@@ -1050,6 +1050,7 @@
         .multas-estado.es-gestionada { background: #dcfce7; color: #166534; }
         .multas-estado.es-rechazada { background: #fee2e2; color: #991b1b; }
         .multas-estado.es-cerrada { background: #e5e7eb; color: #374151; }
+        .multas-estado.es-anulada { background: #d1fae5; color: #065f46; }
         .multas-pend-tabla { margin: 0 0 1rem; }
         .multas-filtro-estados { display: flex; flex-wrap: wrap; gap: 0.3rem; margin: 0 0 0.65rem; }
         .multas-filtro-estados button {
@@ -7488,8 +7489,11 @@
                         </div>
                     </div>
                     <div class="form-group" id="multaFolioOrigenWrap" style="display: none; margin-bottom: 0.5rem;">
-                        <label style="margin-bottom: 0.25rem; font-size: 0.875rem;">Folio de la multa que se anula <span style="font-weight: 400; color: var(--text-tertiary);">(opcional)</span></label>
-                        <input type="text" id="multaFolioMultaOrigen" placeholder="Ej: MUL-202505-001" style="padding: 0.5rem; font-size: 0.875rem; width: 100%; max-width: 320px;">
+                        <label style="margin-bottom: 0.25rem; font-size: 0.875rem;">Multa que se anula *</label>
+                        <select id="multaFolioMultaOrigen" style="padding: 0.5rem; font-size: 0.875rem; width: 100%; max-width: 420px;">
+                            <option value="">Seleccione la multa a anular…</option>
+                        </select>
+                        <p style="margin: 0.35rem 0 0; font-size: 0.75rem; color: var(--text-tertiary);">La multa original queda anulada y no se incluye en el reporte de comité.</p>
                     </div>
                     <div class="form-row" style="gap: 0.5rem; margin-bottom: 0.5rem;">
                         <div class="form-group form-group-residente" style="margin-bottom: 0.5rem;">
@@ -7568,6 +7572,7 @@
                     <button type="button" data-estado="pendiente_tratamiento">Pendiente</button>
                     <button type="button" data-estado="en_revision">En revisión</button>
                     <button type="button" data-estado="gestionada">Gestionadas</button>
+                    <button type="button" data-estado="anulada">Anuladas</button>
                 </div>
                 <table id="tablaMultas">
                     <thead>
@@ -9647,6 +9652,7 @@
                     <option value="gestionada">Gestionada</option>
                     <option value="rechazada">Rechazada / No procede</option>
                     <option value="cerrada">Cerrada</option>
+                    <option value="anulada">Anulada</option>
                 </select>
             </div>
             <div class="form-group" style="margin-bottom: 0.75rem;">
@@ -24293,12 +24299,99 @@ document.getElementById('chatForm').onsubmit = function (e) {
             return m && m.tipoRegistro === 'anulacion';
         }
 
+        function multaNormFolio(f) {
+            return String(f || '').trim().toLowerCase().replace(/\s+/g, '');
+        }
+
+        function multaMarcarAnulada(m) {
+            if (!m) return m;
+            m.anulada = true;
+            m.estado = 'anulada';
+            m.estadoGestion = 'anulada';
+            return m;
+        }
+
         function multaEstaAnulada(m) {
             if (!m) return false;
             if (multaEsRegistroAnulacion(m)) return true;
-            if (m.anulada === true || m.anulada === 'si') return true;
+            if (m.anulada === true || m.anulada === 'si' || m.anulada === 'sí') return true;
+            if (String(m.estadoGestion || '').toLowerCase() === 'anulada') return true;
             const estado = String(m.estado || '').toLowerCase();
             return estado === 'anulada' || estado === 'anulado';
+        }
+
+        function multaAplicarAnulacionesEnLista(lista) {
+            var src = Array.isArray(lista) ? lista : [];
+            var folios = {};
+            var ids = {};
+            var changed = false;
+            src.forEach(function (m) {
+                if (!multaEsRegistroAnulacion(m)) return;
+                if (m.folioMultaOrigen) folios[multaNormFolio(m.folioMultaOrigen)] = m;
+                if (m.originalId) ids[String(m.originalId)] = m;
+            });
+            src.forEach(function (m) {
+                if (!m || multaEsRegistroAnulacion(m)) return;
+                var an = ids[String(m.id)] || (m.folio ? folios[multaNormFolio(m.folio)] : null);
+                if (an) {
+                    if (!m.anulada) { multaMarcarAnulada(m); changed = true; }
+                    if (!an.originalId) { an.originalId = m.id; changed = true; }
+                    if (!an.folioMultaOrigen && m.folio) { an.folioMultaOrigen = m.folio; changed = true; }
+                }
+            });
+            src.forEach(function (an) {
+                if (!multaEsRegistroAnulacion(an) || an.originalId || multaNormFolio(an.folioMultaOrigen)) return;
+                var cands = src.filter(function (m) {
+                    if (!m || multaEsRegistroAnulacion(m) || multaEstaAnulada(m)) return false;
+                    return String(m.departamento || '') === String(an.departamento || '') &&
+                        String(m.nombre || '').trim().toLowerCase() === String(an.nombre || '').trim().toLowerCase();
+                });
+                if (cands.length === 1) {
+                    multaMarcarAnulada(cands[0]);
+                    an.originalId = cands[0].id;
+                    if (cands[0].folio) an.folioMultaOrigen = cands[0].folio;
+                    changed = true;
+                }
+            });
+            return changed;
+        }
+
+        function multaDeduplicarLista(lista) {
+            var src = Array.isArray(lista) ? lista.filter(Boolean) : [];
+            var byKey = {};
+            var out = [];
+            src.forEach(function (m) {
+                if (multaEsRegistroAnulacion(m)) {
+                    out.push(m);
+                    return;
+                }
+                var key = '';
+                if (m.novedadCorrelativo != null && isFinite(Number(m.novedadCorrelativo))) {
+                    key = 'nov:' + Number(m.novedadCorrelativo);
+                } else if (m.folio) {
+                    key = 'folio:' + multaNormFolio(m.folio);
+                }
+                if (!key) {
+                    out.push(m);
+                    return;
+                }
+                if (!byKey[key]) {
+                    byKey[key] = m;
+                    out.push(m);
+                    return;
+                }
+                var keep = byKey[key];
+                if (multaEstaAnulada(m) && !multaEstaAnulada(keep)) multaMarcarAnulada(keep);
+                if (!keep.folio && m.folio) keep.folio = m.folio;
+                if (m.estadoGestion && keep.estadoGestion === 'pendiente_tratamiento' && m.estadoGestion !== 'pendiente_tratamiento') {
+                    keep.estadoGestion = m.estadoGestion;
+                }
+                if ((!keep.evidencias || !keep.evidencias.length) && m.evidencias && m.evidencias.length) keep.evidencias = m.evidencias;
+                if ((!keep.archivos || !keep.archivos.length) && m.archivos && m.archivos.length) keep.archivos = m.archivos;
+                if (!keep.contenidoHtml && m.contenidoHtml) keep.contenidoHtml = m.contenidoHtml;
+                if (!keep.observacionAdmin && m.observacionAdmin) keep.observacionAdmin = m.observacionAdmin;
+            });
+            return out;
         }
 
         function filtrarMudanzasParaReporte(lista) {
@@ -24309,16 +24402,9 @@ document.getElementById('chatForm').onsubmit = function (e) {
 
         function filtrarMultasParaReporte(lista) {
             const src = (Array.isArray(lista) ? lista : []).filter(Boolean);
-            const foliosAnulados = new Set();
-            src.forEach(function (m) {
-                if (multaEsRegistroAnulacion(m) && m.folioMultaOrigen) {
-                    foliosAnulados.add(String(m.folioMultaOrigen).trim().toLowerCase());
-                }
-            });
+            multaAplicarAnulacionesEnLista(src);
             return src.filter(function (m) {
-                if (multaEstaAnulada(m)) return false;
-                if (m.folio && foliosAnulados.has(String(m.folio).trim().toLowerCase())) return false;
-                return true;
+                return !multaEstaAnulada(m);
             });
         }
 
@@ -24562,7 +24648,8 @@ document.getElementById('chatForm').onsubmit = function (e) {
             pendiente_antecedentes: { label: 'Pendiente de antecedentes', emoji: '🟡' },
             gestionada: { label: 'Gestionada', emoji: '🟢' },
             rechazada: { label: 'Rechazada / No procede', emoji: '🔴' },
-            cerrada: { label: 'Cerrada', emoji: '⚫' }
+            cerrada: { label: 'Cerrada', emoji: '⚫' },
+            anulada: { label: 'Anulada', emoji: '✅' }
         };
         window._multasFiltroEstado = window._multasFiltroEstado || '';
         window._multaDetalleId = null;
@@ -24576,6 +24663,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
         }
         function multaEstadoRegistro(m) {
             if (!m) return 'gestionada';
+            if (multaEstaAnulada(m)) return 'anulada';
             if (m.estadoGestion && MULTA_ESTADOS_GESTION[m.estadoGestion]) return m.estadoGestion;
             if (m.origen === 'conserjeria') return 'pendiente_tratamiento';
             return 'gestionada';
@@ -24585,6 +24673,9 @@ document.getElementById('chatForm').onsubmit = function (e) {
             return e === 'pendiente_tratamiento' || e === 'en_revision' || e === 'pendiente_antecedentes';
         }
         function multaHtmlEstado(m) {
+            if (multaEstaAnulada(m)) {
+                return '<span class="multas-estado es-anulada">✅ Anulada</span>';
+            }
             var e = multaEstadoRegistro(m);
             var meta = MULTA_ESTADOS_GESTION[e] || MULTA_ESTADOS_GESTION.gestionada;
             return '<span class="multas-estado es-' + e + '">' + meta.emoji + ' ' + meta.label + '</span>';
@@ -24777,12 +24868,14 @@ document.getElementById('chatForm').onsubmit = function (e) {
                         if (!exist) {
                             var neu = multaPayloadDesdeNovedad(n, libro);
                             neu.mes = mesActual;
+                            if (!neu.folio) neu.folio = getSiguienteFolioMulta(lista, mesActual);
                             multaHistorialPush(neu, 'creada_desde_novedad', { estado: 'pendiente_tratamiento' });
                             lista.unshift(neu);
                             creadas += 1;
                             cambiadas = true;
                             return;
                         }
+                        if (multaEstaAnulada(exist)) return;
                         var huella = [cor, n.fecha, n.hora, n.categoria, n.texto, n.notaInterna].join('|');
                         if (exist.novedadHuella === huella) return;
                         exist.novedadSnapshot = {
@@ -24820,11 +24913,13 @@ document.getElementById('chatForm').onsubmit = function (e) {
                         if (!Array.isArray(latest)) latest = [];
                         lista.forEach(function (m) {
                             if (!m) return;
-                            var got = multaBuscarEnLista(latest, m.novedadCorrelativo) || latest.filter(function (x) { return x && x.id === m.id; })[0];
+                            var got = (m.novedadCorrelativo != null ? multaBuscarEnLista(latest, m.novedadCorrelativo) : null)
+                                || latest.filter(function (x) { return x && x.id === m.id; })[0];
                             if (!got) {
                                 latest.unshift(m);
                                 return;
                             }
+                            if (multaEstaAnulada(got)) return;
                             if (m.novedadHuella && got.novedadHuella !== m.novedadHuella) {
                                 got.novedadSnapshot = m.novedadSnapshot || got.novedadSnapshot;
                                 got.novedadHuella = m.novedadHuella;
@@ -24840,6 +24935,8 @@ document.getElementById('chatForm').onsubmit = function (e) {
                                 }
                             }
                         });
+                        latest = multaDeduplicarLista(latest);
+                        multaAplicarAnulacionesEnLista(latest);
                         await persistirListaMultasMes(mesActual, latest);
                     }
                     return creadas;
@@ -24971,6 +25068,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
             m.observacionAdmin = textoObs;
             m.revisadoAt = new Date().toISOString();
             m.revisadoPor = multaOperadorActual();
+            if (nuevo === 'anulada') multaMarcarAnulada(m);
             multaHistorialPush(m, prev === nuevo ? 'observacion' : 'cambio_estado', { estado: nuevo, estadoAnterior: prev, obs: textoObs });
             lista[idx] = m;
             var mes = m.mes || (typeof obtenerMesActual === 'function' ? obtenerMesActual() : '');
@@ -25516,6 +25614,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
             const gMonto = document.getElementById('multaGrupoMonto');
             const inpMonto = document.getElementById('multaMonto');
             const selTipo = document.getElementById('multaTipoUnidad');
+            const selFolio = document.getElementById('multaFolioMultaOrigen');
             if (wrapFolio) wrapFolio.style.display = esAnul ? 'block' : 'none';
             if (gTipo) gTipo.style.display = esAnul ? 'none' : '';
             if (gMonto) gMonto.style.display = esAnul ? 'none' : '';
@@ -25524,6 +25623,39 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 if (esAnul && !window.editandoMulta && (inpMonto.value === '' || inpMonto.value === null)) inpMonto.value = '0';
             }
             if (selTipo) selTipo.required = !esAnul;
+            if (selFolio) selFolio.required = !!esAnul;
+            if (esAnul && typeof llenarSelectMultasAAnular === 'function') llenarSelectMultasAAnular();
+        }
+
+        async function llenarSelectMultasAAnular(selectedId) {
+            const sel = document.getElementById('multaFolioMultaOrigen');
+            if (!sel) return;
+            const keep = selectedId != null ? String(selectedId) : String(sel.value || '');
+            let lista = [];
+            try {
+                lista = typeof obtenerDatosMes === 'function' ? await obtenerDatosMes('multas') : [];
+            } catch (eSel) { lista = []; }
+            const vigentes = (lista || []).filter(function (m) {
+                if (!m || multaEsRegistroAnulacion(m)) return false;
+                if (keep && String(m.id) === String(keep)) return true;
+                return !multaEstaAnulada(m);
+            }).sort(function (a, b) {
+                return String(b.fecha || '').localeCompare(String(a.fecha || ''));
+            });
+            const esc = function (v) {
+                return String(v == null ? '' : v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
+            };
+            sel.innerHTML = '<option value="">Seleccione la multa a anular…</option>' + vigentes.map(function (m) {
+                var folio = m.folio || 'sin folio';
+                var fecha = m.fecha || '';
+                var label = folio + ' · Depto ' + (m.departamento || '—') + ' · ' + (m.nombre || '—') + (fecha ? ' · ' + fecha : '');
+                return '<option value="' + esc(m.id) + '" data-folio="' + esc(m.folio || '') + '">' + esc(label) + '</option>';
+            }).join('');
+            if (keep) {
+                var found = [].some.call(sel.options, function (o) { return o.value === keep; });
+                if (found) sel.value = keep;
+                else if (!vigentes.length) sel.insertAdjacentHTML('beforeend', '<option value="' + esc(keep) + '" selected>Registro seleccionado</option>');
+            }
         }
 
         // Función para agregar evidencia (disponible globalmente)
@@ -25609,10 +25741,25 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 tipoRegistro: tipoRegistro
             };
             if (tipoRegistro === 'anulacion') {
-                const fo = (document.getElementById('multaFolioMultaOrigen') || {}).value;
-                multa.folioMultaOrigen = fo ? String(fo).trim() : '';
+                const selFo = document.getElementById('multaFolioMultaOrigen');
+                const origId = selFo ? String(selFo.value || '').trim() : '';
+                if (!origId) {
+                    mostrarAlerta('Seleccione la multa que desea anular.', 'Anulación');
+                    return;
+                }
+                const orig = (multas || []).find(function (x) { return x && String(x.id) === origId; });
+                if (!orig || multaEsRegistroAnulacion(orig)) {
+                    mostrarAlerta('No se encontró la multa a anular. Actualice la lista e inténtelo de nuevo.', 'Anulación');
+                    return;
+                }
+                multaMarcarAnulada(orig);
+                if (typeof multaHistorialPush === 'function') multaHistorialPush(orig, 'anulada', { estado: 'anulada' });
+                multa.originalId = orig.id;
+                multa.folioMultaOrigen = orig.folio || '';
+                if (!multa.motivo) multa.motivo = 'Anulación de multa' + (orig.folio ? ' ' + orig.folio : '');
             } else {
                 delete multa.folioMultaOrigen;
+                delete multa.originalId;
             }
             if (!window.editandoMulta) {
                 multa.folio = getSiguienteFolioMulta(multas, multa.mes);
@@ -25666,7 +25813,13 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     if (prevMulta.novedadCategoria) multa.novedadCategoria = prevMulta.novedadCategoria;
                     if (prevMulta.novedadHuella) multa.novedadHuella = prevMulta.novedadHuella;
                     if (prevMulta.novedadSnapshot) multa.novedadSnapshot = prevMulta.novedadSnapshot;
-                    multa.estadoGestion = prevMulta.estadoGestion || (prevMulta.origen === 'conserjeria' ? 'pendiente_tratamiento' : 'gestionada');
+                    multa.estadoGestion = tipoRegistro === 'anulacion'
+                        ? 'anulada'
+                        : (prevMulta.estadoGestion || (prevMulta.origen === 'conserjeria' ? 'pendiente_tratamiento' : 'gestionada'));
+                    if (tipoRegistro === 'anulacion') {
+                        multa.originalId = multa.originalId || prevMulta.originalId;
+                        multa.folioMultaOrigen = multa.folioMultaOrigen || prevMulta.folioMultaOrigen;
+                    }
                     multa.historialEstados = Array.isArray(prevMulta.historialEstados) ? prevMulta.historialEstados : [];
                     multa.observacionAdmin = prevMulta.observacionAdmin || '';
                     multa.revisadoAt = prevMulta.revisadoAt;
@@ -25767,9 +25920,18 @@ document.getElementById('chatForm').onsubmit = function (e) {
             const rAnul = document.getElementById('multaTipoRegistroAnulacion');
             if (rMul) rMul.checked = !esAnulEd;
             if (rAnul) rAnul.checked = esAnulEd;
-            const folioOEd = document.getElementById('multaFolioMultaOrigen');
-            if (folioOEd) folioOEd.value = multa.folioMultaOrigen || '';
             aplicarTipoRegistroMultaFormulario();
+            const folioOEd = document.getElementById('multaFolioMultaOrigen');
+            if (folioOEd) {
+                await llenarSelectMultasAAnular(multa.originalId || '');
+                folioOEd.value = multa.originalId || '';
+                if (!folioOEd.value && multa.folioMultaOrigen) {
+                    var optMatch = [].find.call(folioOEd.options, function (o) {
+                        return multaNormFolio(o.getAttribute('data-folio')) === multaNormFolio(multa.folioMultaOrigen);
+                    });
+                    if (optMatch) folioOEd.value = optMatch.value;
+                }
+            }
             
             // Cargar evidencias (links)
             const evidencias = multa.evidencias || (multa.link ? [multa.link] : []);
@@ -25857,7 +26019,16 @@ document.getElementById('chatForm').onsubmit = function (e) {
             try {
                 if (typeof sincronizarMultasDesdeConserjeria === 'function') await sincronizarMultasDesdeConserjeria();
             } catch (eSyncC) {}
-            const todas = await obtenerDatosMes('multas');
+            const todasRaw = await obtenerDatosMes('multas');
+            var todas = multaDeduplicarLista(todasRaw);
+            var stamped = multaAplicarAnulacionesEnLista(todas);
+            if (stamped || todas.length !== (todasRaw || []).length) {
+                try {
+                    var mesSave = typeof obtenerMesActual === 'function' ? obtenerMesActual() : '';
+                    if (window.mesEnConsulta) mesSave = window.mesEnConsulta;
+                    await persistirListaMultasMes(mesSave, todas);
+                } catch (ePers) {}
+            }
             var paraAlerta = todas;
             try {
                 var mesCal = typeof obtenerMesActual === 'function' ? obtenerMesActual() : '';
@@ -25867,9 +26038,13 @@ document.getElementById('chatForm').onsubmit = function (e) {
             } catch (eAl) {}
             if (typeof pintarAlertasMultasPendientes === 'function') pintarAlertasMultasPendientes(paraAlerta);
             const filtro = window._multasFiltroEstado || '';
+            const idsPresentes = {};
+            (todas || []).forEach(function (m) { if (m && m.id) idsPresentes[String(m.id)] = true; });
             const multas = (todas || []).filter(function (m) {
+                if (multaEsRegistroAnulacion(m) && m.originalId && idsPresentes[String(m.originalId)]) return false;
                 if (!filtro) return true;
-                if (filtro === 'tratamiento') return typeof multaRequiereTratamiento === 'function' && multaRequiereTratamiento(m);
+                if (filtro === 'tratamiento') return typeof multaRequiereTratamiento === 'function' && multaRequiereTratamiento(m) && !multaEstaAnulada(m);
+                if (filtro === 'anulada') return multaEstaAnulada(m);
                 return (typeof multaEstadoRegistro === 'function' ? multaEstadoRegistro(m) : '') === filtro;
             });
             const tbody = document.getElementById('tbodyMultas');
@@ -26301,7 +26476,8 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     const datosAn = await obtenerDatosMes('multas');
                     const idxAn = datosAn.findIndex(m => m.id === id);
                     if (idxAn !== -1) {
-                        datosAn[idxAn] = { ...datosAn[idxAn], anulada: true, estado: 'anulada' };
+                        multaMarcarAnulada(datosAn[idxAn]);
+                        if (typeof multaHistorialPush === 'function') multaHistorialPush(datosAn[idxAn], 'anulada', { estado: 'anulada' });
                         await guardarDatosMes('multas', datosAn);
                     }
                     await persistirNotificacionCorreoTrasEnvio(
