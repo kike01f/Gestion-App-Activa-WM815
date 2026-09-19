@@ -8610,7 +8610,7 @@
             </section>
             <section class="ocupacion-registro-sec" aria-label="Registro mensual de ingresos y salidas">
                 <h3>Ingresos y salidas del mes</h3>
-                <p class="ocupacion-registro-lead" id="ocupacionRegistroLead">Registro mensual del censo de Ocupación (propietarios, arrendatarios y familiares). Las visitas no se incluyen.</p>
+                <p class="ocupacion-registro-lead" id="ocupacionRegistroLead">Ingreso de la unidad: día de mudanza según el registro en Conserjería. En habitacional se anota el propietario; en arriendo, el primer arrendatario.</p>
                 <div class="ocupacion-registro-kpis">
                     <div class="resumen-item">
                         <div id="ocupacionIngresosMes" class="valor" style="color: #059669;">0</div>
@@ -39392,6 +39392,23 @@ document.getElementById('chatForm').onsubmit = function (e) {
             return tl === 'propietario' || tl === 'arrendatario' || tl === 'familiar';
         }
 
+        function tipoResidenteNormOcupacion(r) {
+            return String((r && (r.type || r.tipo || r.tipoResidente)) || '').trim().toLowerCase();
+        }
+
+        function usoUnidadOcupacion(unitOrItem) {
+            var raw = String((unitOrItem && (unitOrItem.unitUse || unitOrItem.usoUnidad || unitOrItem.uso)) || '').trim().toLowerCase();
+            if (raw.indexOf('arriend') >= 0) return 'Arriendo';
+            return 'Habitacional';
+        }
+
+        function tiempoRegistroOcupacion(valor) {
+            if (!valor) return NaN;
+            if (valor instanceof Date) return valor.getTime();
+            var d = new Date(valor);
+            return d.getTime();
+        }
+
         function claveResidenteOcupacion(unidad, nombre, tipo) {
             return [unidad, nombre, tipo].map(function (s) {
                 return String(s || '').trim().toLowerCase().replace(/\s+/g, ' ');
@@ -39413,36 +39430,107 @@ document.getElementById('chatForm').onsubmit = function (e) {
             return !!(n && vivas && vivas[n]);
         }
 
+        function mapaUnidadesPorNumeroOcupacion(units) {
+            var mapa = Object.create(null);
+            (units || []).forEach(function (unit) {
+                if (!unit) return;
+                var n = String(unit.unitNumber || unit.departamento || '').trim();
+                if (n) mapa[n] = unit;
+            });
+            return mapa;
+        }
+
+        function censoComoUnidadesOcupacion(lista) {
+            var byU = Object.create(null);
+            (lista || []).forEach(function (r) {
+                if (!r) return;
+                if (r.unitNumber && Array.isArray(r.residents)) {
+                    var nu = String(r.unitNumber).trim();
+                    if (nu) byU[nu] = r;
+                    return;
+                }
+                var n = String(r.unidad || r.departamento || r.unitNumber || '').trim();
+                if (!n) return;
+                if (!byU[n]) {
+                    byU[n] = {
+                        unitNumber: n,
+                        unitUse: r.usoUnidad || r.unitUse || '',
+                        createdAt: r.createdAt || '',
+                        unitNote: r.notas || '',
+                        residents: []
+                    };
+                }
+                if (!byU[n].unitUse && (r.usoUnidad || r.unitUse)) byU[n].unitUse = r.usoUnidad || r.unitUse;
+                if (Array.isArray(r.residents) && r.residents.length) {
+                    byU[n].residents = r.residents.slice();
+                    return;
+                }
+                byU[n].residents.push({
+                    name: r.nombre || r.name || '',
+                    type: r.tipo || r.tipoResidente || r.type || '',
+                    email: r.correo || r.email || '',
+                    phone: r.telefono || r.phone || '',
+                    registeredAt: r.registeredAt || ''
+                });
+            });
+            return Object.keys(byU).map(function (k) { return byU[k]; });
+        }
+
+        function residentePrincipalMudanzaUnidad(unit) {
+            if (!unit) return null;
+            var uso = usoUnidadOcupacion(unit);
+            var wanted = uso === 'Arriendo' ? 'arrendatario' : 'propietario';
+            var residents = Array.isArray(unit.residents) ? unit.residents : [];
+            var candidatos = [];
+            residents.forEach(function (r, idx) {
+                if (!esResidenteCensoOcupacion(r)) return;
+                if (tipoResidenteNormOcupacion(r) !== wanted) return;
+                var nombre = String(r.name || r.nombre || '').trim();
+                if (!nombre) return;
+                candidatos.push({ r: r, idx: idx, ts: tiempoRegistroOcupacion(r.registeredAt) });
+            });
+            if (!candidatos.length) return null;
+            candidatos.sort(function (a, b) {
+                var aOk = isFinite(a.ts);
+                var bOk = isFinite(b.ts);
+                if (aOk && bOk && a.ts !== b.ts) return a.ts - b.ts;
+                if (aOk && !bOk) return -1;
+                if (!aOk && bOk) return 1;
+                return a.idx - b.idx;
+            });
+            return { resident: candidatos[0].r, uso: uso };
+        }
+
         function extraerCensoResidentesOcupacion(units) {
             var out = [];
             var seen = {};
             (units || []).forEach(function (unit) {
                 if (!unit) return;
-                var unidad = String(unit.unitNumber || '').trim();
+                var unidad = String(unit.unitNumber || unit.unidad || unit.departamento || '').trim();
                 if (!unidad) return;
-                var residents = Array.isArray(unit.residents) ? unit.residents : [];
-                residents.forEach(function (r) {
-                    if (!esResidenteCensoOcupacion(r)) return;
-                    var nombre = String(r.name || r.nombre || '').trim();
-                    if (!nombre) return;
-                    var tipo = String(r.type || r.tipo || '').trim();
-                    var clave = claveResidenteOcupacion(unidad, nombre, tipo);
-                    if (seen[clave]) return;
-                    seen[clave] = true;
-                    out.push({
-                        clave: clave,
-                        unidad: unidad,
-                        departamento: unidad,
-                        nombre: nombre,
-                        tipo: tipo,
-                        tipoResidente: tipo,
-                        correo: String(r.email || r.correo || '').trim(),
-                        telefono: String(r.phone || r.telefono || r.fono || '').trim(),
-                        usoUnidad: String(unit.unitUse || '').trim(),
-                        registeredAt: r.registeredAt || '',
-                        createdAt: unit.createdAt || '',
-                        notas: String(unit.unitNote || '').trim()
-                    });
+                var principal = residentePrincipalMudanzaUnidad(unit);
+                if (!principal || !principal.resident) return;
+                var r = principal.resident;
+                var nombre = String(r.name || r.nombre || '').trim();
+                if (!nombre) return;
+                var tipo = String(r.type || r.tipo || '').trim();
+                var clave = claveResidenteOcupacion(unidad, nombre, tipo);
+                if (seen[clave]) return;
+                seen[clave] = true;
+                out.push({
+                    clave: clave,
+                    unidad: unidad,
+                    departamento: unidad,
+                    nombre: nombre,
+                    tipo: tipo,
+                    tipoResidente: tipo,
+                    correo: String(r.email || r.correo || '').trim(),
+                    telefono: String(r.phone || r.telefono || r.fono || '').trim(),
+                    usoUnidad: principal.uso,
+                    registeredAt: r.registeredAt || '',
+                    createdAt: unit.createdAt || '',
+                    notas: String(unit.unitNote || '').trim(),
+                    alcance: 'unidad'
                 });
             });
             out.sort(function (a, b) {
@@ -39454,6 +39542,19 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 return String(a.nombre).localeCompare(String(b.nombre), 'es');
             });
             return out;
+        }
+
+        function movimientoEsMudanzaUnidadOcupacion(m, unitsByNum) {
+            if (!m) return false;
+            if (m.tipo !== 'ingreso' && m.tipo !== 'salida') return false;
+            var unidad = String(m.unidad || m.departamento || '').trim();
+            if (!unidad) return false;
+            var rel = String(m.tipoResidente || '').trim().toLowerCase();
+            if (!rel || rel.indexOf('visita') !== -1 || rel === 'familiar') return false;
+            var unit = unitsByNum && unitsByNum[unidad];
+            var uso = unit ? usoUnidadOcupacion(unit) : usoUnidadOcupacion(m);
+            if (uso === 'Arriendo') return rel === 'arrendatario';
+            return rel === 'propietario';
         }
 
         function mapaCensoOcupacionPorClave(lista) {
@@ -39588,6 +39689,8 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 fecha: fecha,
                 mes: mes,
                 fuente: 'ocupacion',
+                alcance: 'unidad',
+                usoUnidad: item.usoUnidad || '',
                 clave: item.clave || claveResidenteOcupacion(item.unidad || item.departamento, item.nombre, item.tipo || item.tipoResidente)
             };
         }
@@ -39603,7 +39706,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 var lead = document.getElementById('ocupacionRegistroLead');
                 var nota = document.getElementById('ocupacionRegistroNota');
                 if (lead) {
-                    lead.textContent = 'Registro de ' + (nombreMes || 'este mes') + ' según el censo de Ocupación (propietarios, arrendatarios y familiares). Las visitas no se incluyen.';
+                    lead.textContent = 'Registro de ' + (nombreMes || 'este mes') + ': ingreso de la unidad el día de mudanza (fecha de registro en Conserjería). Habitacional = propietario. Arriendo = primer arrendatario.';
                 }
                 var mesArchivado = !!(window.mesEnConsulta && !window.mesReabierto);
                 var movimientosGuardados = [];
@@ -39626,7 +39729,9 @@ document.getElementById('chatForm').onsubmit = function (e) {
 
                 var units = Array.isArray(window.vinculacionUnits) ? window.vinculacionUnits : [];
                 var unidadesVivas = conjuntoUnidadesVivasOcupacion(units);
+                var unitsByNum = mapaUnidadesPorNumeroOcupacion(units);
                 var censoActual = extraerCensoResidentesOcupacion(units);
+                censoGuardado = extraerCensoResidentesOcupacion(censoComoUnidadesOcupacion(censoGuardado));
                 if (!censoActual.length && !units.length) {
                     window._ocupacionMovimientosVista = movimientosGuardados;
                     pintarTablaRegistroOcupacion();
@@ -39636,7 +39741,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
 
                 var nMovAntesDepurar = movimientosGuardados.length;
                 movimientosGuardados = movimientosGuardados.filter(function (m) {
-                    return m && unidadVivaEnConserjeriaOcupacion(m.unidad || m.departamento, unidadesVivas);
+                    return m && unidadVivaEnConserjeriaOcupacion(m.unidad || m.departamento, unidadesVivas) && movimientoEsMudanzaUnidadOcupacion(m, unitsByNum);
                 });
                 var depuradosUnidadBorrada = nMovAntesDepurar - movimientosGuardados.length;
 
@@ -39648,6 +39753,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     } catch (eP) { censoPrevMes = []; }
                 }
                 if (!Array.isArray(censoPrevMes)) censoPrevMes = [];
+                censoPrevMes = extraerCensoResidentesOcupacion(censoComoUnidadesOcupacion(censoPrevMes));
 
                 var hayCensoEsteMes = censoGuardado.length > 0;
                 var hayCensoPrevMes = censoPrevMes.length > 0;
@@ -39675,7 +39781,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     ingresosDetectados = censoActual.filter(function (r) {
                         return fechaAltaPerteneceAlMesOcupacion(r, mes);
                     });
-                    notaTxt = 'Primer censo del mes: no se marcan las unidades ya habitadas como ingreso. Solo se anotan altas con fecha de este mes. Las salidas aparecerán al comparar con el próximo censo.';
+                    notaTxt = 'Primer censo del mes: solo se anota el ingreso de la unidad si la mudanza (registro en Conserjería) es de este mes.';
                 }
 
                 var movimientos = movimientosGuardados.slice();
@@ -39686,8 +39792,8 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     var last = ultimoMovimientoOcupacionPorClave(movimientos, r.clave);
                     if (last && last.tipo === 'ingreso') return;
                     var fechaAlta = ymdChileOcupacion(r.registeredAt || r.createdAt);
-                    var fecha = (fechaAlta && fechaAlta.slice(0, 7) === mes) ? fechaAlta : hoy;
-                    movimientos.push(movimientoOcupacionDesdeCenso('ingreso', r, fecha || hoy, mes));
+                    if (!fechaAlta || fechaAlta.slice(0, 7) !== mes) return;
+                    movimientos.push(movimientoOcupacionDesdeCenso('ingreso', r, fechaAlta, mes));
                     agregados += 1;
                 });
                 salidasDetectadas.forEach(function (r) {
@@ -39710,7 +39816,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 if (nota) {
                     var extra = agregados > 0 ? ('Se actualizó el registro con ' + agregados + ' movimiento' + (agregados === 1 ? '' : 's') + ' nuevo' + (agregados === 1 ? '' : 's') + '.') : 'El registro está al día con el censo actual.';
                     if (depuradosUnidadBorrada > 0) {
-                        extra += ' Se ocultaron ' + depuradosUnidadBorrada + ' movimiento' + (depuradosUnidadBorrada === 1 ? '' : 's') + ' de unidad' + (depuradosUnidadBorrada === 1 ? '' : 'es') + ' borrada' + (depuradosUnidadBorrada === 1 ? '' : 's') + ' en Conserjería.';
+                        extra += ' Se limpiaron ' + depuradosUnidadBorrada + ' movimiento' + (depuradosUnidadBorrada === 1 ? '' : 's') + ' que no corresponden a la mudanza de la unidad (familiares, otro titular o unidad borrada).';
                     }
                     nota.textContent = (notaTxt ? (notaTxt + ' ') : '') + extra;
                 }
