@@ -4661,14 +4661,17 @@
       transform: translateY(0) scale(1);
       opacity: 1; visibility: visible;
     }
+    .chat-dock.chat-menu-open .chat-flotante { overflow: visible; }
     .chat-header {
       flex-shrink: 0;
       display: flex; align-items: flex-start; justify-content: space-between; gap: 0.5rem;
       padding: 0.65rem 0.7rem 0.6rem;
       background: var(--chat-surface);
       border-bottom: 1px solid var(--chat-border);
+      box-shadow: inset 0 3px 0 var(--chat-accent);
       cursor: grab;
       touch-action: none;
+      transition: box-shadow 0.25s ease;
     }
     .chat-header button,
     .chat-header input { cursor: pointer; touch-action: manipulation; }
@@ -4678,13 +4681,25 @@
       width: 2.25rem; height: 2.25rem; border-radius: 8px;
       display: flex; align-items: center; justify-content: center;
       font-size: 0.95rem;
-      background: color-mix(in srgb, #fff 5%, transparent);
-      border: 1px solid var(--chat-border);
-      color: var(--chat-muted);
+      background: var(--chat-accent-dim);
+      border: 1px solid color-mix(in srgb, var(--chat-accent) 38%, var(--chat-border));
+      color: var(--chat-accent);
       flex-shrink: 0;
+      position: relative;
+      transition: background 0.25s ease, border-color 0.25s ease, color 0.25s ease;
+    }
+    .chat-header-ic::after {
+      content: '';
+      position: absolute;
+      right: -2px; bottom: -2px;
+      width: 0.58rem; height: 0.58rem;
+      border-radius: 50%;
+      background: var(--chat-accent);
+      border: 2px solid var(--chat-surface);
     }
     .chat-title { font-weight: 600; font-size: 0.95rem; color: var(--chat-text); letter-spacing: -0.01em; line-height: 1.25; font-family: inherit; }
     .chat-sub { font-size: 0.68rem; color: var(--chat-muted); margin-top: 0.08rem; line-height: 1.35; font-weight: 400; }
+    .chat-sub.chat-sub--presencia { color: var(--chat-accent); font-weight: 650; }
     .chat-header-actions {
       display: flex; align-items: center; gap: 0.15rem; flex-shrink: 0;
       position: relative;
@@ -4694,9 +4709,12 @@
       position: absolute;
       right: 0;
       top: calc(100% + 6px);
-      min-width: 220px;
-      max-width: min(92vw, 280px);
-      padding: 0.45rem 0;
+      min-width: 248px;
+      max-width: min(92vw, 320px);
+      max-height: min(72vh, 540px);
+      overflow-x: hidden;
+      overflow-y: auto;
+      padding: 0.45rem 0 0.55rem;
       background: var(--chat-surface);
       border: 1px solid var(--chat-border);
       border-radius: 10px;
@@ -4735,6 +4753,81 @@
       margin: 0.35rem 0.5rem;
       background: var(--chat-border);
       border: none;
+    }
+    .chat-presencia-field { padding: 0 0.75rem 0.5rem; }
+    .chat-presencia-field label {
+      display: block;
+      font-size: 0.68rem;
+      color: var(--chat-muted);
+      margin-bottom: 0.28rem;
+    }
+    .chat-presencia-row { display: flex; align-items: center; gap: 0.35rem; }
+    .chat-presencia-row input[type="text"],
+    .chat-presencia-row input:not([type]),
+    .chat-presencia-field input[type="text"] {
+      flex: 1;
+      min-width: 0;
+      height: 1.85rem;
+      border-radius: 8px;
+      border: 1px solid var(--chat-border);
+      background: color-mix(in srgb, #fff 4%, transparent);
+      color: var(--chat-text);
+      padding: 0 0.5rem;
+      font-size: 0.78rem;
+      font-family: inherit;
+    }
+    .chat-presencia-row input[type="color"] {
+      width: 1.85rem; height: 1.85rem; padding: 0;
+      border: 1px solid var(--chat-border);
+      border-radius: 6px;
+      background: transparent;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .chat-presencia-row button {
+      flex-shrink: 0;
+      height: 1.85rem;
+      padding: 0 0.55rem;
+      border-radius: 8px;
+      border: 1px solid var(--chat-border);
+      background: var(--chat-accent-dim);
+      color: var(--chat-text);
+      font-size: 0.72rem;
+      font-weight: 650;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .chat-presencia-estados {
+      display: flex; flex-wrap: wrap; gap: 0.32rem;
+      padding: 0 0.75rem 0.5rem;
+    }
+    .chat-presencia-chip {
+      display: inline-flex; align-items: center; gap: 0.28rem;
+      --chip-color: var(--chat-accent);
+      border: 1px solid color-mix(in srgb, var(--chip-color) 35%, var(--chat-border));
+      background: transparent;
+      color: var(--chat-text);
+      border-radius: 999px;
+      padding: 0.2rem 0.45rem 0.2rem 0.32rem;
+      font-size: 0.7rem;
+      cursor: pointer;
+      font-family: inherit;
+      line-height: 1.2;
+    }
+    .chat-presencia-chip.is-active {
+      background: color-mix(in srgb, var(--chip-color) 22%, transparent);
+      border-color: color-mix(in srgb, var(--chip-color) 70%, var(--chat-border));
+    }
+    .chat-presencia-chip-dot {
+      width: 0.52rem; height: 0.52rem; border-radius: 50%;
+      background: var(--chip-color); flex-shrink: 0;
+    }
+    .chat-presencia-chip-x {
+      border: none; background: transparent; color: var(--chat-muted);
+      cursor: pointer; padding: 0 0.05rem; font-size: 0.72rem; line-height: 1;
+    }
+    .tab-button.chat-sidebar {
+      box-shadow: inset 3px 0 0 var(--chat-presence-color, transparent);
     }
     .chat-header-btn {
       appearance: none; -webkit-appearance: none;
@@ -5436,16 +5529,17 @@
       align-items: center;
       gap: 0.45rem;
       padding: 0.72rem 1.05rem 0.72rem 0.9rem;
-      border: 1px solid color-mix(in srgb, #fff 18%, var(--primary, #75BB21));
+      border: 1px solid color-mix(in srgb, #fff 18%, var(--chat-accent, var(--primary, #75BB21)));
       border-radius: 999px;
-      background: var(--primary, #75BB21);
-      color: #0f172a;
+      background: var(--chat-accent, var(--primary, #75BB21));
+      color: var(--chat-fab-fg, #0f172a);
       font-weight: 800;
       font-size: 0.92rem;
       font-family: inherit;
       cursor: pointer;
       box-shadow: 0 12px 28px rgba(0, 0, 0, 0.38);
       position: relative;
+      transition: background 0.25s ease, border-color 0.25s ease, color 0.25s ease;
     }
     .chat-fab:hover { filter: brightness(1.06); }
     .chat-dock.chat-open .chat-fab { opacity: 0; visibility: hidden; pointer-events: none; }
@@ -15934,6 +16028,40 @@
         var _pcshChatTypingLastPing = 0;
         var _pcshChatTypingSnap = null;
         var _pcshChatTypingRefreshIv = null;
+        var _pcshChatPresenciaUnsub = null;
+        var _pcshChatPresenciaSeeded = false;
+        var PCSH_CHAT_PRESENCIA_LS = 'pcsh_gestion_chat_presencia_v1';
+        var PCSH_CHAT_ESTADOS_DEFAULT = [
+            { id: 'disponible', label: 'Disponible', color: '#22c55e', sistema: true },
+            { id: 'ocupado', label: 'Ocupado', color: '#f59e0b', sistema: true },
+            { id: 'reunion', label: 'En reunión', color: '#3b82f6', sistema: true },
+            { id: 'tarea', label: 'En una tarea', color: '#8b5cf6', sistema: true },
+            { id: 'nomolestar', label: 'No molestar', color: '#ef4444', sistema: true }
+        ];
+        var _pcshChatPresencia = {
+            nombre: '',
+            estadoId: 'disponible',
+            estadoLabel: 'Disponible',
+            detalle: '',
+            color: '#22c55e',
+            estados: PCSH_CHAT_ESTADOS_DEFAULT.slice()
+        };
+        try {
+            var _rawPres = localStorage.getItem(PCSH_CHAT_PRESENCIA_LS);
+            if (_rawPres) {
+                var _parsedPres = JSON.parse(_rawPres);
+                if (_parsedPres && typeof _parsedPres === 'object') {
+                    _pcshChatPresencia.nombre = String(_parsedPres.nombre || '').trim();
+                    _pcshChatPresencia.estadoId = String(_parsedPres.estadoId || 'disponible');
+                    _pcshChatPresencia.estadoLabel = String(_parsedPres.estadoLabel || 'Disponible');
+                    _pcshChatPresencia.detalle = String(_parsedPres.detalle || '').trim();
+                    _pcshChatPresencia.color = String(_parsedPres.color || '#22c55e');
+                    if (Array.isArray(_parsedPres.estados) && _parsedPres.estados.length) {
+                        _pcshChatPresencia.estados = _parsedPres.estados;
+                    }
+                }
+            }
+        } catch (ePresLs) {}
 
         function pcshChatDb() {
             if (!window._chatDbConserjeria) {
@@ -15961,7 +16089,7 @@
             return now.toLocaleTimeString('es-CL', { timeZone: 'America/Santiago', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
         }
 
-        function pcshChatNombreVisibleGestion() {
+        function pcshChatNombreFallbackGestion() {
             var jefe = '';
             try {
                 var inp = document.getElementById('personalizacionJefeEdificio');
@@ -15972,7 +16100,12 @@
             try {
                 if (typeof auth !== 'undefined' && auth && auth.currentUser) mail = auth.currentUser.email || '';
             } catch (eM) {}
-            return jefe || mail || 'Administración';
+            return String(jefe || mail || 'Administración').trim();
+        }
+
+        function pcshChatNombreVisibleGestion() {
+            var n = _pcshChatPresencia && String(_pcshChatPresencia.nombre || '').trim();
+            return n || pcshChatNombreFallbackGestion();
         }
 
         function pcshChatListaNovedades() {
@@ -16018,6 +16151,187 @@
 
 function pcshChatAutorActual() {
   return 'Admin';
+}
+
+function pcshChatSanitizeHex(c) {
+  var s = String(c || '').trim();
+  if (/^#[0-9A-Fa-f]{6}$/.test(s)) return s.toLowerCase();
+  if (/^#[0-9A-Fa-f]{3}$/.test(s)) {
+    return ('#' + s[1] + s[1] + s[2] + s[2] + s[3] + s[3]).toLowerCase();
+  }
+  return '';
+}
+
+function pcshChatHexLuma(hex) {
+  var h = pcshChatSanitizeHex(hex);
+  if (!h) return 0.5;
+  var n = parseInt(h.slice(1), 16);
+  var r = (n >> 16) & 255;
+  var g = (n >> 8) & 255;
+  var b = n & 255;
+  return (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+}
+
+function pcshChatEstadosNormalizados(lista) {
+  var out = [];
+  var seen = {};
+  var src = Array.isArray(lista) ? lista.slice() : [];
+  PCSH_CHAT_ESTADOS_DEFAULT.forEach(function (d) {
+    var hit = null;
+    src.forEach(function (x) {
+      if (x && String(x.id) === d.id) hit = x;
+    });
+    var color = pcshChatSanitizeHex(hit && hit.color) || d.color;
+    var label = String((hit && hit.label) || d.label).trim().slice(0, 40) || d.label;
+    out.push({ id: d.id, label: label, color: color, sistema: true });
+    seen[d.id] = true;
+  });
+  src.forEach(function (x) {
+    if (!x) return;
+    var id = String(x.id || '').trim();
+    if (!id || seen[id]) return;
+    var label = String(x.label || '').trim().slice(0, 40);
+    var color = pcshChatSanitizeHex(x.color);
+    if (!label || !color) return;
+    seen[id] = true;
+    out.push({ id: id, label: label, color: color, sistema: false });
+  });
+  return out;
+}
+
+function pcshChatPresenciaDesdeDoc(d) {
+  d = d || {};
+  var estados = pcshChatEstadosNormalizados(d.estados);
+  var estadoId = String(d.estadoId || 'disponible');
+  var est = null;
+  estados.forEach(function (e) {
+    if (e.id === estadoId) est = e;
+  });
+  if (!est) est = estados[0];
+  return {
+    nombre: String(d.nombre || '').trim().slice(0, 40),
+    estadoId: est.id,
+    estadoLabel: String(d.estadoLabel || est.label).trim().slice(0, 40) || est.label,
+    detalle: String(d.detalle || '').trim().slice(0, 80),
+    color: pcshChatSanitizeHex(d.color) || est.color,
+    estados: estados
+  };
+}
+
+function pcshChatPresenciaLinea() {
+  var p = _pcshChatPresencia || {};
+  var nom = pcshChatNombreVisibleGestion();
+  var st = String(p.estadoLabel || 'Disponible');
+  var det = String(p.detalle || '').trim();
+  return det ? nom + ' · ' + st + ' · ' + det : nom + ' · ' + st;
+}
+
+function pcshChatApplyPresenciaUi() {
+  var p = _pcshChatPresencia || {};
+  var hex = pcshChatSanitizeHex(p.color) || '#22c55e';
+  var dock = document.getElementById('chatDock');
+  if (dock) {
+    dock.style.setProperty('--chat-accent', hex);
+    dock.style.setProperty('--accent', hex);
+    dock.style.setProperty('--chat-accent-dim', 'color-mix(in srgb, ' + hex + ' 18%, transparent)');
+    dock.style.setProperty('--chat-fab-fg', pcshChatHexLuma(hex) > 0.55 ? '#0f172a' : '#f8fafc');
+  }
+  document.body.style.setProperty('--chat-presence-color', hex);
+  var sub = document.getElementById('chatSub');
+  if (sub) {
+    sub.textContent = pcshChatPresenciaLinea();
+    sub.classList.add('chat-sub--presencia');
+    sub.title = pcshChatPresenciaLinea();
+  }
+  var fab = document.getElementById('chatFab');
+  if (fab) fab.setAttribute('title', 'Chat interno · ' + pcshChatPresenciaLinea());
+  var nav = document.getElementById('chatBtn');
+  if (nav) nav.setAttribute('title', 'Chat interno · ' + pcshChatPresenciaLinea());
+}
+
+function pcshChatCachePresenciaLocal() {
+  try {
+    localStorage.setItem(PCSH_CHAT_PRESENCIA_LS, JSON.stringify(_pcshChatPresencia));
+  } catch (eC) {}
+}
+
+function pcshChatPresenciaPayload() {
+  var p = pcshChatPresenciaDesdeDoc(_pcshChatPresencia);
+  return {
+    nombre: p.nombre || pcshChatNombreFallbackGestion(),
+    estadoId: p.estadoId,
+    estadoLabel: p.estadoLabel,
+    detalle: p.detalle,
+    color: p.color,
+    estados: p.estados,
+    actualizadoAt: Date.now(),
+    origen: 'gestion-wm'
+  };
+}
+
+function pcshChatGuardarPresencia(patch) {
+  if (patch && typeof patch === 'object') {
+    Object.keys(patch).forEach(function (k) {
+      _pcshChatPresencia[k] = patch[k];
+    });
+    _pcshChatPresencia = pcshChatPresenciaDesdeDoc(_pcshChatPresencia);
+  }
+  pcshChatApplyPresenciaUi();
+  pcshChatCachePresenciaLocal();
+  var payload = pcshChatPresenciaPayload();
+  _pcshChatPresencia.nombre = payload.nombre;
+  try {
+    pcshChatDb().collection('pcsh_settings').doc('chatPresencia').set(payload).catch(function (err) {
+      console.warn('[chat-presencia] guardar', err);
+    });
+  } catch (eG) {
+    console.warn('[chat-presencia] guardar', eG);
+  }
+}
+
+function pcshChatSeedPresenciaSiFalta() {
+  if (_pcshChatPresenciaSeeded) return;
+  _pcshChatPresenciaSeeded = true;
+  if (!_pcshChatPresencia.nombre) _pcshChatPresencia.nombre = pcshChatNombreFallbackGestion();
+  pcshChatGuardarPresencia({});
+}
+
+function pcshChatStartPresenciaListener(sdb) {
+  if (!sdb) return;
+  if (_pcshChatPresenciaUnsub) {
+    try { _pcshChatPresenciaUnsub(); } catch (eU) {}
+    _pcshChatPresenciaUnsub = null;
+  }
+  pcshChatApplyPresenciaUi();
+  _pcshChatPresenciaUnsub = sdb.collection('pcsh_settings').doc('chatPresencia').onSnapshot(
+    function (snap) {
+      if (!snap.exists) {
+        pcshChatSeedPresenciaSiFalta();
+        return;
+      }
+      _pcshChatPresencia = pcshChatPresenciaDesdeDoc(snap.data());
+      pcshChatApplyPresenciaUi();
+      pcshChatCachePresenciaLocal();
+      var dock = document.getElementById('chatDock');
+      var pop = document.getElementById('chatMenuPopover');
+      var ae = document.activeElement;
+      if (dock && dock.classList.contains('chat-menu-open') && pop && !(ae && pop.contains(ae))) {
+        pcshChatBuildMenuPopover();
+      }
+    },
+    function (err) {
+      console.warn('[chat-presencia] listener', err);
+    }
+  );
+}
+
+function pcshChatIdentidadMensaje() {
+  return {
+    autor: pcshChatAutorActual(),
+    displayName: pcshChatNombreVisibleGestion(),
+    origen: 'gestion-wm',
+    estadoLabel: (_pcshChatPresencia && _pcshChatPresencia.estadoLabel) || ''
+  };
 }
 
 function pcshChatReadLastTs() {
@@ -16204,8 +16518,11 @@ function pcshChatApplyTypingSnapshot(snap) {
     if (!doc || typeof doc.data !== 'function') return;
     var d = doc.data();
     if (!d) return;
+    var autor = String(d.autor || '');
     var nm = String(d.name || '');
-    if (!nm || nm === me) return;
+    if (autor && autor === me) return;
+    if (!autor && nm === me) return;
+    if (!nm) return;
     var ts = typeof d.ts === 'number' ? d.ts : 0;
     if (now - ts > 6500) return;
     if (seen[nm]) return;
@@ -16245,12 +16562,13 @@ function pcshChatPingMyTyping() {
     return;
   }
   var me = pcshChatAutorActual();
+  var vis = typeof pcshChatNombreVisibleGestion === 'function' ? pcshChatNombreVisibleGestion() : me;
   var slug = pcshChatTypingSlug(me);
   window.__pcshChatTypingSlugCached = slug;
   try {
     pcshChatDb().collection('chat_typing')
       .doc(slug)
-      .set({ name: me, ts: Date.now() })
+      .set({ name: vis || me, autor: me, ts: Date.now() })
       .catch(function () {});
   } catch (e) {}
 }
@@ -16303,9 +16621,173 @@ function pcshChatCloseMenu() {
 function pcshChatBuildMenuPopover() {
   var pop = document.getElementById('chatMenuPopover');
   if (!pop) return;
-  pop.innerHTML = true
-    ? '<p class="chat-menu-popover-title">Conversación</p><button type="button" class="chat-menu-item chat-menu-danger" role="menuitem" id="chatMenuClearBtn"><i class="fa-solid fa-trash-can" aria-hidden="true" style="opacity:0.85;width:1rem"></i>Vaciar todo el chat…</button>'
-    : '<p class="chat-menu-popover-title" style="margin:0.35rem 0.75rem;font-weight:600">Solo un administrador puede vaciar el historial.</p>';
+  var p = pcshChatPresenciaDesdeDoc(_pcshChatPresencia);
+  var chips = '';
+  p.estados.forEach(function (st) {
+    var active = st.id === p.estadoId ? ' is-active' : '';
+    var del = st.sistema
+      ? ''
+      : '<button type="button" class="chat-presencia-chip-x" data-del-estado="' +
+        escapeHtml(st.id) +
+        '" title="Quitar estado" aria-label="Quitar ' +
+        escapeHtml(st.label) +
+        '">×</button>';
+    chips +=
+      '<button type="button" class="chat-presencia-chip' +
+      active +
+      '" data-estado-id="' +
+      escapeHtml(st.id) +
+      '" style="--chip-color:' +
+      escapeHtml(st.color) +
+      '"><span class="chat-presencia-chip-dot" aria-hidden="true"></span>' +
+      escapeHtml(st.label) +
+      del +
+      '</button>';
+  });
+  pop.innerHTML =
+    '<p class="chat-menu-popover-title">Tu presencia</p>' +
+    '<div class="chat-presencia-field"><label for="chatPresenciaNombre">Nombre a mostrar</label><div class="chat-presencia-row">' +
+    '<input id="chatPresenciaNombre" type="text" maxlength="40" autocomplete="off" value="' +
+    escapeHtml(p.nombre || pcshChatNombreFallbackGestion()) +
+    '" placeholder="Ej. Kike · Administración" />' +
+    '<button type="button" id="chatPresenciaNombreBtn">Guardar</button></div></div>' +
+    '<p class="chat-menu-popover-title">Estado</p>' +
+    '<div class="chat-presencia-estados" id="chatPresenciaEstados">' +
+    chips +
+    '</div>' +
+    '<div class="chat-presencia-field"><label for="chatPresenciaDetalle">Tarea en curso (lo ve Conserjería)</label><div class="chat-presencia-row">' +
+    '<input id="chatPresenciaDetalle" type="text" maxlength="80" autocomplete="off" value="' +
+    escapeHtml(p.detalle || '') +
+    '" placeholder="Ej. Revisando liquidación…" />' +
+    '<button type="button" id="chatPresenciaDetalleBtn">Ok</button></div></div>' +
+    '<p class="chat-menu-popover-title">Nuevo estado</p>' +
+    '<div class="chat-presencia-field"><div class="chat-presencia-row">' +
+    '<input id="chatPresenciaNuevoLabel" type="text" maxlength="40" autocomplete="off" placeholder="Nombre del estado" />' +
+    '<input id="chatPresenciaNuevoColor" type="color" value="#0ea5e9" title="Color" aria-label="Color del estado" />' +
+    '<button type="button" id="chatPresenciaNuevoBtn">Añadir</button></div></div>' +
+    '<hr class="chat-menu-sep" />' +
+    '<p class="chat-menu-popover-title">Conversación</p>' +
+    '<button type="button" class="chat-menu-item chat-menu-danger" role="menuitem" id="chatMenuClearBtn"><i class="fa-solid fa-trash-can" aria-hidden="true" style="opacity:0.85;width:1rem"></i>Vaciar todo el chat…</button>';
+
+  function guardarNombreDesdeUi() {
+    var inp = document.getElementById('chatPresenciaNombre');
+    var nom = inp ? String(inp.value || '').trim().slice(0, 40) : '';
+    if (!nom) {
+      showMsg('Escribe un nombre para mostrar.', 'error');
+      return;
+    }
+    pcshChatGuardarPresencia({ nombre: nom });
+    showMsg('Nombre actualizado.', 'success');
+  }
+  var nomBtn = document.getElementById('chatPresenciaNombreBtn');
+  if (nomBtn) nomBtn.addEventListener('click', guardarNombreDesdeUi);
+  var nomInp = document.getElementById('chatPresenciaNombre');
+  if (nomInp) {
+    nomInp.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        guardarNombreDesdeUi();
+      }
+    });
+  }
+
+  var estWrap = document.getElementById('chatPresenciaEstados');
+  if (estWrap) {
+    estWrap.addEventListener('click', function (ev) {
+      var del = ev.target && ev.target.closest ? ev.target.closest('[data-del-estado]') : null;
+      if (del) {
+        ev.preventDefault();
+        ev.stopPropagation();
+        var delId = del.getAttribute('data-del-estado');
+        var nextEst = p.estados.filter(function (st) {
+          return st.id !== delId;
+        });
+        var patch = { estados: nextEst };
+        if (p.estadoId === delId) {
+          patch.estadoId = 'disponible';
+          patch.estadoLabel = 'Disponible';
+          patch.color = '#22c55e';
+        }
+        pcshChatGuardarPresencia(patch);
+        pcshChatBuildMenuPopover();
+        return;
+      }
+      var chip = ev.target && ev.target.closest ? ev.target.closest('[data-estado-id]') : null;
+      if (!chip) return;
+      var id = chip.getAttribute('data-estado-id');
+      var hit = null;
+      p.estados.forEach(function (st) {
+        if (st.id === id) hit = st;
+      });
+      if (!hit) return;
+      pcshChatGuardarPresencia({
+        estadoId: hit.id,
+        estadoLabel: hit.label,
+        color: hit.color
+      });
+      pcshChatBuildMenuPopover();
+    });
+  }
+
+  function guardarDetalleDesdeUi() {
+    var inp = document.getElementById('chatPresenciaDetalle');
+    var det = inp ? String(inp.value || '').trim().slice(0, 80) : '';
+    pcshChatGuardarPresencia({ detalle: det });
+    showMsg(det ? 'Tarea visible para Conserjería.' : 'Detalle de tarea quitado.', 'success');
+  }
+  var detBtn = document.getElementById('chatPresenciaDetalleBtn');
+  if (detBtn) detBtn.addEventListener('click', guardarDetalleDesdeUi);
+  var detInp = document.getElementById('chatPresenciaDetalle');
+  if (detInp) {
+    detInp.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        guardarDetalleDesdeUi();
+      }
+    });
+  }
+
+  var addBtn = document.getElementById('chatPresenciaNuevoBtn');
+  if (addBtn) {
+    addBtn.addEventListener('click', function () {
+      var labInp = document.getElementById('chatPresenciaNuevoLabel');
+      var colInp = document.getElementById('chatPresenciaNuevoColor');
+      var label = labInp ? String(labInp.value || '').trim().slice(0, 40) : '';
+      var color = pcshChatSanitizeHex(colInp && colInp.value);
+      if (!label) {
+        showMsg('Escribe el nombre del estado.', 'error');
+        return;
+      }
+      if (!color) color = '#0ea5e9';
+      var customCount = 0;
+      p.estados.forEach(function (st) {
+        if (!st.sistema) customCount++;
+      });
+      if (customCount >= 12) {
+        showMsg('Máximo 12 estados personalizados.', 'error');
+        return;
+      }
+      var id =
+        'c_' +
+        label
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, '_')
+          .replace(/^_|_$/g, '')
+          .slice(0, 18) +
+        '_' +
+        Date.now().toString(36).slice(-4);
+      var next = p.estados.concat([{ id: id, label: label, color: color, sistema: false }]);
+      pcshChatGuardarPresencia({
+        estados: next,
+        estadoId: id,
+        estadoLabel: label,
+        color: color
+      });
+      pcshChatBuildMenuPopover();
+      showMsg('Estado añadido y activado.', 'success');
+    });
+  }
+
   var clr = document.getElementById('chatMenuClearBtn');
   if (clr) {
     clr.addEventListener('click', function () {
@@ -16864,9 +17346,8 @@ function setChatOpen(open) {
   panel.setAttribute('aria-hidden', chatVisible ? 'false' : 'true');
   var sub = document.getElementById('chatSub');
   if (sub) {
-    var nm = typeof pcshChatAutorActual === 'function' ? pcshChatAutorActual() : '';
-    var visNom = typeof pcshChatNombreVisibleGestion === 'function' ? pcshChatNombreVisibleGestion() : '';
-    sub.textContent = 'Tiempo real con Conserjería WM' + (visNom && visNom !== 'Admin' ? ' · ' + visNom : ' · Admin');
+    if (typeof pcshChatApplyPresenciaUi === 'function') pcshChatApplyPresenciaUi();
+    else sub.textContent = 'Tiempo real con Conserjería WM · Admin';
   }
   if (chatVisible) {
     try {
@@ -16917,6 +17398,7 @@ async function initChat() {
   if (!sdb) return;
   window._chatDbConserjeria = sdb;
   window._chatInternoGestionInited = true;
+  if (typeof pcshChatStartPresenciaListener === 'function') pcshChatStartPresenciaListener(sdb);
   chatCollection = sdb.collection('chat');
   var chatPrimerSnapshot = true;
   chatCollection.orderBy('timestamp', 'asc').limitToLast(150).onSnapshot(function (snap) {
@@ -17186,8 +17668,12 @@ async function initChat() {
         showMsg('No se pudo enviar el sticker.', 'error');
         return;
       }
+      var ident = typeof pcshChatIdentidadMensaje === 'function' ? pcshChatIdentidadMensaje() : { autor: pcshChatAutorActual() };
       var pay = {
-        autor: pcshChatAutorActual(),
+        autor: ident.autor,
+        displayName: ident.displayName || '',
+        origen: ident.origen || 'gestion-wm',
+        estadoLabel: ident.estadoLabel || '',
         texto: '🎫 ' + (alt || 'Sticker'),
         tipo: 'sticker',
         stickerUrl: url,
@@ -17560,10 +18046,12 @@ document.getElementById('chatForm').onsubmit = function (e) {
       cit.numeroLibro != null && !isNaN(Number(cit.numeroLibro)) ? Number(cit.numeroLibro) : cit.correlativo;
     textoOut = '📋 Novedad #' + nDef;
   }
+  var ident = typeof pcshChatIdentidadMensaje === 'function' ? pcshChatIdentidadMensaje() : { autor: pcshChatAutorActual() };
   var payload = {
-    autor: pcshChatAutorActual(),
-    displayName: (typeof pcshChatNombreVisibleGestion === 'function' ? pcshChatNombreVisibleGestion() : '') || 'Administración',
-    origen: 'gestion-wm',
+    autor: ident.autor,
+    displayName: ident.displayName || '',
+    origen: ident.origen || 'gestion-wm',
+    estadoLabel: ident.estadoLabel || '',
     texto: textoOut,
     fecha: fechaActual(),
     hora: horaActual(),
