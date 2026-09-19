@@ -38409,6 +38409,15 @@ document.getElementById('chatForm').onsubmit = function (e) {
                             if (typeof scheduleProcesarCorreosBienvenidaResidentesNuevos === 'function') {
                                 scheduleProcesarCorreosBienvenidaResidentesNuevos();
                             }
+                            try {
+                                var tabOcup = document.getElementById('ocupacion');
+                                if (tabOcup && tabOcup.classList.contains('active')) {
+                                    if (typeof updateBuildingMapOcupacion === 'function') updateBuildingMapOcupacion();
+                                    if (typeof sincronizarRegistroOcupacionDesdeVinculacion === 'function') {
+                                        sincronizarRegistroOcupacionDesdeVinculacion();
+                                    }
+                                }
+                            } catch (eOccLive) {}
                         } catch (eSnap) {
                             console.warn('[bienvenida] onSnapshot:', eSnap);
                         }
@@ -39389,6 +39398,21 @@ document.getElementById('chatForm').onsubmit = function (e) {
             }).join('|');
         }
 
+        function conjuntoUnidadesVivasOcupacion(units) {
+            var vivas = Object.create(null);
+            (units || []).forEach(function (unit) {
+                if (!unit) return;
+                var n = String(unit.unitNumber || unit.departamento || '').trim();
+                if (n) vivas[n] = true;
+            });
+            return vivas;
+        }
+
+        function unidadVivaEnConserjeriaOcupacion(unidad, vivas) {
+            var n = String(unidad || '').trim();
+            return !!(n && vivas && vivas[n]);
+        }
+
         function extraerCensoResidentesOcupacion(units) {
             var out = [];
             var seen = {};
@@ -39569,7 +39593,10 @@ document.getElementById('chatForm').onsubmit = function (e) {
         }
 
         async function sincronizarRegistroOcupacionDesdeVinculacion() {
-            if (window._ocupacionRegistroSyncPromesa) return window._ocupacionRegistroSyncPromesa;
+            if (window._ocupacionRegistroSyncPromesa) {
+                window._ocupacionRegistroSyncOtraVez = true;
+                return window._ocupacionRegistroSyncPromesa;
+            }
             window._ocupacionRegistroSyncPromesa = (async function () {
                 var mes = (typeof obtenerMesPeriodoVista === 'function') ? obtenerMesPeriodoVista() : ((typeof obtenerMesActual === 'function') ? obtenerMesActual() : '');
                 var nombreMes = (typeof obtenerNombreMes === 'function' && mes) ? obtenerNombreMes(mes) : mes;
@@ -39598,6 +39625,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 }
 
                 var units = Array.isArray(window.vinculacionUnits) ? window.vinculacionUnits : [];
+                var unidadesVivas = conjuntoUnidadesVivasOcupacion(units);
                 var censoActual = extraerCensoResidentesOcupacion(units);
                 if (!censoActual.length && !units.length) {
                     window._ocupacionMovimientosVista = movimientosGuardados;
@@ -39605,6 +39633,12 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     if (nota) nota.textContent = 'Aún no hay censo en vivo de Ocupación. Se muestra el último registro guardado de este mes.';
                     return;
                 }
+
+                var nMovAntesDepurar = movimientosGuardados.length;
+                movimientosGuardados = movimientosGuardados.filter(function (m) {
+                    return m && unidadVivaEnConserjeriaOcupacion(m.unidad || m.departamento, unidadesVivas);
+                });
+                var depuradosUnidadBorrada = nMovAntesDepurar - movimientosGuardados.length;
 
                 var mesAnterior = (typeof obtenerMesAnterior === 'function' && mes) ? obtenerMesAnterior(mes) : '';
                 var censoPrevMes = [];
@@ -39629,7 +39663,10 @@ document.getElementById('chatForm').onsubmit = function (e) {
                         if (!mapaBase[k]) ingresosDetectados.push(mapaAhora[k]);
                     });
                     Object.keys(mapaBase).forEach(function (k) {
-                        if (!mapaAhora[k]) salidasDetectadas.push(mapaBase[k]);
+                        if (mapaAhora[k]) return;
+                        var item = mapaBase[k];
+                        if (!unidadVivaEnConserjeriaOcupacion((item && (item.unidad || item.departamento)) || '', unidadesVivas)) return;
+                        salidasDetectadas.push(item);
                     });
                     if (!hayCensoPrevMes && hayCensoEsteMes) {
                         notaTxt = 'Aún no hay censo del mes anterior. Los movimientos se calculan respecto del último censo de este mes.';
@@ -39664,7 +39701,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 if (censoCambio && typeof guardarDatosMes === 'function') {
                     await guardarDatosMes('ocupacion-residentes', censoActual);
                 }
-                if (agregados > 0 && typeof guardarDatosMes === 'function') {
+                if ((agregados > 0 || depuradosUnidadBorrada > 0) && typeof guardarDatosMes === 'function') {
                     await guardarDatosMes('ocupacion-movimientos', movimientos);
                 }
 
@@ -39672,6 +39709,9 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 pintarTablaRegistroOcupacion();
                 if (nota) {
                     var extra = agregados > 0 ? ('Se actualizó el registro con ' + agregados + ' movimiento' + (agregados === 1 ? '' : 's') + ' nuevo' + (agregados === 1 ? '' : 's') + '.') : 'El registro está al día con el censo actual.';
+                    if (depuradosUnidadBorrada > 0) {
+                        extra += ' Se ocultaron ' + depuradosUnidadBorrada + ' movimiento' + (depuradosUnidadBorrada === 1 ? '' : 's') + ' de unidad' + (depuradosUnidadBorrada === 1 ? '' : 'es') + ' borrada' + (depuradosUnidadBorrada === 1 ? '' : 's') + ' en Conserjería.';
+                    }
                     nota.textContent = (notaTxt ? (notaTxt + ' ') : '') + extra;
                 }
             })().catch(function (err) {
@@ -39679,6 +39719,10 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 pintarTablaRegistroOcupacion();
             }).finally(function () {
                 window._ocupacionRegistroSyncPromesa = null;
+                if (window._ocupacionRegistroSyncOtraVez) {
+                    window._ocupacionRegistroSyncOtraVez = false;
+                    sincronizarRegistroOcupacionDesdeVinculacion();
+                }
             });
             return window._ocupacionRegistroSyncPromesa;
         }
