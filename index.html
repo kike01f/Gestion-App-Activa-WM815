@@ -1053,6 +1053,159 @@
             padding: 0.2rem 0.3rem !important;
             font-size: 0.6rem !important;
         }
+
+        /* Módulo Conserjería: operación → análisis → aviso → tipificación */
+        #conserjeria.conserjeria-modulo {
+            max-width: 72rem;
+        }
+        #conserjeria .conserjeria-modulo__head {
+            margin-bottom: 0.85rem;
+        }
+        #conserjeria .conserjeria-modulo__head-main {
+            flex: 1 1 18rem;
+            min-width: 0;
+        }
+        #conserjeria .conserjeria-modulo__acciones {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.4rem;
+        }
+        #conserjeria .conserjeria-modulo__nav {
+            position: sticky;
+            top: 0.5rem;
+            z-index: 8;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.35rem;
+            margin: 0 0 1rem 0;
+            padding: 0.35rem;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            background: color-mix(in srgb, var(--bg-primary) 92%, transparent);
+            backdrop-filter: blur(8px);
+        }
+        #conserjeria .conserjeria-modulo__nav a {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.38rem 0.7rem;
+            border-radius: 8px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: var(--gray-700);
+            text-decoration: none;
+            border: 1px solid transparent;
+        }
+        #conserjeria .conserjeria-modulo__nav a:hover {
+            background: var(--bg-secondary);
+        }
+        #conserjeria .conserjeria-modulo__nav a.is-active {
+            background: rgba(117, 187, 33, 0.14);
+            border-color: rgba(117, 187, 33, 0.35);
+            color: var(--gray-900);
+        }
+        #conserjeria .conserjeria-modulo__sec {
+            scroll-margin-top: 3.6rem;
+            margin-bottom: 1.15rem;
+        }
+        #conserjeria .conserjeria-modulo__kicker {
+            display: block;
+            margin: 0 0 0.2rem 0;
+            font-size: 0.68rem;
+            font-weight: 800;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: var(--gray-500);
+        }
+        #conserjeria .conserjeria-modulo__sec-head {
+            margin: 0 0 0.75rem 0;
+        }
+        #conserjeria .conserjeria-modulo__sec-head h3 {
+            margin: 0;
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--gray-900);
+        }
+        #conserjeria .conserjeria-modulo__sec-head p {
+            margin: 0.3rem 0 0 0;
+            font-size: 0.8rem;
+            line-height: 1.45;
+            color: var(--gray-600);
+        }
+        #conserjeria #conserjeriaKpis.resumen-ocupacion-map {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(128px, 1fr));
+            gap: 0.65rem;
+            margin-bottom: 1rem;
+        }
+        #conserjeria #conserjeriaKpis .resumen-item {
+            appearance: none;
+            width: 100%;
+            text-align: left;
+            cursor: pointer;
+            padding: 0.7rem 0.75rem;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-primary);
+            transition: border-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+        }
+        #conserjeria #conserjeriaKpis .resumen-item:hover {
+            border-color: rgba(117, 187, 33, 0.45);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
+        }
+        #conserjeria #conserjeriaKpis .resumen-item .valor {
+            font-size: 1.45rem;
+            font-weight: 800;
+            line-height: 1.1;
+        }
+        #conserjeria #conserjeriaKpis .resumen-item .etiqueta {
+            margin-top: 0.25rem;
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: var(--gray-600);
+        }
+        #conserjeria .conserjeria-modulo__panel {
+            margin-bottom: 1rem;
+            padding: 0.9rem 1rem;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-primary);
+        }
+        #conserjeria .conserjeria-modulo__panel > h3,
+        #conserjeria .conserjeria-modulo__panel > h4 {
+            margin: 0 0 0.45rem 0;
+            font-size: 0.95rem;
+            font-weight: 700;
+        }
+        #conserjeria .conserjeria-modulo__details > summary {
+            cursor: pointer;
+            list-style: none;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: baseline;
+            gap: 0.35rem 0.75rem;
+        }
+        #conserjeria .conserjeria-modulo__details > summary::-webkit-details-marker {
+            display: none;
+        }
+        #conserjeria .conserjeria-modulo__details > summary::after {
+            content: 'Mostrar';
+            margin-left: auto;
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+        #conserjeria .conserjeria-modulo__details[open] > summary::after {
+            content: 'Ocultar';
+        }
+        #conserjeria .conserjeria-modulo__details-body {
+            margin-top: 0.75rem;
+        }
+        #conserjeria #conserjeriaSecVisitas {
+            scroll-margin-top: 3.6rem;
+        }
         #nomina #tablaNomina th:last-child,
         #nomina #tablaNomina td:last-child {
             width: 6.9rem;
@@ -7268,27 +7421,116 @@
             </section>
         </div>
 
-        <div id="conserjeria" class="tab-content">
-            <div style="margin-bottom: 1.5rem;">
-                <h2 id="tituloConserjeria" style="margin: 0; color: var(--gray-900); font-size: 1.5rem; font-weight: 700; display: flex; align-items: center; gap: 0.75rem;">
-                    <span style="display: inline-flex; align-items: center; width: 1.75rem; height: 1.75rem;"></span> Conserjería
-                </h2>
-                <p id="conserjeriaFuenteDatos" style="color: var(--gray-600); font-size: 0.875rem; margin: 0.5rem 0 0 0; max-width: 42rem; line-height: 1.45;">Novedades e incidencias de Conserjería WM. Puede destacar, anotar y editar desde aquí; los cambios quedan en la bitácora de conserjería.</p>
-            </div>
-            <p id="conserjeriaMesTexto" style="margin: 0 0 1rem 0; font-size: 0.82rem; color: var(--gray-600);"></p>
-            <div class="form-section" id="conserjeriaCatalogoWrap" style="margin-bottom: 1rem;">
-                <h3 style="margin: 0 0 0.35rem 0; font-size: 1rem; font-weight: 700;">Tipificación</h3>
-                <p style="margin: 0 0 0.65rem 0; font-size: 0.8rem; color: var(--gray-600); line-height: 1.45;">Las etiquetas se usan en Conserjería WM para tipificar. Marque cuáles se ven en este módulo.</p>
-                <div id="conserjeriaEtiquetasLista" style="display:flex;flex-direction:column;gap:0.4rem;margin-bottom:0.65rem;"></div>
-                <div style="display:flex;flex-wrap:wrap;gap:0.4rem;align-items:center;">
-                    <input type="text" id="conserjeriaNuevaEtiquetaNombre" class="form-input" placeholder="Nueva etiqueta…" maxlength="40" style="padding:0.4rem 0.5rem;font-size:0.8rem;min-width:12rem;">
-                    <input type="color" id="conserjeriaNuevaEtiquetaColor" value="#64748b" title="Color" style="width:2.2rem;height:1.8rem;padding:0;border:1px solid var(--border-color);background:transparent;">
-                    <button type="button" class="btn btn-primary" id="btnAgregarEtiquetaNovedad" style="padding:0.35rem 0.7rem;font-size:0.78rem;">Agregar etiqueta</button>
+        <div id="conserjeria" class="tab-content conserjeria-modulo">
+            <div class="conserjeria-modulo__head">
+                <div class="conserjeria-modulo__head-main">
+                    <h2 id="tituloConserjeria" style="margin: 0; color: var(--gray-900); font-size: 1.5rem; font-weight: 700; display: flex; align-items: center; gap: 0.75rem;">
+                        <span style="display: inline-flex; align-items: center; width: 1.75rem; height: 1.75rem;"></span> Conserjería
+                    </h2>
+                    <p id="conserjeriaFuenteDatos" style="color: var(--gray-600); font-size: 0.875rem; margin: 0.5rem 0 0 0; max-width: 42rem; line-height: 1.45;">Novedades e incidencias de Conserjería WM. Puede destacar, anotar y editar desde aquí; los cambios quedan en la bitácora de conserjería.</p>
+                    <p id="conserjeriaMesTexto" hidden></p>
+                </div>
+                <div class="conserjeria-modulo__acciones">
+                    <button type="button" class="btn btn-primary" id="btnActualizarModuloConserjeria" style="padding: 0.35rem 0.75rem; font-size: 0.8rem;">Actualizar</button>
+                    <a href="conserjeria%20wm.html" target="_blank" rel="noopener" class="btn btn-secondary" style="padding: 0.35rem 0.75rem; font-size: 0.8rem; text-decoration: none;">Abrir Conserjería WM</a>
                 </div>
             </div>
-            <div class="form-section" id="conserjeriaAvisoWrap" style="margin-bottom: 1rem;">
-                <h3 style="margin: 0 0 0.35rem 0; font-size: 1rem; font-weight: 700;">Aviso a Conserjería WM</h3>
-                <p style="margin: 0 0 0.75rem 0; font-size: 0.8rem; color: var(--gray-600); line-height: 1.45;">Redacte el aviso que verá portería en el panel («Aviso de gestión · puntos de mejora del mes»). Publíquelo para enviarlo y actívelo o desactívelo cuando quiera.</p>
+
+            <nav id="conserjeriaModuloNav" class="conserjeria-modulo__nav" aria-label="Secciones del módulo Conserjería">
+                <a href="#conserjeriaSecOperacion" class="is-active">Operación</a>
+                <a href="#conserjeriaAnalisisWrap">Análisis</a>
+                <a href="#conserjeriaAvisoWrap">Aviso</a>
+                <a href="#conserjeriaCatalogoWrap">Etiquetas</a>
+            </nav>
+
+            <section id="conserjeriaSecOperacion" class="conserjeria-modulo__sec" aria-labelledby="conserjeriaOperacionTitulo">
+                <header class="conserjeria-modulo__sec-head">
+                    <span class="conserjeria-modulo__kicker">1 · Operación</span>
+                    <h3 id="conserjeriaOperacionTitulo">Bitácora del mes</h3>
+                    <p>Primero el pulso del mes, luego las destacadas y el listado para trabajar. Pulse un indicador para filtrar.</p>
+                </header>
+                <div id="conserjeriaKpis" class="resumen-ocupacion-map"></div>
+                <div class="conserjeria-modulo__panel" id="conserjeriaDestacadasWrap">
+                    <h3>Novedades destacadas</h3>
+                    <div id="conserjeriaDestacadasList"><p style="margin: 0; color: var(--gray-500); font-size: 0.85rem;">Cargando…</p></div>
+                </div>
+                <div class="conserjeria-modulo__panel" id="conserjeriaNovedadesWrap">
+                    <h3>Novedades del mes</h3>
+                    <div class="form-row" style="gap: 0.5rem; margin: 0.65rem 0 0.75rem 0;">
+                        <div class="form-group" style="flex: 1 1 16rem; margin-bottom: 0;">
+                            <input type="text" id="conserjeriaFiltroTexto" class="form-input" placeholder="Buscar #2356, texto, conserje o visitante…" style="padding: 0.5rem; font-size: 0.875rem; width: 100%;">
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0; min-width: 11rem;">
+                            <select id="conserjeriaFiltroCategoria" class="form-input" style="padding: 0.5rem; font-size: 0.875rem; width: 100%;">
+                                <option value="">Todas las categorías</option>
+                                <option value="reclamos">Reclamos</option>
+                                <option value="incidencias">Incidencias</option>
+                                <option value="seguridad">Seguridad</option>
+                                <option value="aperturas">Aperturas</option>
+                            </select>
+                        </div>
+                        <label style="display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.8rem; color: var(--gray-700); white-space: nowrap;">
+                            <input type="checkbox" id="conserjeriaFiltroDestacadas"> Solo destacadas
+                        </label>
+                    </div>
+                    <div class="table-section" style="padding: 0; box-shadow: none; border: none;">
+                        <table id="tablaConserjeriaNovedades">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Fecha</th>
+                                    <th>Hora</th>
+                                    <th>Categoría</th>
+                                    <th>Conserje</th>
+                                    <th>Descripción</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbodyConserjeriaNovedades">
+                                <tr><td colspan="7" class="empty-state"><p>Cargando novedades…</p></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="table-section conserjeria-modulo__panel" id="conserjeriaSecVisitas">
+                    <h3>Visitas con multa</h3>
+                    <p style="margin: 0 0 0.75rem 0; font-size: 0.78rem; color: var(--gray-600); line-height: 1.4;">Misma regla de Conserjería WM: visita vehicular (no proveedor) que supera 5 horas más 15 minutos de gracia.</p>
+                    <div style="overflow-x: auto;">
+                        <table id="tablaConserjeriaVisitasMulta">
+                            <thead>
+                                <tr>
+                                    <th>Ingreso</th>
+                                    <th>Salida</th>
+                                    <th>Visitante</th>
+                                    <th>Unidad</th>
+                                    <th>Patente</th>
+                                    <th>Permanencia</th>
+                                    <th>Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbodyConserjeriaVisitasMulta">
+                                <tr><td colspan="7" class="empty-state"><p>Cargando visitas…</p></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <section class="form-section conserjeria-modulo__sec conserjeria-modulo__panel" id="conserjeriaAnalisisWrap">
+                <header class="conserjeria-modulo__sec-head">
+                    <span class="conserjeria-modulo__kicker">2 · Análisis</span>
+                    <h3>Análisis de novedades</h3>
+                    <p>Resume el mes con datos de la bitácora. Pulse un tipo del ranking para filtrar el listado.</p>
+                </header>
+                <div id="conserjeriaAnalisis"><p style="margin: 0; color: var(--gray-500); font-size: 0.85rem;">Cargando análisis…</p></div>
+            </section>
+
+            <section class="form-section conserjeria-modulo__sec conserjeria-modulo__panel" id="conserjeriaAvisoWrap">
+                <header class="conserjeria-modulo__sec-head">
+                    <span class="conserjeria-modulo__kicker">3 · Comunicación</span>
+                    <h3>Aviso a Conserjería WM</h3>
+                    <p>Redacte el aviso que verá portería en el panel. Publíquelo para enviarlo y actívelo o desactívelo cuando quiera.</p>
+                </header>
                 <label style="display:inline-flex;align-items:center;gap:0.45rem;font-size:0.82rem;font-weight:600;margin-bottom:0.75rem;">
                     <input type="checkbox" id="avisoGestionActivo">
                     Visible en Conserjería WM
@@ -7310,83 +7552,26 @@
                     <button type="button" class="btn btn-primary" id="btnPublicarAvisoGestion" style="padding:0.4rem 0.85rem;font-size:0.82rem;">Publicar en Conserjería</button>
                     <span id="avisoGestionEstado" style="font-size:0.75rem;color:var(--gray-500);"></span>
                 </div>
-            </div>
-            <div id="conserjeriaKpis" class="resumen-ocupacion-map" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0.85rem; margin-bottom: 1.25rem;"></div>
-            <div class="form-section" id="conserjeriaAnalisisWrap" style="margin-bottom: 1rem;">
-                <h3 style="margin: 0 0 0.35rem 0; font-size: 1rem; font-weight: 700;">Análisis de novedades</h3>
-                <p style="margin: 0 0 0.75rem 0; font-size: 0.8rem; color: var(--gray-600); line-height: 1.45;">Resume el mes con datos de la bitácora. Pulse un tipo del ranking para filtrar el listado.</p>
-                <div id="conserjeriaAnalisis"><p style="margin: 0; color: var(--gray-500); font-size: 0.85rem;">Cargando análisis…</p></div>
-            </div>
-            <div class="form-section" style="margin-bottom: 1rem;">
-                <h3 style="margin: 0 0 0.65rem 0; font-size: 1rem; font-weight: 700;">Novedades destacadas</h3>
-                <div id="conserjeriaDestacadasList"><p style="margin: 0; color: var(--gray-500); font-size: 0.85rem;">Cargando…</p></div>
-            </div>
-            <div class="form-section" style="margin-bottom: 1rem;">
-                <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; justify-content: space-between; margin-bottom: 0.75rem;">
-                    <h3 style="margin: 0; font-size: 1rem; font-weight: 700;">Novedades del mes</h3>
-                    <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
-                        <button type="button" class="btn btn-primary" id="btnActualizarModuloConserjeria" style="padding: 0.35rem 0.75rem; font-size: 0.8rem;">Actualizar</button>
-                        <a href="conserjeria%20wm.html" target="_blank" rel="noopener" class="btn btn-secondary" style="padding: 0.35rem 0.75rem; font-size: 0.8rem; text-decoration: none;">Abrir Conserjería WM</a>
+            </section>
+
+            <details class="form-section conserjeria-modulo__sec conserjeria-modulo__panel conserjeria-modulo__details" id="conserjeriaCatalogoWrap">
+                <summary>
+                    <span>
+                        <span class="conserjeria-modulo__kicker">4 · Configuración</span>
+                        <strong style="display:block;font-size:0.95rem;">Tipificación</strong>
+                    </span>
+                    <span style="font-size:0.78rem;color:var(--gray-600);font-weight:500;">Etiquetas compartidas con Conserjería WM y cuáles se ven aquí.</span>
+                </summary>
+                <div class="conserjeria-modulo__details-body">
+                    <p style="margin: 0 0 0.65rem 0; font-size: 0.8rem; color: var(--gray-600); line-height: 1.45;">Las etiquetas se usan en Conserjería WM para tipificar. Marque cuáles se ven en este módulo.</p>
+                    <div id="conserjeriaEtiquetasLista" style="display:flex;flex-direction:column;gap:0.4rem;margin-bottom:0.65rem;"></div>
+                    <div style="display:flex;flex-wrap:wrap;gap:0.4rem;align-items:center;">
+                        <input type="text" id="conserjeriaNuevaEtiquetaNombre" class="form-input" placeholder="Nueva etiqueta…" maxlength="40" style="padding:0.4rem 0.5rem;font-size:0.8rem;min-width:12rem;">
+                        <input type="color" id="conserjeriaNuevaEtiquetaColor" value="#64748b" title="Color" style="width:2.2rem;height:1.8rem;padding:0;border:1px solid var(--border-color);background:transparent;">
+                        <button type="button" class="btn btn-primary" id="btnAgregarEtiquetaNovedad" style="padding:0.35rem 0.7rem;font-size:0.78rem;">Agregar etiqueta</button>
                     </div>
                 </div>
-                <div class="form-row" style="gap: 0.5rem; margin-bottom: 0.75rem;">
-                    <div class="form-group" style="flex: 1 1 16rem; margin-bottom: 0;">
-                        <input type="text" id="conserjeriaFiltroTexto" class="form-input" placeholder="Buscar #2356, texto, conserje o visitante…" style="padding: 0.5rem; font-size: 0.875rem; width: 100%;">
-                    </div>
-                    <div class="form-group" style="margin-bottom: 0; min-width: 11rem;">
-                        <select id="conserjeriaFiltroCategoria" class="form-input" style="padding: 0.5rem; font-size: 0.875rem; width: 100%;">
-                            <option value="">Todas las categorías</option>
-                            <option value="reclamos">Reclamos</option>
-                            <option value="incidencias">Incidencias</option>
-                            <option value="seguridad">Seguridad</option>
-                            <option value="aperturas">Aperturas</option>
-                        </select>
-                    </div>
-                    <label style="display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.8rem; color: var(--gray-700); white-space: nowrap;">
-                        <input type="checkbox" id="conserjeriaFiltroDestacadas"> Solo destacadas
-                    </label>
-                </div>
-                <div class="table-section" style="padding: 0; box-shadow: none; border: none;">
-                    <table id="tablaConserjeriaNovedades">
-                        <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>Fecha</th>
-                                <th>Hora</th>
-                                <th>Categoría</th>
-                                <th>Conserje</th>
-                                <th>Descripción</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tbodyConserjeriaNovedades">
-                            <tr><td colspan="7" class="empty-state"><p>Cargando novedades…</p></td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            <div class="table-section">
-                <h3>Visitas con multa</h3>
-                <p style="margin: 0 0 0.75rem 0; font-size: 0.78rem; color: var(--gray-600); line-height: 1.4;">Misma regla de Conserjería WM: visita vehicular (no proveedor) que supera 5 horas más 15 minutos de gracia.</p>
-                <div style="overflow-x: auto;">
-                    <table id="tablaConserjeriaVisitasMulta">
-                        <thead>
-                            <tr>
-                                <th>Ingreso</th>
-                                <th>Salida</th>
-                                <th>Visitante</th>
-                                <th>Unidad</th>
-                                <th>Patente</th>
-                                <th>Permanencia</th>
-                                <th>Estado</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tbodyConserjeriaVisitasMulta">
-                            <tr><td colspan="7" class="empty-state"><p>Cargando visitas…</p></td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+            </details>
         </div>
 
         <!-- MÓDULO POSTVENTA: resumen → archivo → formulario → listado (misma API de IDs) -->
@@ -14798,12 +14983,24 @@
                 '</tr></thead><tbody>' + filasTema + '</tbody></table></div></div></div>';
         }
 
-        window.filtrarNovedadesConserjeriaPorTipo = function (clave) {
+        window.filtrarModuloConserjeriaPorKpi = function (tipo) {
+            var clave = String(tipo || '');
+            if (clave === 'multa') {
+                var vis = document.getElementById('conserjeriaSecVisitas');
+                if (vis && vis.scrollIntoView) vis.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                return;
+            }
             var sel = document.getElementById('conserjeriaFiltroCategoria');
-            if (sel) sel.value = String(clave || '');
+            var dest = document.getElementById('conserjeriaFiltroDestacadas');
+            if (dest) dest.checked = clave === 'destacadas';
+            if (sel) sel.value = (clave && clave !== 'destacadas') ? clave : '';
             pintarTablasModuloConserjeria();
             var tabla = document.getElementById('tablaConserjeriaNovedades');
             if (tabla && tabla.scrollIntoView) tabla.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        };
+
+        window.filtrarNovedadesConserjeriaPorTipo = function (clave) {
+            window.filtrarModuloConserjeriaPorKpi(clave);
         };
 
         function pintarAnalisisNovedadesConserjeria() {
@@ -15221,6 +15418,49 @@
             var modalEdit = document.getElementById('modalEditarNovedadGestion');
             if (modalNota) modalNota.addEventListener('click', function (e) { if (e.target === modalNota) cerrarOverlayGestion('modalNotaConserjeriaGestion'); });
             if (modalEdit) modalEdit.addEventListener('click', function (e) { if (e.target === modalEdit) cerrarOverlayGestion('modalEditarNovedadGestion'); });
+            bindNavModuloConserjeria();
+        }
+
+        function marcarNavModuloConserjeria(id) {
+            var nav = document.getElementById('conserjeriaModuloNav');
+            if (!nav) return;
+            nav.querySelectorAll('a[href^="#"]').forEach(function (a) {
+                a.classList.toggle('is-active', a.getAttribute('href') === '#' + id);
+            });
+        }
+
+        function irASeccionModuloConserjeria(id) {
+            var el = document.getElementById(id);
+            if (!el) return;
+            if (id === 'conserjeriaCatalogoWrap' && el.tagName === 'DETAILS') el.open = true;
+            if (el.scrollIntoView) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            marcarNavModuloConserjeria(id);
+        }
+
+        function bindNavModuloConserjeria() {
+            var nav = document.getElementById('conserjeriaModuloNav');
+            if (!nav || nav._bound) return;
+            nav._bound = true;
+            nav.addEventListener('click', function (e) {
+                var a = e.target.closest('a[href^="#"]');
+                if (!a) return;
+                e.preventDefault();
+                irASeccionModuloConserjeria(String(a.getAttribute('href') || '').replace(/^#/, ''));
+            });
+            if (typeof IntersectionObserver === 'function') {
+                var ids = ['conserjeriaSecOperacion', 'conserjeriaAnalisisWrap', 'conserjeriaAvisoWrap', 'conserjeriaCatalogoWrap'];
+                var root = null;
+                var obs = new IntersectionObserver(function (entries) {
+                    var visible = entries.filter(function (en) { return en.isIntersecting; }).sort(function (a, b) {
+                        return a.boundingClientRect.top - b.boundingClientRect.top;
+                    })[0];
+                    if (visible && visible.target && visible.target.id) marcarNavModuloConserjeria(visible.target.id);
+                }, { root: root, rootMargin: '-12% 0px -70% 0px', threshold: 0.02 });
+                ids.forEach(function (id) {
+                    var el = document.getElementById(id);
+                    if (el) obs.observe(el);
+                });
+            }
         }
 
         function pintarKpisModuloConserjeria() {
@@ -15230,10 +15470,11 @@
                 var shown = etiquetasMostradasGestion();
                 var cards = shown.map(function (e) {
                     var st = estiloBadgeCategoriaNovedad(e.id);
-                    return '<div class="resumen-item"><div class="valor" style="color:' + st.fg + ';">' + (r.porTipo[e.id] || 0) + '</div><div class="etiqueta">' + escaparHtmlModuloConserjeria(e.label) + '</div></div>';
+                    var id = escaparHtmlModuloConserjeria(e.id);
+                    return '<button type="button" class="resumen-item" data-kpi="' + id + '" title="Filtrar novedades de ' + escaparHtmlModuloConserjeria(e.label) + '" onclick="filtrarModuloConserjeriaPorKpi(\'' + id + '\')"><div class="valor" style="color:' + st.fg + ';">' + (r.porTipo[e.id] || 0) + '</div><div class="etiqueta">' + escaparHtmlModuloConserjeria(e.label) + '</div></button>';
                 }).join('');
-                cards += '<div class="resumen-item"><div class="valor" id="conserjeriaKpiDestacadas" style="color: #b45309;">' + r.destacadas + '</div><div class="etiqueta">Destacadas</div></div>';
-                cards += '<div class="resumen-item"><div class="valor" id="conserjeriaKpiVisitasMulta" style="color: #b45309;">' + r.visitasMulta + '</div><div class="etiqueta">Visitas con multa</div></div>';
+                cards += '<button type="button" class="resumen-item" data-kpi="destacadas" title="Ver solo destacadas" onclick="filtrarModuloConserjeriaPorKpi(\'destacadas\')"><div class="valor" id="conserjeriaKpiDestacadas" style="color: #b45309;">' + r.destacadas + '</div><div class="etiqueta">Destacadas</div></button>';
+                cards += '<button type="button" class="resumen-item" data-kpi="multa" title="Ir a visitas con multa" onclick="filtrarModuloConserjeriaPorKpi(\'multa\')"><div class="valor" id="conserjeriaKpiVisitasMulta" style="color: #b45309;">' + r.visitasMulta + '</div><div class="etiqueta">Visitas con multa</div></button>';
                 wrap.innerHTML = cards;
             }
             var mesEl = document.getElementById('conserjeriaMesTexto');
