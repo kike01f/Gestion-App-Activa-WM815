@@ -2672,7 +2672,7 @@
             padding: 0.75rem 1rem 1.25rem;
         }
         .dashboard2-block {
-            margin-bottom: 1rem;
+            margin-bottom: 0.75rem;
         }
         .dashboard2-block-title {
             margin: 0 0 0.55rem 0;
@@ -2748,62 +2748,64 @@
         #dashboard2StatsGrid.dashboard2-stats-stack {
             display: flex;
             flex-direction: column;
-            gap: 0.85rem;
+            gap: 0.55rem;
         }
         .dashboard2-mod-grupo-title {
-            margin: 0 0 0.45rem 0;
-            font-size: 0.78rem;
+            margin: 0 0 0.3rem 0;
+            font-size: 0.68rem;
             font-weight: 700;
             letter-spacing: 0.06em;
             text-transform: uppercase;
-            color: #e2e8f0;
+            color: #cbd5e1;
         }
         [data-theme="dark"] .dashboard2-mod-grupo-title {
-            color: #e2e8f0;
+            color: #cbd5e1;
         }
         .dashboard2-stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(176px, 1fr));
-            gap: 0.65rem;
+            grid-template-columns: repeat(auto-fill, minmax(128px, 1fr));
+            gap: 0.4rem;
         }
         .dashboard2-card {
             background: linear-gradient(180deg, #1e293b 0%, #334155 100%);
-            border: 1px solid rgba(255,255,255,0.18);
-            border-radius: 10px;
-            padding: 0.85rem;
-            min-height: 7.25rem;
+            border: 1px solid rgba(255,255,255,0.16);
+            border-radius: 8px;
+            padding: 0.5rem 0.55rem 0.55rem;
+            min-height: 0;
             position: relative;
             transition: border-color 0.2s ease, box-shadow 0.2s ease;
         }
         .dashboard2-card:hover { border-color: rgba(117, 187, 33, 0.4); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
         .dashboard2-card-semaforo {
             position: absolute;
-            top: 0.5rem;
-            right: 0.5rem;
-            width: 8px;
-            height: 8px;
+            top: 0.4rem;
+            right: 0.4rem;
+            width: 7px;
+            height: 7px;
             border-radius: 50%;
         }
         .dashboard2-card-icon-wrap {
-            width: 2rem;
-            height: 2rem;
-            margin-bottom: 0.4rem;
+            width: 1.45rem;
+            height: 1.45rem;
+            margin-bottom: 0.25rem;
             color: var(--primary-light);
         }
         .dashboard2-card-icon-wrap svg { width: 100%; height: 100%; }
         .dashboard2-card-title {
-            font-size: 0.8rem;
+            font-size: 0.68rem;
             font-weight: 700;
             color: #fff;
-            margin-bottom: 0.25rem;
+            margin-bottom: 0.12rem;
+            line-height: 1.25;
         }
         .dashboard2-card-value {
-            font-size: 1.4rem;
+            font-size: 1.05rem;
             font-weight: 800;
             color: #fff;
-            margin-bottom: 0.2rem;
+            margin-bottom: 0.1rem;
+            line-height: 1.2;
         }
-        .dashboard2-card-sub { font-size: 0.75rem; color: #e2e8f0; line-height: 1.4; }
+        .dashboard2-card-sub { font-size: 0.65rem; color: #e2e8f0; line-height: 1.3; }
         .dashboard2-empty-msg { margin: 0; padding: 1rem; font-size: 0.8rem; color: var(--gray-600); }
 
         /* Módulo Ocupación: pulso + mapa alineado por eje 01–15 */
@@ -3108,8 +3110,8 @@
         /* Fallback: contenido clonado (grid + cards del panel principal) */
         #dashboard .dashboard2-stats-grid .dashboard-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-            gap: 0.5rem;
+            grid-template-columns: repeat(auto-fill, minmax(128px, 1fr));
+            gap: 0.4rem;
         }
         #dashboard .dashboard-card {
             background: linear-gradient(180deg, #1e293b 0%, #334155 100%) !important;
@@ -3206,18 +3208,18 @@
         .bienvenida-panel--basico { padding: 0; background: transparent; border: none; box-shadow: none; }
         .bienvenida-panel-kpis--basico {
             grid-template-columns: repeat(2, minmax(0, 1fr));
-            max-width: 420px;
+            max-width: 340px;
             margin-bottom: 0;
         }
         .bienvenida-panel-kpi {
-            padding: 0.55rem 0.7rem;
+            padding: 0.45rem 0.6rem;
             border-radius: 8px;
             border: 1px solid var(--border-color);
             background: var(--bg-secondary);
         }
-        .bienvenida-panel-kpi .lbl { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em; color: #cbd5e1; }
-        .bienvenida-panel-kpi .val { font-size: 1.45rem; font-weight: 800; font-variant-numeric: tabular-nums; color: #fff; }
-        .bienvenida-panel-kpi .hint { margin-top: 0.12rem; font-size: 0.75rem; color: #cbd5e1; line-height: 1.3; }
+        .bienvenida-panel-kpi .lbl { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em; color: #cbd5e1; }
+        .bienvenida-panel-kpi .val { font-size: 1.2rem; font-weight: 800; font-variant-numeric: tabular-nums; color: #fff; }
+        .bienvenida-panel-kpi .hint { margin-top: 0.08rem; font-size: 0.68rem; color: #cbd5e1; line-height: 1.3; }
         .bienvenida-panel-kpi.ok .val { color: #4ade80; }
         .bienvenida-panel-kpi.cola .val { color: #93c5fd; }
         .bienvenida-panel-kpi.no .val { color: #fbbf24; }
@@ -3393,7 +3395,7 @@
         .dashboard2-chart-wrap {
             position: relative;
             width: 100%;
-            height: 220px;
+            height: 180px;
             background: rgba(0,0,0,0.2);
             border-radius: var(--radius);
         }
@@ -3405,6 +3407,20 @@
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 0.65rem;
+        }
+        .dashboard2-extra-grid--solo {
+            grid-template-columns: minmax(240px, 440px);
+        }
+        .dashboard2-block--mantenciones {
+            max-width: 440px;
+        }
+        .dashboard2-block--mantenciones .dashboard2-extra-col > div {
+            padding: 0.5rem 0.65rem !important;
+        }
+        #dashboard .dashboard2-block--mantenciones #mantencionesMesActual {
+            padding: 0.2rem 0 !important;
+            font-size: 0.78rem;
+            line-height: 1.35;
         }
         .dashboard2-extra-col > div {
             background: linear-gradient(180deg, #1e293b 0%, #334155 100%) !important;
@@ -3461,8 +3477,8 @@
             align-items: center;
             justify-content: space-between;
             flex-wrap: wrap;
-            gap: 0.75rem;
-            padding: 0.85rem 1rem;
+            gap: 0.5rem;
+            padding: 0.6rem 0.85rem;
             cursor: pointer;
             transition: background 0.2s ease;
         }
@@ -3502,19 +3518,19 @@
             transition: transform 0.3s ease;
         }
         #dashboard #herramientasAppContent {
-            padding: 1rem;
+            padding: 0.75rem;
             border-top: 1px solid rgba(255,255,255,0.08);
         }
         .dashboard2-herramientas-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 1rem;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 0.65rem;
         }
         .dashboard2-htool-card {
             background: rgba(0,0,0,0.2);
             border: 1px solid rgba(255,255,255,0.1);
             border-radius: 10px;
-            padding: 1.25rem;
+            padding: 0.75rem;
             transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
         }
         .dashboard2-htool-card:hover {
@@ -3524,29 +3540,29 @@
         }
         .dashboard2-htool-card--wide { grid-column: 1 / -1; }
         .dashboard2-htool-card .htool-icon {
-            width: 2.25rem;
-            height: 2.25rem;
-            border-radius: 10px;
+            width: 1.85rem;
+            height: 1.85rem;
+            border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.2rem;
-            margin-bottom: 0.75rem;
+            font-size: 1rem;
+            margin-bottom: 0.45rem;
         }
         .dashboard2-htool-card .htool-icon--purple { background: rgba(139, 92, 246, 0.25); }
         .dashboard2-htool-card .htool-icon--green { background: rgba(34, 197, 94, 0.25); }
         .dashboard2-htool-card .htool-icon--amber { background: rgba(245, 158, 11, 0.25); }
         .dashboard2-htool-card .htool-title {
-            margin: 0 0 0.35rem 0;
-            font-size: 1rem;
+            margin: 0 0 0.25rem 0;
+            font-size: 0.88rem;
             font-weight: 700;
             color: #fff;
         }
         .dashboard2-htool-card .htool-desc {
-            margin: 0 0 1rem 0;
-            font-size: 0.8125rem;
-            color: rgba(255,255,255,0.7);
-            line-height: 1.5;
+            margin: 0 0 0.55rem 0;
+            font-size: 0.72rem;
+            color: rgba(255,255,255,0.72);
+            line-height: 1.4;
         }
         .dashboard2-htool-card .htool-toggle {
             display: flex;
@@ -3591,7 +3607,7 @@
             background: linear-gradient(135deg, rgba(117, 187, 33, 0.12) 0%, rgba(117, 187, 33, 0.06) 100%);
             border-radius: 8px;
             border: 1px solid rgba(117, 187, 33, 0.25);
-            padding: 0.5rem 0.75rem;
+            padding: 0.4rem 0.65rem;
             transition: background-color 0.2s ease, border-color 0.2s ease;
             cursor: pointer;
         }
@@ -6474,7 +6490,7 @@
                                     <svg class="dashboard2-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg>
                                     Panel de Control
                                 </h1>
-                                <p id="dashboard2Subtitulo" class="dashboard2-subtitulo">Atención, pulso del mes y operación por área</p>
+                                <p id="dashboard2Subtitulo" class="dashboard2-subtitulo">Arturito, operación, finanzas y correo</p>
                                 <p id="dashboard2MesTexto" class="dashboard2-mes-texto"></p>
                             </div>
                         </div>
@@ -6494,6 +6510,7 @@
                 <div id="alertasDashboard" style="display: none;"><!-- Gestionado por Arturito --></div>
                 <div id="dashboardMultasPendientesWrap" class="multas-alerta" role="status"></div>
                 <div id="dashboardResumenNovedadesWrap" class="dashboard-resumen-aviso" role="status" aria-live="polite"></div>
+                </div>
                 <!-- 0. Asistente Arturito -->
                 <section class="dashboard2-block dashboard2-block--arturito" aria-label="Asistente Arturito">
                     <h2 class="dashboard2-block-title">Asistente Arturito</h2>
@@ -6502,8 +6519,7 @@
                         <p class="arturito-placeholder">Cargando asistente…</p>
                     </div>
                 </section>
-                </div>
-                <!-- 1. Tarjetas de módulos: contenedor estable, solo se rellena el grid interior -->
+                <!-- 1. Tarjetas de módulos compactas -->
                 <section class="dashboard2-block dashboard2-block--modulos" aria-label="Actividad por área">
                     <h2 class="dashboard2-block-title">Actividad por área</h2>
                     <div class="dashboard2-stats-wrap" id="dashboard2Stats">
@@ -6537,10 +6553,10 @@
                         </div>
                     </div>
                 </section>
-                <!-- 3. Nómina y mantenciones (seguimiento operativo) -->
-                <section class="dashboard2-block dashboard2-block--extra" aria-label="Nómina y mantenciones">
+                <!-- 3. Nómina (seguimiento operativo) -->
+                <section class="dashboard2-block dashboard2-block--extra" aria-label="Nómina y seguimiento">
                     <h2 class="dashboard2-block-title">Seguimiento operativo</h2>
-                    <div class="dashboard2-extra-grid">
+                    <div class="dashboard2-extra-grid dashboard2-extra-grid--solo">
                         <div class="dashboard2-extra-col" id="dashboard2ProgresoNomina">
                             <div id="dashboardProgresoNominaWrap" style="margin-top: 0; display: block;">
                                 <div style="background: transparent; border-radius: 0; border: none; padding: 0; box-shadow: none;">
@@ -6548,30 +6564,22 @@
                                 </div>
                             </div>
                         </div>
+                    </div>
+                </section>
+                <!-- 4. Mantenciones compactas -->
+                <section class="dashboard2-block dashboard2-block--mantenciones" aria-label="Mantenciones del mes">
+                    <h2 class="dashboard2-block-title">Mantenciones</h2>
+                    <div class="dashboard2-extra-grid dashboard2-extra-grid--solo">
                         <div class="dashboard2-extra-col" id="dashboard2Mantenciones">
                             <div id="dashboardMantencionesWrap" style="margin-top: 0; padding: 0; background: transparent; border: none; border-radius: 0; box-shadow: none;">
-                                <div id="mantencionesMesActual" style="padding: 0.75rem 0;"><!-- Se llena dinámicamente --></div>
+                                <div id="mantencionesMesActual" style="padding: 0.35rem 0;"><!-- Se llena dinámicamente --></div>
                             </div>
                         </div>
                     </div>
                 </section>
-                <!-- 4. Panorama del mes -->
-                <section class="dashboard2-block dashboard2-block--charts" aria-label="Panorama del mes">
-                    <h2 class="dashboard2-block-title">Panorama del mes</h2>
-                    <div class="dashboard2-charts-grid">
-                        <article class="dashboard2-chart-card">
-                            <h4 class="dashboard2-chart-title">Actividad por módulo</h4>
-                            <div class="dashboard2-chart-wrap"><canvas id="chartActividadModulos"></canvas></div>
-                        </article>
-                        <article class="dashboard2-chart-card">
-                            <h4 class="dashboard2-chart-title">Ocupación del edificio</h4>
-                            <div class="dashboard2-chart-wrap"><canvas id="chartOcupacionEdificio"></canvas></div>
-                        </article>
-                    </div>
-                </section>
-                <!-- Correo de bienvenida: solo enviados y pendientes en el panel -->
-                <section class="dashboard2-block" id="dashboardBienvenidaBlock" aria-label="Correo de bienvenida">
-                    <h2 class="dashboard2-block-title">Correo de bienvenida</h2>
+                <!-- 5. Envíos de correo -->
+                <section class="dashboard2-block" id="dashboardBienvenidaBlock" aria-label="Envíos de correo">
+                    <h2 class="dashboard2-block-title">Envíos de correo</h2>
                     <div class="bienvenida-panel bienvenida-panel--basico">
                         <div class="bienvenida-panel-kpis bienvenida-panel-kpis--basico">
                             <div class="bienvenida-panel-kpi ok">
@@ -6616,7 +6624,21 @@
                         </div>
                     </div>
                 </section>
-                <!-- 6. Acciones - Herramientas de la App -->
+                <!-- 6. Panorama del mes -->
+                <section class="dashboard2-block dashboard2-block--charts" aria-label="Panorama del mes">
+                    <h2 class="dashboard2-block-title">Panorama del mes</h2>
+                    <div class="dashboard2-charts-grid">
+                        <article class="dashboard2-chart-card">
+                            <h4 class="dashboard2-chart-title">Actividad por módulo</h4>
+                            <div class="dashboard2-chart-wrap"><canvas id="chartActividadModulos"></canvas></div>
+                        </article>
+                        <article class="dashboard2-chart-card">
+                            <h4 class="dashboard2-chart-title">Ocupación del edificio</h4>
+                            <div class="dashboard2-chart-wrap"><canvas id="chartOcupacionEdificio"></canvas></div>
+                        </article>
+                    </div>
+                </section>
+                <!-- 7. Acciones - Herramientas de la App -->
                 <section class="dashboard2-block dashboard2-block--actions" aria-label="Herramientas de la App">
                     <div id="dashboardHerramientasWrap">
                         <div class="dashboard2-herramientas-header" onclick="toggleHerramientasApp()" role="button" tabindex="0" aria-expanded="false" aria-label="Expandir o contraer Herramientas de la App">
@@ -6624,7 +6646,7 @@
                                 <div class="dashboard2-herramientas-header-icon">🔧</div>
                                 <div class="dashboard2-herramientas-header-text">
                                     <h2>Herramientas de la App</h2>
-                                    <p>Configuración de módulos, recuperar datos y cierre de mes</p>
+                                    <p>Módulos, respaldo, cargos y cierre de mes</p>
                                 </div>
                             </div>
                             <span id="herramientasAppToggle" class="dashboard2-herramientas-chevron">▼</span>
@@ -6635,7 +6657,7 @@
                                 <div class="dashboard2-htool-card">
                                     <div class="htool-icon htool-icon--purple">⚙️</div>
                                     <h4 class="htool-title">Configuración de Módulos</h4>
-                                    <p class="htool-desc">Seleccione los módulos que desea usar. Los ocultos no aparecerán en el menú ni en los reportes.</p>
+                                    <p class="htool-desc">Muestre u oculte módulos del menú y de los reportes.</p>
                                     <div class="htool-toggle" onclick="toggleConfigModulos()">
                                         <span>Ver configuración</span>
                                         <span id="configModulosToggle">▼</span>
@@ -6648,7 +6670,7 @@
                                 <div class="dashboard2-htool-card">
                                     <div class="htool-icon htool-icon--green">🔧</div>
                                     <h4 class="htool-title">Recuperar Datos</h4>
-                                    <p class="htool-desc">Desde Firestore. Si cerraste un mes por error, recupere los datos aquí.</p>
+                                    <p class="htool-desc">Restaure datos de Firestore si un mes se cerró por error.</p>
                                     <button class="btn" id="btnRecuperarFirestore" style="background: var(--primary); color: white; margin-bottom: 0.5rem;">⬇️ Recuperar Todo de Firestore</button>
                                     <button class="btn" id="btnBuscarMeses" style="background: rgba(255,255,255,0.2); color: #fff; border: 1px solid rgba(255,255,255,0.3);">🔍 Buscar Meses Disponibles</button>
                                     <div id="mesesDisponibles" style="display: none; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.1);"><!-- Se llena dinámicamente --></div>
@@ -6657,15 +6679,15 @@
                                 <div class="dashboard2-htool-card">
                                     <div class="htool-icon htool-icon--amber">↔</div>
                                     <h4 class="htool-title">Trasladar Cargos entre Meses</h4>
-                                    <p class="htool-desc">Mueva cargos de mudanzas, aperturas, tarjetas/TAG, espacios comunes y multas entre períodos de gestión (incluye meses archivados).</p>
+                                    <p class="htool-desc">Mueva cargos entre períodos, incluidos meses archivados.</p>
                                     <button type="button" class="btn" id="btnAbrirTrasladarCargos" style="background: #f59e0b; color: #111827; font-weight: 600; border: none;">↔ Trasladar cargos</button>
                                 </div>
                                 <!-- Consultar meses y cierre -->
                                 <div class="dashboard2-htool-card dashboard2-htool-card--wide">
                                     <div class="htool-icon htool-icon--amber">📅</div>
                                     <h4 class="htool-title">Consultar Meses Anteriores y Cierre de Mes</h4>
-                                    <p class="htool-desc">Acceda a datos históricos, genere reportes PDF, reabra o elimine un mes. Cierre el mes y genere el reporte mensual.</p>
-                                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; margin-bottom: 1rem;">
+                                    <p class="htool-desc">Consulte historial, reporte PDF, reabra o cierre el mes.</p>
+                                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0.65rem; margin-bottom: 0.65rem;">
                                         <div class="form-group" style="margin: 0;">
                                             <label style="font-size: 0.8125rem; font-weight: 600; margin-bottom: 0.4rem; display: block;">Mes a consultar</label>
                                             <select id="mesConsulta" style="width: 100%; padding: 0.6rem 0.75rem; border-radius: 8px; font-size: 0.875rem;"><option value="">Seleccione un mes...</option></select>
@@ -6680,7 +6702,7 @@
                                             <button class="btn btn-secondary" id="btnVolverActual" style="display: none; width: 100%; margin-top: 0.5rem; padding: 0.5rem; font-size: 0.8125rem;">Volver al Mes Actual</button>
                                         </div>
                                     </div>
-                                    <div style="padding: 1rem; background: rgba(117, 187, 33, 0.12); border-radius: 10px; border: 1px solid rgba(117, 187, 33, 0.25); margin-bottom: 1rem;">
+                                    <div style="padding: 0.7rem 0.75rem; background: rgba(117, 187, 33, 0.12); border-radius: 10px; border: 1px solid rgba(117, 187, 33, 0.25); margin-bottom: 0.65rem;">
                                         <h3 style="font-size: 0.9rem; font-weight: 600; color: #fff; margin: 0 0 0.5rem 0;">📊 Cierre de Mes y Reporte</h3>
                                         <p style="font-size: 0.75rem; color: rgba(255,255,255,0.75); margin: 0 0 0.75rem 0;">Previsualice o descargue el reporte antes de cerrar el mes.</p>
                                         <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
@@ -46689,7 +46711,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 }
 
                 var subtitulo = document.getElementById('dashboard2Subtitulo');
-                if (subtitulo) subtitulo.textContent = 'Atención, pulso del mes y operación por área';
+                if (subtitulo) subtitulo.textContent = 'Arturito, operación, finanzas y correo';
 
                 // KPIs: actualizar por ID (misma distribución que activa)
                 var totalIngresosEl = document.getElementById('totalIngresos');
