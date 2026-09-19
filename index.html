@@ -16345,6 +16345,9 @@
                 generadoAt: new Date().toISOString(),
                 origen: 'gestion-wm',
                 motor: 'local',
+                huella: items.map(function (n) {
+                    return [n.correlativo, String(n.texto || '').length, n.relevante ? 1 : 0, n.destacada ? 1 : 0, (n.categoria || '')].join(':');
+                }).join('|'),
                 total: items.length,
                 vacio: !items.length,
                 conteos: { critica: criticas.length, importante: importantes.length, pendiente: pendientes.length, general: generales.length },
@@ -16355,12 +16358,95 @@
                 recomendaciones: pendientes.slice(0, 6).map(function (g) { return 'Dar seguimiento a ' + g.titulo; })
             };
         }
+        function pcshResumenGestionAvisoHtml(dia) {
+            var esc = typeof escaparHtmlModuloConserjeria === 'function' ? escaparHtmlModuloConserjeria : function (s) { return String(s == null ? '' : s); };
+            if (!dia) {
+                return '<h3>Resumen diario de novedades</h3><p class="sub">Preparando el aviso automático de la jornada…</p>';
+            }
+            var c = dia.conteos || {};
+            var toneClass = dia.vacio ? ' is-vacio' : (c.critica ? ' is-crit' : '');
+            var destacados = [].concat(dia.criticas || [], dia.importantes || [], dia.pendientes || []).slice(0, 5);
+            var html = '<h3>Resumen diario de novedades</h3>';
+            html += '<p class="sub">' + esc(pcshResumenGestionFechaLarga(dia.ymd)) + ' · ' + (dia.total || 0) + ' novedades · emitido automáticamente</p>';
+            html += '<div class="chips">';
+            html += '<span class="chip">🔴 ' + (c.critica || 0) + ' críticas</span>';
+            html += '<span class="chip">🟠 ' + (c.importante || 0) + ' importantes</span>';
+            html += '<span class="chip">🟡 ' + (c.pendiente || 0) + ' pendientes</span>';
+            html += '<span class="chip">🟢 ' + (c.general || 0) + ' generales</span></div>';
+            html += '<p class="lead">' + esc(dia.resumenGeneral || (dia.vacio ? 'No se registraron novedades durante este día.' : '')) + '</p>';
+            if (destacados.length) {
+                html += '<ul>';
+                destacados.forEach(function (g) {
+                    var marca = g.prioridad === 'critica' ? '🔴' : (g.pendiente ? '🟡' : (g.prioridad === 'importante' ? '🟠' : '🟢'));
+                    html += '<li>' + marca + ' ' + esc(g.titulo || 'Situación') + (g.libros && g.libros.length ? ' (' + esc(g.libros.join(', ')) + ')' : '') + '</li>';
+                });
+                html += '</ul>';
+            }
+            html += '<button type="button" class="btn btn-primary" data-ir-conserjeria-resumen style="padding:0.35rem 0.75rem;font-size:0.78rem;">Abrir Conserjería</button>';
+            return { html: html, toneClass: toneClass };
+        }
+        function pcshResumenGestionPintarAviso(dia) {
+            var wrap = document.getElementById('dashboardResumenNovedadesWrap');
+            if (!wrap) return;
+            var pack = pcshResumenGestionAvisoHtml(dia);
+            wrap.innerHTML = pack.html;
+            wrap.className = 'dashboard-resumen-aviso is-on' + (pack.toneClass || '');
+            if (!wrap.dataset.bound) {
+                wrap.dataset.bound = '1';
+                wrap.addEventListener('click', function (ev) {
+                    var b = ev.target && ev.target.closest ? ev.target.closest('[data-ir-conserjeria-resumen]') : null;
+                    if (!b) return;
+                    if (typeof window.showTab === 'function') window.showTab('conserjeria');
+                    setTimeout(function () {
+                        var dest = document.getElementById('conserjeriaResumenDiarioWrap');
+                        if (dest && dest.scrollIntoView) dest.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }, 80);
+                });
+            }
+        }
         function pcshResumenGestionPintar(dia) {
             var body = document.getElementById('pcshResumenBodyGestion');
-            if (!body) return;
-            body.innerHTML = pcshResumenGestionHtml(dia);
+            if (body && dia) body.innerHTML = pcshResumenGestionHtml(dia);
             window._pcshResumenDiaGestion = dia;
+            if (dia && dia.ymd === pcshResumenGestionHoyYmd()) {
+                window._pcshResumenDiaHoyGestion = dia;
+                pcshResumenGestionPintarAviso(dia);
+            }
         }
+        async function pcshResumenGestionAsegurarHoy() {
+            if (window._pcshResumenGestionAutoLock) return window._pcshResumenGestionAutoLock;
+            window._pcshResumenGestionAutoLock = (async function () {
+                try {
+                    var ymd = pcshResumenGestionHoyYmd();
+                    var lista = pcshResumenGestionLista();
+                    if (!lista.length && !window._moduloConserjeriaCargando && typeof window.cargarModuloConserjeriaGestion === 'function') {
+                        await window.cargarModuloConserjeriaGestion();
+                        lista = pcshResumenGestionLista();
+                    }
+                    var local = pcshResumenGestionConstruir(lista, ymd);
+                    var mem = window._pcshResumenDiaHoyGestion;
+                    if (mem && mem.ymd === ymd && mem.huella === local.huella) {
+                        pcshResumenGestionPintarAviso(mem);
+                        return mem;
+                    }
+                    var cache = await pcshResumenGestionLeer(ymd);
+                    var dia = (cache && cache.huella && cache.huella === local.huella) ? cache : local;
+                    if (!cache || cache.huella !== local.huella) {
+                        try { await pcshResumenGestionGuardar(local); } catch (eG) {}
+                        dia = local;
+                    }
+                    window._pcshResumenDiaHoyGestion = dia;
+                    pcshResumenGestionPintarAviso(dia);
+                    var inp = document.getElementById('pcshResumenFechaGestion');
+                    if (!inp || !inp.value || inp.value === ymd) pcshResumenGestionPintar(dia);
+                    return dia;
+                } finally {
+                    window._pcshResumenGestionAutoLock = null;
+                }
+            })();
+            return window._pcshResumenGestionAutoLock;
+        }
+        window.pcshResumenGestionAsegurarHoy = pcshResumenGestionAsegurarHoy;
         function pcshResumenBindUiGestion() {
             if (window._pcshResumenGestionBound) return;
             window._pcshResumenGestionBound = true;
@@ -16396,7 +16482,9 @@
                     if (isFinite(cor) && typeof window.enfocarNovedadConserjeriaGestion === 'function') window.enfocarNovedadConserjeriaGestion(cor);
                 });
             }
-            cargar((inp && inp.value) || pcshResumenGestionHoyYmd(), false);
+            if ((inp && inp.value) && inp.value !== pcshResumenGestionHoyYmd()) cargar(inp.value, false);
+            else if (typeof pcshResumenGestionAsegurarHoy === 'function') pcshResumenGestionAsegurarHoy();
+            else cargar((inp && inp.value) || pcshResumenGestionHoyYmd(), false);
         }
 
         function bindUiModuloConserjeria() {
@@ -16849,9 +16937,10 @@
                 window._analisisNovedadesStore = { mes: mes, acciones: [], resumen: '', huella: '', loaded: false };
             }
             var cache = window._moduloConserjeriaCache || {};
-            if (!opts.forzar && cache.mes === mes && (cache.novedades || cache.visitas) && !cache.error) {
+                if (!opts.forzar && cache.mes === mes && (cache.novedades || cache.visitas) && !cache.error) {
                 await cargarAnalisisNovedadesGuardado(mes);
                 pintarTablasModuloConserjeria();
+                if (typeof pcshResumenGestionAsegurarHoy === 'function') pcshResumenGestionAsegurarHoy();
                 return cache;
             }
             if (window._moduloConserjeriaCargando && !opts.forzar) return cache;
@@ -16872,6 +16961,7 @@
                 };
                 await cargarAnalisisNovedadesGuardado(mes);
                 pintarTablasModuloConserjeria();
+                if (typeof pcshResumenGestionAsegurarHoy === 'function') pcshResumenGestionAsegurarHoy();
             } catch (e) {
                 var msg = (e && e.message) ? e.message : 'No se pudo leer Conserjería WM.';
                 window._moduloConserjeriaCache = {
@@ -46446,6 +46536,9 @@ document.getElementById('chatForm').onsubmit = function (e) {
         // Panel de Control 2: renderizar contenido (solo actualiza contenedores interiores, no borra secciones)
         window.renderPanelControl2 = function() {
             try {
+                if (typeof pcshResumenGestionAsegurarHoy === 'function') {
+                    pcshResumenGestionAsegurarHoy().catch(function () {});
+                }
                 if (typeof bindUiMultasGestionEstados === 'function') bindUiMultasGestionEstados();
                 if (typeof sincronizarMultasDesdeConserjeria === 'function') {
                     sincronizarMultasDesdeConserjeria().then(function () {
