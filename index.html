@@ -6295,10 +6295,10 @@
             </div>
             <p id="conserjeriaMesTexto" style="margin: 0 0 1rem 0; font-size: 0.82rem; color: var(--gray-600);"></p>
             <div id="conserjeriaKpis" class="resumen-ocupacion-map" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0.85rem; margin-bottom: 1.25rem;">
-                <div class="resumen-item"><div class="valor" id="conserjeriaKpiReclamos" style="color: #be185d;">0</div><div class="etiqueta">Reclamos</div></div>
-                <div class="resumen-item"><div class="valor" id="conserjeriaKpiIncidencias" style="color: #d97706;">0</div><div class="etiqueta">Incidencias</div></div>
-                <div class="resumen-item"><div class="valor" id="conserjeriaKpiSeguridad" style="color: #dc2626;">0</div><div class="etiqueta">Seguridad</div></div>
-                <div class="resumen-item"><div class="valor" id="conserjeriaKpiAperturas" style="color: #059669;">0</div><div class="etiqueta">Aperturas</div></div>
+                <div class="resumen-item"><div class="valor" id="conserjeriaKpiReclamos" style="color: #fbcfe8;">0</div><div class="etiqueta">Reclamos</div></div>
+                <div class="resumen-item"><div class="valor" id="conserjeriaKpiIncidencias" style="color: #fecaca;">0</div><div class="etiqueta">Incidencias</div></div>
+                <div class="resumen-item"><div class="valor" id="conserjeriaKpiSeguridad" style="color: #fecaca;">0</div><div class="etiqueta">Seguridad</div></div>
+                <div class="resumen-item"><div class="valor" id="conserjeriaKpiAperturas" style="color: #86efac;">0</div><div class="etiqueta">Aperturas</div></div>
                 <div class="resumen-item"><div class="valor" id="conserjeriaKpiDestacadas" style="color: #b45309;">0</div><div class="etiqueta">Destacadas</div></div>
                 <div class="resumen-item"><div class="valor" id="conserjeriaKpiVisitasMulta" style="color: #b45309;">0</div><div class="etiqueta">Visitas con multa</div></div>
             </div>
@@ -12785,12 +12785,12 @@
 
         function estiloBadgeCategoriaNovedad(clave) {
             var map = {
-                reclamos: { bg: 'rgba(190, 24, 93, 0.12)', fg: '#9d174d', bd: 'rgba(190, 24, 93, 0.28)' },
-                incidencias: { bg: 'rgba(217, 119, 6, 0.12)', fg: '#b45309', bd: 'rgba(217, 119, 6, 0.28)' },
-                seguridad: { bg: 'rgba(220, 38, 38, 0.12)', fg: '#b91c1c', bd: 'rgba(220, 38, 38, 0.28)' },
-                aperturas: { bg: 'rgba(5, 150, 105, 0.12)', fg: '#047857', bd: 'rgba(5, 150, 105, 0.28)' }
+                reclamos: { bg: 'rgba(157, 23, 77, 0.3)', fg: '#fbcfe8', bd: 'rgba(190, 24, 93, 0.55)', accent: '#be185d' },
+                incidencias: { bg: 'rgba(220, 38, 38, 0.26)', fg: '#fecaca', bd: 'rgba(185, 28, 28, 0.55)', accent: '#b91c1c' },
+                seguridad: { bg: 'rgba(239, 68, 68, 0.22)', fg: '#fecaca', bd: 'rgba(220, 38, 38, 0.5)', accent: '#dc2626' },
+                aperturas: { bg: 'rgba(34, 197, 94, 0.22)', fg: '#86efac', bd: 'rgba(34, 197, 94, 0.5)', accent: '#22c55e' }
             };
-            return map[clave] || { bg: 'rgba(100,116,139,0.12)', fg: '#475569', bd: 'rgba(100,116,139,0.25)' };
+            return map[clave] || { bg: 'rgba(100, 116, 139, 0.35)', fg: '#cbd5e1', bd: 'rgba(100,116,139,0.45)', accent: '#64748b' };
         }
 
         var TEMAS_ANALISIS_NOVEDADES = [
@@ -12977,6 +12977,7 @@
                     tema: tema.label,
                     n: tema.n,
                     tipo: tema.catLabel || '—',
+                    clave: tema.catPrincipal || '',
                     mejora: sug.mejora,
                     solucion: sug.solucion + und
                 });
@@ -13028,24 +13029,27 @@
                 var st = estiloBadgeCategoriaNovedad(t.clave);
                 return '<tr>' +
                     '<td style="' + td + 'font-weight:800;color:' + medal(i) + ';">' + (i + 1) + '</td>' +
-                    '<td style="' + td + ';"><button type="button" class="btn btn-secondary" style="padding:0.15rem 0.5rem;font-size:0.75rem;background:' + st.bg + ';color:' + st.fg + ';border-color:' + st.bd + ';" onclick="filtrarNovedadesConserjeriaPorTipo(\'' + t.clave + '\')">' + escaparHtmlModuloConserjeria(t.label) + '</button></td>' +
+                    '<td style="' + td + ';"><button type="button" class="btn btn-secondary" style="padding:0.08rem 0.4rem;font-size:0.72rem;font-weight:600;border-radius:4px;background:' + st.bg + ';color:' + st.fg + ';border:1px solid ' + st.bd + ';" onclick="filtrarNovedadesConserjeriaPorTipo(\'' + t.clave + '\')">' + escaparHtmlModuloConserjeria(t.label) + '</button></td>' +
                     '<td style="' + td + '">' + t.n + '</td>' +
                     '<td style="' + td + '">' + t.dest + '</td>' +
                     '<td style="' + td + ';font-size:0.75rem;color:var(--gray-600);">' + (t.unidades.slice(0, 6).join(', ') || '—') + '</td>' +
                     '</tr>';
             }).join('');
             var filasTema = a.rankingTemas.map(function (t, i) {
+                var stT = estiloBadgeCategoriaNovedad(t.catPrincipal);
+                var badgeT = '<span style="display:inline-block;padding:0.08rem 0.35rem;border-radius:4px;font-size:0.72rem;font-weight:600;background:' + stT.bg + ';color:' + stT.fg + ';border:1px solid ' + stT.bd + ';">' + escaparHtmlModuloConserjeria(t.catLabel || '—') + '</span>';
                 return '<tr>' +
                     '<td style="' + td + 'font-weight:800;color:' + medal(i) + ';">' + (i + 1) + '</td>' +
                     '<td style="' + td + '">' + escaparHtmlModuloConserjeria(t.label) + '</td>' +
-                    '<td style="' + td + '">' + escaparHtmlModuloConserjeria(t.catLabel || '—') + '</td>' +
+                    '<td style="' + td + '">' + badgeT + '</td>' +
                     '<td style="' + td + '">' + t.n + '</td>' +
                     '<td style="' + td + ';font-size:0.75rem;color:var(--gray-600);">' + (t.unidades.slice(0, 6).join(', ') || '—') + '</td>' +
                     '</tr>';
             }).join('');
             var cards = a.acciones.map(function (ac, i) {
-                return '<article style="border:1px solid var(--border-color);border-radius:10px;padding:0.7rem 0.8rem;background:var(--bg-primary);">' +
-                    '<div style="font-size:0.72rem;font-weight:800;color:#6b7280;text-transform:uppercase;letter-spacing:0.03em;">Prioridad ' + (i + 1) + ' · ' + escaparHtmlModuloConserjeria(ac.tipo) + ' · ' + ac.n + (ac.n === 1 ? ' caso' : ' casos') + '</div>' +
+                var stA = estiloBadgeCategoriaNovedad(ac.clave);
+                return '<article style="border:1px solid var(--border-color);border-left:3px solid ' + (stA.accent || stA.bd) + ';border-radius:10px;padding:0.7rem 0.8rem;background:var(--bg-primary);">' +
+                    '<div style="font-size:0.72rem;font-weight:800;color:' + stA.fg + ';text-transform:uppercase;letter-spacing:0.03em;">Prioridad ' + (i + 1) + ' · ' + escaparHtmlModuloConserjeria(ac.tipo) + ' · ' + ac.n + (ac.n === 1 ? ' caso' : ' casos') + '</div>' +
                     '<h4 style="margin:0.25rem 0 0.45rem 0;font-size:0.92rem;">' + escaparHtmlModuloConserjeria(ac.tema) + '</h4>' +
                     '<p style="margin:0 0 0.35rem 0;font-size:0.8rem;line-height:1.45;color:var(--gray-700);"><strong>Mejora:</strong> ' + escaparHtmlModuloConserjeria(ac.mejora) + '</p>' +
                     '<p style="margin:0;font-size:0.8rem;line-height:1.45;color:var(--gray-700);"><strong>Solución sugerida:</strong> ' + escaparHtmlModuloConserjeria(ac.solucion) + '</p>' +
@@ -13470,7 +13474,7 @@
                 } else {
                     tbN.innerHTML = nov.map(function (n) {
                         var st = estiloBadgeCategoriaNovedad(n.catClave);
-                        var badge = '<span style="display:inline-block;padding:0.15rem 0.5rem;border-radius:999px;font-size:0.72rem;font-weight:700;background:' + st.bg + ';color:' + st.fg + ';border:1px solid ' + st.bd + ';">' + escaparHtmlModuloConserjeria(etiquetaCategoriaNovedadGestion(n.catClave) || n.categoria || '—') + '</span>';
+                        var badge = '<span style="display:inline-block;margin:0;padding:0.08rem 0.35rem;border-radius:4px;font-size:0.72rem;font-weight:600;background:' + st.bg + ';color:' + st.fg + ';border:1px solid ' + st.bd + ';">' + escaparHtmlModuloConserjeria(etiquetaCategoriaNovedadGestion(n.catClave) || n.categoria || '—') + '</span>';
                         var dest = novedadEstaDestacadaGestion(n);
                         var nNotas = (n.notas || []).length;
                         var cor = Number(n.correlativo);
@@ -13482,7 +13486,7 @@
                         var extra = '';
                         if (n.notaInterna) extra += '<div style="margin-top:0.3rem;font-size:0.75rem;color:var(--gray-500);">Interna: ' + escaparHtmlModuloConserjeria(n.notaInterna) + '</div>';
                         if (nNotas) extra += '<div style="margin-top:0.2rem;font-size:0.75rem;color:#0369a1;">' + nNotas + (nNotas === 1 ? ' nota' : ' notas') + '</div>';
-                        return '<tr id="filaNovedadGestion-' + cor + '"' + (dest ? ' style="background: rgba(245, 158, 11, 0.12);"' : '') + '>' +
+                        return '<tr id="filaNovedadGestion-' + cor + '" style="border-left:3px solid ' + (st.accent || st.bd) + ';' + (dest ? 'background: rgba(245, 158, 11, 0.12);' : '') + '">' +
                             '<td>' + escaparHtmlModuloConserjeria(n.libro || '—') + '</td>' +
                             '<td>' + escaparHtmlModuloConserjeria(n.fecha || '—') + '</td>' +
                             '<td>' + escaparHtmlModuloConserjeria(n.hora || '—') + '</td>' +
