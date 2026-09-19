@@ -7026,6 +7026,10 @@
             </div>
             <div class="form-section" style="margin-bottom: 1rem;">
                 <h3 style="margin: 0 0 0.75rem 0; font-size: 1rem; font-weight: 700;">Registrar Mudanza</h3>
+                <div id="requisitoAgendaMudanza48" style="margin: 0 0 0.85rem 0; padding: 0.75rem 0.9rem; border-radius: 8px; border: 1px solid rgba(117, 187, 33, 0.35); background: rgba(117, 187, 33, 0.08);">
+                    <p style="margin: 0 0 0.45rem 0; font-size: 0.82rem; color: var(--text-primary); line-height: 1.4;"><strong>Requisito:</strong> la mudanza debe estar <strong>agendada con al menos 48 horas de anticipación</strong>. Sin reserva, no se autoriza.</p>
+                    <a href="https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ2NCdwJTRckw6AwajrvEGKBomNxxHzzkNQFZR963Pi541AsFz5ctFt0G2gvoNdKNsNC2FCD1G_H" target="_blank" rel="noopener noreferrer" style="display:inline-block;padding:0.4rem 0.75rem;border-radius:6px;background:#75BB21;color:#fff;font-size:0.8rem;font-weight:700;text-decoration:none;">Agendar reserva</a>
+                </div>
                 <form id="formMudanza">
                     <div class="form-row" style="gap: 0.5rem; margin-bottom: 0.5rem;">
                         <div class="form-group form-group-residente" style="margin-bottom: 0.5rem;">
@@ -7093,7 +7097,7 @@
                     <!-- Campos adicionales para mudanzas de salida -->
                     <div id="camposSalida" style="display: none; margin-top: 1rem; padding: 1rem; background: rgba(245, 158, 11, 0.1); border-radius: 8px; border: 1px solid rgba(245, 158, 11, 0.3); transition: background-color 0.3s ease, border-color 0.3s ease;">
                         <h4 style="margin: 0 0 0.75rem 0; font-size: 0.9375rem; font-weight: 700; color: var(--text-primary); transition: color 0.3s ease;">Requisitos de mudanza de salida</h4>
-                        <p id="camposSalidaIntro" style="margin: 0 0 0.75rem 0; font-size: 0.78rem; color: var(--gray-600); line-height: 1.4;">Solo se exigen dos documentos: <strong>salvoconducto o autorización del propietario/arrendador</strong> y <strong>recibo de pago de gastos comunes</strong>. Si falta alguno, deje el estado en <strong>Pendiente</strong> para notificarlo una sola vez al residente.</p>
+                        <p id="camposSalidaIntro" style="margin: 0 0 0.75rem 0; font-size: 0.78rem; color: var(--gray-600); line-height: 1.4;">Requisitos de salida: <strong>mudanza agendada con 48 h de anticipación</strong>, <strong>salvoconducto o autorización del propietario/arrendador</strong> y <strong>recibo de pago de gastos comunes</strong>. Si falta alguno, use <strong>Pendiente</strong> para notificarlo una sola vez.</p>
                         <select id="mudanzaTipoCheck" style="display:none;" tabindex="-1" aria-hidden="true">
                             <option value="">Seleccione...</option>
                             <option value="propietario">Propietario</option>
@@ -21695,18 +21699,48 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 .replace(/"/g, '&quot;');
         }
 
+        const URL_RESERVA_MUDANZA = 'https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ2NCdwJTRckw6AwajrvEGKBomNxxHzzkNQFZR963Pi541AsFz5ctFt0G2gvoNdKNsNC2FCD1G_H';
+        window.URL_RESERVA_MUDANZA = URL_RESERVA_MUDANZA;
+
+        function esDocAgendaMudanza48(itemOLabel) {
+            if (itemOLabel && typeof itemOLabel === 'object') return itemOLabel.id === 'aviso48';
+            return /48 horas|agendada/i.test(String(itemOLabel || ''));
+        }
+
+        function htmlBotonReservaMudanza48() {
+            const url = URL_RESERVA_MUDANZA;
+            return '<table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" style="margin:10px auto 0 auto;">'
+                + '<tr><td align="center" bgcolor="#75BB21" style="border-radius:8px;">'
+                + '<a href="' + url + '" target="_blank" rel="noopener" style="display:inline-block;padding:12px 20px;font-size:14px;font-weight:700;color:#ffffff;text-decoration:none;font-family:Arial,Helvetica,sans-serif;">Agendar mudanza — 48 h de anticipación</a>'
+                + '</td></tr></table>';
+        }
+
+        function htmlBloqueAgendaMudanza48() {
+            return '<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color:#f7faf2;border-radius:8px;border:1px solid #d4e8b8;">'
+                + '<tr><td style="padding:12px 14px;font-size:13px;color:#1a1a1a;line-height:1.5;font-family:Arial,Helvetica,sans-serif;">'
+                + 'La mudanza debe estar <strong>agendada con al menos 48 horas de anticipación</strong>. Sin reserva en el sistema, no se autoriza ni puede realizarse.'
+                + htmlBotonReservaMudanza48()
+                + '</td></tr></table>';
+        }
+
         function catalogoDocsMudanza(ctx) {
             const tipo = String((ctx && (ctx.tipo || ctx.tipoCheck)) || '').toLowerCase();
             const movimiento = String((ctx && ctx.movimiento) || '').toLowerCase();
             const cobro = String((ctx && (ctx.aplicaCobro || ctx.cobro)) || '').toLowerCase();
+            const aviso48 = {
+                id: 'aviso48',
+                label: 'Mudanza agendada con al menos 48 horas de anticipación',
+                href: URL_RESERVA_MUDANZA
+            };
             if (movimiento === 'salida') {
                 return [
+                    aviso48,
                     { id: 'salvoconducto', label: 'Salvoconducto o autorización del propietario / arrendador' },
                     { id: 'gastosComunes', label: 'Recibo de pago de gastos comunes' }
                 ];
             }
             const items = [
-                { id: 'aviso48', label: 'Aviso de mudanza con al menos 48 horas de anticipación' },
+                aviso48,
                 { id: 'identidad', label: 'Cédula de identidad del residente' }
             ];
             if (tipo === 'arrendatario') {
@@ -21811,11 +21845,14 @@ document.getElementById('chatForm').onsubmit = function (e) {
             }
             const items = catalogoDocsMudanza(ctx);
             cont.innerHTML = items.map(function (item) {
+                const enlace = item.href
+                    ? ' <a href="' + escaparAttrMudanza(item.href) + '" target="_blank" rel="noopener noreferrer" onclick="event.preventDefault();event.stopPropagation();window.open(this.href,\'_blank\',\'noopener\');return false;" style="margin-left:0.35rem;font-size:0.78rem;font-weight:700;color:#75BB21;text-decoration:underline;">Agendar reserva</a>'
+                    : '';
                 return '<label style="display:flex;align-items:flex-start;gap:0.5rem;margin:0.35rem 0;font-size:0.85rem;cursor:pointer;line-height:1.35;">'
                     + '<input type="checkbox" class="mudanza-doc-recibido" data-doc-id="' + escaparAttrMudanza(item.id) + '"'
                     + (recibidos[item.id] ? ' checked' : '')
                     + ' style="width:1.1rem;height:1.1rem;margin-top:0.15rem;flex-shrink:0;">'
-                    + '<span>Recibido: ' + escaparAttrMudanza(item.label) + '</span></label>';
+                    + '<span>Recibido: ' + escaparAttrMudanza(item.label) + enlace + '</span></label>';
             }).join('');
             const otro = document.getElementById('mudanzaDocOtroFaltante');
             if (otro && !keepChecks) {
@@ -21931,8 +21968,11 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 return '<p style="margin:0;font-size:14px;color:#333333;line-height:1.5;">La administración aún no ha marcado documentos recibidos. Contacte a administración para regularizar los antecedentes.</p>';
             }
             const lis = items.map(function (doc, i) {
+                const extraAgenda = esDocAgendaMudanza48(doc)
+                    ? '<div style="margin-top:6px;">' + htmlBotonReservaMudanza48() + '</div>'
+                    : '';
                 return '<tr><td style="padding:8px 12px;font-size:13px;color:#92400e;font-weight:700;width:28px;vertical-align:top;">' + (i + 1) + '.</td>'
-                    + '<td style="padding:8px 12px 8px 0;font-size:14px;color:#1a1a1a;line-height:1.45;">' + esc(doc) + '</td></tr>';
+                    + '<td style="padding:8px 12px 8px 0;font-size:14px;color:#1a1a1a;line-height:1.45;">' + esc(doc) + extraAgenda + '</td></tr>';
             }).join('');
             return '<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;">' + lis + '</table>';
         }
@@ -21989,8 +22029,9 @@ document.getElementById('chatForm').onsubmit = function (e) {
   <tr>
     <td style="padding:7px 10px;background:#f7faf2;font-size:11px;color:#333333;line-height:1.45;font-family:Arial,Helvetica,sans-serif;">
       Ingreso por <strong>Inés de Suárez 7624</strong>. Prohibido camión de gran tamaño que dañe suelo o losa (sin excepción).<br>
-      Si no está agendada en el sistema, <strong>no se autoriza ni puede realizarse</strong>.<br>
+      Debe estar <strong>agendada con 48 horas de anticipación</strong>. Sin reserva, <strong>no se autoriza ni puede realizarse</strong>.<br>
       Resguardo de ascensores y espacios comunes: <strong>$20.000</strong> a GGCC. Consulte el Reglamento Interno.
+      ${htmlBotonReservaMudanza48()}
     </td>
   </tr>
 </table>`;
@@ -22422,17 +22463,17 @@ document.getElementById('chatForm').onsubmit = function (e) {
 
             let parrafoPrincipal = '';
             if (esIngreso && autorizada) {
-                parrafoPrincipal = 'Confirmamos que su <strong>mudanza de ingreso</strong> se encuentra <strong>autorizada</strong> por la administración para la fecha indicada.';
+                parrafoPrincipal = 'Confirmamos que su mudanza de <strong>ingreso</strong> quedó <strong>autorizada</strong> para la fecha indicada.';
             } else if (esIngreso && enEspera) {
-                parrafoPrincipal = 'Informamos que su <strong>mudanza de ingreso</strong> quedó registrada y se encuentra <strong>pendiente de autorización</strong> porque falta documentación. A continuación se detalla qué debe presentar.';
+                parrafoPrincipal = 'Su mudanza de <strong>ingreso</strong> quedó registrada. Regularice los requisitos listados más abajo para obtener la autorización.';
             } else if (esIngreso && !autorizada) {
-                parrafoPrincipal = 'Informamos que su <strong>mudanza de ingreso</strong> quedó registrada, pero <strong>aún no se encuentra autorizada</strong>.';
+                parrafoPrincipal = 'Su mudanza de <strong>ingreso</strong> quedó registrada, pero <strong>aún no está autorizada</strong>.';
             } else if (esSalida && autorizada) {
-                parrafoPrincipal = 'Confirmamos que su <strong>mudanza de salida</strong> se encuentra <strong>autorizada</strong> por la administración para la fecha indicada.';
+                parrafoPrincipal = 'Confirmamos que su mudanza de <strong>salida</strong> quedó <strong>autorizada</strong> para la fecha indicada.';
             } else if (esSalida && enEspera) {
-                parrafoPrincipal = 'Informamos que su <strong>mudanza de salida</strong> quedó <strong>pendiente de autorización</strong>. Para autorizarla, la administración solo requiere: <strong>salvoconducto o autorización del propietario/arrendador</strong> y <strong>recibo de pago de gastos comunes</strong>. A continuación se indica qué falta.';
+                parrafoPrincipal = 'Su mudanza de <strong>salida</strong> quedó registrada. Regularice los requisitos listados más abajo para obtener la autorización.';
             } else if (esSalida && !autorizada) {
-                parrafoPrincipal = 'Informamos que su <strong>mudanza de salida</strong> quedó registrada, pero <strong>aún no se encuentra autorizada</strong>.';
+                parrafoPrincipal = 'Su mudanza de <strong>salida</strong> quedó registrada, pero <strong>aún no está autorizada</strong>.';
             } else {
                 parrafoPrincipal = 'Le informamos el estado de la mudanza registrada a su nombre.';
             }
@@ -22517,12 +22558,10 @@ document.getElementById('chatForm').onsubmit = function (e) {
               <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color: #fff8e1; border-radius: 8px; border: 1px solid #fde68a;">
                 <tr>
                   <td style="padding: 12px 14px 6px 14px;">
-                    <p style="margin: 0 0 4px 0; font-size: 12px; color: #92400e; text-transform: uppercase; letter-spacing: 0.04em; font-weight: 700;">Documentos faltantes para autorizar</p>
-                    <p style="margin: 0 0 8px 0; font-size: 13px; color: #333333; line-height: 1.45;">${esSalida
-                        ? 'Para autorizar la mudanza de salida debe presentar únicamente:'
-                        : 'Para que la administración autorice esta mudanza, debe presentar:'}</p>
+                    <p style="margin: 0 0 4px 0; font-size: 12px; color: #92400e; text-transform: uppercase; letter-spacing: 0.04em; font-weight: 700;">Qué falta para autorizar</p>
+                    <p style="margin: 0 0 8px 0; font-size: 13px; color: #333333; line-height: 1.45;">Presente estos antecedentes a la administración:</p>
                     ${htmlListaDocsFaltantesMudanza(docsFaltantes, linkEsc)}
-                    <p style="margin: 10px 0 0 0; font-size: 12px; color: #666666; line-height: 1.45;">Envíe estos antecedentes a la administración. La mudanza no puede ejecutarse hasta contar con la autorización.</p>
+                    <p style="margin: 10px 0 0 0; font-size: 12px; color: #666666; line-height: 1.45;">Hasta completar lo anterior y contar con autorización, la mudanza no puede realizarse.</p>
                   </td>
                 </tr>
               </table>
@@ -22829,10 +22868,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     documentos: listaTxt
                 };
                 const asuntoBase = `Mudanza pendiente de autorización — documentos faltantes (${movimientoAsunto}) - Depto ${mudanza.departamento} - ${nombreComunidad}`;
-                const prefillDocs = resolverCuerpoInicioPlantillaCorreo(bloque, ctx)
-                    || (typeof textoPrefillCorreoMudanzaPendiente === 'function'
-                        ? textoPrefillCorreoMudanzaPendiente(mudanza, faltan)
-                        : '');
+                const prefillDocs = resolverCuerpoInicioPlantillaCorreo(bloque, ctx);
                 const resultado = await mostrarModalPersonalizarCorreoYEnviar({
                     titulo: 'Enviar comprobante de mudanza pendiente',
                     asuntoDefecto: resolverAsuntoPlantillaCorreo(bloque, asuntoBase, ctx),
