@@ -40531,15 +40531,6 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 
                 // Obtener métricas de vinculación comunidad
                 const metricasVinculacion = await obtenerMetricasVinculacion();
-                let ocupacionMovimientosMes = [];
-                try {
-                    ocupacionMovimientosMes = await cargarDatosModulo('ocupacion-movimientos', mesAnio, !!(opciones && opciones.soloCuerpoCorreoResumenEjecutivo));
-                    if (!Array.isArray(ocupacionMovimientosMes)) ocupacionMovimientosMes = [];
-                } catch (eOcMov) {
-                    ocupacionMovimientosMes = [];
-                }
-                const totalIngresosEdificio = ocupacionMovimientosMes.filter(function (m) { return m && m.tipo === 'ingreso'; }).length;
-                const totalSalidasEdificio = ocupacionMovimientosMes.filter(function (m) { return m && m.tipo === 'salida'; }).length;
                 
                 // Cargar datos del mes anterior para análisis comparativo
                 const mesAnterior = typeof obtenerMesAnterior === 'function' ? obtenerMesAnterior(mesAnio) : null;
@@ -40862,42 +40853,6 @@ document.getElementById('chatForm').onsubmit = function (e) {
                                     <span style="font-size: 0.75rem; color: #6b7280;">Total de residentes</span>
                                     <span style="font-weight: 700; color: #4b5563; font-size: 0.95rem;">${metricasVinculacion.totalResidentesViviendo} residentes</span>
                                 </div>
-                            </div>
-                            <div class="reporte-summary-item" style="padding: 0.6rem; background: #f9fafb; border-radius: 6px; border: 1px solid #e5e7eb; margin-top: 0.35rem;">
-                                <span style="font-weight: 600; color: #374151; font-size: 0.8rem;">Ingresos y salidas del mes</span>
-                                <p style="margin: 0.35rem 0 0.5rem; font-size: 0.72rem; color: #6b7280; line-height: 1.4;">Censo de Ocupación (propietarios, arrendatarios y familiares). No incluye visitas ni mudanzas reservadas.</p>
-                                <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-                                    <span style="font-size: 0.8rem; color: #059669; font-weight: 700;">Ingresos: ${totalIngresosEdificio}</span>
-                                    <span style="font-size: 0.8rem; color: #dc2626; font-weight: 700;">Salidas: ${totalSalidasEdificio}</span>
-                                </div>
-                                ${ocupacionMovimientosMes.length ? `
-                                <div style="overflow-x: auto; margin-top: 0.55rem;">
-                                    <table class="reporte-table" style="width: 100%; border-collapse: collapse;">
-                                        <thead>
-                                            <tr>
-                                                <th style="padding: 0.35rem 0.45rem; text-align: left; font-size: 0.7rem; border: 1px solid var(--border-color); background: var(--bg-tertiary);">Fecha</th>
-                                                <th style="padding: 0.35rem 0.45rem; text-align: left; font-size: 0.7rem; border: 1px solid var(--border-color); background: var(--bg-tertiary);">Movimiento</th>
-                                                <th style="padding: 0.35rem 0.45rem; text-align: left; font-size: 0.7rem; border: 1px solid var(--border-color); background: var(--bg-tertiary);">Unidad</th>
-                                                <th style="padding: 0.35rem 0.45rem; text-align: left; font-size: 0.7rem; border: 1px solid var(--border-color); background: var(--bg-tertiary);">Nombre</th>
-                                                <th style="padding: 0.35rem 0.45rem; text-align: left; font-size: 0.7rem; border: 1px solid var(--border-color); background: var(--bg-tertiary);">Relación</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            ${(typeof ordenarMovimientosOcupacion === 'function' ? ordenarMovimientosOcupacion(ocupacionMovimientosMes) : ocupacionMovimientosMes).map(function (m) {
-                                                if (!m) return '';
-                                                var fechaTxt = (typeof formatearFechaParaCorreo === 'function') ? (formatearFechaParaCorreo(m.fecha) || m.fecha || '-') : (m.fecha || '-');
-                                                var esc = (typeof escHtmlOcupacion === 'function') ? escHtmlOcupacion : function (s) { return String(s == null ? '' : s); };
-                                                return '<tr>' +
-                                                    '<td style="padding: 0.35rem 0.45rem; font-size: 0.72rem; border: 1px solid var(--border-color);">' + esc(fechaTxt) + '</td>' +
-                                                    '<td style="padding: 0.35rem 0.45rem; font-size: 0.72rem; border: 1px solid var(--border-color);">' + (m.tipo === 'salida' ? 'Salida' : 'Ingreso') + '</td>' +
-                                                    '<td style="padding: 0.35rem 0.45rem; font-size: 0.72rem; border: 1px solid var(--border-color);">' + esc(m.unidad || m.departamento || '-') + '</td>' +
-                                                    '<td style="padding: 0.35rem 0.45rem; font-size: 0.72rem; border: 1px solid var(--border-color);">' + esc(m.nombre || '-') + '</td>' +
-                                                    '<td style="padding: 0.35rem 0.45rem; font-size: 0.72rem; border: 1px solid var(--border-color);">' + esc(m.tipoResidente || m.tipo || '-') + '</td>' +
-                                                    '</tr>';
-                                            }).join('')}
-                                        </tbody>
-                                    </table>
-                                </div>` : '<p style="margin: 0.45rem 0 0; font-size: 0.75rem; color: #6b7280;">Sin movimientos de ingreso o salida registrados en este mes.</p>'}
                             </div>
                         </div>
                     </div>
@@ -41499,7 +41454,6 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     else if (metricasVinculacion.porcentajeOcupacion >= 50) nivel = 'Moderado';
                     else nivel = 'Bajo';
                     resumenEjecutivo.push(`Ocupación: ${metricasVinculacion.porcentajeOcupacion}% (${nivel}) - ${metricasVinculacion.ocupacionActual}/${metricasVinculacion.totalUnidades} unidades`);
-                    resumenEjecutivo.push(`Ingresos al edificio: ${totalIngresosEdificio} | Salidas: ${totalSalidasEdificio}`);
                 }
                 
                 if (resumenEjecutivo.length > 0) {
