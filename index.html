@@ -5239,10 +5239,44 @@
       box-shadow: 0 0 0 2px color-mix(in srgb, var(--chat-accent) 45%, var(--chat-border));
       transition: box-shadow 0.35s ease;
     }
-    /* FAB oculto: el chat se abre desde la barra lateral, justo debajo de Administración */
+    #chatDock { display: none; }
+    body.chat-activo #chatDock { display: block; }
     .chat-fab {
-      display: none !important;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.72rem 1.05rem 0.72rem 0.9rem;
+      border: 1px solid color-mix(in srgb, #fff 18%, var(--primary, #75BB21));
+      border-radius: 999px;
+      background: var(--primary, #75BB21);
+      color: #0f172a;
+      font-weight: 800;
+      font-size: 0.92rem;
+      font-family: inherit;
+      cursor: pointer;
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.38);
+      position: relative;
     }
+    .chat-fab:hover { filter: brightness(1.06); }
+    .chat-dock.chat-open .chat-fab { opacity: 0; visibility: hidden; pointer-events: none; }
+    .chat-fab-ic { display: inline-flex; width: 1.15rem; height: 1.15rem; align-items: center; justify-content: center; }
+    .chat-fab-badge {
+      display: none;
+      position: absolute;
+      top: -0.35rem;
+      right: -0.2rem;
+      min-width: 1.15rem;
+      height: 1.15rem;
+      padding: 0 0.3rem;
+      border-radius: 999px;
+      background: #ef4444;
+      color: #fff;
+      font-size: 0.65rem;
+      font-weight: 800;
+      line-height: 1.15rem;
+      text-align: center;
+    }
+    .chat-fab-badge[data-count]:not([data-count="0"]) { display: inline-block; }
 
         .tab-button.chat-sidebar {
             position: relative;
@@ -5349,6 +5383,13 @@
                     </svg>
                 </span>
                 <span>Panel de Control</span>
+            </button>
+            <button type="button" class="tab-button chat-sidebar" id="chatBtn" aria-expanded="false" aria-controls="chatFlotante">
+                <span>
+                    <svg class="menu-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/></svg>
+                </span>
+                <span>Chat interno</span>
+                <span id="chatSidebarBadge" class="sidebar-chat-badge" data-count="0" aria-hidden="true"></span>
             </button>
             <button class="tab-button" data-tab="mudanzas">
                 <span>
@@ -5460,13 +5501,6 @@
                     <svg class="menu-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/></svg>
                 </span>
                 <span>Conserjería</span>
-            </button>
-            <button type="button" class="tab-button chat-sidebar" id="chatBtn" aria-expanded="false" aria-controls="chatFlotante">
-                <span>
-                    <svg class="menu-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/></svg>
-                </span>
-                <span>Chat interno</span>
-                <span id="chatSidebarBadge" class="sidebar-chat-badge" data-count="0" aria-hidden="true"></span>
             </button>
             <button class="tab-button" data-tab="postventa">
                 <span>
@@ -7243,12 +7277,8 @@
             </div>
             <p id="conserjeriaMesTexto" style="margin: 0 0 1rem 0; font-size: 0.82rem; color: var(--gray-600);"></p>
             <div class="form-section" id="conserjeriaCatalogoWrap" style="margin-bottom: 1rem;">
-                <h3 style="margin: 0 0 0.35rem 0; font-size: 1rem; font-weight: 700;">Tipificación y avisos</h3>
-                <p style="margin: 0 0 0.65rem 0; font-size: 0.8rem; color: var(--gray-600); line-height: 1.45;">Las etiquetas se usan en Conserjería WM para tipificar. Marque cuáles se ven en este módulo. El aviso de mejoras se puede apagar sin borrar el análisis.</p>
-                <label style="display:inline-flex;align-items:center;gap:0.45rem;font-size:0.82rem;font-weight:600;margin-bottom:0.75rem;">
-                    <input type="checkbox" id="conserjeriaAvisoMejorasActivo" checked>
-                    Publicar aviso de mejoras en Conserjería WM
-                </label>
+                <h3 style="margin: 0 0 0.35rem 0; font-size: 1rem; font-weight: 700;">Tipificación</h3>
+                <p style="margin: 0 0 0.65rem 0; font-size: 0.8rem; color: var(--gray-600); line-height: 1.45;">Las etiquetas se usan en Conserjería WM para tipificar. Marque cuáles se ven en este módulo.</p>
                 <div id="conserjeriaEtiquetasLista" style="display:flex;flex-direction:column;gap:0.4rem;margin-bottom:0.65rem;"></div>
                 <div style="display:flex;flex-wrap:wrap;gap:0.4rem;align-items:center;">
                     <input type="text" id="conserjeriaNuevaEtiquetaNombre" class="form-input" placeholder="Nueva etiqueta…" maxlength="40" style="padding:0.4rem 0.5rem;font-size:0.8rem;min-width:12rem;">
@@ -7256,10 +7286,35 @@
                     <button type="button" class="btn btn-primary" id="btnAgregarEtiquetaNovedad" style="padding:0.35rem 0.7rem;font-size:0.78rem;">Agregar etiqueta</button>
                 </div>
             </div>
+            <div class="form-section" id="conserjeriaAvisoWrap" style="margin-bottom: 1rem;">
+                <h3 style="margin: 0 0 0.35rem 0; font-size: 1rem; font-weight: 700;">Aviso a Conserjería WM</h3>
+                <p style="margin: 0 0 0.75rem 0; font-size: 0.8rem; color: var(--gray-600); line-height: 1.45;">Redacte el aviso que verá portería en el panel («Aviso de gestión · puntos de mejora del mes»). Publíquelo para enviarlo y actívelo o desactívelo cuando quiera.</p>
+                <label style="display:inline-flex;align-items:center;gap:0.45rem;font-size:0.82rem;font-weight:600;margin-bottom:0.75rem;">
+                    <input type="checkbox" id="avisoGestionActivo">
+                    Visible en Conserjería WM
+                </label>
+                <div class="form-group" style="margin-bottom:0.65rem;">
+                    <label style="font-size:0.78rem;font-weight:700;">Título</label>
+                    <input type="text" id="avisoGestionTitulo" class="form-input" maxlength="120" value="Aviso de gestión · puntos de mejora del mes" style="padding:0.45rem 0.55rem;font-size:0.85rem;width:100%;box-sizing:border-box;">
+                </div>
+                <div class="form-group" style="margin-bottom:0.65rem;">
+                    <label style="font-size:0.78rem;font-weight:700;">Mensaje</label>
+                    <textarea id="avisoGestionResumen" class="form-input" rows="3" maxlength="700" placeholder="Texto que verá el personal de portería…" style="width:100%;font-size:0.85rem;line-height:1.45;box-sizing:border-box;resize:vertical;"></textarea>
+                </div>
+                <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:0.4rem;margin-bottom:0.45rem;">
+                    <strong style="font-size:0.82rem;">Puntos del aviso</strong>
+                    <button type="button" class="btn btn-secondary" id="btnAgregarPuntoAviso" style="padding:0.3rem 0.65rem;font-size:0.76rem;">Agregar punto</button>
+                </div>
+                <div id="avisoGestionPuntosLista" style="display:flex;flex-direction:column;gap:0.55rem;margin-bottom:0.75rem;"></div>
+                <div style="display:flex;flex-wrap:wrap;align-items:center;gap:0.5rem;">
+                    <button type="button" class="btn btn-primary" id="btnPublicarAvisoGestion" style="padding:0.4rem 0.85rem;font-size:0.82rem;">Publicar en Conserjería</button>
+                    <span id="avisoGestionEstado" style="font-size:0.75rem;color:var(--gray-500);"></span>
+                </div>
+            </div>
             <div id="conserjeriaKpis" class="resumen-ocupacion-map" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0.85rem; margin-bottom: 1.25rem;"></div>
             <div class="form-section" id="conserjeriaAnalisisWrap" style="margin-bottom: 1rem;">
                 <h3 style="margin: 0 0 0.35rem 0; font-size: 1rem; font-weight: 700;">Análisis de novedades</h3>
-                <p style="margin: 0 0 0.75rem 0; font-size: 0.8rem; color: var(--gray-600); line-height: 1.45;">Resume el mes con datos de la bitácora. Las recomendaciones son objetivas (conteo, unidades y qué revisar). Se guardan solas. Pulse un tipo del ranking para filtrar el listado.</p>
+                <p style="margin: 0 0 0.75rem 0; font-size: 0.8rem; color: var(--gray-600); line-height: 1.45;">Resume el mes con datos de la bitácora. Pulse un tipo del ranking para filtrar el listado.</p>
                 <div id="conserjeriaAnalisis"><p style="margin: 0; color: var(--gray-500); font-size: 0.85rem;">Cargando análisis…</p></div>
             </div>
             <div class="form-section" style="margin-bottom: 1rem;">
@@ -8115,8 +8170,8 @@
         <div class="chat-header-main">
           <span class="chat-header-ic" aria-hidden="true"><i class="fa-solid fa-comments"></i></span>
           <div>
-            <div id="chatTitle" class="chat-title">Chat del equipo</div>
-            <div id="chatSub" class="chat-sub">Mensajes internos · administración</div>
+            <div id="chatTitle" class="chat-title">Chat interno</div>
+            <div id="chatSub" class="chat-sub">Tiempo real con Conserjería WM</div>
           </div>
         </div>
         <div class="chat-header-actions">
@@ -8176,7 +8231,7 @@
     </div>
     <button type="button" id="chatFab" class="chat-fab" aria-expanded="false" aria-controls="chatFlotante">
       <span class="chat-fab-ic" aria-hidden="true"><i class="fa-solid fa-comments"></i></span>
-      <span class="chat-fab-label">Chat</span>
+      <span class="chat-fab-label">Chat interno</span>
       <span id="chatFabBadge" class="chat-fab-badge" data-count="0" aria-hidden="true"></span>
     </button>
   </div>
@@ -8413,6 +8468,10 @@
         function showLogin() {
             if (loginScreen) loginScreen.classList.remove('hidden');
             if (appContainer) appContainer.style.display = 'none';
+            document.body.classList.remove('chat-activo');
+            if (typeof setChatOpen === 'function') {
+                try { setChatOpen(false); } catch (eChatClose) {}
+            }
             var submitBtn = document.getElementById('loginSubmit');
             if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Iniciar sesión'; }
             var okEl = document.getElementById('loginResetSuccess');
@@ -8421,6 +8480,7 @@
         function showApp() {
             if (loginScreen) loginScreen.classList.add('hidden');
             if (appContainer) appContainer.style.display = 'flex';
+            document.body.classList.add('chat-activo');
             /* Igual que index tras personalización: re-pintar iconos cuando el contenedor ya es visible.
                En iOS/WebKit, SVG inyectados con #appContainer en display:none suelen no rasterizar bien. */
             requestAnimationFrame(function () {
@@ -8429,6 +8489,9 @@
                         if (typeof inicializarIconosMenu === 'function') inicializarIconosMenu();
                         if (typeof inicializarIconosTitulosModulos === 'function') inicializarIconosTitulosModulos();
                     } catch (e) { console.warn('Iconos menú (showApp):', e); }
+                    if (typeof window.iniciarChatInternoGestion === 'function') {
+                        window.iniciarChatInternoGestion();
+                    }
                 });
             });
         }
@@ -13962,8 +14025,6 @@
                     del +
                     '</div>';
             }).join('');
-            var chk = document.getElementById('conserjeriaAvisoMejorasActivo');
-            if (chk) chk.checked = avisoMejorasActivoGestion();
             pintarSelectsEtiquetasNovedadGestion();
         }
 
@@ -15663,7 +15724,7 @@ function pcshChatClearMyTyping() {
   _pcshChatTypingLastPing = 0;
   var slug = window.__pcshChatTypingSlugCached;
   window.__pcshChatTypingSlugCached = null;
-  if (!slug || typeof db === 'undefined' || !db) return;
+  if (!slug || !window._chatDbConserjeria) return;
   try {
     pcshChatDb().collection('chat_typing')
       .doc(slug)
@@ -15673,7 +15734,7 @@ function pcshChatClearMyTyping() {
 }
 
 function pcshChatPingMyTyping() {
-  if (typeof db === 'undefined' || !db) return;
+  if (!window._chatDbConserjeria) return;
   var inp = document.getElementById('chatInput');
   if (!inp || !String(inp.value || '').trim()) {
     pcshChatClearMyTyping();
@@ -16301,7 +16362,7 @@ function setChatOpen(open) {
   if (sub) {
     var nm = typeof pcshChatAutorActual === 'function' ? pcshChatAutorActual() : '';
     var visNom = typeof pcshChatNombreVisibleGestion === 'function' ? pcshChatNombreVisibleGestion() : '';
-    sub.textContent = 'Conectado como Admin' + (visNom && visNom !== 'Admin' ? ' · ' + visNom : '');
+    sub.textContent = 'Tiempo real con Conserjería WM' + (visNom && visNom !== 'Admin' ? ' · ' + visNom : ' · Admin');
   }
   if (chatVisible) {
     try {
@@ -16322,7 +16383,13 @@ function setChatOpen(open) {
     pcshChatUpdateFabBadge(0);
     requestAnimationFrame(function () {
       requestAnimationFrame(function () {
-        if (typeof pcshChatAnchorStackToSidebarBtn === 'function') pcshChatAnchorStackToSidebarBtn();
+        var stack = document.getElementById('chatStack');
+        if (stack) {
+          stack.style.left = 'auto';
+          stack.style.top = 'auto';
+          stack.style.right = 'max(1rem, env(safe-area-inset-right, 0px))';
+          stack.style.bottom = 'max(1rem, env(safe-area-inset-bottom, 0px))';
+        }
         if (typeof window.pcshChatClampStack === 'function') window.pcshChatClampStack();
         var inp = document.getElementById('chatInput');
         if (inp) {
@@ -16375,7 +16442,7 @@ async function initChat() {
       _pcshChatTypingUnsub();
       _pcshChatTypingUnsub = null;
     }
-    _pcshChatTypingUnsub = db
+    _pcshChatTypingUnsub = sdb
       .collection('chat_typing')
       .orderBy('ts', 'desc')
       .limit(30)
@@ -16917,12 +16984,22 @@ function initChatDrag() {
   header.addEventListener('pointercancel', onPointerUp);
 }
 
+window.iniciarChatInternoGestion = function () {
+  if (typeof initChat !== 'function') return;
+  return Promise.resolve(initChat()).then(function () {
+    if (typeof initChatDrag === 'function') initChatDrag();
+  }).catch(function (eC) {
+    console.warn('[chat-gestion]', eC);
+  });
+};
+
 document.getElementById('chatBtn') && (document.getElementById('chatBtn').onclick = function () {
   if (typeof window.iniciarChatInternoGestion === 'function') window.iniciarChatInternoGestion();
   setChatOpen(!chatVisible);
 });
 var chatFabEl = document.getElementById('chatFab');
 if (chatFabEl) chatFabEl.onclick = function () {
+  if (typeof window.iniciarChatInternoGestion === 'function') window.iniciarChatInternoGestion();
   setChatOpen(!chatVisible);
 };
 document.getElementById('chatCloseBtn').onclick = function () {
