@@ -16212,20 +16212,48 @@
             var meses = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
             return parseInt(p[2], 10) + ' de ' + (meses[parseInt(p[1], 10) - 1] || p[1]) + ' de ' + p[0];
         }
+        function pcshResumenGestionYmdAnterior(ymd) {
+            var p = String(ymd || '').split('-');
+            if (p.length !== 3) return '';
+            var d = new Date(Date.UTC(parseInt(p[0], 10), parseInt(p[1], 10) - 1, parseInt(p[2], 10)));
+            d.setUTCDate(d.getUTCDate() - 1);
+            return d.getUTCFullYear() + '-' + String(d.getUTCMonth() + 1).padStart(2, '0') + '-' + String(d.getUTCDate()).padStart(2, '0');
+        }
+        function pcshResumenGestionVentanaYmds(ymdFin) {
+            var ayer = pcshResumenGestionYmdAnterior(ymdFin);
+            return ayer ? [ayer, ymdFin] : [ymdFin];
+        }
+        function pcshResumenGestionFechaVentanaLarga(ymdFin) {
+            var ayer = pcshResumenGestionYmdAnterior(ymdFin);
+            if (!ayer) return pcshResumenGestionFechaLarga(ymdFin);
+            var a = String(ayer).split('-');
+            var b = String(ymdFin).split('-');
+            var meses = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+            if (a[0] === b[0] && a[1] === b[1]) {
+                return parseInt(a[2], 10) + ' y ' + parseInt(b[2], 10) + ' de ' + (meses[parseInt(b[1], 10) - 1] || b[1]) + ' de ' + b[0];
+            }
+            return pcshResumenGestionFechaLarga(ayer) + ' y ' + pcshResumenGestionFechaLarga(ymdFin);
+        }
+        function pcshResumenGestionFechaCorta(fecha) {
+            var ymd = pcshResumenGestionYmd(fecha);
+            var p = String(ymd).split('-');
+            if (p.length !== 3) return '';
+            return p[2] + '/' + p[1];
+        }
         function pcshResumenGestionHtml(dia, esc) {
             esc = esc || (typeof escaparHtmlModuloConserjeria === 'function' ? escaparHtmlModuloConserjeria : function (s) { return String(s == null ? '' : s); });
             if (!dia) return '<p style="margin:0;color:var(--gray-500);font-size:0.85rem;">Sin resumen.</p>';
             var c = dia.conteos || {};
             var html = '<div class="pcsh-resumen-meta">';
-            html += '<span class="pcsh-resumen-chip">' + esc(pcshResumenGestionFechaLarga(dia.ymd)) + '</span>';
-            html += '<span class="pcsh-resumen-chip">' + (dia.total || 0) + ' novedades analizadas</span>';
+            html += '<span class="pcsh-resumen-chip">' + esc(dia.ventana || pcshResumenGestionFechaVentanaLarga(dia.ymd)) + '</span>';
+            html += '<span class="pcsh-resumen-chip">' + (dia.total || 0) + ' novedades de turnos cerrados</span>';
             html += '<span class="pcsh-resumen-chip">🔴 ' + (c.critica || 0) + '</span>';
             html += '<span class="pcsh-resumen-chip">🟠 ' + (c.importante || 0) + '</span>';
             html += '<span class="pcsh-resumen-chip">🟡 ' + (c.pendiente || 0) + '</span>';
             html += '<span class="pcsh-resumen-chip">🟢 ' + (c.general || 0) + '</span>';
             html += '</div>';
-            html += '<div class="pcsh-resumen-sec"><h4>Resumen de la jornada</h4><p class="pcsh-resumen-sit">' + esc(dia.resumenGeneral || '') + '</p></div>';
-            if (dia.vacio) return html + '<p style="margin:0;color:var(--gray-500);font-size:0.85rem;">No se registraron novedades durante este día.</p>';
+            html += '<div class="pcsh-resumen-sec"><h4>Resumen de los últimos 2 días</h4><p class="pcsh-resumen-sit">' + esc(dia.resumenGeneral || '') + '</p></div>';
+            if (dia.vacio) return html + '<p style="margin:0;color:var(--gray-500);font-size:0.85rem;">No se registraron novedades en turnos cerrados de los últimos dos días.</p>';
             function bloque(titulo, arr) {
                 var out = '<div class="pcsh-resumen-sec"><h4>' + esc(titulo) + '</h4>';
                 if (!arr || !arr.length) return out + '<p style="margin:0;color:var(--gray-500);font-size:0.8rem;">Ninguna.</p></div>';
@@ -16271,6 +16299,8 @@
             return cache.novedadesAll && cache.novedadesAll.length ? cache.novedadesAll : (cache.novedades || []);
         }
         function pcshResumenGestionConstruir(lista, ymd) {
+            var ventana = pcshResumenGestionVentanaYmds(ymd);
+            var ventanaTxt = pcshResumenGestionFechaVentanaLarga(ymd);
             var arr = (lista || []).slice().sort(function (a, b) {
                 return (Number(a && a.correlativo) || 0) - (Number(b && b.correlativo) || 0);
             });
@@ -16279,7 +16309,7 @@
             arr.forEach(function (n) {
                 if (!n) return;
                 if (n.turnoSep) {
-                    if (pcshResumenGestionYmd(n.fecha) === ymd) {
+                    if (ventana.indexOf(pcshResumenGestionYmd(n.fecha)) >= 0) {
                         acc.forEach(function (it) {
                             if (it && !it.turnoSep && it.tipo !== 'resumen_diario' && !it.minimizada) items.push(it);
                         });
@@ -16291,29 +16321,81 @@
             });
             var critRe = /incend|fuego|filtraci|inund|robo|gas\b|ascensor|alarma|emergencia|urgente|amenaza/i;
             var pendRe = /pendiente|por revisar|falta\b|sin resolver|esperando|seguimiento/i;
-            var grupos = items.map(function (n) {
+            var temas = [
+                { re: /incend|fuego/i, t: 'Incendio o fuego' },
+                { re: /filtraci|inund/i, t: 'Filtración o inundación' },
+                { re: /robo|hurto/i, t: 'Robo' },
+                { re: /gas\b/i, t: 'Gas' },
+                { re: /ascensor/i, t: 'Ascensor' },
+                { re: /alarma|emergencia|urgente/i, t: 'Emergencia' },
+                { re: /reclamo|queja/i, t: 'Reclamo' },
+                { re: /ruido|fiesta/i, t: 'Ruidos' },
+                { re: /da[nñ]o|falla|desperfecto/i, t: 'Falla o daño' }
+            ];
+            function deptoDe(n) {
+                var t = String((n && n.texto) || '');
+                var m = t.match(/(?:dpto\.?|depto\.?|departamento|unidad|#)\s*(\d{2,4})\b/i) || t.match(/\b(\d{3,4})\b/);
+                return m ? m[1] : '';
+            }
+            function temaDe(n) {
+                var txt = String((n && n.texto) || '');
+                var i;
+                for (i = 0; i < temas.length; i++) if (temas[i].re.test(txt)) return temas[i].t;
+                var cat = String((n && n.categoria) || '').trim();
+                if (cat && !/^(general|otros)$/i.test(cat)) return cat;
+                return 'Situación';
+            }
+            var map = {};
+            items.forEach(function (n) {
                 var txt = String(n.texto || '').replace(/\s+/g, ' ').trim();
+                var depto = deptoDe(n);
+                var tema = temaDe(n);
+                var key = (tema !== 'Situación' ? tema + '|' + depto : (depto ? 'depto|' + depto : 'solo|' + (n.correlativo || '')));
                 var prio = critRe.test(txt) ? 'critica' : ((n.relevante || n.destacada || pendRe.test(txt) || /reclamo|multa|seguridad|incidente/i.test(String(n.categoria || ''))) ? 'importante' : 'general');
                 var pend = pendRe.test(txt);
-                return {
-                    titulo: (n.categoria || 'Novedad') + (txt ? ' — ' + txt.slice(0, 70) : ''),
-                    prioridad: prio,
-                    estado: pend ? 'Pendiente' : (prio === 'critica' ? 'Urgente' : 'Informativo'),
-                    cors: [Number(n.correlativo) || 0],
-                    libros: ['#' + (n.correlativo || '—')],
-                    bullets: [(String(n.hora || '').slice(0, 5) || '—') + ' · ' + txt.slice(0, 180)],
-                    pendiente: pend
-                };
+                if (!map[key]) {
+                    map[key] = {
+                        titulo: tema + (depto ? ' — Depto. ' + depto : ''),
+                        prioridad: prio,
+                        estado: pend ? 'Pendiente' : (prio === 'critica' ? 'Urgente' : 'Informativo'),
+                        cors: [],
+                        libros: [],
+                        bullets: [],
+                        pendiente: false
+                    };
+                }
+                var g = map[key];
+                g.cors.push(Number(n.correlativo) || 0);
+                g.libros.push('#' + (n.correlativo || '—'));
+                g.bullets.push((pcshResumenGestionFechaCorta(n.fecha) ? pcshResumenGestionFechaCorta(n.fecha) + ' ' : '') + (String(n.hora || '').slice(0, 5) || '—') + ' · ' + txt.slice(0, 180));
+                if (prio === 'critica') g.prioridad = 'critica';
+                else if (prio === 'importante' && g.prioridad !== 'critica') g.prioridad = 'importante';
+                if (pend) {
+                    g.pendiente = true;
+                    g.estado = 'Pendiente';
+                }
             });
+            var grupos = Object.keys(map).map(function (k) { return map[k]; });
             var criticas = grupos.filter(function (g) { return g.prioridad === 'critica'; });
             var importantes = grupos.filter(function (g) { return g.prioridad === 'importante' && !g.pendiente; });
             var pendientes = grupos.filter(function (g) { return g.pendiente; });
             var generales = grupos.filter(function (g) { return g.prioridad === 'general' && !g.pendiente; });
-            var resumen = items.length
-                ? ('Durante la jornada se registraron ' + items.length + ' novedades. ' + (criticas.length ? ('Hay ' + criticas.length + ' situación(es) crítica(s). ') : 'No se identifican situaciones críticas. ') + (pendientes.length ? ('Quedan ' + pendientes.length + ' pendientes.') : ''))
-                : ('No se registraron novedades en turnos cerrados el ' + pcshResumenGestionFechaLarga(ymd) + '.');
+            var resumen = '';
+            if (!items.length) {
+                resumen = 'No se registraron novedades en turnos cerrados de los últimos dos días (' + ventanaTxt + ').';
+            } else {
+                var bits = [];
+                bits.push('En los últimos dos días de turnos cerrados (' + ventanaTxt + ') se registraron ' + items.length + (items.length === 1 ? ' novedad' : ' novedades') + '.');
+                if (criticas.length) bits.push((criticas.length === 1 ? 'Situación crítica: ' : 'Situaciones críticas: ') + criticas.slice(0, 3).map(function (g) { return g.titulo; }).join('; ') + '.');
+                else bits.push('No se identifican situaciones críticas.');
+                if (pendientes.length) bits.push((pendientes.length === 1 ? 'Pendiente: ' : 'Pendientes: ') + pendientes.slice(0, 3).map(function (g) { return g.titulo; }).join('; ') + '.');
+                if (importantes.length) bits.push('Lo más relevante: ' + importantes.slice(0, 2).map(function (g) { return g.titulo; }).join('; ') + '.');
+                resumen = bits.join(' ');
+            }
             return {
                 ymd: ymd,
+                ymdDesde: pcshResumenGestionYmdAnterior(ymd) || ymd,
+                ventana: ventanaTxt,
                 generadoAt: new Date().toISOString(),
                 origen: 'gestion-wm',
                 motor: 'local',
@@ -16327,25 +16409,25 @@
                 criticas: criticas.slice(0, 8),
                 importantes: importantes.slice(0, 8),
                 pendientes: pendientes.slice(0, 10),
-                recomendaciones: pendientes.slice(0, 6).map(function (g) { return 'Dar seguimiento a ' + g.titulo; })
+                recomendaciones: pendientes.slice(0, 6).map(function (g) { return 'Seguimiento: ' + g.titulo; })
             };
         }
         function pcshResumenGestionAvisoHtml(dia) {
             var esc = typeof escaparHtmlModuloConserjeria === 'function' ? escaparHtmlModuloConserjeria : function (s) { return String(s == null ? '' : s); };
             if (!dia) {
-                return '<h3>Resumen diario de novedades</h3><p class="sub">Preparando el aviso automático de la jornada…</p>';
+                return '<h3>Resumen de novedades</h3><p class="sub">Preparando el aviso automático de los últimos 2 días…</p>';
             }
             var c = dia.conteos || {};
             var toneClass = dia.vacio ? ' is-vacio' : (c.critica ? ' is-crit' : '');
-            var destacados = [].concat(dia.criticas || [], dia.importantes || [], dia.pendientes || []).slice(0, 5);
-            var html = '<h3>Resumen diario de novedades</h3>';
-            html += '<p class="sub">' + esc(pcshResumenGestionFechaLarga(dia.ymd)) + ' · ' + (dia.total || 0) + ' novedades de turnos cerrados · emitido automáticamente</p>';
+            var destacados = [].concat(dia.criticas || [], dia.importantes || [], dia.pendientes || []).slice(0, 6);
+            var html = '<h3>Resumen de novedades</h3>';
+            html += '<p class="sub">' + esc(dia.ventana || pcshResumenGestionFechaVentanaLarga(dia.ymd)) + ' · ' + (dia.total || 0) + ' novedades de turnos cerrados · emitido automáticamente</p>';
             html += '<div class="chips">';
             html += '<span class="chip">🔴 ' + (c.critica || 0) + ' críticas</span>';
             html += '<span class="chip">🟠 ' + (c.importante || 0) + ' importantes</span>';
             html += '<span class="chip">🟡 ' + (c.pendiente || 0) + ' pendientes</span>';
             html += '<span class="chip">🟢 ' + (c.general || 0) + ' generales</span></div>';
-            html += '<p class="lead">' + esc(dia.resumenGeneral || (dia.vacio ? 'No se registraron novedades durante este día.' : '')) + '</p>';
+            html += '<p class="lead">' + esc(dia.resumenGeneral || (dia.vacio ? 'No se registraron novedades en turnos cerrados de los últimos dos días.' : '')) + '</p>';
             if (destacados.length) {
                 html += '<ul>';
                 destacados.forEach(function (g) {
