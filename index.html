@@ -5470,10 +5470,17 @@
       top: auto;
       display: flex; flex-direction: column; align-items: flex-end; gap: 0.65rem;
       pointer-events: none; max-width: calc(100vw - 2rem);
+      transform: none;
+      filter: none;
     }
     .chat-stack > * { pointer-events: auto; }
     .chat-flotante {
-      position: relative;
+      position: absolute;
+      right: 0;
+      bottom: calc(100% + 0.65rem);
+      left: auto;
+      top: auto;
+      z-index: 1;
       width: min(400px, calc(100vw - 2rem));
       max-height: min(600px, calc(100vh - 6.5rem));
       display: flex; flex-direction: column;
@@ -6355,7 +6362,15 @@
       transition: box-shadow 0.35s ease;
     }
     #chatDock { display: none; }
-    body.chat-activo #chatDock { display: block; }
+    body.chat-activo #chatDock {
+      display: block;
+      position: fixed;
+      inset: 0;
+      z-index: 5000;
+      pointer-events: none;
+      transform: none;
+      filter: none;
+    }
     .chat-fab {
       display: inline-flex;
       align-items: center;
@@ -6371,6 +6386,8 @@
       cursor: pointer;
       box-shadow: 0 12px 28px rgba(0, 0, 0, 0.38);
       position: relative;
+      z-index: 2;
+      flex-shrink: 0;
       transition: background 0.25s ease, border-color 0.25s ease, color 0.25s ease;
     }
     .chat-fab:hover { filter: brightness(1.06); }
@@ -9806,6 +9823,8 @@
             if (loginScreen) loginScreen.classList.add('hidden');
             if (appContainer) appContainer.style.display = 'flex';
             document.body.classList.add('chat-activo');
+            if (typeof pcshChatPinDockToBody === 'function') pcshChatPinDockToBody();
+            if (typeof pcshChatResetStackAnchor === 'function') pcshChatResetStackAnchor();
             /* Igual que index tras personalización: re-pintar iconos cuando el contenedor ya es visible.
                En iOS/WebKit, SVG inyectados con #appContainer en display:none suelen no rasterizar bien. */
             requestAnimationFrame(function () {
@@ -18718,6 +18737,20 @@ function pcshChatRenderMessages(snap) {
  * y alinea la vertical con el botón «Chat interno» del menú (centro del panel ≈ centro del botón).
  */
 
+function pcshChatPinDockToBody() {
+  var dock = document.getElementById('chatDock');
+  if (dock && dock.parentNode !== document.body) document.body.appendChild(dock);
+}
+
+function pcshChatResetStackAnchor() {
+  var stack = document.getElementById('chatStack');
+  if (!stack) return;
+  stack.style.left = 'auto';
+  stack.style.top = 'auto';
+  stack.style.right = 'max(1rem, env(safe-area-inset-right, 0px))';
+  stack.style.bottom = 'max(1rem, env(safe-area-inset-bottom, 0px))';
+}
+
 function setChatOpen(open) {
   chatVisible = !!open;
   var dock = document.getElementById('chatDock');
@@ -18725,6 +18758,7 @@ function setChatOpen(open) {
   var fab = document.getElementById('chatFab');
   var chatNavBtn = document.getElementById('chatBtn');
   if (!dock || !panel) return;
+  pcshChatPinDockToBody();
   dock.classList.toggle('chat-open', chatVisible);
   if (!chatVisible) {
     if (typeof pcshChatClearMyTyping === 'function') pcshChatClearMyTyping();
@@ -18735,6 +18769,7 @@ function setChatOpen(open) {
     var sbClose = document.getElementById('chatStickerBtn');
     if (sbClose) sbClose.setAttribute('aria-expanded', 'false');
     if (typeof pcshChatCloseCitaNovedadModal === 'function') pcshChatCloseCitaNovedadModal();
+    pcshChatResetStackAnchor();
   }
   if (fab) fab.setAttribute('aria-expanded', chatVisible ? 'true' : 'false');
   if (chatNavBtn) chatNavBtn.setAttribute('aria-expanded', chatVisible ? 'true' : 'false');
@@ -18763,14 +18798,7 @@ function setChatOpen(open) {
     pcshChatUpdateFabBadge(0);
     requestAnimationFrame(function () {
       requestAnimationFrame(function () {
-        var stack = document.getElementById('chatStack');
-        if (stack) {
-          stack.style.left = 'auto';
-          stack.style.top = 'auto';
-          stack.style.right = 'max(1rem, env(safe-area-inset-right, 0px))';
-          stack.style.bottom = 'max(1rem, env(safe-area-inset-bottom, 0px))';
-        }
-        if (typeof window.pcshChatClampStack === 'function') window.pcshChatClampStack();
+        pcshChatResetStackAnchor();
         var inp = document.getElementById('chatInput');
         if (inp) {
           inp.focus();
@@ -19289,39 +19317,53 @@ async function initChat() {
 
 /** Arrastra el chat por la barra superior; la posición queda dentro del viewport y se guarda en localStorage */
 function initChatDrag() {
+  pcshChatPinDockToBody();
   var stack = document.getElementById('chatStack');
   var panel = document.getElementById('chatFlotante');
   var header = panel ? panel.querySelector('.chat-header') : null;
   if (!stack || !header) return;
+  if (window._chatDragInited) {
+    pcshChatResetStackAnchor();
+    return;
+  }
+  window._chatDragInited = true;
 
   var margin = 10;
   var dragging = false;
   var drag = null;
 
   function clampChatStack() {
-    var r = stack.getBoundingClientRect();
-    var w = r.width;
-    var h = r.height;
+    if (!chatVisible) {
+      pcshChatResetStackAnchor();
+      return;
+    }
+    var panelR = panel.getBoundingClientRect();
+    var stackR = stack.getBoundingClientRect();
+    var left = Math.min(panelR.left, stackR.left);
+    var top = Math.min(panelR.top, stackR.top);
+    var right = Math.max(panelR.right, stackR.right);
+    var bottom = Math.max(panelR.bottom, stackR.bottom);
+    var w = Math.max(1, right - left);
+    var h = Math.max(1, bottom - top);
     var vw = window.innerWidth;
     var vh = window.innerHeight;
     var minL = margin;
     var minT = margin;
     var maxL = Math.max(minL, vw - w - margin);
     var maxT = Math.max(minT, vh - h - margin);
-    var left = Math.min(Math.max(r.left, minL), maxL);
-    var top = Math.min(Math.max(r.top, minT), maxT);
-    stack.style.left = left + 'px';
-    stack.style.top = top + 'px';
+    var dx = Math.min(Math.max(left, minL), maxL) - left;
+    var dy = Math.min(Math.max(top, minT), maxT) - top;
+    stack.style.left = (stackR.left + dx) + 'px';
+    stack.style.top = (stackR.top + dy) + 'px';
     stack.style.right = 'auto';
     stack.style.bottom = 'auto';
   }
   window.pcshChatClampStack = clampChatStack;
 
-  requestAnimationFrame(function () {
-    clampChatStack();
-  });
+  pcshChatResetStackAnchor();
   window.addEventListener('resize', function () {
-    clampChatStack();
+    if (chatVisible) clampChatStack();
+    else pcshChatResetStackAnchor();
   });
 
   function onPointerDown(e) {
@@ -19370,6 +19412,7 @@ function initChatDrag() {
 }
 
 window.iniciarChatInternoGestion = function () {
+  if (typeof pcshChatPinDockToBody === 'function') pcshChatPinDockToBody();
   if (typeof initChat !== 'function') return;
   return Promise.resolve(initChat()).then(function () {
     if (typeof initChatDrag === 'function') initChatDrag();
