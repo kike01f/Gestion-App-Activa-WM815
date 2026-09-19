@@ -251,7 +251,7 @@
             position: fixed;
             top: 1rem;
             left: calc(280px + 1rem);
-            z-index: 101;
+            z-index: 5102;
             width: 2.5rem;
             height: 2.5rem;
             background: var(--primary);
@@ -319,7 +319,7 @@
             overflow-y: auto;
             overflow-x: hidden;
             box-shadow: 4px 0 16px rgba(0, 0, 0, 0.08);
-            z-index: 100;
+            z-index: 5100;
             transition: transform 0.3s ease, width 0.3s ease, background 0.3s ease, border-color 0.3s ease;
         }
 
@@ -4055,7 +4055,7 @@
             display: none;
             position: fixed;
             inset: 0;
-            z-index: 199;
+            z-index: 5090;
             background: rgba(15, 23, 42, 0.5);
             backdrop-filter: blur(3px);
             -webkit-backdrop-filter: blur(3px);
@@ -4086,7 +4086,7 @@
             .tabs {
                 width: min(300px, 90vw) !important;
                 max-width: min(300px, 90vw);
-                z-index: 220;
+                z-index: 5100;
                 box-shadow: 6px 0 32px rgba(0, 0, 0, 0.2);
             }
             [data-theme="dark"] .tabs {
@@ -4100,7 +4100,7 @@
                 left: max(0.65rem, env(safe-area-inset-left, 0px)) !important;
                 top: max(0.65rem, env(safe-area-inset-top, 0px)) !important;
                 right: auto !important;
-                z-index: 230;
+                z-index: 5102;
                 min-width: 44px;
                 min-height: 44px;
                 touch-action: manipulation;
@@ -5454,13 +5454,17 @@
     .chat-backdrop {
       position: absolute; inset: 0;
       background: rgba(6, 8, 12, 0.48);
-      backdrop-filter: blur(4px);
-      -webkit-backdrop-filter: blur(4px);
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
       opacity: 0; visibility: hidden;
       transition: opacity 0.25s ease, visibility 0.25s ease;
       pointer-events: none;
     }
-    .chat-dock.chat-open .chat-backdrop { opacity: 1; visibility: visible; pointer-events: auto; cursor: pointer; }
+    .chat-dock.chat-open .chat-backdrop {
+      opacity: 1; visibility: visible; pointer-events: auto; cursor: pointer;
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+    }
     .chat-stack {
       position: fixed;
       z-index: 5001;
@@ -5474,6 +5478,10 @@
       filter: none;
     }
     .chat-stack > * { pointer-events: auto; }
+    .chat-dock:not(.chat-open) .chat-flotante,
+    .chat-dock:not(.chat-open) .chat-backdrop {
+      pointer-events: none !important;
+    }
     .chat-flotante {
       position: absolute;
       right: 0;
@@ -6365,11 +6373,21 @@
     body.chat-activo #chatDock {
       display: block;
       position: fixed;
-      inset: 0;
+      inset: auto;
+      right: 0;
+      bottom: 0;
+      width: 0;
+      height: 0;
+      overflow: visible;
       z-index: 5000;
       pointer-events: none;
       transform: none;
       filter: none;
+    }
+    body.chat-activo #chatDock.chat-open {
+      inset: 0;
+      width: auto;
+      height: auto;
     }
     .chat-fab {
       display: inline-flex;
@@ -6993,6 +7011,9 @@
                         </div>
                     </div>
                 </section>
+
+            </div>
+        </div>
 
         <!-- MÓDULO 1: MUDANZAS -->
         <div id="mudanzas" class="tab-content">
