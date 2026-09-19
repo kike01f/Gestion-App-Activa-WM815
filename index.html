@@ -908,6 +908,52 @@
         .multa-nov-item strong { font-size: 0.8rem; }
         .multa-nov-item span { display: block; margin-top: 0.15rem; font-size: 0.75rem; color: var(--gray-600); line-height: 1.4; }
         .multa-nov-vacio { padding: 0.85rem; font-size: 0.82rem; color: var(--gray-500); text-align: center; }
+        .multas-alerta {
+            display: none;
+            margin: 0 0 1rem;
+            padding: 0.75rem 1rem;
+            border-radius: 12px;
+            border: 1px solid rgba(217, 119, 6, 0.45);
+            background: rgba(245, 158, 11, 0.12);
+            color: var(--gray-900);
+        }
+        .multas-alerta.is-on { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.55rem 1rem; }
+        .multas-alerta strong { font-size: 0.88rem; }
+        .multas-alerta p { margin: 0.15rem 0 0; font-size: 0.8rem; color: var(--gray-700); }
+        .multas-alerta .btn { padding: 0.35rem 0.75rem; font-size: 0.78rem; }
+        .multas-estado {
+            display: inline-block;
+            padding: 0.12rem 0.45rem;
+            border-radius: 999px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        .multas-estado.es-pendiente_tratamiento { background: #ffedd5; color: #9a3412; }
+        .multas-estado.es-en_revision { background: #dbeafe; color: #1e40af; }
+        .multas-estado.es-pendiente_antecedentes { background: #fef9c3; color: #854d0e; }
+        .multas-estado.es-gestionada { background: #dcfce7; color: #166534; }
+        .multas-estado.es-rechazada { background: #fee2e2; color: #991b1b; }
+        .multas-estado.es-cerrada { background: #e5e7eb; color: #374151; }
+        .multas-pend-tabla { margin: 0 0 1rem; }
+        .multas-filtro-estados { display: flex; flex-wrap: wrap; gap: 0.3rem; margin: 0 0 0.65rem; }
+        .multas-filtro-estados button {
+            border: 1px solid var(--border-color);
+            background: var(--bg-secondary);
+            border-radius: 999px;
+            padding: 0.2rem 0.55rem;
+            font-size: 0.7rem;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        .multas-filtro-estados button.is-on {
+            background: rgba(117, 187, 33, 0.16);
+            border-color: rgba(117, 187, 33, 0.45);
+        }
+        #modalDetalleMulta .multa-detalle-sec { margin: 0 0 0.85rem; }
+        #modalDetalleMulta .multa-detalle-sec h4 { margin: 0 0 0.35rem; font-size: 0.82rem; }
+        #modalDetalleMulta .multa-detalle-sec p { margin: 0 0 0.25rem; font-size: 0.8rem; line-height: 1.45; }
 
         .btn {
             padding: 0.625rem 1.25rem;
@@ -1155,48 +1201,6 @@
             line-height: 1.45;
             color: var(--gray-600);
         }
-        #conserjeria .pcsh-entrega-toolbar {
-            display: flex; flex-wrap: wrap; align-items: flex-end; gap: 0.45rem 0.65rem; margin-bottom: 0.65rem;
-        }
-        #conserjeria .pcsh-entrega-toolbar label { font-size: 0.75rem; font-weight: 700; color: var(--gray-600); display: block; margin-bottom: 0.2rem; }
-        #conserjeria .pcsh-entrega-toolbar input[type="date"] {
-            padding: 0.4rem 0.55rem; border-radius: 8px; border: 1px solid var(--border-color);
-            background: var(--bg-primary); color: var(--text-primary); font-size: 0.82rem;
-        }
-        #conserjeria .pcsh-entrega-meta { display: flex; flex-wrap: wrap; gap: 0.35rem; margin: 0 0 0.65rem; }
-        #conserjeria .pcsh-entrega-chip {
-            display: inline-flex; align-items: center; gap: 0.28rem; padding: 0.22rem 0.5rem;
-            border-radius: 999px; border: 1px solid var(--border-color); font-size: 0.7rem; font-weight: 700;
-            background: var(--bg-secondary); color: var(--gray-700);
-        }
-        #conserjeria .pcsh-entrega-chip.prio { border-color: rgba(220,38,38,0.35); color: #b91c1c; background: rgba(220,38,38,0.1); }
-        #conserjeria .pcsh-entrega-chip.dest { border-color: rgba(217,119,6,0.4); color: #b45309; background: rgba(245,158,11,0.12); }
-        #conserjeria .pcsh-entrega-chip.ok { border-color: rgba(5,150,105,0.35); color: #047857; background: rgba(16,185,129,0.1); }
-        #conserjeria .pcsh-entrega-sit {
-            margin: 0 0 0.7rem; font-size: 0.84rem; line-height: 1.5; color: var(--gray-800);
-            padding: 0.6rem 0.7rem; border-radius: 10px; border: 1px solid var(--border-color);
-            background: rgba(37, 99, 235, 0.08);
-        }
-        #conserjeria .pcsh-entrega-sec { margin: 0 0 0.7rem; }
-        #conserjeria .pcsh-entrega-sec h4 {
-            margin: 0 0 0.35rem; font-size: 0.74rem; font-weight: 800; letter-spacing: 0.04em;
-            text-transform: uppercase; color: var(--gray-500);
-        }
-        #conserjeria .pcsh-entrega-item {
-            display: block; width: 100%; text-align: left; border: 1px solid var(--border-color);
-            background: var(--bg-primary); color: var(--text-primary); border-radius: 8px;
-            padding: 0.45rem 0.55rem; margin: 0 0 0.35rem; cursor: pointer; font: inherit;
-        }
-        #conserjeria .pcsh-entrega-item:hover { border-color: rgba(117, 187, 33, 0.45); }
-        #conserjeria .pcsh-entrega-item strong { font-size: 0.78rem; }
-        #conserjeria .pcsh-entrega-item p { margin: 0.18rem 0 0; font-size: 0.78rem; line-height: 1.4; color: var(--gray-600); }
-        #conserjeria .pcsh-entrega-turno {
-            border: 1px solid var(--border-color); border-radius: 10px; padding: 0.55rem 0.65rem; margin: 0 0 0.55rem;
-            background: var(--bg-secondary);
-        }
-        #conserjeria .pcsh-entrega-turno h5 { margin: 0 0 0.25rem; font-size: 0.84rem; color: var(--gray-900); }
-        #conserjeria .pcsh-entrega-cats { font-size: 0.75rem; color: var(--gray-600); line-height: 1.45; margin: 0; }
-        #conserjeria .pcsh-entrega-hint { margin: 0.45rem 0 0; font-size: 0.72rem; color: var(--gray-500); }
         #conserjeria #conserjeriaKpis.resumen-ocupacion-map {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(128px, 1fr));
@@ -6284,6 +6288,7 @@
                     </div>
                 </section>
                 <div id="alertasDashboard" style="display: none;"><!-- Gestionado por Arturito --></div>
+                <div id="dashboardMultasPendientesWrap" class="multas-alerta" role="status"></div>
                 <!-- 1. Resumen rápido (KPIs) - misma estructura que activa -->
                 <section class="dashboard2-block dashboard2-block--kpis" aria-label="Resumen del mes">
                     <h2 class="dashboard2-block-title">Resumen del mes</h2>
@@ -6951,7 +6956,27 @@
                 <h2 id="tituloMultas" style="margin: 0; color: var(--gray-900); font-size: 1.5rem; font-weight: 700; display: flex; align-items: center; gap: 0.75rem;">
                     <span style="display: inline-flex; align-items: center; width: 1.75rem; height: 1.75rem;"></span> Multas
                 </h2>
-                <p style="color: var(--gray-600); font-size: 0.875rem; margin: 0.5rem 0 0 0;">Registro de multas a residentes</p>
+                <p style="color: var(--gray-600); font-size: 0.875rem; margin: 0.5rem 0 0 0;">Registro de multas a residentes. Las novedades con etiqueta Multa de Conserjería WM llegan aquí como pendientes de tratamiento.</p>
+            </div>
+            <div id="multasAlertaPendientes" class="multas-alerta" role="status"></div>
+            <div class="table-section multas-pend-tabla" id="multasPendientesSec" hidden>
+                <h3>Pendientes de tratamiento (Conserjería)</h3>
+                <p style="margin: 0 0 0.55rem; font-size: 0.78rem; color: var(--gray-600);">Priorizadas para Administración. Pulse Revisar para ver la novedad original y cambiar el estado.</p>
+                <div style="overflow-x: auto;">
+                    <table id="tablaMultasPendientes">
+                        <thead>
+                            <tr>
+                                <th>Novedad</th>
+                                <th>Fecha</th>
+                                <th>Depto.</th>
+                                <th>Motivo</th>
+                                <th>Estado</th>
+                                <th>Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyMultasPendientes"></tbody>
+                    </table>
+                </div>
             </div>
             <div class="form-section" style="margin-bottom: 1rem;">
                 <h3 style="margin: 0 0 0.75rem 0; font-size: 1rem; font-weight: 700;">Registrar Multa</h3>
@@ -7050,11 +7075,19 @@
 
             <div class="table-section">
                 <h3>Registros de Multas</h3>
+                <div class="multas-filtro-estados" id="multasFiltroEstados" role="group" aria-label="Filtrar por estado">
+                    <button type="button" class="is-on" data-estado="">Todas</button>
+                    <button type="button" data-estado="tratamiento">Requieren tratamiento</button>
+                    <button type="button" data-estado="pendiente_tratamiento">Pendiente</button>
+                    <button type="button" data-estado="en_revision">En revisión</button>
+                    <button type="button" data-estado="gestionada">Gestionadas</button>
+                </div>
                 <table id="tablaMultas">
                     <thead>
                         <tr>
                             <th>Fecha</th>
                             <th>Tipo</th>
+                            <th>Estado</th>
                             <th>Residente</th>
                             <th>Depto</th>
                             <th>Motivo</th>
@@ -8018,7 +8051,6 @@
 
             <nav id="conserjeriaModuloNav" class="conserjeria-modulo__nav" aria-label="Secciones del módulo Conserjería">
                 <a href="#conserjeriaSecOperacion" class="is-active">Operación</a>
-                <a href="#conserjeriaEntregaWrap">Entrega</a>
                 <a href="#conserjeriaAnalisisWrap">Análisis</a>
                 <a href="#conserjeriaAvisoWrap">Aviso</a>
                 <a href="#conserjeriaCatalogoWrap">Categorías</a>
@@ -8031,18 +8063,6 @@
                     <p>Primero el pulso del mes, luego las destacadas y el listado para trabajar. Pulse un indicador para filtrar.</p>
                 </header>
                 <div id="conserjeriaKpis" class="resumen-ocupacion-map"></div>
-                <div class="conserjeria-modulo__panel" id="conserjeriaEntregaWrap">
-                    <h3>Entrega de turno · resumen IA</h3>
-                    <p style="margin: 0 0 0.65rem 0; font-size: 0.8rem; color: var(--gray-600); line-height: 1.45;">Resumen profesional del día y de cada turno: destacadas, lo más importante y lo rutinario agrupado, para el relevo sin leer novedad por novedad.</p>
-                    <div class="pcsh-entrega-toolbar">
-                        <div>
-                            <label for="pcshEntregaFecha">Día (Santiago)</label>
-                            <input type="date" id="pcshEntregaFecha">
-                        </div>
-                        <button type="button" class="btn btn-primary" id="pcshEntregaGenerarBtn" style="padding: 0.4rem 0.75rem; font-size: 0.8rem;">Generar resumen</button>
-                    </div>
-                    <div id="pcshEntregaBody"><p style="margin: 0; color: var(--gray-500); font-size: 0.85rem;">Cargando resumen…</p></div>
-                </div>
                 <div class="conserjeria-modulo__panel" id="conserjeriaDestacadasWrap">
                     <h3>Novedades destacadas</h3>
                     <div id="conserjeriaDestacadasList"><p style="margin: 0; color: var(--gray-500); font-size: 0.85rem;">Cargando…</p></div>
@@ -9115,6 +9135,34 @@
             <div id="multaNovedadLista" style="max-height: 320px; overflow: auto; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-secondary);"></div>
             <div class="modal-buttons" style="margin-top: 0.85rem;">
                 <button type="button" class="btn btn-secondary" id="btnCerrarNovedadMulta">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modalDetalleMulta" class="modal-overlay">
+        <div class="modal-confirm" style="max-width: 720px; width: 100%; max-height: 90vh; overflow: auto;">
+            <h3 style="margin: 0 0 0.35rem 0;">Detalle de multa</h3>
+            <p style="margin: 0 0 0.75rem 0; color: var(--gray-600); font-size: 0.82rem;">Capa administrativa sobre la novedad original. La bitácora de Conserjería no se modifica desde aquí.</p>
+            <div id="multaDetalleCuerpo"></div>
+            <div class="form-group" style="margin: 0.75rem 0 0.5rem;">
+                <label for="multaDetalleEstado" style="margin-bottom: 0.25rem; font-size: 0.875rem;">Estado de gestión</label>
+                <select id="multaDetalleEstado" style="padding: 0.5rem; font-size: 0.875rem; width: 100%;">
+                    <option value="pendiente_tratamiento">Pendiente de tratamiento</option>
+                    <option value="en_revision">En revisión</option>
+                    <option value="pendiente_antecedentes">Pendiente de antecedentes</option>
+                    <option value="gestionada">Gestionada</option>
+                    <option value="rechazada">Rechazada / No procede</option>
+                    <option value="cerrada">Cerrada</option>
+                </select>
+            </div>
+            <div class="form-group" style="margin-bottom: 0.75rem;">
+                <label for="multaDetalleObsAdmin" style="margin-bottom: 0.25rem; font-size: 0.875rem;">Observaciones de Administración</label>
+                <textarea id="multaDetalleObsAdmin" rows="3" style="width: 100%; padding: 0.5rem; font-size: 0.875rem; box-sizing: border-box;"></textarea>
+            </div>
+            <div class="modal-buttons">
+                <button type="button" class="btn btn-secondary" id="btnCerrarDetalleMulta">Cerrar</button>
+                <button type="button" class="btn btn-secondary" id="btnDetalleMultaIrNovedad">Ver novedad original</button>
+                <button type="button" class="btn btn-primary" id="btnGuardarDetalleMulta">Guardar gestión</button>
             </div>
         </div>
     </div>
@@ -16298,7 +16346,6 @@
         function bindUiModuloConserjeria() {
             if (window._moduloConserjeriaUiBound) return;
             window._moduloConserjeriaUiBound = true;
-            pcshEntregaBindUiGestion();
             var btn = document.getElementById('btnActualizarModuloConserjeria');
             if (btn) {
                 btn.addEventListener('click', function () {
@@ -16588,7 +16635,12 @@
             pintarKpisModuloConserjeria();
             pintarDestacadasModuloConserjeria();
             pintarAnalisisNovedadesConserjeria();
-            if (typeof pcshEntregaPintarDesdeCacheGestion === 'function') pcshEntregaPintarDesdeCacheGestion();
+            if (typeof sincronizarMultasDesdeConserjeria === 'function') {
+                sincronizarMultasDesdeConserjeria().then(function () {
+                    if (typeof obtenerDatosMes !== 'function' || typeof pintarAlertasMultasPendientes !== 'function') return;
+                    return obtenerDatosMes('multas').then(function (list) { pintarAlertasMultasPendientes(list); });
+                }).catch(function () {});
+            }
         }
 
         async function cargarDatosCrudosModuloConserjeria(mes) {
@@ -23874,6 +23926,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 editor.innerHTML = sanitizarContenidoMultaHtml(editor.innerHTML);
             });
             if (typeof bindSelectorNovedadMulta === 'function') bindSelectorNovedadMulta();
+            if (typeof bindUiMultasGestionEstados === 'function') bindUiMultasGestionEstados();
         }
 
         function multaFormatoFechaNovedad(fecha) {
@@ -24029,6 +24082,488 @@ document.getElementById('chatForm').onsubmit = function (e) {
             }
         }
 
+        var MULTA_ESTADOS_GESTION = {
+            pendiente_tratamiento: { label: 'Pendiente de tratamiento', emoji: '🟠' },
+            en_revision: { label: 'En revisión', emoji: '🔵' },
+            pendiente_antecedentes: { label: 'Pendiente de antecedentes', emoji: '🟡' },
+            gestionada: { label: 'Gestionada', emoji: '🟢' },
+            rechazada: { label: 'Rechazada / No procede', emoji: '🔴' },
+            cerrada: { label: 'Cerrada', emoji: '⚫' }
+        };
+        window._multasFiltroEstado = window._multasFiltroEstado || '';
+        window._multaDetalleId = null;
+
+        function multaNormCat(cat) {
+            return String(cat || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '');
+        }
+        function multaEsCategoriaNovedadMulta(cat) {
+            var s = multaNormCat(cat);
+            return s === 'multa' || s.indexOf('multa') === 0;
+        }
+        function multaEstadoRegistro(m) {
+            if (!m) return 'gestionada';
+            if (m.estadoGestion && MULTA_ESTADOS_GESTION[m.estadoGestion]) return m.estadoGestion;
+            if (m.origen === 'conserjeria') return 'pendiente_tratamiento';
+            return 'gestionada';
+        }
+        function multaRequiereTratamiento(m) {
+            var e = multaEstadoRegistro(m);
+            return e === 'pendiente_tratamiento' || e === 'en_revision' || e === 'pendiente_antecedentes';
+        }
+        function multaHtmlEstado(m) {
+            var e = multaEstadoRegistro(m);
+            var meta = MULTA_ESTADOS_GESTION[e] || MULTA_ESTADOS_GESTION.gestionada;
+            return '<span class="multas-estado es-' + e + '">' + meta.emoji + ' ' + meta.label + '</span>';
+        }
+        function multaOperadorActual() {
+            try {
+                if (typeof auth !== 'undefined' && auth && auth.currentUser) {
+                    return auth.currentUser.email || auth.currentUser.displayName || 'Administración';
+                }
+            } catch (eOp) {}
+            return 'Administración';
+        }
+        function multaInferirDeptoTexto(texto) {
+            var s = String(texto || '');
+            var m = s.match(/(?:dpto\.?|depto\.?|departamento|unidad|#)\s*(\d{2,4})\b/i);
+            if (m) return m[1];
+            if (typeof extraerUnidadesTextoNovedad === 'function') {
+                var uns = extraerUnidadesTextoNovedad(s);
+                if (uns && uns[0]) return String(uns[0]);
+            }
+            var m2 = s.match(/\b(\d{3,4})\b/);
+            return m2 ? m2[1] : '';
+        }
+        function multaMotivoDesdeTexto(texto) {
+            var s = String(texto || '').replace(/\s+/g, ' ').trim();
+            if (!s) return 'Multa desde Conserjería';
+            var cut = s.split(/[.!?]/)[0] || s;
+            return cut.length > 90 ? cut.slice(0, 87) + '…' : cut;
+        }
+        function multaYmdIso(fecha) {
+            if (typeof multaYmdDesdeNovedad === 'function') {
+                var y = multaYmdDesdeNovedad(fecha);
+                if (y) return y;
+            }
+            var s = String(fecha || '');
+            var m1 = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+            if (m1) return m1[3] + '-' + String(m1[2]).padStart(2, '0') + '-' + String(m1[1]).padStart(2, '0');
+            var m2 = s.match(/^(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})/);
+            if (m2) return m2[1] + '-' + String(m2[2]).padStart(2, '0') + '-' + String(m2[3]).padStart(2, '0');
+            return '';
+        }
+        function multaIdDesdeNovedad(cor) {
+            return 'nov-' + String(cor);
+        }
+        async function persistirListaMultasMes(mesAnio, lista) {
+            var mes = mesAnio || (typeof obtenerMesActual === 'function' ? obtenerMesActual() : '');
+            if (!mes) return;
+            var datos = Array.isArray(lista) ? lista : [];
+            var mesVista = (window.mesReabierto && window.mesEnConsulta) ? window.mesEnConsulta : (typeof obtenerMesActual === 'function' ? obtenerMesActual() : mes);
+            if (typeof guardarDatosMes === 'function' && mes === mesVista) {
+                await guardarDatosMes('multas', datos);
+                return;
+            }
+            var docKey = 'multas_' + mes;
+            if (typeof firebaseInitialized !== 'undefined' && firebaseInitialized && typeof db !== 'undefined' && db) {
+                try {
+                    await db.collection('comunidad').doc(docKey).set({
+                        datos: datos,
+                        mes: mes,
+                        modulo: 'multas',
+                        actualizado: firebase.firestore.FieldValue.serverTimestamp()
+                    }, { merge: true });
+                } catch (eFs) {
+                    console.warn('[multas] persistir mes:', eFs);
+                }
+            }
+            try {
+                if (typeof lsKey === 'function') localStorage.setItem(lsKey(docKey), JSON.stringify(datos));
+            } catch (eLs) {}
+        }
+        function multaFuenteNovedadesParaSync() {
+            var cache = window._moduloConserjeriaCache || {};
+            var raw = (cache.novedadesAll && cache.novedadesAll.length) ? cache.novedadesAll : (cache.novedades || []);
+            var mes = typeof obtenerMesActual === 'function' ? obtenerMesActual() : '';
+            return (raw || []).filter(function (n) {
+                if (!n || n.turnoSep || n.tipo === 'resumen_diario' || n.minimizada) return false;
+                if (!multaEsCategoriaNovedadMulta(n.categoria)) return false;
+                if (!mes) return true;
+                var nm = typeof mesDesdeFechaNovedadGestion === 'function' ? mesDesdeFechaNovedadGestion(n.fecha) : '';
+                return !nm || nm === mes;
+            });
+        }
+        async function multaLeerColaConserjeria() {
+            var out = [];
+            try {
+                var sdb = typeof obtenerDbConserjeriaOperativa === 'function' ? await obtenerDbConserjeriaOperativa() : null;
+                if (!sdb) return out;
+                var snap = await sdb.collection('multas_desde_novedad').get();
+                snap.forEach(function (doc) {
+                    var d = doc.data() || {};
+                    d.correlativo = d.correlativo != null ? d.correlativo : Number(doc.id);
+                    out.push(d);
+                });
+            } catch (eCol) {
+                console.warn('[multas] cola Conserjería:', eCol);
+            }
+            return out;
+        }
+        function multaBuscarEnLista(lista, cor) {
+            var id = multaIdDesdeNovedad(cor);
+            return (lista || []).find(function (m) {
+                return m && (m.id === id || Number(m.novedadCorrelativo) === Number(cor));
+            }) || null;
+        }
+        function multaResidenteDesdeDepto(depto) {
+            if (!depto || typeof obtenerResidentePorNumeroDepto !== 'function') return '';
+            var info = obtenerResidentePorNumeroDepto(depto);
+            return info && info.nombre ? info.nombre : '';
+        }
+        function multaHistorialPush(m, accion, extra) {
+            var hist = Array.isArray(m.historialEstados) ? m.historialEstados.slice() : [];
+            hist.push(Object.assign({
+                at: new Date().toISOString(),
+                usuario: multaOperadorActual(),
+                accion: accion
+            }, extra || {}));
+            if (hist.length > 40) hist = hist.slice(-40);
+            m.historialEstados = hist;
+            return m;
+        }
+        function multaPayloadDesdeNovedad(n, libroNum) {
+            var cor = Number(n.correlativo);
+            var texto = n.texto || '';
+            var depto = String(n.depto || n.departamento || multaInferirDeptoTexto(texto) || '').trim();
+            var nombre = String(n.nombre || multaResidenteDesdeDepto(depto) || '').trim() || 'Por confirmar';
+            var ymd = multaYmdIso(n.fecha) || (typeof obtenerFechaHoy === 'function' ? obtenerFechaHoy() : '');
+            var num = libroNum != null ? libroNum : (n.numeroLibro != null ? n.numeroLibro : cor);
+            var refHtml = '<p>Novedad <strong>#' + String(num).replace(/</g, '') + '</strong> · ' + (n.fecha || '') + (n.hora ? ' · ' + String(n.hora).slice(0, 5) + ' hrs.' : '') + '</p>';
+            var cuerpo = String(texto || '').replace(/</g, '&lt;');
+            if (n.notaInterna) cuerpo += '<p><em>Nota interna:</em> ' + String(n.notaInterna).replace(/</g, '&lt;') + '</p>';
+            return {
+                id: multaIdDesdeNovedad(cor),
+                origen: 'conserjeria',
+                novedadCorrelativo: cor,
+                novedadLibro: num,
+                novedadHora: n.hora || '',
+                novedadConserje: n.conserje || '',
+                novedadCategoria: n.categoria || 'Multa',
+                novedadHuella: [cor, n.fecha, n.hora, n.categoria, n.texto, n.notaInterna].join('|'),
+                nombre: nombre,
+                fecha: ymd,
+                departamento: depto || '—',
+                motivo: multaMotivoDesdeTexto(texto),
+                contenido: String(texto || ''),
+                contenidoHtml: refHtml + '<p>' + cuerpo.replace(/\n/g, '<br>') + '</p>',
+                monto: 0,
+                tipoUnidad: 'UF',
+                tipoRegistro: 'multa',
+                evidencias: [],
+                archivos: [],
+                mes: (typeof obtenerMesActual === 'function' ? obtenerMesActual() : ''),
+                estadoGestion: 'pendiente_tratamiento'
+            };
+        }
+        async function sincronizarMultasDesdeConserjeria() {
+            if (window._multasSyncLock) return window._multasSyncLock;
+            var job = (async function () {
+                try {
+                    if (typeof multaAsegurarNovedadesConserjeria === 'function') {
+                        await multaAsegurarNovedadesConserjeria();
+                    }
+                    var cola = await multaLeerColaConserjeria();
+                    var porCor = {};
+                    cola.forEach(function (d) {
+                        if (d && d.activa !== false && isFinite(Number(d.correlativo))) porCor[Number(d.correlativo)] = d;
+                    });
+                    multaFuenteNovedadesParaSync().forEach(function (n) {
+                        porCor[Number(n.correlativo)] = Object.assign({}, porCor[Number(n.correlativo)] || {}, n, { activa: true });
+                    });
+                    var keys = Object.keys(porCor);
+                    if (!keys.length) return 0;
+                    var mesActual = typeof obtenerMesActual === 'function' ? obtenerMesActual() : '';
+                    var lista = typeof obtenerDatosMesEspecifico === 'function'
+                        ? await obtenerDatosMesEspecifico('multas', mesActual)
+                        : (typeof obtenerDatosMes === 'function' ? await obtenerDatosMes('multas') : []);
+                    if (!Array.isArray(lista)) lista = [];
+                    var nums = {};
+                    var rawAll = (window._moduloConserjeriaCache && window._moduloConserjeriaCache.novedadesAll) || [];
+                    if (typeof numerosLibroNovedadesGestion === 'function' && rawAll.length) {
+                        nums = numerosLibroNovedadesGestion(rawAll);
+                    }
+                    var creadas = 0;
+                    var cambiadas = false;
+                    keys.forEach(function (k) {
+                        var n = porCor[k];
+                        var cor = Number(n.correlativo);
+                        if (!isFinite(cor)) return;
+                        var exist = multaBuscarEnLista(lista, cor);
+                        var libro = nums[cor] != null ? nums[cor] : n.numeroLibro;
+                        if (!exist) {
+                            var neu = multaPayloadDesdeNovedad(n, libro);
+                            neu.mes = mesActual;
+                            multaHistorialPush(neu, 'creada_desde_novedad', { estado: 'pendiente_tratamiento' });
+                            lista.unshift(neu);
+                            creadas += 1;
+                            cambiadas = true;
+                            return;
+                        }
+                        var huella = [cor, n.fecha, n.hora, n.categoria, n.texto, n.notaInterna].join('|');
+                        if (exist.novedadHuella === huella) return;
+                        exist.novedadSnapshot = {
+                            fecha: n.fecha || exist.fecha,
+                            hora: n.hora || '',
+                            conserje: n.conserje || '',
+                            texto: n.texto || '',
+                            notaInterna: n.notaInterna || '',
+                            categoria: n.categoria || 'Multa'
+                        };
+                        exist.novedadHuella = huella;
+                        exist.novedadHora = n.hora || exist.novedadHora;
+                        exist.novedadConserje = n.conserje || exist.novedadConserje;
+                        exist.novedadCategoria = n.categoria || exist.novedadCategoria;
+                        exist.novedadLibro = libro != null ? libro : exist.novedadLibro;
+                        if (multaRequiereTratamiento(exist)) {
+                            if (n.texto) {
+                                exist.contenido = String(n.texto);
+                                exist.motivo = multaMotivoDesdeTexto(n.texto);
+                            }
+                            var deptoN = multaInferirDeptoTexto(n.texto || '');
+                            if (deptoN && (!exist.departamento || exist.departamento === '—')) exist.departamento = deptoN;
+                            if ((!exist.nombre || exist.nombre === 'Por confirmar') && deptoN) {
+                                var nom = multaResidenteDesdeDepto(deptoN);
+                                if (nom) exist.nombre = nom;
+                            }
+                        }
+                        multaHistorialPush(exist, 'novedad_actualizada');
+                        cambiadas = true;
+                    });
+                    if (cambiadas) {
+                        var latest = typeof obtenerDatosMesEspecifico === 'function'
+                            ? await obtenerDatosMesEspecifico('multas', mesActual)
+                            : lista;
+                        if (!Array.isArray(latest)) latest = [];
+                        lista.forEach(function (m) {
+                            if (!m) return;
+                            var got = multaBuscarEnLista(latest, m.novedadCorrelativo) || latest.filter(function (x) { return x && x.id === m.id; })[0];
+                            if (!got) {
+                                latest.unshift(m);
+                                return;
+                            }
+                            if (m.novedadHuella && got.novedadHuella !== m.novedadHuella) {
+                                got.novedadSnapshot = m.novedadSnapshot || got.novedadSnapshot;
+                                got.novedadHuella = m.novedadHuella;
+                                got.novedadHora = m.novedadHora || got.novedadHora;
+                                got.novedadConserje = m.novedadConserje || got.novedadConserje;
+                                got.novedadCategoria = m.novedadCategoria || got.novedadCategoria;
+                                got.novedadLibro = m.novedadLibro != null ? m.novedadLibro : got.novedadLibro;
+                                if (multaRequiereTratamiento(got)) {
+                                    if (m.contenido) got.contenido = m.contenido;
+                                    if (m.motivo) got.motivo = m.motivo;
+                                    if (m.departamento && (got.departamento === '—' || !got.departamento)) got.departamento = m.departamento;
+                                    if (m.nombre && (got.nombre === 'Por confirmar' || !got.nombre)) got.nombre = m.nombre;
+                                }
+                            }
+                        });
+                        await persistirListaMultasMes(mesActual, latest);
+                    }
+                    return creadas;
+                } catch (eSync) {
+                    console.warn('[multas] sync Conserjería:', eSync);
+                    return 0;
+                } finally {
+                    if (window._multasSyncLock === job) window._multasSyncLock = null;
+                }
+            })();
+            window._multasSyncLock = job;
+            return job;
+        }
+        function pintarAlertasMultasPendientes(multas) {
+            var list = Array.isArray(multas) ? multas : [];
+            var pend = list.filter(multaRequiereTratamiento);
+            var n = pend.length;
+            var html = '';
+            if (n) {
+                html = '<div><strong>MULTAS PENDIENTES</strong><p>🔔 ' + n + ' multa' + (n === 1 ? '' : 's') + ' requieren revisión</p></div>' +
+                    '<button type="button" class="btn btn-primary" data-ir-multas-pend>Revisar</button>';
+            }
+            ['multasAlertaPendientes', 'dashboardMultasPendientesWrap'].forEach(function (id) {
+                var el = document.getElementById(id);
+                if (!el) return;
+                el.innerHTML = html;
+                el.classList.toggle('is-on', !!n);
+            });
+            var sec = document.getElementById('multasPendientesSec');
+            var tb = document.getElementById('tbodyMultasPendientes');
+            if (sec) sec.hidden = !n;
+            if (tb) {
+                if (!n) tb.innerHTML = '';
+                else {
+                    var esc = function (v) { return String(v == null ? '' : v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;'); };
+                    tb.innerHTML = pend.sort(function (a, b) {
+                        return String(b.fecha || '').localeCompare(String(a.fecha || ''));
+                    }).map(function (m) {
+                        var libro = m.novedadLibro != null ? ('#' + m.novedadLibro) : (m.novedadCorrelativo != null ? '#' + m.novedadCorrelativo : '—');
+                        return '<tr>' +
+                            '<td>' + esc(libro) + '</td>' +
+                            '<td>' + (typeof formatearFecha === 'function' ? formatearFecha(m.fecha) : esc(m.fecha)) + (m.novedadHora ? ' · ' + esc(String(m.novedadHora).slice(0, 5)) : '') + '</td>' +
+                            '<td>' + esc(m.departamento) + '</td>' +
+                            '<td>' + esc(m.motivo) + '</td>' +
+                            '<td>' + multaHtmlEstado(m) + '</td>' +
+                            '<td><button type="button" class="btn btn-primary btn-sm" data-revisar-multa="' + esc(m.id) + '">Revisar</button></td>' +
+                            '</tr>';
+                    }).join('');
+                }
+            }
+        }
+        function multaHtmlHistorial(m) {
+            var hist = Array.isArray(m.historialEstados) ? m.historialEstados : [];
+            if (!hist.length) return '<p>Sin historial todavía.</p>';
+            return '<ul style="margin:0;padding-left:1.1rem;font-size:0.78rem;">' + hist.slice().reverse().map(function (h) {
+                var cuando = '';
+                try { cuando = new Date(h.at).toLocaleString('es-CL'); } catch (eH) { cuando = h.at || ''; }
+                var est = h.estado && MULTA_ESTADOS_GESTION[h.estado] ? MULTA_ESTADOS_GESTION[h.estado].label : '';
+                return '<li>' + String(cuando).replace(/</g, '') + ' · ' + String(h.usuario || '').replace(/</g, '') + ' · ' + String(h.accion || '').replace(/</g, '') + (est ? ' → ' + est : '') + (h.obs ? ' — ' + String(h.obs).replace(/</g, '') : '') + '</li>';
+            }).join('') + '</ul>';
+        }
+        async function abrirDetalleMulta(id) {
+            var lista = typeof obtenerDatosMes === 'function' ? await obtenerDatosMes('multas') : [];
+            var m = (lista || []).find(function (x) { return x && x.id === id; });
+            if (!m) {
+                if (typeof mostrarAlerta === 'function') mostrarAlerta('No se encontró la multa.', 'Error');
+                return;
+            }
+            window._multaDetalleId = id;
+            var modal = document.getElementById('modalDetalleMulta');
+            var body = document.getElementById('multaDetalleCuerpo');
+            var sel = document.getElementById('multaDetalleEstado');
+            var obs = document.getElementById('multaDetalleObsAdmin');
+            var libro = m.novedadLibro != null ? '#' + m.novedadLibro : (m.novedadCorrelativo != null ? '#' + m.novedadCorrelativo : '—');
+            var snap = m.novedadSnapshot || {};
+            var texto = snap.texto || m.contenido || '';
+            var evidencias = m.evidencias || [];
+            var archivos = m.archivos || [];
+            var evHtml = (typeof renderizarArchivos === 'function') ? renderizarArchivos(archivos, evidencias) : '';
+            if (body) {
+                body.innerHTML =
+                    '<div class="multa-detalle-sec"><h4>Origen</h4>' +
+                    '<p><strong>Novedad:</strong> ' + String(libro).replace(/</g, '') + (m.novedadCorrelativo != null ? ' <span style="color:var(--gray-500)">(correlativo ' + m.novedadCorrelativo + ')</span>' : '') + '</p>' +
+                    '<p><strong>Fecha y hora:</strong> ' + String(m.fecha || snap.fecha || '—').replace(/</g, '') + (m.novedadHora || snap.hora ? ' · ' + String(m.novedadHora || snap.hora).slice(0, 5) : '') + '</p>' +
+                    '<p><strong>Conserje:</strong> ' + String(m.novedadConserje || snap.conserje || '—').replace(/</g, '') + '</p>' +
+                    '<p><strong>Categoría:</strong> ' + String(m.novedadCategoria || snap.categoria || 'Multa').replace(/</g, '') + '</p>' +
+                    '<p><strong>Referencia:</strong> la novedad original permanece en Conserjería WM. Este registro solo gestiona el trámite.</p></div>' +
+                    '<div class="multa-detalle-sec"><h4>Involucrado</h4>' +
+                    '<p><strong>Departamento:</strong> ' + String(m.departamento || '—').replace(/</g, '') + '</p>' +
+                    '<p><strong>Residente:</strong> ' + String(m.nombre || '—').replace(/</g, '') + '</p></div>' +
+                    '<div class="multa-detalle-sec"><h4>Antecedentes</h4>' +
+                    '<p>' + String(texto || 'Sin descripción.').replace(/</g, '&lt;').replace(/\n/g, '<br>') + '</p>' +
+                    (snap.notaInterna ? '<p><em>Nota interna:</em> ' + String(snap.notaInterna).replace(/</g, '&lt;') + '</p>' : '') +
+                    '<p><strong>Evidencias:</strong> ' + (evHtml || 'No se adjuntaron archivos en la novedad. Si hay fotos, están en el texto o se pueden agregar al editar la multa.') + '</p></div>' +
+                    '<div class="multa-detalle-sec"><h4>Gestión administrativa</h4>' +
+                    '<p><strong>Estado actual:</strong> ' + multaHtmlEstado(m) + '</p>' +
+                    '<p><strong>Última revisión:</strong> ' + String(m.revisadoAt ? (function () { try { return new Date(m.revisadoAt).toLocaleString('es-CL'); } catch (eR) { return m.revisadoAt; } })() : 'Aún no revisada') + (m.revisadoPor ? ' · ' + String(m.revisadoPor).replace(/</g, '') : '') + '</p>' +
+                    '<p><strong>Historial</strong></p>' + multaHtmlHistorial(m) + '</div>';
+            }
+            if (sel) sel.value = multaEstadoRegistro(m);
+            if (obs) obs.value = m.observacionAdmin || '';
+            if (modal) modal.classList.add('active');
+        }
+        function cerrarDetalleMulta() {
+            var modal = document.getElementById('modalDetalleMulta');
+            if (modal) modal.classList.remove('active');
+            window._multaDetalleId = null;
+        }
+        async function guardarDetalleMulta() {
+            var id = window._multaDetalleId;
+            if (!id) return;
+            var mesCal = typeof obtenerMesActual === 'function' ? obtenerMesActual() : '';
+            if (window.mesEnConsulta && window.mesEnConsulta !== mesCal && !window.mesReabierto) {
+                if (typeof mostrarAlerta === 'function') mostrarAlerta('No se pueden editar registros de meses archivados.', 'Mes Archivado');
+                return;
+            }
+            var lista = (typeof obtenerDatosMesEspecifico === 'function' && mesCal)
+                ? await obtenerDatosMesEspecifico('multas', mesCal)
+                : await obtenerDatosMes('multas');
+            var idx = (lista || []).findIndex(function (x) { return x && x.id === id; });
+            if (idx < 0) return;
+            var m = lista[idx];
+            var sel = document.getElementById('multaDetalleEstado');
+            var obs = document.getElementById('multaDetalleObsAdmin');
+            var nuevo = sel ? sel.value : multaEstadoRegistro(m);
+            var textoObs = obs ? String(obs.value || '').trim() : '';
+            var prev = multaEstadoRegistro(m);
+            m.estadoGestion = nuevo;
+            m.observacionAdmin = textoObs;
+            m.revisadoAt = new Date().toISOString();
+            m.revisadoPor = multaOperadorActual();
+            multaHistorialPush(m, prev === nuevo ? 'observacion' : 'cambio_estado', { estado: nuevo, estadoAnterior: prev, obs: textoObs });
+            lista[idx] = m;
+            var mes = m.mes || (typeof obtenerMesActual === 'function' ? obtenerMesActual() : '');
+            await persistirListaMultasMes(mes, lista);
+            if (typeof window.registrarMovimiento === 'function') {
+                window.registrarMovimiento('actualizar', 'multas', 'Estado de multa ' + (m.novedadLibro != null ? '#' + m.novedadLibro : m.id) + ': ' + (MULTA_ESTADOS_GESTION[nuevo] || {}).label);
+            }
+            cerrarDetalleMulta();
+            if (typeof cargarMultas === 'function') await cargarMultas();
+            pintarAlertasMultasPendientes(lista);
+            if (typeof mostrarToast === 'function') mostrarToast('Gestión de la multa actualizada.', 'success');
+        }
+        function irANovedadDesdeMulta(m) {
+            if (!m) return;
+            if (typeof window.showTab === 'function') window.showTab('conserjeria');
+            var cor = Number(m.novedadCorrelativo);
+            setTimeout(function () {
+                if (isFinite(cor) && typeof window.enfocarNovedadConserjeriaGestion === 'function') {
+                    window.enfocarNovedadConserjeriaGestion(cor);
+                }
+            }, 280);
+        }
+        function bindUiMultasGestionEstados() {
+            if (window._multasEstadosBound) return;
+            window._multasEstadosBound = true;
+            document.addEventListener('click', function (ev) {
+                var t = ev.target;
+                if (!t || !t.closest) return;
+                if (t.closest('[data-ir-multas-pend]')) {
+                    if (typeof window.showTab === 'function') window.showTab('multas');
+                    var sec = document.getElementById('multasPendientesSec');
+                    if (sec && sec.scrollIntoView) sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    return;
+                }
+                var rev = t.closest('[data-revisar-multa]');
+                if (rev) {
+                    abrirDetalleMulta(rev.getAttribute('data-revisar-multa'));
+                    return;
+                }
+            });
+            var close = document.getElementById('btnCerrarDetalleMulta');
+            var save = document.getElementById('btnGuardarDetalleMulta');
+            var ir = document.getElementById('btnDetalleMultaIrNovedad');
+            var modal = document.getElementById('modalDetalleMulta');
+            if (close) close.addEventListener('click', cerrarDetalleMulta);
+            if (save) save.addEventListener('click', function () { guardarDetalleMulta(); });
+            if (ir) ir.addEventListener('click', async function () {
+                var lista = await obtenerDatosMes('multas');
+                var m = (lista || []).find(function (x) { return x && x.id === window._multaDetalleId; });
+                cerrarDetalleMulta();
+                irANovedadDesdeMulta(m);
+            });
+            if (modal) modal.addEventListener('click', function (e) { if (e.target === modal) cerrarDetalleMulta(); });
+            var filtros = document.getElementById('multasFiltroEstados');
+            if (filtros) {
+                filtros.addEventListener('click', function (ev) {
+                    var b = ev.target && ev.target.closest ? ev.target.closest('button[data-estado]') : null;
+                    if (!b) return;
+                    window._multasFiltroEstado = b.getAttribute('data-estado') || '';
+                    filtros.querySelectorAll('button').forEach(function (x) { x.classList.toggle('is-on', x === b); });
+                    if (typeof cargarMultas === 'function') cargarMultas();
+                });
+            }
+        }
+        window.abrirDetalleMulta = abrirDetalleMulta;
+        window.sincronizarMultasDesdeConserjeria = sincronizarMultasDesdeConserjeria;
+
         function aplicarTipoRegistroMultaFormulario() {
             const radAnul = document.getElementById('multaTipoRegistroAnulacion');
             const esAnul = radAnul && radAnul.checked;
@@ -24137,6 +24672,14 @@ document.getElementById('chatForm').onsubmit = function (e) {
             }
             if (!window.editandoMulta) {
                 multa.folio = getSiguienteFolioMulta(multas, multa.mes);
+                multa.origen = 'gestion';
+                multa.estadoGestion = 'gestionada';
+                multa.historialEstados = [{
+                    at: new Date().toISOString(),
+                    usuario: (typeof multaOperadorActual === 'function' ? multaOperadorActual() : 'Administración'),
+                    accion: 'creada_manual',
+                    estado: 'gestionada'
+                }];
             }
             
             // Subir archivos si hay
@@ -24171,6 +24714,20 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     const prevMulta = multas[index];
                     if (prevMulta.folio) multa.folio = prevMulta.folio;
                     if (prevMulta.mes) multa.mes = prevMulta.mes;
+                    if (prevMulta.origen) multa.origen = prevMulta.origen;
+                    if (prevMulta.novedadCorrelativo != null) multa.novedadCorrelativo = prevMulta.novedadCorrelativo;
+                    if (prevMulta.novedadLibro != null) multa.novedadLibro = prevMulta.novedadLibro;
+                    if (prevMulta.novedadHora) multa.novedadHora = prevMulta.novedadHora;
+                    if (prevMulta.novedadConserje) multa.novedadConserje = prevMulta.novedadConserje;
+                    if (prevMulta.novedadCategoria) multa.novedadCategoria = prevMulta.novedadCategoria;
+                    if (prevMulta.novedadHuella) multa.novedadHuella = prevMulta.novedadHuella;
+                    if (prevMulta.novedadSnapshot) multa.novedadSnapshot = prevMulta.novedadSnapshot;
+                    multa.estadoGestion = prevMulta.estadoGestion || (prevMulta.origen === 'conserjeria' ? 'pendiente_tratamiento' : 'gestionada');
+                    multa.historialEstados = Array.isArray(prevMulta.historialEstados) ? prevMulta.historialEstados : [];
+                    multa.observacionAdmin = prevMulta.observacionAdmin || '';
+                    multa.revisadoAt = prevMulta.revisadoAt;
+                    multa.revisadoPor = prevMulta.revisadoPor;
+                    if (typeof multaHistorialPush === 'function') multaHistorialPush(multa, 'datos_actualizados');
                     // Combinar archivos existentes con nuevos
                     const archivosExistentes = prevMulta.archivos || [];
                     if (archivosSubidos && archivosSubidos.length > 0) {
@@ -24352,11 +24909,29 @@ document.getElementById('chatForm').onsubmit = function (e) {
         }
 
         async function cargarMultas() {
-            const multas = await obtenerDatosMes('multas');
+            if (typeof bindUiMultasGestionEstados === 'function') bindUiMultasGestionEstados();
+            try {
+                if (typeof sincronizarMultasDesdeConserjeria === 'function') await sincronizarMultasDesdeConserjeria();
+            } catch (eSyncC) {}
+            const todas = await obtenerDatosMes('multas');
+            var paraAlerta = todas;
+            try {
+                var mesCal = typeof obtenerMesActual === 'function' ? obtenerMesActual() : '';
+                if (window.mesEnConsulta && mesCal && window.mesEnConsulta !== mesCal && typeof obtenerDatosMesEspecifico === 'function') {
+                    paraAlerta = await obtenerDatosMesEspecifico('multas', mesCal);
+                }
+            } catch (eAl) {}
+            if (typeof pintarAlertasMultasPendientes === 'function') pintarAlertasMultasPendientes(paraAlerta);
+            const filtro = window._multasFiltroEstado || '';
+            const multas = (todas || []).filter(function (m) {
+                if (!filtro) return true;
+                if (filtro === 'tratamiento') return typeof multaRequiereTratamiento === 'function' && multaRequiereTratamiento(m);
+                return (typeof multaEstadoRegistro === 'function' ? multaEstadoRegistro(m) : '') === filtro;
+            });
             const tbody = document.getElementById('tbodyMultas');
             
             if (multas.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="8" class="empty-state"><p>No hay registros de multas</p></td></tr>';
+                tbody.innerHTML = '<tr><td colspan="9" class="empty-state"><p>No hay registros de multas</p></td></tr>';
                 return;
             }
 
@@ -24383,10 +24958,15 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 const titComprob = esAnul ? '📄 Vista' : '📄 Comprobante';
                 const titEnviar = esAnul ? '📧 Anulación' : '📧 Enviar';
                 const btnAnulSobre = esAnul ? '' : `<button type="button" class="btn btn-sm" onclick="enviarCorreoAnulacionMultaSobreMulta('${m.id}')" style="padding: 0.375rem 0.75rem; font-size: 0.8125rem; background: #059669; color: white; border: none;" title="Notificar por correo la anulación de esta multa">📧 Anulación</button>`;
+                const origenChip = m.origen === 'conserjeria'
+                    ? ' <span style="display:inline-block;padding:0.1rem 0.35rem;border-radius:6px;font-size:0.68rem;font-weight:700;background:#ffedd5;color:#9a3412;">Conserjería</span>'
+                    : '';
+                const btnRevisar = `<button type="button" class="btn btn-primary btn-sm" data-revisar-multa="${escMultaTabla(m.id)}" style="padding: 0.375rem 0.75rem; font-size: 0.8125rem;">Revisar</button>`;
                 return `
                     <tr>
                         <td>${formatearFecha(m.fecha)}</td>
-                        <td>${tipoLabel}</td>
+                        <td>${tipoLabel}${origenChip}</td>
+                        <td>${typeof multaHtmlEstado === 'function' ? multaHtmlEstado(m) : ''}</td>
                         <td>${escMultaTabla(m.nombre)}</td>
                         <td>${escMultaTabla(m.departamento)}</td>
                         <td>${escMultaTabla(m.motivo)}</td>
@@ -24395,6 +24975,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                         <td>
                             <div class="tabla-acciones">
                                 ${htmlBadgeNotificacionCorreo(m)}
+                                ${btnRevisar}
                                 <button type="button" class="btn btn-secondary btn-sm" onclick="abrirComprobanteMulta('${m.id}')" style="padding: 0.375rem 0.75rem; font-size: 0.8125rem;">${titComprob}</button>
                                 <button type="button" class="btn btn-info btn-sm" onclick="enviarCorreoMulta('${m.id}')" style="padding: 0.375rem 0.75rem; font-size: 0.8125rem; background: #06b6d4; color: white; border: none;" title="${esAnul ? 'Enviar correo de anulación' : 'Enviar comprobante por correo'}">${titEnviar}</button>
                                 ${btnAnulSobre}
@@ -45154,12 +45735,17 @@ document.getElementById('chatForm').onsubmit = function (e) {
             }
             
             if (modulosVisibles.includes('multas')) {
+                var pendMultas = (multas || []).filter(function (m) {
+                    return typeof multaRequiereTratamiento === 'function' && multaRequiereTratamiento(m);
+                }).length;
                 stats.push({
                     title: 'Multas',
                     value: totalMultas,
-                    subtitle: 'Registros activos',
+                    subtitle: pendMultas ? (pendMultas + ' pendiente' + (pendMultas === 1 ? '' : 's') + ' de tratamiento') : 'Registros activos',
                     icon: 'multas',
-                    iconClass: 'warning',
+                    iconClass: pendMultas ? 'danger' : 'warning',
+                    onClickTab: 'multas',
+                    semaforo: pendMultas ? 'rojo' : 'verde',
                     gradient: 'linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(245, 158, 11, 0.05) 100%)'
                 });
             }
@@ -45764,6 +46350,16 @@ document.getElementById('chatForm').onsubmit = function (e) {
         // Panel de Control 2: renderizar contenido (solo actualiza contenedores interiores, no borra secciones)
         window.renderPanelControl2 = function() {
             try {
+                if (typeof bindUiMultasGestionEstados === 'function') bindUiMultasGestionEstados();
+                if (typeof sincronizarMultasDesdeConserjeria === 'function') {
+                    sincronizarMultasDesdeConserjeria().then(function () {
+                        return typeof obtenerDatosMes === 'function' ? obtenerDatosMes('multas') : [];
+                    }).then(function (list) {
+                        if (typeof pintarAlertasMultasPendientes === 'function') pintarAlertasMultasPendientes(list);
+                    }).catch(function () {});
+                } else if (window.dashboardData && window.dashboardData.multas && typeof pintarAlertasMultasPendientes === 'function') {
+                    pintarAlertasMultasPendientes(window.dashboardData.multas);
+                }
                 var d = window.dashboardData;
                 var gridEl = document.getElementById('dashboard2StatsGrid');
 
@@ -48345,6 +48941,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     if (typeof inicializarEditorContenidoMulta === 'function') inicializarEditorContenidoMulta();
                     if (typeof aplicarTipoRegistroMultaFormulario === 'function') aplicarTipoRegistroMultaFormulario();
                     if (typeof bindSelectorNovedadMulta === 'function') bindSelectorNovedadMulta();
+                    if (typeof bindUiMultasGestionEstados === 'function') bindUiMultasGestionEstados();
                 }
                 
                 const formMoroso = document.getElementById('formMoroso');
