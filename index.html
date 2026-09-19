@@ -889,6 +889,25 @@
                 flex: 1 1 100%;
             }
         }
+        .multa-nov-item {
+            display: block;
+            width: 100%;
+            text-align: left;
+            border: 0;
+            border-bottom: 1px solid var(--border-color);
+            background: transparent;
+            color: var(--text-primary);
+            padding: 0.55rem 0.7rem;
+            cursor: pointer;
+            font: inherit;
+        }
+        .multa-nov-item:hover,
+        .multa-nov-item:focus {
+            background: var(--bg-primary);
+        }
+        .multa-nov-item strong { font-size: 0.8rem; }
+        .multa-nov-item span { display: block; margin-top: 0.15rem; font-size: 0.75rem; color: var(--gray-600); line-height: 1.4; }
+        .multa-nov-vacio { padding: 0.85rem; font-size: 0.82rem; color: var(--gray-500); text-align: center; }
 
         .btn {
             padding: 0.625rem 1.25rem;
@@ -2587,79 +2606,215 @@
         .dashboard2-card-sub { font-size: 0.575rem; color: rgba(255,255,255,0.75); line-height: 1.3; }
         .dashboard2-empty-msg { margin: 0; padding: 1rem; font-size: 0.8rem; color: var(--gray-600); }
 
-        /* Módulo Ocupación: mismo diseño que activa-entre-cerros (building-map-edificio) */
+        /* Módulo Ocupación: pulso + mapa alineado por eje 01–15 */
+        #ocupacion.ocupacion-modulo { max-width: 88rem; }
+        #ocupacion .ocupacion-head {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 0.85rem 1.25rem;
+            margin-bottom: 1rem;
+        }
+        #ocupacion .ocupacion-head h2 {
+            margin: 0;
+            color: var(--gray-900);
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
         #ocupacion .resumen-ocupacion-map {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-            gap: 1rem;
-            margin-bottom: 1.5rem;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 0.65rem;
+            margin-bottom: 0.85rem;
+        }
+        @media (max-width: 820px) {
+            #ocupacion .resumen-ocupacion-map { grid-template-columns: repeat(2, minmax(0, 1fr)); }
         }
         #ocupacion .resumen-ocupacion-map .resumen-item {
-            text-align: center;
+            text-align: left;
             border-radius: 10px;
-            padding: 1rem;
+            padding: 0.7rem 0.8rem;
             border: 1px solid var(--border-color);
         }
         #ocupacion .resumen-ocupacion-map .resumen-item.total { background: var(--bg-secondary); }
         #ocupacion .resumen-ocupacion-map .resumen-item.ocupadas { background: rgba(16, 185, 129, 0.1); border-color: rgba(16, 185, 129, 0.3); }
         #ocupacion .resumen-ocupacion-map .resumen-item.vacias { background: rgba(156, 163, 175, 0.15); }
         #ocupacion .resumen-ocupacion-map .resumen-item.pct { background: rgba(117, 187, 33, 0.1); border-color: rgba(117, 187, 33, 0.3); }
-        #ocupacion .resumen-ocupacion-map .resumen-item .valor { font-size: 1.5rem; font-weight: 700; }
-        #ocupacion .resumen-ocupacion-map .resumen-item .etiqueta { font-size: 0.75rem; color: var(--text-tertiary); }
-        /* Mapa del edificio: mismo tamaño y comportamiento que gestion-entre-cerros.html (.building-map-edificio) */
+        #ocupacion .resumen-ocupacion-map .resumen-item .valor { font-size: 1.35rem; font-weight: 800; font-variant-numeric: tabular-nums; }
+        #ocupacion .resumen-ocupacion-map .resumen-item .etiqueta { font-size: 0.72rem; color: var(--text-tertiary); font-weight: 700; }
+        #ocupacion .ocupacion-mapa-sec {
+            margin-bottom: 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            background: var(--bg-primary);
+            overflow: hidden;
+        }
+        #ocupacion .ocupacion-mapa-sec > h3 {
+            margin: 0;
+            padding: 0.7rem 1rem 0.15rem;
+            font-size: 1.02rem;
+            font-weight: 800;
+            color: var(--gray-900);
+        }
+        #ocupacion .ocupacion-mapa-lead {
+            margin: 0 1rem 0.65rem;
+            font-size: 0.78rem;
+            line-height: 1.4;
+            color: var(--gray-600);
+        }
+        #ocupacion .ocupacion-mapa-toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.45rem 0.65rem;
+            padding: 0 1rem 0.7rem;
+        }
+        #ocupacion .ocupacion-mapa-toolbar .form-input { max-width: 22rem; flex: 1 1 14rem; }
+        #ocupacion .ocupacion-vistas {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.3rem;
+        }
+        #ocupacion .ocupacion-vista-btn {
+            border: 1px solid var(--border-color);
+            background: var(--bg-secondary);
+            color: var(--gray-700);
+            border-radius: 999px;
+            padding: 0.22rem 0.55rem;
+            font-size: 0.7rem;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        #ocupacion .ocupacion-vista-btn.is-on {
+            background: rgba(117, 187, 33, 0.16);
+            border-color: rgba(117, 187, 33, 0.45);
+            color: var(--gray-900);
+        }
+        #ocupacion .leyenda-mapa-edificio {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.45rem 0.75rem;
+            margin: 0;
+            padding: 0.35rem 1rem 0.75rem;
+            background: transparent;
+            border: 0;
+            border-radius: 0;
+        }
+        #ocupacion .leyenda-mapa-edificio .leyenda-item {
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+            font-size: 0.7rem;
+            color: var(--gray-600);
+        }
+        #ocupacion .leyenda-mapa-edificio .leyenda-cuadro {
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+            flex-shrink: 0;
+        }
+        #ocupacion .ocupacion-mapa-hint {
+            margin: 0 1rem 0.55rem;
+            font-size: 0.72rem;
+            color: var(--gray-500);
+            min-height: 1em;
+        }
+        #ocupacion .ocupacion-mapa-shell {
+            padding: 0 0.75rem 0.85rem;
+        }
+        #ocupacion .ocupacion-mapa-scroll {
+            max-height: min(78vh, 980px);
+            overflow: auto;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            background: linear-gradient(180deg, var(--bg-tertiary) 0%, rgba(117, 187, 33, 0.06) 100%);
+            min-height: 28rem;
+        }
+        #ocupacion .ocupacion-mapa-axis {
+            display: grid;
+            grid-template-columns: 42px repeat(15, minmax(0, 1fr));
+            gap: 3px;
+            align-items: center;
+            padding: 8px 14px 6px;
+            position: sticky;
+            top: 0;
+            z-index: 4;
+            background: color-mix(in srgb, var(--bg-primary) 94%, transparent);
+            backdrop-filter: blur(6px);
+        }
+        #ocupacion .ocupacion-mapa-axis-floor {
+            font-size: 0.62rem;
+            font-weight: 800;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            color: var(--gray-500);
+            text-align: center;
+        }
+        #ocupacion .ocupacion-mapa-cols {
+            display: contents;
+        }
+        #ocupacion .ocupacion-mapa-cols span {
+            text-align: center;
+            font-size: 0.62rem;
+            font-weight: 800;
+            color: var(--gray-500);
+            font-variant-numeric: tabular-nums;
+        }
         #ocupacion .building-map-edificio {
             display: flex;
-            flex-direction: column-reverse;
-            gap: 8px;
-            padding: 14px 14px 14px 62px;
+            flex-direction: column;
+            gap: 5px;
+            padding: 0 14px 10px;
             width: 100%;
             max-width: 100%;
             box-sizing: border-box;
-            background: linear-gradient(120deg, var(--bg-tertiary) 60%, rgba(117, 187, 33, 0.08) 100%);
-            border-radius: 12px;
-            max-height: 52vh;
-            overflow-y: auto;
-            overflow-x: auto;
-            border: 1px solid var(--border-color);
+            background: transparent;
+            border: 0;
+            border-radius: 0;
+            min-height: 0;
+            max-height: none;
+            overflow: visible;
         }
         #ocupacion .building-map-edificio .floor-row {
             display: grid;
-            grid-template-columns: repeat(15, 1fr);
+            grid-template-columns: 42px repeat(15, minmax(0, 1fr));
             gap: 3px;
-            padding: 7px;
-            background: var(--bg-secondary);
-            border-radius: 6px;
-            border: 1.5px solid var(--border-color);
+            padding: 3px 0;
+            background: transparent;
+            border: 0;
+            border-radius: 0;
             position: relative;
+            align-items: stretch;
         }
-        #ocupacion .building-map-edificio .floor-row::before {
-            content: attr(data-floor);
-            position: absolute;
-            left: -48px;
-            top: 50%;
-            transform: translateY(-50%);
+        #ocupacion .building-map-edificio .floor-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
             background: linear-gradient(90deg, var(--primary), var(--primary-dark));
             color: white;
-            padding: 3px 8px;
-            border-radius: 8px;
-            font-size: 0.75rem;
-            font-weight: 700;
+            border-radius: 7px;
+            font-size: 0.68rem;
+            font-weight: 800;
+            min-height: 26px;
+            user-select: none;
         }
         #ocupacion .building-map-edificio .unit-cell {
             aspect-ratio: 1;
             border: 2px solid var(--border-color);
-            border-radius: 4px;
+            border-radius: 5px;
             display: flex;
             align-items: center;
             justify-content: center;
             position: relative;
-            font-size: 0.65rem;
-            font-weight: 700;
+            font-size: 0.68rem;
+            font-weight: 800;
             cursor: pointer;
             background: var(--bg-primary);
             color: var(--text-tertiary);
-            min-height: 20px;
-            transition: all 0.2s;
+            min-height: 26px;
+            transition: transform 0.15s ease, filter 0.15s ease, opacity 0.15s ease;
         }
         #ocupacion .building-map-edificio .unit-cell.occupied.habitacional {
             background: var(--primary) !important;
@@ -2681,13 +2836,12 @@
             color: var(--text-tertiary) !important;
             border-style: dashed;
         }
-        /* Hueco vacío para mantener 15 columnas y mismo tamaño en todas las celdas */
         #ocupacion .building-map-edificio .unit-cell.slot-vacio {
             background: transparent !important;
             border-color: transparent !important;
             cursor: default;
             visibility: hidden;
-            min-height: 20px;
+            min-height: 26px;
             pointer-events: none;
         }
         #ocupacion .building-map-edificio .unit-cell.occupied.new-resident {
@@ -2700,30 +2854,53 @@
             outline: 1.5px solid rgba(255, 165, 2, 0.6);
             outline-offset: -1px;
         }
-        #ocupacion .building-map-edificio .unit-cell:hover {
-            filter: brightness(1.1);
+        #ocupacion .building-map-edificio .unit-cell.is-dim { opacity: 0.18; filter: grayscale(0.35); }
+        #ocupacion .building-map-edificio .unit-cell.is-hit {
+            box-shadow: 0 0 0 2px var(--bg-primary), 0 0 0 4px var(--primary);
             z-index: 2;
         }
-        #ocupacion .leyenda-mapa-edificio {
+        #ocupacion .building-map-edificio .unit-cell:hover {
+            filter: brightness(1.08);
+            z-index: 3;
+            transform: scale(1.06);
+        }
+        #ocupacion .ocupacion-bienvenida-sec {
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 0.85rem 1rem 1rem;
+            background: var(--bg-primary);
+        }
+        #ocupacion .ocupacion-bienvenida-sec > h3 {
+            margin: 0 0 0.25rem;
+            font-size: 0.95rem;
+            font-weight: 800;
+            color: var(--gray-900);
+        }
+        #ocupacion .ocupacion-bienvenida-kpis {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 0.5rem;
+            margin: 0.65rem 0 0.75rem;
+        }
+        @media (max-width: 640px) {
+            #ocupacion .ocupacion-bienvenida-kpis { grid-template-columns: 1fr; }
+            #ocupacion .ocupacion-mapa-scroll { min-height: 20rem; max-height: 70vh; }
+        }
+        #ocupacion .ocupacion-bienvenida-kpis .resumen-item {
+            text-align: left;
+            border-radius: 8px;
+            padding: 0.55rem 0.65rem;
+            border: 1px solid var(--border-color);
+            background: var(--bg-secondary);
+        }
+        #ocupacion .ocupacion-bienvenida-kpis .valor { font-size: 1.15rem; font-weight: 800; }
+        #ocupacion .ocupacion-bienvenida-kpis .etiqueta { font-size: 0.7rem; color: var(--gray-500); font-weight: 700; }
+        #ocupacion .ocupacion-bienvenida-acciones {
             display: flex;
             flex-wrap: wrap;
-            gap: 14px;
-            margin-bottom: 14px;
-            padding: 14px 16px;
-            background: var(--bg-secondary);
-            border-radius: 10px;
-            border: 1px solid var(--border-color);
-        }
-        #ocupacion .leyenda-mapa-edificio .leyenda-item {
-            display: flex;
             align-items: center;
-            gap: 9px;
-            font-size: 0.9375rem;
-        }
-        #ocupacion .leyenda-mapa-edificio .leyenda-cuadro {
-            width: 18px;
-            height: 18px;
-            border-radius: 4px;
+            gap: 0.45rem;
+            margin-bottom: 0.7rem;
         }
 
         /* Fallback: contenido clonado (grid + cards del panel principal) */
@@ -6820,10 +6997,13 @@
                             <input type="text" id="multaMotivo" required style="padding: 0.5rem; font-size: 0.875rem;">
                         </div>
                         <div class="form-group" style="grid-column: 1 / -1; margin-bottom: 0.5rem;">
-                            <label style="margin-bottom: 0.25rem; font-size: 0.875rem;">Contenido de la multa</label>
+                            <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.4rem 0.75rem; margin-bottom: 0.25rem;">
+                                <label style="margin: 0; font-size: 0.875rem;" for="multaContenido">Contenido de la multa</label>
+                                <button type="button" class="btn btn-secondary" id="btnMultaTraerNovedad" style="padding: 0.32rem 0.65rem; font-size: 0.75rem; white-space: nowrap;">Traer novedad de Conserjería</button>
+                            </div>
                             <div id="multaContenido" contenteditable="true" role="textbox" aria-multiline="true" data-placeholder="Detalle, antecedentes, norma infringida u observaciones que deben quedar guardadas en el registro." style="width: 100%; min-height: 120px; padding: 0.6rem; font-size: 0.875rem; line-height: 1.5; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-primary); color: var(--text-primary); font-family: inherit; overflow-y: auto; box-sizing: border-box;"></div>
                             <small style="color: var(--gray-500); font-size: 0.7rem; margin-top: 0.15rem; display: block;">
-                                Puede pegar texto con formato básico. Se conservarán negritas, cursivas, subrayado, listas y saltos de párrafo para el correo.
+                                Puede insertar el número, la fecha y la hora de una novedad de Conserjería. También se conserva formato básico al pegar texto.
                             </small>
                         </div>
                         <div class="form-group" id="multaGrupoTipoUnidad" style="margin-bottom: 0.5rem;">
@@ -7728,21 +7908,14 @@
         </div>
 
         <!-- MÓDULO: OCUPACIÓN — datos solo desde Conserjería (prueba-conserjeria): Firestore conserjeriawm2 cgSites/kv o caché local compartida -->
-        <div id="ocupacion" class="tab-content">
-            <div style="margin-bottom: 1.5rem; display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 1rem;">
+        <div id="ocupacion" class="tab-content ocupacion-modulo">
+            <header class="ocupacion-head">
                 <div>
-                    <h2 style="margin: 0; color: var(--gray-900); font-size: 1.5rem; font-weight: 700;">🏢 Ocupación del Edificio</h2>
-                    <p id="ocupacionFuenteDatos" style="color: var(--gray-600); font-size: 0.875rem; margin: 0.5rem 0 0 0;">Cargando fuente de residentes…</p>
+                    <h2>Ocupación del edificio</h2>
+                    <p id="ocupacionFuenteDatos" style="color: var(--gray-600); font-size: 0.875rem; margin: 0.4rem 0 0 0;">Cargando fuente de residentes…</p>
                 </div>
-                <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem;">
-                    <label for="ocupacionUnidadBienvenida" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0);">Número de unidad</label>
-                    <input type="text" id="ocupacionUnidadBienvenida" class="form-input" placeholder="Nº unidad" autocomplete="off" style="width: 7.5rem; padding: 0.5rem 0.75rem; font-size: 0.875rem;">
-                    <button type="button" id="btnEnviarBienvenidaOcupacion" class="btn btn-primary" style="padding: 0.5rem 0.9rem; font-size: 0.875rem; white-space: nowrap;" title="Reenvía el correo de bienvenida a propietarios, arrendatarios y familiares de la unidad. Las visitas frecuentes no lo reciben.">📧 Enviar correo de bienvenida</button>
-                    <button type="button" id="btnEnviarBienvenidaMasivaOcupacion" class="btn btn-secondary" style="padding: 0.5rem 0.9rem; font-size: 0.875rem; white-space: nowrap;" title="Envía el correo de bienvenida a propietarios, arrendatarios y familiares de todas las unidades en copia oculta (CCO). Las visitas frecuentes quedan fuera.">📧 Enviar bienvenida a todas (CCO)</button>
-                </div>
-            </div>
-            <!-- Resumen ocupación (igual que activa-entre-cerros) -->
-            <div id="resumenOcupacion" class="resumen-ocupacion-map" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+            </header>
+            <div id="resumenOcupacion" class="resumen-ocupacion-map">
                 <div class="resumen-item total">
                     <div id="ocupacionTotalUnidades" class="valor" style="color: var(--text-primary);">0</div>
                     <div class="etiqueta">Total unidades</div>
@@ -7759,47 +7932,69 @@
                     <div id="ocupacionPorcentaje" class="valor" style="color: var(--primary);">0%</div>
                     <div class="etiqueta">Ocupación actual</div>
                 </div>
-                <div class="resumen-item">
-                    <div id="ocupacionBienvenidaEnviadas" class="valor" style="color: #059669;">0</div>
-                    <div class="etiqueta">Bienvenida enviada</div>
-                </div>
-                <div class="resumen-item">
-                    <div id="ocupacionBienvenidaEnCola" class="valor" style="color: #2563eb;">0</div>
-                    <div class="etiqueta">Bienvenida en cola</div>
-                </div>
-                <div class="resumen-item">
-                    <div id="ocupacionBienvenidaPendientes" class="valor" style="color: #d97706;">0</div>
-                    <div class="etiqueta">Bienvenida pendiente</div>
-                </div>
             </div>
-            <section class="form-section" style="margin-bottom: 1.5rem;">
-                <h3 style="margin: 0 0 0.75rem 0; font-size: 1.1rem; font-weight: 700;">🏢 Mapa del Edificio</h3>
+            <section class="ocupacion-mapa-sec" aria-label="Mapa del edificio">
+                <h3>Mapa del edificio</h3>
+                <p class="ocupacion-mapa-lead">El edificio se lee como está: piso 19 arriba y piso 2 abajo. Cada columna es el depto (01 a 15), así 204 queda sobre 304, 404, 504… Pulse una unidad para ver el detalle.</p>
+                <div class="ocupacion-mapa-toolbar">
+                    <input type="text" id="buildingMapFilterOcupacion" class="form-input" placeholder="Buscar unidad, residente, estacionamiento o bodega…" style="padding: 0.45rem 0.7rem; font-size: 0.82rem;">
+                    <div class="ocupacion-vistas" id="ocupacionMapaVistas" role="group" aria-label="Vista del mapa">
+                        <button type="button" class="ocupacion-vista-btn is-on" data-vista="">Todas</button>
+                        <button type="button" class="ocupacion-vista-btn" data-vista="habitacional">Habitacional</button>
+                        <button type="button" class="ocupacion-vista-btn" data-vista="arriendo">Arriendo</button>
+                        <button type="button" class="ocupacion-vista-btn" data-vista="vacia">Vacías</button>
+                        <button type="button" class="ocupacion-vista-btn" data-vista="nuevas">Nuevas</button>
+                        <button type="button" class="ocupacion-vista-btn" data-vista="bienvenida">Bienvenida pendiente</button>
+                    </div>
+                </div>
                 <div class="leyenda-mapa-edificio">
-                    <div class="leyenda-item"><div class="leyenda-cuadro" style="background: var(--primary);"></div><span style="font-size: 0.8rem;">Habitacional ocupada</span></div>
-                    <div class="leyenda-item"><div class="leyenda-cuadro" style="background: #5499C7;"></div><span style="font-size: 0.8rem;">Arriendo ocupada (con arrendatarios)</span></div>
-                    <div class="leyenda-item"><div class="leyenda-cuadro" style="background: #94a3b8;"></div><span style="font-size: 0.8rem;">Arriendo vacía o sin arrendatarios</span></div>
-                    <div class="leyenda-item"><div class="leyenda-cuadro" style="background: var(--bg-tertiary); border: 2px solid var(--border-color);"></div><span style="font-size: 0.8rem;">Vacía / Disponible</span></div>
-                    <div class="leyenda-item"><div class="leyenda-cuadro" style="background: #9b59b6;"></div><span style="font-size: 0.8rem;">Nuevas (últimos 7 días)</span></div>
-                    <div class="leyenda-item"><div class="leyenda-cuadro" style="border: 2px solid #ffa502; background: var(--bg-tertiary);"></div><span style="font-size: 0.8rem;">Contrato arriendo</span></div>
-                    <div class="leyenda-item"><span style="font-size: 0.85rem; color: #059669;">✉</span><span style="font-size: 0.8rem;">Bienvenida enviada</span></div>
-                    <div class="leyenda-item"><span style="font-size: 0.85rem; color: #2563eb;">✉</span><span style="font-size: 0.8rem;">Bienvenida en cola</span></div>
-                    <div class="leyenda-item"><span style="font-size: 0.85rem; color: #d97706;">✉</span><span style="font-size: 0.8rem;">Bienvenida pendiente</span></div>
+                    <div class="leyenda-item"><div class="leyenda-cuadro" style="background: var(--primary);"></div><span>Habitacional</span></div>
+                    <div class="leyenda-item"><div class="leyenda-cuadro" style="background: #5499C7;"></div><span>Arriendo ocupada</span></div>
+                    <div class="leyenda-item"><div class="leyenda-cuadro" style="background: #94a3b8;"></div><span>Arriendo sin arrendatario</span></div>
+                    <div class="leyenda-item"><div class="leyenda-cuadro" style="background: var(--bg-tertiary); border: 2px solid var(--border-color);"></div><span>Vacía</span></div>
+                    <div class="leyenda-item"><div class="leyenda-cuadro" style="background: #9b59b6;"></div><span>Nueva (7 días)</span></div>
+                    <div class="leyenda-item"><div class="leyenda-cuadro" style="border: 2px solid #ffa502; background: var(--bg-tertiary);"></div><span>Contrato</span></div>
+                    <div class="leyenda-item"><span style="color: #059669;">✉</span><span>Bienvenida enviada</span></div>
+                    <div class="leyenda-item"><span style="color: #2563eb;">✉</span><span>En cola</span></div>
+                    <div class="leyenda-item"><span style="color: #d97706;">✉</span><span>Pendiente</span></div>
                 </div>
-                <div id="ocupacionBienvenidaRegistroWrap" style="margin: 0 0 12px 0;">
-                    <h4 style="margin: 0 0 0.35rem 0; font-size: 0.85rem; font-weight: 700;">Registro de fecha de envío de bienvenida</h4>
+                <p class="ocupacion-mapa-hint" id="ocupacionMapaHint" aria-live="polite"></p>
+                <div class="ocupacion-mapa-shell">
+                    <div class="ocupacion-mapa-scroll">
+                        <div class="ocupacion-mapa-axis" aria-hidden="true">
+                            <span class="ocupacion-mapa-axis-floor">Piso</span>
+                            <div class="ocupacion-mapa-cols" id="ocupacionMapaCols"></div>
+                        </div>
+                        <div class="building-map-edificio" id="buildingMapOcupacion"></div>
+                    </div>
+                </div>
+            </section>
+            <section class="ocupacion-bienvenida-sec" aria-label="Correo de bienvenida">
+                <h3>Correo de bienvenida</h3>
+                <p style="margin: 0; font-size: 0.78rem; color: var(--gray-600);">Envío por unidad, separado del mapa para no tapar la lectura del edificio.</p>
+                <div class="ocupacion-bienvenida-kpis">
+                    <div class="resumen-item">
+                        <div id="ocupacionBienvenidaEnviadas" class="valor" style="color: #059669;">0</div>
+                        <div class="etiqueta">Bienvenida enviada</div>
+                    </div>
+                    <div class="resumen-item">
+                        <div id="ocupacionBienvenidaEnCola" class="valor" style="color: #2563eb;">0</div>
+                        <div class="etiqueta">Bienvenida en cola</div>
+                    </div>
+                    <div class="resumen-item">
+                        <div id="ocupacionBienvenidaPendientes" class="valor" style="color: #d97706;">0</div>
+                        <div class="etiqueta">Bienvenida pendiente</div>
+                    </div>
+                </div>
+                <div class="ocupacion-bienvenida-acciones">
+                    <label for="ocupacionUnidadBienvenida" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0);">Número de unidad</label>
+                    <input type="text" id="ocupacionUnidadBienvenida" class="form-input" placeholder="Nº unidad" autocomplete="off" style="width: 7.5rem; padding: 0.45rem 0.7rem; font-size: 0.82rem;">
+                    <button type="button" id="btnEnviarBienvenidaOcupacion" class="btn btn-primary" style="padding: 0.4rem 0.75rem; font-size: 0.8rem; white-space: nowrap;" title="Reenvía el correo de bienvenida a propietarios, arrendatarios y familiares de la unidad. Las visitas frecuentes no lo reciben.">Enviar correo de bienvenida</button>
+                    <button type="button" id="btnEnviarBienvenidaMasivaOcupacion" class="btn btn-secondary" style="padding: 0.4rem 0.75rem; font-size: 0.8rem; white-space: nowrap;" title="Envía el correo de bienvenida a propietarios, arrendatarios y familiares de todas las unidades en copia oculta (CCO). Las visitas frecuentes quedan fuera.">Enviar a todas (CCO)</button>
+                </div>
+                <div id="ocupacionBienvenidaRegistroWrap">
+                    <h4 style="margin: 0 0 0.35rem 0; font-size: 0.82rem; font-weight: 700;">Registro de fecha de envío</h4>
                     <div class="bienvenida-registro" id="ocupacionBienvenidaRegistro"><span class="bienvenida-vacio">Cargando…</span></div>
-                </div>
-                <div style="margin-bottom: 10px;">
-                    <input type="text" id="buildingMapFilterOcupacion" class="form-input" placeholder="🔍 Filtrar por número de unidad, uso, residente, estacionamiento, bodega..." style="width: 100%; max-width: 400px; padding: 0.5rem 0.75rem; font-size: 0.875rem;">
-                </div>
-                <div class="building-map-edificio" id="buildingMapOcupacion"></div>
-                <div style="margin-top: 15px; display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 8px;">
-                    <a href="prueba-conserjeria.html" target="_blank" rel="noopener" class="btn btn-primary" style="font-size: 0.8rem; padding: 6px 12px; text-decoration: none;">
-                        🏠 Conserjería / residentes (prueba-conserjeria)
-                    </a>
-                    <a href="prueba-conserjeria.html#building" target="_blank" rel="noopener" class="btn btn-primary" style="font-size: 0.8rem; padding: 6px 12px; text-decoration: none;">
-                        🗺️ Mapa residentes (Conserjería)
-                    </a>
                 </div>
             </section>
         </div>
@@ -8903,6 +9098,21 @@
             <div class="modal-buttons">
                 <button type="button" class="btn btn-secondary" id="btnCancelarEditarNovedadGestion">Cancelar</button>
                 <button type="button" class="btn btn-primary" id="btnGuardarEditarNovedadGestion">Guardar cambios</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modalNovedadMulta" class="modal-overlay">
+        <div class="modal-confirm" style="max-width: 640px; width: 100%;">
+            <h3 style="margin: 0 0 0.35rem 0;">Novedad de Conserjería</h3>
+            <p style="margin: 0 0 0.75rem 0; color: var(--gray-600); font-size: 0.875rem;">Elija la novedad para insertar su número, fecha y hora en el contenido de la multa.</p>
+            <div class="form-group" style="margin-bottom: 0.65rem;">
+                <label for="multaNovedadBuscar" style="margin-bottom: 0.25rem; font-size: 0.875rem;">Buscar</label>
+                <input type="search" id="multaNovedadBuscar" placeholder="Buscar #2356, fecha, conserje o texto…" style="width: 100%; padding: 0.5rem; font-size: 0.875rem; box-sizing: border-box;">
+            </div>
+            <div id="multaNovedadLista" style="max-height: 320px; overflow: auto; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-secondary);"></div>
+            <div class="modal-buttons" style="margin-top: 0.85rem;">
+                <button type="button" class="btn btn-secondary" id="btnCerrarNovedadMulta">Cancelar</button>
             </div>
         </div>
     </div>
@@ -23661,6 +23871,160 @@ document.getElementById('chatForm').onsubmit = function (e) {
             editor.addEventListener('blur', function() {
                 editor.innerHTML = sanitizarContenidoMultaHtml(editor.innerHTML);
             });
+            if (typeof bindSelectorNovedadMulta === 'function') bindSelectorNovedadMulta();
+        }
+
+        function multaFormatoFechaNovedad(fecha) {
+            var s = String(fecha || '').trim();
+            var m1 = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+            if (m1) return String(m1[1]).padStart(2, '0') + '-' + String(m1[2]).padStart(2, '0') + '-' + m1[3];
+            var m2 = s.match(/^(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})/);
+            if (m2) return String(m2[3]).padStart(2, '0') + '-' + String(m2[2]).padStart(2, '0') + '-' + m2[1];
+            return s;
+        }
+        function multaYmdDesdeNovedad(fecha) {
+            var s = String(fecha || '').trim();
+            var m1 = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+            if (m1) return m1[3] + '-' + String(m1[2]).padStart(2, '0') + '-' + String(m1[1]).padStart(2, '0');
+            var m2 = s.match(/^(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})/);
+            if (m2) return m2[1] + '-' + String(m2[2]).padStart(2, '0') + '-' + String(m2[3]).padStart(2, '0');
+            return '';
+        }
+        function multaFormatoHoraNovedad(hora) {
+            return String(hora || '').slice(0, 5) || '—';
+        }
+        function multaNumeroNovedad(n) {
+            if (!n) return '—';
+            if (n.numeroLibro != null && n.numeroLibro !== '') return String(n.numeroLibro);
+            var lab = String(n.libro || '');
+            var m = lab.match(/#(\d+)/);
+            if (m) return m[1];
+            return n.correlativo != null ? String(n.correlativo) : '—';
+        }
+        function multaListaNovedadesConserjeria() {
+            var cache = window._moduloConserjeriaCache || {};
+            var raw = (cache.novedadesAll && cache.novedadesAll.length) ? cache.novedadesAll : (cache.novedades || []);
+            var nums = typeof numerosLibroNovedadesGestion === 'function' ? numerosLibroNovedadesGestion(raw) : {};
+            return raw.filter(function (n) {
+                return n && !n.turnoSep && n.tipo !== 'resumen_diario' && !n.minimizada;
+            }).map(function (n) {
+                var num = n.numeroLibro != null ? n.numeroLibro : nums[n.correlativo];
+                return {
+                    correlativo: n.correlativo,
+                    numeroLibro: num,
+                    fecha: n.fecha || '',
+                    hora: n.hora || '',
+                    categoria: n.categoria || '',
+                    conserje: n.conserje || '',
+                    texto: n.texto || ''
+                };
+            }).sort(function (a, b) {
+                return (Number(b.correlativo) || 0) - (Number(a.correlativo) || 0);
+            });
+        }
+        async function multaAsegurarNovedadesConserjeria() {
+            var cache = window._moduloConserjeriaCache || {};
+            if ((cache.novedadesAll && cache.novedadesAll.length) || (cache.novedades && cache.novedades.length)) return;
+            if (typeof window.cargarModuloConserjeriaGestion === 'function') {
+                try { await window.cargarModuloConserjeriaGestion({ forzar: true }); } catch (e) {}
+            }
+        }
+        function multaHtmlRefNovedad(n) {
+            var num = multaNumeroNovedad(n);
+            var fecha = multaFormatoFechaNovedad(n.fecha);
+            var hora = multaFormatoHoraNovedad(n.hora);
+            var partes = ['Novedad <strong>#' + escaparHtmlContenidoMulta(num) + '</strong>'];
+            if (fecha) partes.push(escaparHtmlContenidoMulta(fecha));
+            if (hora && hora !== '—') partes.push(escaparHtmlContenidoMulta(hora) + ' hrs.');
+            return '<p style="margin: 0 0 8px 0;">' + partes.join(' · ') + '</p>';
+        }
+        function insertarNovedadEnContenidoMulta(n) {
+            var editor = document.getElementById('multaContenido');
+            if (!editor || !n) return;
+            editor.focus();
+            var html = multaHtmlRefNovedad(n);
+            var ok = false;
+            try { ok = document.execCommand('insertHTML', false, html); } catch (eIns) { ok = false; }
+            if (!ok) editor.innerHTML = (editor.innerHTML || '') + html;
+            editor.innerHTML = sanitizarContenidoMultaHtml(editor.innerHTML);
+            var fechaInp = document.getElementById('multaFecha');
+            var ymd = multaYmdDesdeNovedad(n.fecha);
+            if (fechaInp && ymd && !String(fechaInp.value || '').trim()) fechaInp.value = ymd;
+        }
+        function pintarListaNovedadMulta() {
+            var list = document.getElementById('multaNovedadLista');
+            var inp = document.getElementById('multaNovedadBuscar');
+            if (!list) return;
+            var q = inp ? String(inp.value || '').trim().toLowerCase().replace(/^#/, '') : '';
+            var rows = multaListaNovedadesConserjeria();
+            if (q) {
+                rows = rows.filter(function (n) {
+                    var blob = [n.numeroLibro, n.correlativo, n.fecha, n.hora, n.categoria, n.conserje, n.texto].join(' ').toLowerCase();
+                    return blob.indexOf(q) !== -1;
+                });
+            }
+            rows = rows.slice(0, 80);
+            if (!rows.length) {
+                list.innerHTML = '<div class="multa-nov-vacio">' + (q ? 'Sin coincidencias en Conserjería.' : 'No hay novedades cargadas. Pulse buscar o actualice el módulo Conserjería.') + '</div>';
+                return;
+            }
+            list.innerHTML = rows.map(function (n) {
+                var num = multaNumeroNovedad(n);
+                var fecha = multaFormatoFechaNovedad(n.fecha);
+                var hora = multaFormatoHoraNovedad(n.hora);
+                var snip = String(n.texto || '').replace(/\s+/g, ' ').trim();
+                if (snip.length > 140) snip = snip.slice(0, 137) + '…';
+                return '<button type="button" class="multa-nov-item" data-multa-nov-cor="' + String(n.correlativo || '') + '">' +
+                    '<strong>#' + escaparHtmlContenidoMulta(num) + '</strong> · ' + escaparHtmlContenidoMulta(fecha || '—') + ' · ' + escaparHtmlContenidoMulta(hora) +
+                    (n.categoria ? ' · ' + escaparHtmlContenidoMulta(n.categoria) : '') +
+                    (n.conserje ? ' · ' + escaparHtmlContenidoMulta(n.conserje) : '') +
+                    '<span>' + escaparHtmlContenidoMulta(snip || 'Sin detalle') + '</span></button>';
+            }).join('');
+        }
+        function cerrarModalNovedadMulta() {
+            var modal = document.getElementById('modalNovedadMulta');
+            if (modal) modal.classList.remove('active');
+        }
+        async function abrirModalNovedadMulta() {
+            var modal = document.getElementById('modalNovedadMulta');
+            var list = document.getElementById('multaNovedadLista');
+            var inp = document.getElementById('multaNovedadBuscar');
+            if (!modal) return;
+            if (list) list.innerHTML = '<div class="multa-nov-vacio">Cargando novedades de Conserjería…</div>';
+            modal.classList.add('active');
+            if (inp) inp.value = '';
+            await multaAsegurarNovedadesConserjeria();
+            pintarListaNovedadMulta();
+            if (inp) setTimeout(function () { inp.focus(); }, 80);
+        }
+        function bindSelectorNovedadMulta() {
+            if (window._multaNovedadBound) return;
+            window._multaNovedadBound = true;
+            var btn = document.getElementById('btnMultaTraerNovedad');
+            var close = document.getElementById('btnCerrarNovedadMulta');
+            var modal = document.getElementById('modalNovedadMulta');
+            var inp = document.getElementById('multaNovedadBuscar');
+            var list = document.getElementById('multaNovedadLista');
+            if (btn) btn.addEventListener('click', function () { abrirModalNovedadMulta(); });
+            if (close) close.addEventListener('click', cerrarModalNovedadMulta);
+            if (modal) {
+                modal.addEventListener('click', function (e) {
+                    if (e.target === modal) cerrarModalNovedadMulta();
+                });
+            }
+            if (inp) inp.addEventListener('input', pintarListaNovedadMulta);
+            if (list) {
+                list.addEventListener('click', function (ev) {
+                    var b = ev.target && ev.target.closest ? ev.target.closest('[data-multa-nov-cor]') : null;
+                    if (!b) return;
+                    var cor = Number(b.getAttribute('data-multa-nov-cor'));
+                    var n = multaListaNovedadesConserjeria().filter(function (x) { return Number(x.correlativo) === cor; })[0];
+                    if (!n) return;
+                    insertarNovedadEnContenidoMulta(n);
+                    cerrarModalNovedadMulta();
+                    if (typeof mostrarToast === 'function') mostrarToast('Se insertaron número, fecha y hora de la novedad #' + multaNumeroNovedad(n) + '.', 'success');
+                });
+            }
         }
 
         function aplicarTipoRegistroMultaFormulario() {
@@ -37640,11 +38004,53 @@ document.getElementById('chatForm').onsubmit = function (e) {
             });
         }
 
+        function ocupacionColumnaDesdeNumero(unitNumber) {
+            var digits = String(unitNumber || '').replace(/\D/g, '');
+            if (!digits) return 0;
+            var suf = parseInt(digits, 10) % 100;
+            return (suf >= 1 && suf <= 15) ? suf : 0;
+        }
+        function ocupacionVistaActiva() {
+            var on = document.querySelector('#ocupacionMapaVistas .ocupacion-vista-btn.is-on');
+            return on ? String(on.getAttribute('data-vista') || '') : '';
+        }
+        function ocupacionUnidadEsNueva(unit, now, weekMs) {
+            if (!unit || !Array.isArray(unit.residents)) return false;
+            return unit.residents.some(function (r) {
+                if (!r) return false;
+                var registrationDate = r.registeredAt ? new Date(r.registeredAt) : (unit.createdAt ? new Date(unit.createdAt) : null);
+                if (!registrationDate || isNaN(registrationDate.getTime())) return false;
+                var d = now.getTime() - registrationDate.getTime();
+                return d >= 0 && d <= weekMs;
+            });
+        }
+        function ocupacionCoincideVista(unit, unitNumber, vista, now, weekMs) {
+            if (!vista) return true;
+            var estB = typeof estadoBienvenidaUnidad === 'function' && unit ? estadoBienvenidaUnidad(unit) : '';
+            if (vista === 'vacia') return !unit;
+            if (vista === 'nuevas') return !!(unit && ocupacionUnidadEsNueva(unit, now, weekMs));
+            if (vista === 'bienvenida') return estB === 'pendiente' || estB === 'en-cola';
+            if (!unit) return false;
+            var use = String(unit.unitUse || '').toLowerCase();
+            var hasTenants = Array.isArray(unit.residents) && unit.residents.some(function (r) {
+                return r && r.type && String(r.type).toLowerCase().indexOf('arrendatario') !== -1;
+            });
+            if (vista === 'habitacional') return use === 'habitacional';
+            if (vista === 'arriendo') return use === 'arriendo' || hasTenants;
+            return true;
+        }
         function updateBuildingMapOcupacion() {
             var buildingMap = document.getElementById('buildingMapOcupacion');
             var filterInput = document.getElementById('buildingMapFilterOcupacion');
             if (!buildingMap) return;
+            var colsEl = document.getElementById('ocupacionMapaCols');
+            if (colsEl && !colsEl.childElementCount) {
+                var h = '';
+                for (var c = 1; c <= 15; c++) h += '<span>' + String(c).padStart(2, '0') + '</span>';
+                colsEl.innerHTML = h;
+            }
             var filterValue = filterInput ? filterInput.value.toLowerCase().trim() : '';
+            var vista = ocupacionVistaActiva();
             buildingMap.innerHTML = '';
             var units = window.vinculacionUnits || [];
             var now = new Date();
@@ -37705,31 +38111,33 @@ document.getElementById('chatForm').onsubmit = function (e) {
             Object.keys(BUILDING_STRUCTURE_OCUPACION).sort(function(a, b) { return parseInt(b, 10) - parseInt(a, 10); }).forEach(function(floor) {
                 var floorDiv = document.createElement('div');
                 floorDiv.className = 'floor-row';
-                floorDiv.setAttribute('data-floor', floor);
-                floorDiv.style.gridTemplateColumns = 'repeat(' + MAX_COLUMNAS_POR_PISO + ', 1fr)';
-                var unitNumbers = BUILDING_STRUCTURE_OCUPACION[floor];
+                floorDiv.setAttribute('data-floor', 'P' + floor);
+                floorDiv.style.gridTemplateColumns = 'repeat(' + MAX_COLUMNAS_POR_PISO + ', minmax(0, 1fr))';
+                var unitNumbers = BUILDING_STRUCTURE_OCUPACION[floor] || [];
+                var byCol = {};
+                unitNumbers.forEach(function (num) {
+                    var col = ocupacionColumnaDesdeNumero(num);
+                    if (col) byCol[col] = num;
+                });
                 var hasVisibleUnits = false;
-                for (var i = 0; i < MAX_COLUMNAS_POR_PISO; i++) {
-                    if (i >= unitNumbers.length) {
+                for (var i = 1; i <= MAX_COLUMNAS_POR_PISO; i++) {
+                    var unitNumber = byCol[i];
+                    if (!unitNumber) {
                         var slotVacio = document.createElement('div');
                         slotVacio.className = 'unit-cell slot-vacio';
                         slotVacio.setAttribute('aria-hidden', 'true');
                         floorDiv.appendChild(slotVacio);
                         continue;
                     }
-                    var unitNumber = unitNumbers[i];
                     var unit = units.find(function(u) { return u.unitNumber === unitNumber; });
-                    var shouldShow = matchesFilter(unit, unitNumber);
-                    if (!shouldShow && filterValue) {
-                        var slotVacio = document.createElement('div');
-                        slotVacio.className = 'unit-cell slot-vacio';
-                        slotVacio.setAttribute('aria-hidden', 'true');
-                        floorDiv.appendChild(slotVacio);
-                        continue;
-                    }
+                    var hitTexto = matchesFilter(unit, unitNumber);
+                    var hitVista = ocupacionCoincideVista(unit, unitNumber, vista, now, ONE_WEEK_MS);
+                    var shouldShow = hitTexto && hitVista;
                     hasVisibleUnits = true;
                     var cell = document.createElement('div');
                     cell.className = 'unit-cell';
+                    if ((filterValue || vista) && !shouldShow) cell.classList.add('is-dim');
+                    else if ((filterValue || vista) && shouldShow) cell.classList.add('is-hit');
                     if (unit) {
                         cell.classList.add('occupied');
                         var unitUse = (unit.unitUse || '').toLowerCase();
@@ -47892,6 +48300,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     });
                     if (typeof inicializarEditorContenidoMulta === 'function') inicializarEditorContenidoMulta();
                     if (typeof aplicarTipoRegistroMultaFormulario === 'function') aplicarTipoRegistroMultaFormulario();
+                    if (typeof bindSelectorNovedadMulta === 'function') bindSelectorNovedadMulta();
                 }
                 
                 const formMoroso = document.getElementById('formMoroso');
