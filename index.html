@@ -75,6 +75,8 @@
             --text-tertiary: #6b7280;
             --border-color: #e5e7eb;
             --icon-color: #374151;
+            --app-fixed-toolbar-w: 21.25rem;
+            --app-fixed-toolbar-h: 4.35rem;
         }
 
         html {
@@ -134,6 +136,7 @@
             max-width: calc(100vw - 280px);
             width: 100%;
             box-sizing: border-box;
+            padding-top: var(--app-fixed-toolbar-h);
         }
 
         .main-content.menu-collapsed {
@@ -2386,14 +2389,14 @@
             position: relative;
             z-index: 1;
             padding-left: 4rem;
-            padding-right: 5rem;
+            padding-right: 1rem;
         }
         .dashboard2-banner-top {
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
             flex-wrap: wrap;
-            gap: 0.5rem;
+            gap: 0.65rem 1rem;
         }
         /* Zona del título "Panel de Control": Arturito en rojo solo corre aquí */
         .dashboard2-banner-titulo-wrap {
@@ -2432,6 +2435,10 @@
             font-size: 0.8rem;
             font-weight: 600;
             text-decoration: none;
+            flex-shrink: 0;
+            white-space: nowrap;
+            position: relative;
+            z-index: 2;
         }
         .dashboard2-btn-link:hover { background: rgba(255,255,255,0.3); color: #fff; }
 
@@ -2712,13 +2719,68 @@
             background: var(--bg-primary);
             border: 1px solid var(--border-color);
             border-radius: var(--radius-lg);
-            padding: 0.85rem 1rem;
+            padding: 0.95rem 1rem 1rem;
         }
+        .bienvenida-panel-head {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 0.65rem 1rem;
+            margin-bottom: 0.75rem;
+        }
+        .bienvenida-panel-lead {
+            margin: 0;
+            font-size: 0.8rem;
+            line-height: 1.45;
+            color: var(--gray-600);
+            max-width: 42rem;
+        }
+        .bienvenida-panel-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.35rem;
+        }
+        .bienvenida-meta-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            padding: 0.28rem 0.55rem;
+            border-radius: 999px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-secondary);
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: var(--gray-700);
+            line-height: 1.3;
+        }
+        .bienvenida-meta-chip.alerta { border-color: rgba(217, 119, 6, 0.35); color: #b45309; background: rgba(245, 158, 11, 0.12); }
+        .bienvenida-meta-chip.ok { border-color: rgba(5, 150, 105, 0.28); color: #047857; background: rgba(16, 185, 129, 0.1); }
+        .bienvenida-cobertura {
+            margin: 0 0 0.75rem 0;
+        }
+        .bienvenida-cobertura-bar {
+            display: flex;
+            height: 0.55rem;
+            border-radius: 999px;
+            overflow: hidden;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+        }
+        .bienvenida-cobertura-bar > span {
+            display: block;
+            min-width: 0;
+            height: 100%;
+        }
+        .bienvenida-cobertura-bar > span.ok { background: #059669; }
+        .bienvenida-cobertura-bar > span.cola { background: #2563eb; }
+        .bienvenida-cobertura-bar > span.no { background: #d97706; }
+        .bienvenida-cobertura-bar > span.na { background: #9ca3af; }
         .bienvenida-panel-kpis {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
             gap: 0.5rem;
-            margin-bottom: 0.75rem;
+            margin-bottom: 0.85rem;
         }
         .bienvenida-panel-kpi {
             padding: 0.55rem 0.7rem;
@@ -2728,18 +2790,105 @@
         }
         .bienvenida-panel-kpi .lbl { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em; color: var(--gray-600); }
         .bienvenida-panel-kpi .val { font-size: 1.25rem; font-weight: 800; font-variant-numeric: tabular-nums; }
+        .bienvenida-panel-kpi .hint { margin-top: 0.12rem; font-size: 0.68rem; color: var(--gray-500); line-height: 1.3; }
         .bienvenida-panel-kpi.ok .val { color: #059669; }
         .bienvenida-panel-kpi.cola .val { color: #2563eb; }
         .bienvenida-panel-kpi.no .val { color: #d97706; }
         .bienvenida-panel-kpi.na .val { color: #6b7280; }
-        .bienvenida-panel-col h4 { margin: 0 0 0.4rem 0; font-size: 0.8rem; color: var(--gray-800); }
+        .bienvenida-panel-toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.45rem 0.75rem;
+            margin: 0 0 0.65rem 0;
+        }
+        .bienvenida-panel-toolbar label {
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: var(--gray-600);
+        }
+        .bienvenida-panel-filtro {
+            width: min(16rem, 100%);
+            padding: 0.38rem 0.65rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-size: 0.78rem;
+            font-family: inherit;
+        }
+        .bienvenida-sec {
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 0.7rem 0.75rem 0.8rem;
+            background: var(--bg-secondary);
+            margin-bottom: 0.65rem;
+        }
+        .bienvenida-sec > h3 {
+            margin: 0 0 0.2rem 0;
+            font-size: 0.82rem;
+            font-weight: 800;
+            color: var(--gray-800);
+        }
+        .bienvenida-sec > p.desc {
+            margin: 0 0 0.55rem 0;
+            font-size: 0.72rem;
+            line-height: 1.4;
+            color: var(--gray-500);
+        }
+        .bienvenida-sec--accion { border-color: rgba(217, 119, 6, 0.28); }
+        .bienvenida-sec--ok { border-color: rgba(5, 150, 105, 0.22); }
+        .bienvenida-panel-col h4 {
+            margin: 0 0 0.4rem 0;
+            font-size: 0.75rem;
+            color: var(--gray-800);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.4rem;
+        }
+        .bienvenida-col-count {
+            font-variant-numeric: tabular-nums;
+            font-size: 0.68rem;
+            font-weight: 800;
+            color: var(--gray-500);
+        }
         .bienvenida-panel-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 0.75rem;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 0.65rem;
+        }
+        @media (max-width: 900px) {
+            .bienvenida-panel-grid { grid-template-columns: 1fr 1fr; }
         }
         @media (max-width: 720px) {
             .bienvenida-panel-grid { grid-template-columns: 1fr; }
+        }
+        .bienvenida-reglas {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 0.45rem 0.75rem;
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+        .bienvenida-reglas li {
+            font-size: 0.72rem;
+            line-height: 1.4;
+            color: var(--gray-600);
+            padding-left: 0.85rem;
+            position: relative;
+        }
+        .bienvenida-reglas li::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 0.42rem;
+            width: 0.38rem;
+            height: 0.38rem;
+            border-radius: 50%;
+            background: var(--primary);
         }
         .bienvenida-chips {
             display: flex;
@@ -3837,6 +3986,25 @@
             align-items: center;
             gap: 0.5rem;
             flex-direction: row-reverse;
+            max-width: calc(100vw - 5.5rem);
+        }
+        /* Reserva franja superior y esquina derecha para consulta rápida + campana */
+        @media (min-width: 1025px) {
+            .dashboard2-banner-inner {
+                padding-left: 1rem;
+            }
+            .dashboard2-banner {
+                padding-right: calc(var(--app-fixed-toolbar-w) + 0.5rem);
+            }
+            .tab-content:not(#dashboard) > :first-child,
+            .modulo-cabecera-con-mes {
+                padding-right: calc(var(--app-fixed-toolbar-w) - 2.25rem);
+                box-sizing: border-box;
+            }
+            #conserjeria .conserjeria-modulo__nav {
+                top: 0.5rem;
+                max-width: calc(100% - (var(--app-fixed-toolbar-w) - 2.25rem));
+            }
         }
         .notif-bell {
             position: relative;
@@ -5947,46 +6115,88 @@
                 <section class="dashboard2-block" id="dashboardBienvenidaBlock" aria-label="Correo de bienvenida">
                     <h2 class="dashboard2-block-title">Correo de bienvenida</h2>
                     <div class="bienvenida-panel">
+                        <div class="bienvenida-panel-head">
+                            <p class="bienvenida-panel-lead">Estado por unidad del correo de bienvenida a propietarios, arrendatarios y familiares. Pulse un número para abrir la unidad en Ocupación.</p>
+                            <div class="bienvenida-panel-meta">
+                                <span class="bienvenida-meta-chip ok" id="dashboardBienvenidaCobertura">0% con envío confirmado</span>
+                                <span class="bienvenida-meta-chip alerta" id="dashboardBienvenidaAtencion">0 unidades requieren acción</span>
+                                <span class="bienvenida-meta-chip" id="dashboardBienvenidaUltimo">Último envío: —</span>
+                            </div>
+                        </div>
+                        <div class="bienvenida-cobertura" aria-hidden="true">
+                            <div class="bienvenida-cobertura-bar">
+                                <span class="ok" id="dashboardBienvenidaBarOk"></span>
+                                <span class="cola" id="dashboardBienvenidaBarCola"></span>
+                                <span class="no" id="dashboardBienvenidaBarNo"></span>
+                                <span class="na" id="dashboardBienvenidaBarNa"></span>
+                            </div>
+                        </div>
                         <div class="bienvenida-panel-kpis">
                             <div class="bienvenida-panel-kpi ok">
-                                <div class="lbl">Bienvenida enviada</div>
+                                <div class="lbl">Envío confirmado</div>
                                 <div class="val" id="dashboardBienvenidaEnviadasCount">0</div>
+                                <div class="hint" id="dashboardBienvenidaEnviadasHint">Correo escrito en el servicio</div>
                             </div>
                             <div class="bienvenida-panel-kpi cola">
-                                <div class="lbl">En cola (no enviada)</div>
+                                <div class="lbl">En cola</div>
                                 <div class="val" id="dashboardBienvenidaEnColaCount">0</div>
+                                <div class="hint" id="dashboardBienvenidaEnColaHint">Programado, aún no enviado</div>
                             </div>
                             <div class="bienvenida-panel-kpi no">
                                 <div class="lbl">Pendiente de envío</div>
                                 <div class="val" id="dashboardBienvenidaPendientesCount">0</div>
+                                <div class="hint" id="dashboardBienvenidaPendientesHint">Tiene correo y falta enviar</div>
                             </div>
                             <div class="bienvenida-panel-kpi na">
                                 <div class="lbl">Sin correo registrado</div>
                                 <div class="val" id="dashboardBienvenidaSinCorreoCount">0</div>
+                                <div class="hint" id="dashboardBienvenidaSinCorreoHint">No se puede enviar aún</div>
                             </div>
                         </div>
-                        <div class="bienvenida-panel-grid">
+                        <div class="bienvenida-panel-toolbar">
+                            <label for="dashboardBienvenidaFiltro">Buscar unidad en este apartado</label>
+                            <input type="search" id="dashboardBienvenidaFiltro" class="bienvenida-panel-filtro" placeholder="Filtrar por número de unidad…" autocomplete="off">
+                        </div>
+                        <div class="bienvenida-sec bienvenida-sec--accion">
+                            <h3>Requieren atención</h3>
+                            <p class="desc">Primero lo que falta: pendientes, cola y unidades sin correo. «En cola» no cuenta como envío.</p>
+                            <div class="bienvenida-panel-grid">
+                                <div class="bienvenida-panel-col">
+                                    <h4>Pendiente de envío <span class="bienvenida-col-count" id="dashboardBienvenidaPendientesHead">0</span></h4>
+                                    <div class="bienvenida-chips" id="dashboardBienvenidaPendientesList"><span class="bienvenida-vacio">Cargando…</span></div>
+                                </div>
+                                <div class="bienvenida-panel-col">
+                                    <h4>En cola <span class="bienvenida-col-count" id="dashboardBienvenidaEnColaHead">0</span></h4>
+                                    <div class="bienvenida-chips" id="dashboardBienvenidaEnColaList"><span class="bienvenida-vacio">Cargando…</span></div>
+                                </div>
+                                <div class="bienvenida-panel-col" id="dashboardBienvenidaSinCorreoWrap">
+                                    <h4>Sin correo registrado <span class="bienvenida-col-count" id="dashboardBienvenidaSinCorreoHead">0</span></h4>
+                                    <div class="bienvenida-chips" id="dashboardBienvenidaSinCorreoList"><span class="bienvenida-vacio">Cargando…</span></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bienvenida-sec bienvenida-sec--ok">
+                            <h3>Envío confirmado</h3>
+                            <p class="desc">Solo unidades cuyo correo quedó escrito en el servicio, con fecha y hora de Santiago.</p>
                             <div class="bienvenida-panel-col">
-                                <h4>Unidades con bienvenida enviada</h4>
+                                <h4>Unidades enviadas <span class="bienvenida-col-count" id="dashboardBienvenidaEnviadasHead">0</span></h4>
                                 <div class="bienvenida-chips" id="dashboardBienvenidaEnviadasList"><span class="bienvenida-vacio">Cargando…</span></div>
                             </div>
-                            <div class="bienvenida-panel-col">
-                                <h4>En cola, aún no enviadas</h4>
-                                <div class="bienvenida-chips" id="dashboardBienvenidaEnColaList"><span class="bienvenida-vacio">Cargando…</span></div>
-                            </div>
-                            <div class="bienvenida-panel-col">
-                                <h4>Unidades sin bienvenida</h4>
-                                <div class="bienvenida-chips" id="dashboardBienvenidaPendientesList"><span class="bienvenida-vacio">Cargando…</span></div>
-                            </div>
                         </div>
-                        <p style="margin: 0.65rem 0 0 0; font-size: 0.75rem; color: var(--gray-500);">Pulse un número para ir a Ocupación. «Enviada» solo aparece si el correo se escribió en el servicio de correo. Cada envío queda con fecha y hora (Santiago). «En cola» no es un envío. Destinatarios: propietarios, arrendatarios y familiares. Copia (CC) a conserjería: conserjeria.wm815@gmail.com. Las visitas frecuentes/autorizadas no reciben este correo.</p>
-                        <div id="dashboardBienvenidaSinCorreoWrap" style="margin-top: 0.55rem;">
-                            <h4 style="margin: 0 0 0.35rem 0; font-size: 0.75rem; color: var(--gray-600);">Sin correo registrado</h4>
-                            <div class="bienvenida-chips" id="dashboardBienvenidaSinCorreoList"></div>
-                        </div>
-                        <div id="dashboardBienvenidaRegistroWrap" style="margin-top: 0.75rem;">
-                            <h4 style="margin: 0 0 0.35rem 0; font-size: 0.8rem; color: var(--gray-700);">Registro de fecha de envío</h4>
+                        <div class="bienvenida-sec" id="dashboardBienvenidaRegistroWrap">
+                            <h3>Registro de envíos</h3>
+                            <p class="desc">Historial por unidad. La más reciente aparece primero.</p>
                             <div class="bienvenida-registro" id="dashboardBienvenidaRegistro"><span class="bienvenida-vacio">Cargando…</span></div>
+                        </div>
+                        <div class="bienvenida-sec">
+                            <h3>Reglas de envío</h3>
+                            <ul class="bienvenida-reglas">
+                                <li>«Enviada» solo si el correo se escribió en el servicio de correo.</li>
+                                <li>«En cola» está programada; todavía no es un envío.</li>
+                                <li>Destinatarios: propietarios, arrendatarios y familiares.</li>
+                                <li>Copia (CC) a conserjería: conserjeria.wm815@gmail.com.</li>
+                                <li>Las visitas frecuentes o autorizadas no reciben este correo.</li>
+                            </ul>
                         </div>
                     </div>
                 </section>
@@ -14092,10 +14302,18 @@
                 var nb = parseInt(String(b.unidad).replace(/\D/g, ''), 10) || 0;
                 return na - nb;
             });
-            var html = '<table><thead><tr><th>Unidad</th><th>Fecha de envío</th></tr></thead><tbody>';
+            var html = '<table><thead><tr><th>Unidad</th><th>Fecha de envío</th><th>Destinatarios</th></tr></thead><tbody>';
             filas.forEach(function (f) {
                 var u = String(f.unidad).replace(/</g, '&lt;').replace(/"/g, '&quot;');
-                html += '<tr><td><button type="button" class="bienvenida-chip ok" data-unidad="' + u + '">' + u + '</button></td><td class="fecha">' + String(f.fecha).replace(/</g, '&lt;') + '</td></tr>';
+                var dest = '—';
+                if (typeof buscarUnidadOcupacionPorNumero === 'function' && typeof correosUnidadResidentes === 'function') {
+                    var unit = buscarUnidadOcupacionPorNumero(f.unidad);
+                    if (unit) {
+                        var cs = correosUnidadResidentes(unit) || [];
+                        dest = cs.length ? (cs.length + (cs.length === 1 ? ' correo' : ' correos')) : '—';
+                    }
+                }
+                html += '<tr data-unidad="' + u + '"><td><button type="button" class="bienvenida-chip ok" data-unidad="' + u + '">' + u + '</button></td><td class="fecha">' + String(f.fecha).replace(/</g, '&lt;') + '</td><td>' + dest + '</td></tr>';
             });
             html += '</tbody></table>';
             return html;
@@ -18649,19 +18867,86 @@ document.getElementById('chatForm').onsubmit = function (e) {
             });
         }
 
+        function ultimoEnvioBienvenidaTexto(nums) {
+            var best = null;
+            (nums || []).forEach(function (n) {
+                var r = registroEnvioBienvenidaUnidad(n);
+                if (!r) return;
+                var key = r.iso || ((r.fecha || '') + 'T' + (r.hora || '00:00'));
+                if (!best || key > best.key) best = { key: key, r: r };
+            });
+            if (!best) return 'Último envío: sin fecha';
+            var txt = textoFechaEnvioBienvenida(best.r);
+            return txt ? ('Último envío: ' + txt) : 'Último envío: sin fecha';
+        }
+
+        function filtrarPanelBienvenidaControl() {
+            var inp = document.getElementById('dashboardBienvenidaFiltro');
+            var q = inp ? String(inp.value || '').trim().toLowerCase() : '';
+            var root = document.getElementById('dashboardBienvenidaBlock');
+            if (!root) return;
+            root.querySelectorAll('.bienvenida-chip[data-unidad]').forEach(function (btn) {
+                var n = String(btn.getAttribute('data-unidad') || btn.textContent || '').toLowerCase();
+                btn.hidden = !!(q && n.indexOf(q) === -1);
+            });
+            root.querySelectorAll('.bienvenida-registro tbody tr[data-unidad]').forEach(function (tr) {
+                var n = String(tr.getAttribute('data-unidad') || '').toLowerCase();
+                tr.hidden = !!(q && n.indexOf(q) === -1);
+            });
+        }
+
+        function bindFiltroBienvenidaPanel() {
+            var inp = document.getElementById('dashboardBienvenidaFiltro');
+            if (!inp || inp._bienvenidaFiltroBound) return;
+            inp._bienvenidaFiltroBound = true;
+            inp.addEventListener('input', filtrarPanelBienvenidaControl);
+        }
+
         function pintarPanelBienvenidaControl(clasif) {
             var c = clasif || window._clasificacionBienvenida || { enviadas: [], enCola: [], pendientes: [], sinCorreo: [] };
+            var nOk = (c.enviadas || []).length;
+            var nCola = (c.enCola || []).length;
+            var nNo = (c.pendientes || []).length;
+            var nNa = (c.sinCorreo || []).length;
+            var total = nOk + nCola + nNo + nNa;
+            var atencion = nCola + nNo + nNa;
+            var pct = function (n) { return total ? Math.round((n / total) * 100) : 0; };
             var setTxt = function (id, v) {
                 var n = document.getElementById(id);
                 if (n) n.textContent = String(v);
             };
-            setTxt('dashboardBienvenidaEnviadasCount', (c.enviadas || []).length);
-            setTxt('dashboardBienvenidaEnColaCount', (c.enCola || []).length);
-            setTxt('dashboardBienvenidaPendientesCount', (c.pendientes || []).length);
-            setTxt('dashboardBienvenidaSinCorreoCount', (c.sinCorreo || []).length);
-            setTxt('ocupacionBienvenidaEnviadas', (c.enviadas || []).length);
-            setTxt('ocupacionBienvenidaEnCola', (c.enCola || []).length);
-            setTxt('ocupacionBienvenidaPendientes', (c.pendientes || []).length);
+            var setBar = function (id, n) {
+                var el = document.getElementById(id);
+                if (!el) return;
+                el.style.width = (total ? ((n / total) * 100) : 0) + '%';
+                el.style.display = n ? 'block' : 'none';
+            };
+            setTxt('dashboardBienvenidaEnviadasCount', nOk);
+            setTxt('dashboardBienvenidaEnColaCount', nCola);
+            setTxt('dashboardBienvenidaPendientesCount', nNo);
+            setTxt('dashboardBienvenidaSinCorreoCount', nNa);
+            setTxt('dashboardBienvenidaEnviadasHead', nOk);
+            setTxt('dashboardBienvenidaEnColaHead', nCola);
+            setTxt('dashboardBienvenidaPendientesHead', nNo);
+            setTxt('dashboardBienvenidaSinCorreoHead', nNa);
+            setTxt('dashboardBienvenidaEnviadasHint', total ? (pct(nOk) + '% del universo · correo escrito') : 'Correo escrito en el servicio');
+            setTxt('dashboardBienvenidaEnColaHint', total ? (pct(nCola) + '% · programado, aún no enviado') : 'Programado, aún no enviado');
+            setTxt('dashboardBienvenidaPendientesHint', total ? (pct(nNo) + '% · tiene correo y falta enviar') : 'Tiene correo y falta enviar');
+            setTxt('dashboardBienvenidaSinCorreoHint', total ? (pct(nNa) + '% · no se puede enviar aún') : 'No se puede enviar aún');
+            setTxt('dashboardBienvenidaCobertura', pct(nOk) + '% con envío confirmado');
+            setTxt('dashboardBienvenidaAtencion', atencion + (atencion === 1 ? ' unidad requiere acción' : ' unidades requieren acción'));
+            setTxt('dashboardBienvenidaUltimo', ultimoEnvioBienvenidaTexto(c.enviadas));
+            var chipAt = document.getElementById('dashboardBienvenidaAtencion');
+            if (chipAt) chipAt.classList.toggle('alerta', atencion > 0);
+            var chipOk = document.getElementById('dashboardBienvenidaCobertura');
+            if (chipOk) chipOk.classList.toggle('ok', nOk > 0);
+            setBar('dashboardBienvenidaBarOk', nOk);
+            setBar('dashboardBienvenidaBarCola', nCola);
+            setBar('dashboardBienvenidaBarNo', nNo);
+            setBar('dashboardBienvenidaBarNa', nNa);
+            setTxt('ocupacionBienvenidaEnviadas', nOk);
+            setTxt('ocupacionBienvenidaEnCola', nCola);
+            setTxt('ocupacionBienvenidaPendientes', nNo);
             var listOk = document.getElementById('dashboardBienvenidaEnviadasList');
             var listCola = document.getElementById('dashboardBienvenidaEnColaList');
             var listNo = document.getElementById('dashboardBienvenidaPendientesList');
@@ -18677,6 +18962,8 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 el.innerHTML = htmlReg;
                 bindChipsBienvenida(el);
             });
+            bindFiltroBienvenidaPanel();
+            filtrarPanelBienvenidaControl();
         }
 
         async function refrescarEstadoBienvenidaUnidades() {
