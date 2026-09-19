@@ -3266,6 +3266,96 @@
             gap: 0.45rem;
             margin-bottom: 0.7rem;
         }
+        #ocupacion .ocupacion-registro-sec {
+            margin-bottom: 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 0.85rem 1rem 1rem;
+            background: var(--bg-primary);
+        }
+        #ocupacion .ocupacion-registro-sec > h3 {
+            margin: 0 0 0.25rem;
+            font-size: 0.95rem;
+            font-weight: 800;
+            color: var(--gray-900);
+        }
+        #ocupacion .ocupacion-registro-lead {
+            margin: 0;
+            font-size: 0.78rem;
+            line-height: 1.4;
+            color: var(--gray-600);
+        }
+        #ocupacion .ocupacion-registro-kpis {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 0.5rem;
+            margin: 0.65rem 0 0.75rem;
+        }
+        #ocupacion .ocupacion-registro-kpis .resumen-item {
+            text-align: left;
+            border-radius: 8px;
+            padding: 0.55rem 0.65rem;
+            border: 1px solid var(--border-color);
+            background: var(--bg-secondary);
+        }
+        #ocupacion .ocupacion-registro-kpis .valor { font-size: 1.15rem; font-weight: 800; font-variant-numeric: tabular-nums; }
+        #ocupacion .ocupacion-registro-kpis .etiqueta { font-size: 0.7rem; color: var(--gray-500); font-weight: 700; }
+        #ocupacion .ocupacion-registro-toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.45rem 0.65rem;
+            margin-bottom: 0.65rem;
+        }
+        #ocupacion .ocupacion-registro-tabla-wrap {
+            overflow-x: auto;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+        }
+        #ocupacion .ocupacion-registro-tabla {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.8rem;
+        }
+        #ocupacion .ocupacion-registro-tabla th,
+        #ocupacion .ocupacion-registro-tabla td {
+            padding: 0.45rem 0.6rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+            vertical-align: top;
+        }
+        #ocupacion .ocupacion-registro-tabla th {
+            background: var(--bg-secondary);
+            font-size: 0.7rem;
+            font-weight: 800;
+            color: var(--text-tertiary);
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+        }
+        #ocupacion .ocupacion-registro-tabla tbody tr:last-child td { border-bottom: 0; }
+        #ocupacion .ocupacion-mov-badge {
+            display: inline-block;
+            padding: 0.12rem 0.45rem;
+            border-radius: 999px;
+            font-size: 0.68rem;
+            font-weight: 800;
+            letter-spacing: 0.02em;
+        }
+        #ocupacion .ocupacion-mov-badge.ingreso { background: rgba(16, 185, 129, 0.16); color: #059669; }
+        #ocupacion .ocupacion-mov-badge.salida { background: rgba(239, 68, 68, 0.14); color: #dc2626; }
+        #ocupacion .ocupacion-registro-vacio {
+            margin: 0;
+            padding: 0.85rem 0.6rem;
+            text-align: center;
+            color: var(--gray-500);
+            font-size: 0.8rem;
+        }
+        #ocupacion .ocupacion-registro-nota {
+            margin: 0.55rem 0 0;
+            font-size: 0.75rem;
+            color: var(--gray-500);
+            line-height: 1.4;
+        }
 
         /* Fallback: contenido clonado (grid + cards del panel principal) */
         #dashboard .dashboard2-stats-grid .dashboard-grid {
@@ -8517,6 +8607,45 @@
                         <div class="building-map-edificio" id="buildingMapOcupacion"></div>
                     </div>
                 </div>
+            </section>
+            <section class="ocupacion-registro-sec" aria-label="Registro mensual de ingresos y salidas">
+                <h3>Ingresos y salidas del mes</h3>
+                <p class="ocupacion-registro-lead" id="ocupacionRegistroLead">Registro mensual del censo de Ocupación (propietarios, arrendatarios y familiares). Las visitas no se incluyen.</p>
+                <div class="ocupacion-registro-kpis">
+                    <div class="resumen-item">
+                        <div id="ocupacionIngresosMes" class="valor" style="color: #059669;">0</div>
+                        <div class="etiqueta">Ingresos del mes</div>
+                    </div>
+                    <div class="resumen-item">
+                        <div id="ocupacionSalidasMes" class="valor" style="color: #dc2626;">0</div>
+                        <div class="etiqueta">Salidas del mes</div>
+                    </div>
+                </div>
+                <div class="ocupacion-registro-toolbar">
+                    <div class="ocupacion-vistas" id="ocupacionRegistroFiltros" role="group" aria-label="Filtro de movimientos">
+                        <button type="button" class="ocupacion-vista-btn is-on" data-ocupacion-mov="todos">Todos</button>
+                        <button type="button" class="ocupacion-vista-btn" data-ocupacion-mov="ingreso">Ingresos</button>
+                        <button type="button" class="ocupacion-vista-btn" data-ocupacion-mov="salida">Salidas</button>
+                    </div>
+                </div>
+                <div class="ocupacion-registro-tabla-wrap">
+                    <table class="ocupacion-registro-tabla">
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Movimiento</th>
+                                <th>Unidad</th>
+                                <th>Nombre</th>
+                                <th>Relación</th>
+                                <th>Correo</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ocupacionRegistroCuerpo">
+                            <tr><td colspan="6"><p class="ocupacion-registro-vacio">Cargando registro…</p></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p class="ocupacion-registro-nota" id="ocupacionRegistroNota"></p>
             </section>
             <section class="ocupacion-bienvenida-sec" aria-label="Correo de bienvenida">
                 <h3>Correo de bienvenida</h3>
@@ -21709,18 +21838,25 @@ document.getElementById('chatForm').onsubmit = function (e) {
 
         function htmlBotonReservaMudanza48() {
             const url = URL_RESERVA_MUDANZA;
-            return '<table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" style="margin:10px auto 0 auto;">'
+            return '<table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" style="margin:12px auto 0 auto;">'
                 + '<tr><td align="center" bgcolor="#75BB21" style="border-radius:8px;">'
-                + '<a href="' + url + '" target="_blank" rel="noopener" style="display:inline-block;padding:12px 20px;font-size:14px;font-weight:700;color:#ffffff;text-decoration:none;font-family:Arial,Helvetica,sans-serif;">Agendar mudanza — 48 h de anticipación</a>'
+                + '<a href="' + url + '" target="_blank" rel="noopener" style="display:inline-block;padding:12px 22px;font-size:14px;font-weight:700;color:#ffffff;text-decoration:none;font-family:Arial,Helvetica,sans-serif;">Agendar mudanza — 48 h de anticipación</a>'
+                + '</td></tr></table>';
+        }
+
+        function htmlBloqueReservarMudanza() {
+            return '<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;border:1px solid #d4e8b8;border-radius:8px;margin:8px 0 0 0;width:100%;">'
+                + '<tr><td style="background:#75BB21;color:#ffffff;padding:8px 12px;font-size:11px;font-weight:700;letter-spacing:0.04em;font-family:Arial,Helvetica,sans-serif;">RESERVA DE MUDANZA</td></tr>'
+                + '<tr><td style="padding:12px 14px 6px 14px;font-size:13px;color:#1a1a1a;line-height:1.55;font-family:Arial,Helvetica,sans-serif;">'
+                + '<p style="margin:0 0 10px 0;">Ingreso por <strong>Inés de Suárez 7624</strong>. Prohibido camión de gran tamaño que dañe suelo o losa (sin excepción).</p>'
+                + '<p style="margin:0 0 10px 0;">Debe estar <strong>agendada con 48 horas de anticipación</strong>. Sin reserva, no se autoriza ni puede realizarse.</p>'
+                + '<p style="margin:0;">Resguardo de ascensores y espacios comunes: <strong>$20.000</strong> a GGCC. Consulte el Reglamento Interno.</p>'
+                + htmlBotonReservaMudanza48()
                 + '</td></tr></table>';
         }
 
         function htmlBloqueAgendaMudanza48() {
-            return '<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color:#f7faf2;border-radius:8px;border:1px solid #d4e8b8;">'
-                + '<tr><td style="padding:12px 14px;font-size:13px;color:#1a1a1a;line-height:1.5;font-family:Arial,Helvetica,sans-serif;">'
-                + 'La mudanza debe estar <strong>agendada con al menos 48 horas de anticipación</strong>. Sin reserva en el sistema, no se autoriza ni puede realizarse.'
-                + htmlBotonReservaMudanza48()
-                + '</td></tr></table>';
+            return htmlBloqueReservarMudanza();
         }
 
         function catalogoDocsMudanza(ctx) {
@@ -21968,11 +22104,8 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 return '<p style="margin:0;font-size:14px;color:#333333;line-height:1.5;">La administración aún no ha marcado documentos recibidos. Contacte a administración para regularizar los antecedentes.</p>';
             }
             const lis = items.map(function (doc, i) {
-                const extraAgenda = esDocAgendaMudanza48(doc)
-                    ? '<div style="margin-top:6px;">' + htmlBotonReservaMudanza48() + '</div>'
-                    : '';
                 return '<tr><td style="padding:8px 12px;font-size:13px;color:#92400e;font-weight:700;width:28px;vertical-align:top;">' + (i + 1) + '.</td>'
-                    + '<td style="padding:8px 12px 8px 0;font-size:14px;color:#1a1a1a;line-height:1.45;">' + esc(doc) + extraAgenda + '</td></tr>';
+                    + '<td style="padding:8px 12px 8px 0;font-size:14px;color:#1a1a1a;line-height:1.45;">' + esc(doc) + '</td></tr>';
             }).join('');
             return '<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;">' + lis + '</table>';
         }
@@ -22008,31 +22141,32 @@ document.getElementById('chatForm').onsubmit = function (e) {
         }
 
         function htmlNormativaMudanzaMiniatura() {
-            return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;border:1px solid #d4e8b8;border-radius:8px;margin:8px 0 10px 0;width:100%;">
+            return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;width:100%;">
   <tr>
-    <td style="background:#75BB21;color:#ffffff;padding:6px 10px;font-size:11px;font-weight:700;letter-spacing:0.03em;font-family:Arial,Helvetica,sans-serif;">NORMAS DE MUDANZA · lun a sáb · aviso 48 h</td>
-  </tr>
-  <tr>
-    <td style="padding:0;">
-      <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;width:100%;">
+    <td style="padding:0 0 8px 0;">
+      <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;border:1px solid #d4e8b8;border-radius:8px;width:100%;">
         <tr>
-          <td width="50%" valign="top" style="padding:7px 10px;border-right:1px solid #e8eee8;border-bottom:1px solid #e8eee8;font-size:11px;color:#1a1a1a;line-height:1.4;font-family:Arial,Helvetica,sans-serif;">
-            <strong style="color:#5a9219;">Lun–Vie</strong><br>Mañana 09:00–13:30<br>Tarde 13:30–18:00
-          </td>
-          <td width="50%" valign="top" style="padding:7px 10px;border-bottom:1px solid #e8eee8;font-size:11px;color:#1a1a1a;line-height:1.4;font-family:Arial,Helvetica,sans-serif;">
-            <strong style="color:#5a9219;">Sábado</strong><br>Único 09:00–15:00<br><strong style="color:#dc2626;">No domingo ni festivos</strong>
+          <td style="background:#75BB21;color:#ffffff;padding:6px 10px;font-size:11px;font-weight:700;letter-spacing:0.03em;font-family:Arial,Helvetica,sans-serif;">HORARIO · lun a sáb</td>
+        </tr>
+        <tr>
+          <td style="padding:0;">
+            <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;width:100%;">
+              <tr>
+                <td width="50%" valign="top" style="padding:7px 10px;border-right:1px solid #e8eee8;font-size:11px;color:#1a1a1a;line-height:1.4;font-family:Arial,Helvetica,sans-serif;">
+                  <strong style="color:#5a9219;">Lun–Vie</strong><br>Mañana 09:00–13:30<br>Tarde 13:30–18:00
+                </td>
+                <td width="50%" valign="top" style="padding:7px 10px;font-size:11px;color:#1a1a1a;line-height:1.4;font-family:Arial,Helvetica,sans-serif;">
+                  <strong style="color:#5a9219;">Sábado</strong><br>Único 09:00–15:00<br><strong style="color:#dc2626;">No domingo ni festivos</strong>
+                </td>
+              </tr>
+            </table>
           </td>
         </tr>
       </table>
     </td>
   </tr>
   <tr>
-    <td style="padding:7px 10px;background:#f7faf2;font-size:11px;color:#333333;line-height:1.45;font-family:Arial,Helvetica,sans-serif;">
-      Ingreso por <strong>Inés de Suárez 7624</strong>. Prohibido camión de gran tamaño que dañe suelo o losa (sin excepción).<br>
-      Debe estar <strong>agendada con 48 horas de anticipación</strong>. Sin reserva, <strong>no se autoriza ni puede realizarse</strong>.<br>
-      Resguardo de ascensores y espacios comunes: <strong>$20.000</strong> a GGCC. Consulte el Reglamento Interno.
-      ${htmlBotonReservaMudanza48()}
-    </td>
+    <td style="padding:0;">${htmlBloqueReservarMudanza()}</td>
   </tr>
 </table>`;
         }
@@ -22592,12 +22726,11 @@ document.getElementById('chatForm').onsubmit = function (e) {
               </table>
             </td>
           </tr>
-          ${enEspera ? '' : `
           <tr>
             <td class="content-padding" style="padding: 0 28px 10px 28px;">
               ${htmlNormativaMudanzaMiniatura()}
             </td>
-          </tr>`}
+          </tr>
           ${autorizada || enEspera ? '' : `
           <tr>
             <td class="content-padding" style="padding: 0 28px 10px 28px;">
@@ -29766,7 +29899,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     'espacios': 'espacios',
                     'multas': 'multas',
                     'morosos': 'morosos',
-                    'ocupacion': 'ocupacion-residentes',
+                    'ocupacion': ['ocupacion-residentes', 'ocupacion-movimientos'],
                     'caja': 'caja',
                     'mantenciones': ['mantenciones', 'visitas-extraordinarias'],
                     'pagos-aseo': 'pagosAseo',
@@ -39220,12 +39353,336 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 if (elVacias) elVacias.textContent = vacias;
                 if (elPct) elPct.textContent = pct + '%';
                 if (typeof scheduleRefrescarEstadoBienvenidaUnidades === 'function') scheduleRefrescarEstadoBienvenidaUnidades();
+                if (typeof sincronizarRegistroOcupacionDesdeVinculacion === 'function') {
+                    sincronizarRegistroOcupacionDesdeVinculacion();
+                }
             } catch (e) {
                 console.warn('Ocupación: error cargando unidades', e);
                 window.vinculacionUnits = [];
                 updateBuildingMapOcupacion();
+                if (typeof sincronizarRegistroOcupacionDesdeVinculacion === 'function') {
+                    sincronizarRegistroOcupacionDesdeVinculacion();
+                }
             }
         }
+
+        function escHtmlOcupacion(s) {
+            return String(s == null ? '' : s)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+
+        function esResidenteCensoOcupacion(r) {
+            if (!r) return false;
+            var t = String(r.type || r.tipo || '').trim();
+            if (!t) return false;
+            var tl = t.toLowerCase();
+            if (tl.indexOf('visita') !== -1) return false;
+            return tl === 'propietario' || tl === 'arrendatario' || tl === 'familiar';
+        }
+
+        function claveResidenteOcupacion(unidad, nombre, tipo) {
+            return [unidad, nombre, tipo].map(function (s) {
+                return String(s || '').trim().toLowerCase().replace(/\s+/g, ' ');
+            }).join('|');
+        }
+
+        function extraerCensoResidentesOcupacion(units) {
+            var out = [];
+            var seen = {};
+            (units || []).forEach(function (unit) {
+                if (!unit) return;
+                var unidad = String(unit.unitNumber || '').trim();
+                if (!unidad) return;
+                var residents = Array.isArray(unit.residents) ? unit.residents : [];
+                residents.forEach(function (r) {
+                    if (!esResidenteCensoOcupacion(r)) return;
+                    var nombre = String(r.name || r.nombre || '').trim();
+                    if (!nombre) return;
+                    var tipo = String(r.type || r.tipo || '').trim();
+                    var clave = claveResidenteOcupacion(unidad, nombre, tipo);
+                    if (seen[clave]) return;
+                    seen[clave] = true;
+                    out.push({
+                        clave: clave,
+                        unidad: unidad,
+                        departamento: unidad,
+                        nombre: nombre,
+                        tipo: tipo,
+                        tipoResidente: tipo,
+                        correo: String(r.email || r.correo || '').trim(),
+                        telefono: String(r.phone || r.telefono || r.fono || '').trim(),
+                        usoUnidad: String(unit.unitUse || '').trim(),
+                        registeredAt: r.registeredAt || '',
+                        createdAt: unit.createdAt || '',
+                        notas: String(unit.unitNote || '').trim()
+                    });
+                });
+            });
+            out.sort(function (a, b) {
+                var ua = parseInt(a.unidad, 10);
+                var ub = parseInt(b.unidad, 10);
+                if (isFinite(ua) && isFinite(ub) && ua !== ub) return ua - ub;
+                var cmpU = String(a.unidad).localeCompare(String(b.unidad), 'es', { numeric: true });
+                if (cmpU) return cmpU;
+                return String(a.nombre).localeCompare(String(b.nombre), 'es');
+            });
+            return out;
+        }
+
+        function mapaCensoOcupacionPorClave(lista) {
+            var mapa = {};
+            (lista || []).forEach(function (r) {
+                if (!r) return;
+                var clave = r.clave || claveResidenteOcupacion(r.unidad || r.departamento, r.nombre, r.tipo || r.tipoResidente);
+                if (!clave || clave === '||') return;
+                mapa[clave] = r;
+            });
+            return mapa;
+        }
+
+        function censosOcupacionIguales(a, b) {
+            var ka = Object.keys(mapaCensoOcupacionPorClave(a)).sort().join('\n');
+            var kb = Object.keys(mapaCensoOcupacionPorClave(b)).sort().join('\n');
+            return ka === kb;
+        }
+
+        function ymdChileOcupacion(valor) {
+            if (!valor) return '';
+            if (typeof valor === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(valor.trim())) return valor.trim();
+            try {
+                if (typeof obtenerFechaSantiago === 'function') return obtenerFechaSantiago(valor);
+            } catch (eY) {}
+            var d = valor instanceof Date ? valor : new Date(valor);
+            if (isNaN(d.getTime())) return '';
+            return d.toISOString().slice(0, 10);
+        }
+
+        function fechaAltaPerteneceAlMesOcupacion(item, mesYYYYMM) {
+            if (!item || !mesYYYYMM) return false;
+            var ymd = ymdChileOcupacion(item.registeredAt || item.createdAt);
+            return ymd ? ymd.slice(0, 7) === mesYYYYMM : false;
+        }
+
+        function ultimoMovimientoOcupacionPorClave(movimientos, clave) {
+            var last = null;
+            (movimientos || []).forEach(function (m) {
+                if (m && m.clave === clave) last = m;
+            });
+            return last;
+        }
+
+        function ordenarMovimientosOcupacion(list) {
+            return (list || []).slice().sort(function (a, b) {
+                var fa = String((a && a.fecha) || '');
+                var fb = String((b && b.fecha) || '');
+                if (fa !== fb) return fa < fb ? 1 : -1;
+                var ta = (a && a.tipo) === 'ingreso' ? 0 : 1;
+                var tb = (b && b.tipo) === 'ingreso' ? 0 : 1;
+                if (ta !== tb) return ta - tb;
+                return String((a && a.unidad) || '').localeCompare(String((b && b.unidad) || ''), 'es', { numeric: true });
+            });
+        }
+
+        function contarMovimientosOcupacion(movimientos) {
+            var ingresos = 0;
+            var salidas = 0;
+            (movimientos || []).forEach(function (m) {
+                if (!m) return;
+                if (m.tipo === 'ingreso') ingresos += 1;
+                else if (m.tipo === 'salida') salidas += 1;
+            });
+            return { ingresos: ingresos, salidas: salidas };
+        }
+
+        function bindRegistroOcupacionUi() {
+            if (window._ocupacionRegistroUiBound) return;
+            var wrap = document.getElementById('ocupacionRegistroFiltros');
+            if (!wrap) return;
+            window._ocupacionRegistroUiBound = true;
+            wrap.addEventListener('click', function (e) {
+                var btn = e.target && e.target.closest ? e.target.closest('[data-ocupacion-mov]') : null;
+                if (!btn) return;
+                window._ocupacionMovimientosFiltro = btn.getAttribute('data-ocupacion-mov') || 'todos';
+                wrap.querySelectorAll('[data-ocupacion-mov]').forEach(function (b) {
+                    b.classList.toggle('is-on', b === btn);
+                });
+                pintarTablaRegistroOcupacion();
+            });
+        }
+
+        function pintarTablaRegistroOcupacion() {
+            bindRegistroOcupacionUi();
+            var cuerpo = document.getElementById('ocupacionRegistroCuerpo');
+            var elIng = document.getElementById('ocupacionIngresosMes');
+            var elSal = document.getElementById('ocupacionSalidasMes');
+            var movimientos = Array.isArray(window._ocupacionMovimientosVista) ? window._ocupacionMovimientosVista : [];
+            var conteo = contarMovimientosOcupacion(movimientos);
+            if (elIng) elIng.textContent = conteo.ingresos;
+            if (elSal) elSal.textContent = conteo.salidas;
+            if (!cuerpo) return;
+            var filtro = window._ocupacionMovimientosFiltro || 'todos';
+            var filas = ordenarMovimientosOcupacion(movimientos).filter(function (m) {
+                if (!m) return false;
+                if (filtro === 'ingreso' || filtro === 'salida') return m.tipo === filtro;
+                return m.tipo === 'ingreso' || m.tipo === 'salida';
+            });
+            if (!filas.length) {
+                var vacio = filtro === 'ingreso'
+                    ? 'Sin ingresos registrados en este mes.'
+                    : (filtro === 'salida' ? 'Sin salidas registradas en este mes.' : 'Sin ingresos ni salidas registrados en este mes.');
+                cuerpo.innerHTML = '<tr><td colspan="6"><p class="ocupacion-registro-vacio">' + vacio + '</p></td></tr>';
+                return;
+            }
+            cuerpo.innerHTML = filas.map(function (m) {
+                var tipo = m.tipo === 'salida' ? 'salida' : 'ingreso';
+                var etiqueta = tipo === 'salida' ? 'Salida' : 'Ingreso';
+                var fechaTxt = (typeof formatearFechaParaCorreo === 'function') ? (formatearFechaParaCorreo(m.fecha) || m.fecha || '—') : (m.fecha || '—');
+                return '<tr>' +
+                    '<td>' + escHtmlOcupacion(fechaTxt) + '</td>' +
+                    '<td><span class="ocupacion-mov-badge ' + tipo + '">' + etiqueta + '</span></td>' +
+                    '<td>' + escHtmlOcupacion(m.unidad || m.departamento || '—') + '</td>' +
+                    '<td>' + escHtmlOcupacion(m.nombre || '—') + '</td>' +
+                    '<td>' + escHtmlOcupacion(m.tipoResidente || m.tipo || '—') + '</td>' +
+                    '<td>' + escHtmlOcupacion(m.correo || m.email || '—') + '</td>' +
+                    '</tr>';
+            }).join('');
+        }
+
+        function movimientoOcupacionDesdeCenso(tipo, item, fecha, mes) {
+            return {
+                id: (typeof generarId === 'function') ? generarId() : ('ocm-' + Date.now().toString(36)),
+                tipo: tipo,
+                unidad: item.unidad || item.departamento || '',
+                departamento: item.unidad || item.departamento || '',
+                nombre: item.nombre || '',
+                tipoResidente: item.tipo || item.tipoResidente || '',
+                correo: item.correo || item.email || '',
+                telefono: item.telefono || '',
+                fecha: fecha,
+                mes: mes,
+                fuente: 'ocupacion',
+                clave: item.clave || claveResidenteOcupacion(item.unidad || item.departamento, item.nombre, item.tipo || item.tipoResidente)
+            };
+        }
+
+        async function sincronizarRegistroOcupacionDesdeVinculacion() {
+            if (window._ocupacionRegistroSyncPromesa) return window._ocupacionRegistroSyncPromesa;
+            window._ocupacionRegistroSyncPromesa = (async function () {
+                var mes = (typeof obtenerMesPeriodoVista === 'function') ? obtenerMesPeriodoVista() : ((typeof obtenerMesActual === 'function') ? obtenerMesActual() : '');
+                var nombreMes = (typeof obtenerNombreMes === 'function' && mes) ? obtenerNombreMes(mes) : mes;
+                var lead = document.getElementById('ocupacionRegistroLead');
+                var nota = document.getElementById('ocupacionRegistroNota');
+                if (lead) {
+                    lead.textContent = 'Registro de ' + (nombreMes || 'este mes') + ' según el censo de Ocupación (propietarios, arrendatarios y familiares). Las visitas no se incluyen.';
+                }
+                var mesArchivado = !!(window.mesEnConsulta && !window.mesReabierto);
+                var movimientosGuardados = [];
+                var censoGuardado = [];
+                try {
+                    movimientosGuardados = await obtenerDatosMes('ocupacion-movimientos');
+                } catch (eM) { movimientosGuardados = []; }
+                try {
+                    censoGuardado = await obtenerDatosMes('ocupacion-residentes');
+                } catch (eC) { censoGuardado = []; }
+                if (!Array.isArray(movimientosGuardados)) movimientosGuardados = [];
+                if (!Array.isArray(censoGuardado)) censoGuardado = [];
+
+                if (mesArchivado) {
+                    window._ocupacionMovimientosVista = movimientosGuardados;
+                    pintarTablaRegistroOcupacion();
+                    if (nota) nota.textContent = 'Mes archivado: se muestra el registro guardado, sin actualizarlo con el censo en vivo.';
+                    return;
+                }
+
+                var units = Array.isArray(window.vinculacionUnits) ? window.vinculacionUnits : [];
+                var censoActual = extraerCensoResidentesOcupacion(units);
+                if (!censoActual.length && !units.length) {
+                    window._ocupacionMovimientosVista = movimientosGuardados;
+                    pintarTablaRegistroOcupacion();
+                    if (nota) nota.textContent = 'Aún no hay censo en vivo de Ocupación. Se muestra el último registro guardado de este mes.';
+                    return;
+                }
+
+                var mesAnterior = (typeof obtenerMesAnterior === 'function' && mes) ? obtenerMesAnterior(mes) : '';
+                var censoPrevMes = [];
+                if (mesAnterior && typeof obtenerDatosMesEspecifico === 'function') {
+                    try {
+                        censoPrevMes = await obtenerDatosMesEspecifico('ocupacion-residentes', mesAnterior);
+                    } catch (eP) { censoPrevMes = []; }
+                }
+                if (!Array.isArray(censoPrevMes)) censoPrevMes = [];
+
+                var hayCensoEsteMes = censoGuardado.length > 0;
+                var hayCensoPrevMes = censoPrevMes.length > 0;
+                var base = hayCensoEsteMes ? censoGuardado : (hayCensoPrevMes ? censoPrevMes : []);
+                var mapaBase = mapaCensoOcupacionPorClave(base);
+                var mapaAhora = mapaCensoOcupacionPorClave(censoActual);
+                var ingresosDetectados = [];
+                var salidasDetectadas = [];
+                var notaTxt = '';
+
+                if (base.length > 0) {
+                    Object.keys(mapaAhora).forEach(function (k) {
+                        if (!mapaBase[k]) ingresosDetectados.push(mapaAhora[k]);
+                    });
+                    Object.keys(mapaBase).forEach(function (k) {
+                        if (!mapaAhora[k]) salidasDetectadas.push(mapaBase[k]);
+                    });
+                    if (!hayCensoPrevMes && hayCensoEsteMes) {
+                        notaTxt = 'Aún no hay censo del mes anterior. Los movimientos se calculan respecto del último censo de este mes.';
+                    }
+                } else {
+                    ingresosDetectados = censoActual.filter(function (r) {
+                        return fechaAltaPerteneceAlMesOcupacion(r, mes);
+                    });
+                    notaTxt = 'Primer censo del mes: no se marcan las unidades ya habitadas como ingreso. Solo se anotan altas con fecha de este mes. Las salidas aparecerán al comparar con el próximo censo.';
+                }
+
+                var movimientos = movimientosGuardados.slice();
+                var hoy = (typeof obtenerFechaHoy === 'function') ? obtenerFechaHoy() : (typeof obtenerFechaSantiago === 'function' ? obtenerFechaSantiago() : '');
+                var agregados = 0;
+
+                ingresosDetectados.forEach(function (r) {
+                    var last = ultimoMovimientoOcupacionPorClave(movimientos, r.clave);
+                    if (last && last.tipo === 'ingreso') return;
+                    var fechaAlta = ymdChileOcupacion(r.registeredAt || r.createdAt);
+                    var fecha = (fechaAlta && fechaAlta.slice(0, 7) === mes) ? fechaAlta : hoy;
+                    movimientos.push(movimientoOcupacionDesdeCenso('ingreso', r, fecha || hoy, mes));
+                    agregados += 1;
+                });
+                salidasDetectadas.forEach(function (r) {
+                    var last = ultimoMovimientoOcupacionPorClave(movimientos, r.clave);
+                    if (last && last.tipo === 'salida') return;
+                    movimientos.push(movimientoOcupacionDesdeCenso('salida', r, hoy, mes));
+                    agregados += 1;
+                });
+
+                var censoCambio = !censosOcupacionIguales(censoGuardado, censoActual);
+                if (censoCambio && typeof guardarDatosMes === 'function') {
+                    await guardarDatosMes('ocupacion-residentes', censoActual);
+                }
+                if (agregados > 0 && typeof guardarDatosMes === 'function') {
+                    await guardarDatosMes('ocupacion-movimientos', movimientos);
+                }
+
+                window._ocupacionMovimientosVista = movimientos;
+                pintarTablaRegistroOcupacion();
+                if (nota) {
+                    var extra = agregados > 0 ? ('Se actualizó el registro con ' + agregados + ' movimiento' + (agregados === 1 ? '' : 's') + ' nuevo' + (agregados === 1 ? '' : 's') + '.') : 'El registro está al día con el censo actual.';
+                    nota.textContent = (notaTxt ? (notaTxt + ' ') : '') + extra;
+                }
+            })().catch(function (err) {
+                console.warn('Ocupación: no se pudo sincronizar el registro mensual', err);
+                pintarTablaRegistroOcupacion();
+            }).finally(function () {
+                window._ocupacionRegistroSyncPromesa = null;
+            });
+            return window._ocupacionRegistroSyncPromesa;
+        }
+        window.sincronizarRegistroOcupacionDesdeVinculacion = sincronizarRegistroOcupacionDesdeVinculacion;
 
         /** Obtiene nombre y tipo (propietario/arrendatario) del residente principal de una unidad desde Vinculación. */
         function obtenerResidentePorNumeroDepto(numeroDepto) {
@@ -39924,6 +40381,15 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 
                 // Obtener métricas de vinculación comunidad
                 const metricasVinculacion = await obtenerMetricasVinculacion();
+                let ocupacionMovimientosMes = [];
+                try {
+                    ocupacionMovimientosMes = await cargarDatosModulo('ocupacion-movimientos', mesAnio, !!(opciones && opciones.soloCuerpoCorreoResumenEjecutivo));
+                    if (!Array.isArray(ocupacionMovimientosMes)) ocupacionMovimientosMes = [];
+                } catch (eOcMov) {
+                    ocupacionMovimientosMes = [];
+                }
+                const totalIngresosEdificio = ocupacionMovimientosMes.filter(function (m) { return m && m.tipo === 'ingreso'; }).length;
+                const totalSalidasEdificio = ocupacionMovimientosMes.filter(function (m) { return m && m.tipo === 'salida'; }).length;
                 
                 // Cargar datos del mes anterior para análisis comparativo
                 const mesAnterior = typeof obtenerMesAnterior === 'function' ? obtenerMesAnterior(mesAnio) : null;
@@ -40246,6 +40712,42 @@ document.getElementById('chatForm').onsubmit = function (e) {
                                     <span style="font-size: 0.75rem; color: #6b7280;">Total de residentes</span>
                                     <span style="font-weight: 700; color: #4b5563; font-size: 0.95rem;">${metricasVinculacion.totalResidentesViviendo} residentes</span>
                                 </div>
+                            </div>
+                            <div class="reporte-summary-item" style="padding: 0.6rem; background: #f9fafb; border-radius: 6px; border: 1px solid #e5e7eb; margin-top: 0.35rem;">
+                                <span style="font-weight: 600; color: #374151; font-size: 0.8rem;">Ingresos y salidas del mes</span>
+                                <p style="margin: 0.35rem 0 0.5rem; font-size: 0.72rem; color: #6b7280; line-height: 1.4;">Censo de Ocupación (propietarios, arrendatarios y familiares). No incluye visitas ni mudanzas reservadas.</p>
+                                <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                                    <span style="font-size: 0.8rem; color: #059669; font-weight: 700;">Ingresos: ${totalIngresosEdificio}</span>
+                                    <span style="font-size: 0.8rem; color: #dc2626; font-weight: 700;">Salidas: ${totalSalidasEdificio}</span>
+                                </div>
+                                ${ocupacionMovimientosMes.length ? `
+                                <div style="overflow-x: auto; margin-top: 0.55rem;">
+                                    <table class="reporte-table" style="width: 100%; border-collapse: collapse;">
+                                        <thead>
+                                            <tr>
+                                                <th style="padding: 0.35rem 0.45rem; text-align: left; font-size: 0.7rem; border: 1px solid var(--border-color); background: var(--bg-tertiary);">Fecha</th>
+                                                <th style="padding: 0.35rem 0.45rem; text-align: left; font-size: 0.7rem; border: 1px solid var(--border-color); background: var(--bg-tertiary);">Movimiento</th>
+                                                <th style="padding: 0.35rem 0.45rem; text-align: left; font-size: 0.7rem; border: 1px solid var(--border-color); background: var(--bg-tertiary);">Unidad</th>
+                                                <th style="padding: 0.35rem 0.45rem; text-align: left; font-size: 0.7rem; border: 1px solid var(--border-color); background: var(--bg-tertiary);">Nombre</th>
+                                                <th style="padding: 0.35rem 0.45rem; text-align: left; font-size: 0.7rem; border: 1px solid var(--border-color); background: var(--bg-tertiary);">Relación</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            ${(typeof ordenarMovimientosOcupacion === 'function' ? ordenarMovimientosOcupacion(ocupacionMovimientosMes) : ocupacionMovimientosMes).map(function (m) {
+                                                if (!m) return '';
+                                                var fechaTxt = (typeof formatearFechaParaCorreo === 'function') ? (formatearFechaParaCorreo(m.fecha) || m.fecha || '-') : (m.fecha || '-');
+                                                var esc = (typeof escHtmlOcupacion === 'function') ? escHtmlOcupacion : function (s) { return String(s == null ? '' : s); };
+                                                return '<tr>' +
+                                                    '<td style="padding: 0.35rem 0.45rem; font-size: 0.72rem; border: 1px solid var(--border-color);">' + esc(fechaTxt) + '</td>' +
+                                                    '<td style="padding: 0.35rem 0.45rem; font-size: 0.72rem; border: 1px solid var(--border-color);">' + (m.tipo === 'salida' ? 'Salida' : 'Ingreso') + '</td>' +
+                                                    '<td style="padding: 0.35rem 0.45rem; font-size: 0.72rem; border: 1px solid var(--border-color);">' + esc(m.unidad || m.departamento || '-') + '</td>' +
+                                                    '<td style="padding: 0.35rem 0.45rem; font-size: 0.72rem; border: 1px solid var(--border-color);">' + esc(m.nombre || '-') + '</td>' +
+                                                    '<td style="padding: 0.35rem 0.45rem; font-size: 0.72rem; border: 1px solid var(--border-color);">' + esc(m.tipoResidente || m.tipo || '-') + '</td>' +
+                                                    '</tr>';
+                                            }).join('')}
+                                        </tbody>
+                                    </table>
+                                </div>` : '<p style="margin: 0.45rem 0 0; font-size: 0.75rem; color: #6b7280;">Sin movimientos de ingreso o salida registrados en este mes.</p>'}
                             </div>
                         </div>
                     </div>
@@ -40847,6 +41349,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     else if (metricasVinculacion.porcentajeOcupacion >= 50) nivel = 'Moderado';
                     else nivel = 'Bajo';
                     resumenEjecutivo.push(`Ocupación: ${metricasVinculacion.porcentajeOcupacion}% (${nivel}) - ${metricasVinculacion.ocupacionActual}/${metricasVinculacion.totalUnidades} unidades`);
+                    resumenEjecutivo.push(`Ingresos al edificio: ${totalIngresosEdificio} | Salidas: ${totalSalidasEdificio}`);
                 }
                 
                 if (resumenEjecutivo.length > 0) {
@@ -42799,7 +43302,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 }
             }
         }
-        function _construirAOAOcupacion(residentes) {
+        function _construirAOAOcupacion(residentes, movimientos) {
             var aoa = [['OCUPACIÓN / RESIDENTES']];
             aoa.push([]);
             aoa.push(['Unidad', 'Nombre', 'Tipo', 'Correo', 'Teléfono', 'Notas']);
@@ -42816,6 +43319,30 @@ document.getElementById('chatForm').onsubmit = function (e) {
             });
             aoa.push([]);
             aoa.push(['TOTALES', (residentes || []).length, '', '', '', '']);
+            aoa.push([]);
+            aoa.push(['INGRESOS Y SALIDAS DEL MES']);
+            aoa.push(['Fecha', 'Movimiento', 'Unidad', 'Nombre', 'Tipo', 'Correo', 'Teléfono']);
+            var nIng = 0;
+            var nSal = 0;
+            var movs = (typeof ordenarMovimientosOcupacion === 'function')
+                ? ordenarMovimientosOcupacion(movimientos || [])
+                : (movimientos || []);
+            movs.forEach(function (m) {
+                if (!m) return;
+                if (m.tipo === 'ingreso') nIng += 1;
+                else if (m.tipo === 'salida') nSal += 1;
+                aoa.push([
+                    m.fecha || '-',
+                    m.tipo === 'salida' ? 'Salida' : 'Ingreso',
+                    m.unidad || m.departamento || '-',
+                    m.nombre || '-',
+                    m.tipoResidente || m.tipo || '-',
+                    m.correo || m.email || '-',
+                    m.telefono || m.fono || '-'
+                ]);
+            });
+            aoa.push([]);
+            aoa.push(['TOTAL INGRESOS', nIng, 'TOTAL SALIDAS', nSal, '', '', '']);
             return aoa;
         }
         function _construirAOAPostventa(registros) {
@@ -43000,6 +43527,16 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 if (metricas && !metricas.error) {
                     lineasResumen.push('Ocupación indicada: ' + (metricas.porcentajeOcupacion != null ? metricas.porcentajeOcupacion : '-') + '%. Unidades entregadas: ' + (metricas.unidadesEntregadas != null ? metricas.unidadesEntregadas : '-') + '. Residentes en edificio: ' + (metricas.totalResidentesViviendo != null ? metricas.totalResidentesViviendo : '-') + '.');
                 }
+                var ocupMovXls = [];
+                try {
+                    ocupMovXls = await cargarDatosModulo('ocupacion-movimientos', mesAnio, esPrevisualizacion);
+                    if (!Array.isArray(ocupMovXls)) ocupMovXls = [];
+                } catch (eOcX) { ocupMovXls = []; }
+                if (ocupMovXls.length) {
+                    var nIngX = ocupMovXls.filter(function (m) { return m && m.tipo === 'ingreso'; }).length;
+                    var nSalX = ocupMovXls.filter(function (m) { return m && m.tipo === 'salida'; }).length;
+                    lineasResumen.push('Ingresos al edificio: ' + nIngX + '. Salidas: ' + nSalX + '.');
+                }
 
                 var wb = new ExcelJSLib.Workbook();
                 wb.creator = 'Gestión Comunidad';
@@ -43016,6 +43553,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 });
 
                 var ordenModulos = ['mudanzas', 'tarjetas', 'espacios', 'multas', 'morosos', 'aperturas'];
+                if (modulosVisibles.indexOf('ocupacion') !== -1) ordenModulos.push('ocupacion');
 
                 function _resaltarMudanzasCobro(ws) {
                     try {
@@ -43134,7 +43672,11 @@ document.getElementById('chatForm').onsubmit = function (e) {
                         _escribirHojaNomina(ws, nom || [], rep || []);
                     } else if (clave === 'ocupacion') {
                         var occ = await cargarDatosModulo('ocupacion-residentes', mesAnio, esPrevisualizacion);
-                        _escribirHojaDesdeAOA(ws, _construirAOAOcupacion(occ || []));
+                        var occMov = ocupMovXls;
+                        if (!occMov || !occMov.length) {
+                            try { occMov = await cargarDatosModulo('ocupacion-movimientos', mesAnio, esPrevisualizacion); } catch (eOccM) { occMov = []; }
+                        }
+                        _escribirHojaDesdeAOA(ws, _construirAOAOcupacion(occ || [], occMov || []));
                     } else if (clave === 'postventa') {
                         var pv = await _obtenerRegistrosPostventaInforme();
                         _escribirHojaDesdeAOA(ws, _construirAOAPostventa(pv || []));
@@ -43245,7 +43787,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     'espacios': 'espacios',
                     'multas': 'multas',
                     'morosos': 'morosos',
-                    'ocupacion': 'ocupacion-residentes',
+                    'ocupacion': ['ocupacion-residentes', 'ocupacion-movimientos'],
                     'caja': 'caja',
                     'mantenciones': ['mantenciones', 'visitas-extraordinarias'],
                     'pagos-aseo': 'pagosAseo',
@@ -43271,7 +43813,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 const modulosUnicos = [...new Set(modulos)];
                 
                 // Agregar módulos de configuración que también deben archivarse
-                modulosUnicos.push('mantenciones-config', 'caja-config');
+                modulosUnicos.push('mantenciones-config', 'caja-config', 'ocupacion-residentes', 'ocupacion-movimientos');
                 
                 // Obtener lecturas de agua caliente ANTES de archivarlas para poder transferirlas
                 let lecturasAguaParaTransferir = null;
@@ -43286,6 +43828,15 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 let modulosArchivados = 0;
                 const totalModulos = modulosUnicos.length;
                 
+                try {
+                    if (typeof sincronizarRegistroOcupacionDesdeVinculacion === 'function') {
+                        progreso.actualizar(0, Math.max(totalModulos, 1), 'Actualizando registro de ocupación…');
+                        await sincronizarRegistroOcupacionDesdeVinculacion();
+                    }
+                } catch (eOccCierre) {
+                    console.warn('Cierre de mes: no se pudo sincronizar ocupación', eOccCierre);
+                }
+
                 /** Copia de tarjetas ANTES de archivar: el reporte de cierre usa estos datos para no depender de lectura inmediata del archivo. */
                 let snapshotTarjetasParaReporte = [];
                 if (modulosUnicos.includes('tarjetas')) {
@@ -43436,7 +43987,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
             try {
                 mostrarAlerta('Reabriendo mes... Por favor espere.', 'Procesando');
                 
-                const modulos = ['mudanzas', 'aperturas', 'tarjetas', 'espacios', 'multas', 'morosos', 'ocupacion-residentes', 'caja', 'mantenciones', 'visitas-extraordinarias', 'pagosAseo', 'nomina', 'nomina-reemplazos', 'insumos', 'lecturasAguaCaliente', 'analisisNovedades'];
+                const modulos = ['mudanzas', 'aperturas', 'tarjetas', 'espacios', 'multas', 'morosos', 'ocupacion-residentes', 'ocupacion-movimientos', 'caja', 'mantenciones', 'visitas-extraordinarias', 'pagosAseo', 'nomina', 'nomina-reemplazos', 'insumos', 'lecturasAguaCaliente', 'analisisNovedades'];
                 // Agregar módulos de configuración que también deben reabrirse
                 const modulosConfig = ['mantenciones-config', 'caja-config'];
                 let datosReabiertos = 0;
