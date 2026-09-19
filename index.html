@@ -431,6 +431,23 @@
             transform: scaleY(1);
         }
 
+        .tabs-group-label {
+            padding: 0.85rem 1.5rem 0.3rem;
+            font-size: 0.62rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--gray-500);
+            pointer-events: none;
+            user-select: none;
+        }
+        .tabs-group-label:first-of-type {
+            padding-top: 0.45rem;
+        }
+        [data-theme="dark"] .tabs-group-label {
+            color: var(--gray-500);
+        }
+
         .tab-button span:first-child {
             font-size: 1.25rem;
             min-width: 1.75rem;
@@ -921,6 +938,59 @@
         .multas-alerta strong { font-size: 0.88rem; }
         .multas-alerta p { margin: 0.15rem 0 0; font-size: 0.8rem; color: var(--gray-700); }
         .multas-alerta .btn { padding: 0.35rem 0.75rem; font-size: 0.78rem; }
+        .dashboard-resumen-aviso {
+            display: none;
+            margin: 0 0 1rem;
+            padding: 0.8rem 1rem 0.85rem;
+            border-radius: 12px;
+            border: 1px solid rgba(14, 165, 233, 0.38);
+            background: rgba(14, 165, 233, 0.1);
+            color: var(--gray-900);
+        }
+        .dashboard-resumen-aviso.is-on { display: block; }
+        .dashboard-resumen-aviso.is-crit {
+            border-color: rgba(239, 68, 68, 0.42);
+            background: rgba(239, 68, 68, 0.1);
+        }
+        .dashboard-resumen-aviso.is-vacio {
+            border-color: rgba(100, 116, 139, 0.35);
+            background: rgba(100, 116, 139, 0.1);
+        }
+        .dashboard-resumen-aviso h3 {
+            margin: 0 0 0.15rem;
+            font-size: 0.9rem;
+            font-weight: 800;
+        }
+        .dashboard-resumen-aviso .sub {
+            margin: 0 0 0.45rem;
+            font-size: 0.74rem;
+            color: var(--gray-600);
+        }
+        .dashboard-resumen-aviso .lead {
+            margin: 0 0 0.45rem;
+            font-size: 0.84rem;
+            line-height: 1.5;
+        }
+        .dashboard-resumen-aviso ul {
+            margin: 0 0 0.5rem;
+            padding-left: 1.1rem;
+            font-size: 0.8rem;
+            line-height: 1.4;
+        }
+        .dashboard-resumen-aviso li { margin: 0 0 0.25rem; }
+        .dashboard-resumen-aviso .chips { display: flex; flex-wrap: wrap; gap: 0.3rem; margin: 0 0 0.45rem; }
+        .dashboard-resumen-aviso .chip {
+            display: inline-flex; align-items: center;
+            padding: 0.15rem 0.45rem; border-radius: 999px;
+            font-size: 0.68rem; font-weight: 700;
+            background: var(--bg-secondary); border: 1px solid var(--border-color);
+        }
+        [data-theme="dark"] .dashboard-resumen-aviso {
+            color: var(--gray-100);
+            background: rgba(14, 165, 233, 0.14);
+        }
+        [data-theme="dark"] .dashboard-resumen-aviso .sub { color: var(--gray-400); }
+        [data-theme="dark"] .dashboard-resumen-aviso.is-crit { background: rgba(239, 68, 68, 0.14); }
         .multas-estado {
             display: inline-block;
             padding: 0.12rem 0.45rem;
@@ -1259,6 +1329,37 @@
             line-height: 1.45;
             color: var(--gray-600);
         }
+        #conserjeria .pcsh-resumen-toolbar { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 0.45rem 0.55rem; margin: 0 0 0.65rem; }
+        #conserjeria .pcsh-resumen-toolbar label { font-size: 0.75rem; font-weight: 700; color: var(--gray-600); display: block; margin-bottom: 0.2rem; }
+        #conserjeria .pcsh-resumen-toolbar input[type="date"] {
+            padding: 0.4rem 0.55rem; border-radius: 8px; border: 1px solid var(--border-color);
+            background: var(--bg-primary); color: var(--text-primary); font-size: 0.82rem;
+        }
+        [data-theme="dark"] #conserjeria .pcsh-resumen-chip {
+            border-color: #6b7280; color: #f9fafb; background: #374151;
+        }
+        #conserjeria .pcsh-resumen-meta { display: flex; flex-wrap: wrap; gap: 0.35rem; margin: 0 0 0.65rem; }
+        #conserjeria .pcsh-resumen-chip {
+            display: inline-flex; align-items: center; padding: 0.22rem 0.5rem; border-radius: 999px;
+            border: 1px solid var(--border-color); font-size: 0.7rem; font-weight: 700;
+            background: var(--bg-secondary); color: var(--gray-700);
+        }
+        #conserjeria .pcsh-resumen-sit {
+            margin: 0; font-size: 0.84rem; line-height: 1.5; padding: 0.6rem 0.7rem; border-radius: 10px;
+            border: 1px solid var(--border-color); background: rgba(37, 99, 235, 0.08); color: var(--text-primary);
+        }
+        #conserjeria .pcsh-resumen-sec { margin: 0 0 0.7rem; }
+        #conserjeria .pcsh-resumen-sec h4 {
+            margin: 0 0 0.35rem; font-size: 0.74rem; font-weight: 800; letter-spacing: 0.04em;
+            text-transform: uppercase; color: var(--gray-500);
+        }
+        #conserjeria .pcsh-resumen-item {
+            display: block; width: 100%; text-align: left; border: 1px solid var(--border-color);
+            background: var(--bg-primary); color: var(--text-primary); border-radius: 8px;
+            padding: 0.45rem 0.55rem; margin: 0 0 0.35rem; cursor: pointer; font: inherit;
+        }
+        [data-theme="dark"] #conserjeria .btn-primary { background: #86c933; color: #111827; font-weight: 700; }
+        [data-theme="dark"] #conserjeria .btn-secondary { background: #4b5563; color: #f9fafb; border: 1px solid #d1d5db; }
         #conserjeria #conserjeriaKpis.resumen-ocupacion-map {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(128px, 1fr));
@@ -2622,8 +2723,24 @@
         }
         @keyframes dashboardPulse { 0%, 100% { opacity: 0.7; } 50% { opacity: 1; } }
 
-        /* Módulos: grid de tarjetas (contenedor estable) */
+        /* Módulos: grupos por área + grid de tarjetas */
         .dashboard2-stats-wrap { min-height: 60px; }
+        #dashboard2StatsGrid.dashboard2-stats-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 0.85rem;
+        }
+        .dashboard2-mod-grupo-title {
+            margin: 0 0 0.4rem 0;
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: var(--gray-600);
+        }
+        [data-theme="dark"] .dashboard2-mod-grupo-title {
+            color: var(--gray-500);
+        }
         .dashboard2-stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
@@ -6126,6 +6243,19 @@
                 <span>Chat interno</span>
                 <span id="chatSidebarBadge" class="sidebar-chat-badge" data-count="0" aria-hidden="true"></span>
             </button>
+            <div class="tabs-group-label" data-menu-group="edificio">Edificio</div>
+            <button class="tab-button" data-tab="conserjeria">
+                <span>
+                    <svg class="menu-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/></svg>
+                </span>
+                <span>Conserjería</span>
+            </button>
+            <button class="tab-button" data-tab="ocupacion">
+                <span>
+                    <svg class="menu-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/><path d="M9 9v.01"/><path d="M9 12v.01"/><path d="M9 15v.01"/><path d="M9 18v.01"/></svg>
+                </span>
+                <span>Ocupación</span>
+            </button>
             <button class="tab-button" data-tab="mudanzas">
                 <span>
                     <svg class="menu-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -6158,6 +6288,7 @@
                 </span>
                 <span>Espacios Comunes</span>
             </button>
+            <div class="tabs-group-label" data-menu-group="convivencia">Convivencia</div>
             <button class="tab-button" data-tab="multas">
                 <span>
                     <svg class="menu-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -6174,14 +6305,13 @@
                 </span>
                 <span>Morosos</span>
             </button>
-            <button class="tab-button" data-tab="lecturasAgua">
+            <button class="tab-button" data-tab="postventa">
                 <span>
-                    <svg class="menu-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M12 2C9 6 6 10 6 13.5 6 17.09 8.91 20 12.5 20s6.5-2.91 6.5-6.5C19 10 16 6 12 2zm0 16c-2.21 0-4-1.79-4-4 0-1.28.86-3.22 2.57-5.79.32-.47 1.02-.47 1.34 0C15.14 10.78 16 12.72 16 14c0 2.21-1.79 4-4 4z"/>
-                    </svg>
+                    <svg class="menu-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M19 3H5c-1.1 0-2 .9-2 2v14l4-4h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 10H6.17L5 14.17V5h14v8z"/><path fill="currentColor" d="M7 9h10v2H7zm0-3h7v2H7z" opacity="0.7"/></svg>
                 </span>
-                <span>Lecturas Agua Caliente</span>
+                <span>Postventa</span>
             </button>
+            <div class="tabs-group-label" data-menu-group="finanzas">Finanzas y servicios</div>
             <button class="tab-button" data-tab="caja">
                 <span>
                     <svg class="menu-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -6191,13 +6321,13 @@
                 </span>
                 <span>Caja Chica</span>
             </button>
-            <button class="tab-button" data-tab="mantenciones">
+            <button class="tab-button" data-tab="lecturasAgua">
                 <span>
                     <svg class="menu-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M22.7 19l-9.1-9.1c.9-2.3.4-5-1.5-6.9-2-2-5-2.4-7.4-1.3L9 6 6 9 1.6 4.7C.4 7.1.9 10.1 2.9 12.1c1.9 1.9 4.6 2.4 6.9 1.5l9.1 9.1c.4.4 1 .4 1.4 0l2.3-2.3c.5-.4.5-1.1.1-1.4z"/>
+                        <path d="M12 2C9 6 6 10 6 13.5 6 17.09 8.91 20 12.5 20s6.5-2.91 6.5-6.5C19 10 16 6 12 2zm0 16c-2.21 0-4-1.79-4-4 0-1.28.86-3.22 2.57-5.79.32-.47 1.02-.47 1.34 0C15.14 10.78 16 12.72 16 14c0 2.21-1.79 4-4 4z"/>
                     </svg>
                 </span>
-                <span>Mantenciones</span>
+                <span>Lecturas Agua Caliente</span>
             </button>
             <button class="tab-button" data-tab="pagos-aseo">
                 <span>
@@ -6225,24 +6355,15 @@
                 </span>
                 <span>Pedido de Insumos</span>
             </button>
-            <button class="tab-button" data-tab="ocupacion">
+            <button class="tab-button" data-tab="mantenciones">
                 <span>
-                    <svg class="menu-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/><path d="M9 9v.01"/><path d="M9 12v.01"/><path d="M9 15v.01"/><path d="M9 18v.01"/></svg>
+                    <svg class="menu-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M22.7 19l-9.1-9.1c.9-2.3.4-5-1.5-6.9-2-2-5-2.4-7.4-1.3L9 6 6 9 1.6 4.7C.4 7.1.9 10.1 2.9 12.1c1.9 1.9 4.6 2.4 6.9 1.5l9.1 9.1c.4.4 1 .4 1.4 0l2.3-2.3c.5-.4.5-1.1.1-1.4z"/>
+                    </svg>
                 </span>
-                <span>Ocupación</span>
+                <span>Mantenciones</span>
             </button>
-            <button class="tab-button" data-tab="conserjeria">
-                <span>
-                    <svg class="menu-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/></svg>
-                </span>
-                <span>Conserjería</span>
-            </button>
-            <button class="tab-button" data-tab="postventa">
-                <span>
-                    <svg class="menu-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M19 3H5c-1.1 0-2 .9-2 2v14l4-4h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 10H6.17L5 14.17V5h14v8z"/><path fill="currentColor" d="M7 9h10v2H7zm0-3h7v2H7z" opacity="0.7"/></svg>
-                </span>
-                <span>Postventa</span>
-            </button>
+            <div class="tabs-group-label" data-menu-group="sistema">Comunicación</div>
             <button class="tab-button" data-tab="notificaciones">
                 <span>
                     <svg class="menu-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -6321,7 +6442,7 @@
                                     <svg class="dashboard2-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg>
                                     Panel de Control
                                 </h1>
-                                <p id="dashboard2Subtitulo" class="dashboard2-subtitulo">Resumen visual del mes</p>
+                                <p id="dashboard2Subtitulo" class="dashboard2-subtitulo">Atención, pulso del mes y operación por área</p>
                                 <p id="dashboard2MesTexto" class="dashboard2-mes-texto"></p>
                             </div>
                         </div>
@@ -6337,7 +6458,10 @@
                         <span class="cinta-regano-texto" aria-hidden="true"></span>
                     </div>
                 </div>
-                <!-- 0. Asistente Arturito (misma distribución que activa) -->
+                <div id="alertasDashboard" style="display: none;"><!-- Gestionado por Arturito --></div>
+                <div id="dashboardMultasPendientesWrap" class="multas-alerta" role="status"></div>
+                <div id="dashboardResumenNovedadesWrap" class="dashboard-resumen-aviso" role="status" aria-live="polite"></div>
+                <!-- 0. Asistente Arturito -->
                 <section class="dashboard2-block dashboard2-block--arturito" aria-label="Asistente Arturito">
                     <h2 class="dashboard2-block-title">Asistente Arturito</h2>
                     <div id="arturitoMensajes2" class="arturito-mensajes-box" onclick="toggleArturitoMensajes2()" role="button" tabindex="0" aria-expanded="false" aria-label="Ver mensajes de Arturito">
@@ -6345,11 +6469,9 @@
                         <p class="arturito-placeholder">Cargando asistente…</p>
                     </div>
                 </section>
-                <div id="alertasDashboard" style="display: none;"><!-- Gestionado por Arturito --></div>
-                <div id="dashboardMultasPendientesWrap" class="multas-alerta" role="status"></div>
-                <!-- 1. Resumen rápido (KPIs) - misma estructura que activa -->
-                <section class="dashboard2-block dashboard2-block--kpis" aria-label="Resumen del mes">
-                    <h2 class="dashboard2-block-title">Resumen del mes</h2>
+                <!-- 1. Pulso financiero -->
+                <section class="dashboard2-block dashboard2-block--kpis" aria-label="Pulso financiero del mes">
+                    <h2 class="dashboard2-block-title">Pulso financiero</h2>
                     <div class="dashboard2-kpi-row" id="dashboard2KpiRow">
                         <div class="dashboard2-kpi" style="position: relative;">
                             <div id="semaforoIngresos" class="dashboard2-kpi-semaforo" style="background: #10b981;"></div>
@@ -6375,15 +6497,33 @@
                     </div>
                 </section>
                 <!-- 2. Tarjetas de módulos: contenedor estable, solo se rellena el grid interior -->
-                <section class="dashboard2-block dashboard2-block--modulos" aria-label="Módulos">
-                    <h2 class="dashboard2-block-title">Módulos</h2>
+                <section class="dashboard2-block dashboard2-block--modulos" aria-label="Actividad por área">
+                    <h2 class="dashboard2-block-title">Actividad por área</h2>
                     <div class="dashboard2-stats-wrap" id="dashboard2Stats">
-                        <div class="dashboard2-stats-grid" id="dashboard2StatsGrid"></div>
+                        <div class="dashboard2-stats-stack" id="dashboard2StatsGrid"></div>
                     </div>
                 </section>
-                <!-- 3. Gráficos -->
-                <section class="dashboard2-block dashboard2-block--charts" aria-label="Gráficos">
-                    <h2 class="dashboard2-block-title">Gráficos</h2>
+                <!-- 3. Nómina y mantenciones (seguimiento operativo) -->
+                <section class="dashboard2-block dashboard2-block--extra" aria-label="Nómina y mantenciones">
+                    <h2 class="dashboard2-block-title">Seguimiento operativo</h2>
+                    <div class="dashboard2-extra-grid">
+                        <div class="dashboard2-extra-col" id="dashboard2ProgresoNomina">
+                            <div id="dashboardProgresoNominaWrap" style="margin-top: 0; display: block;">
+                                <div style="background: transparent; border-radius: 0; border: none; padding: 0; box-shadow: none;">
+                                    <div id="progresoNomina"><!-- Se llena dinámicamente --></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="dashboard2-extra-col" id="dashboard2Mantenciones">
+                            <div id="dashboardMantencionesWrap" style="margin-top: 0; padding: 0; background: transparent; border: none; border-radius: 0; box-shadow: none;">
+                                <div id="mantencionesMesActual" style="padding: 0.75rem 0;"><!-- Se llena dinámicamente --></div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                <!-- 4. Panorama del mes -->
+                <section class="dashboard2-block dashboard2-block--charts" aria-label="Panorama del mes">
+                    <h2 class="dashboard2-block-title">Panorama del mes</h2>
                     <div class="dashboard2-charts-grid">
                         <article class="dashboard2-chart-card">
                             <h4 class="dashboard2-chart-title">Actividad por módulo</h4>
@@ -6484,25 +6624,7 @@
                         </div>
                     </div>
                 </section>
-                <!-- 4. Nómina y mantenciones -->
-                <section class="dashboard2-block dashboard2-block--extra" aria-label="Nómina y mantenciones">
-                    <h2 class="dashboard2-block-title">Nómina y mantenciones</h2>
-                    <div class="dashboard2-extra-grid">
-                        <div class="dashboard2-extra-col" id="dashboard2ProgresoNomina">
-                            <div id="dashboardProgresoNominaWrap" style="margin-top: 0; display: block;">
-                                <div style="background: transparent; border-radius: 0; border: none; padding: 0; box-shadow: none;">
-                                    <div id="progresoNomina"><!-- Se llena dinámicamente --></div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="dashboard2-extra-col" id="dashboard2Mantenciones">
-                            <div id="dashboardMantencionesWrap" style="margin-top: 0; padding: 0; background: transparent; border: none; border-radius: 0; box-shadow: none;">
-                                <div id="mantencionesMesActual" style="padding: 0.75rem 0;"><!-- Se llena dinámicamente --></div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-                <!-- 5. Acciones - Herramientas de la App -->
+                <!-- 6. Acciones - Herramientas de la App -->
                 <section class="dashboard2-block dashboard2-block--actions" aria-label="Herramientas de la App">
                     <div id="dashboardHerramientasWrap">
                         <div class="dashboard2-herramientas-header" onclick="toggleHerramientasApp()" role="button" tabindex="0" aria-expanded="false" aria-label="Expandir o contraer Herramientas de la App">
@@ -8121,6 +8243,20 @@
                     <p>Primero el pulso del mes, luego las destacadas y el listado para trabajar. Pulse un indicador para filtrar.</p>
                 </header>
                 <div id="conserjeriaKpis" class="resumen-ocupacion-map"></div>
+                <div class="conserjeria-modulo__panel" id="conserjeriaResumenDiarioWrap">
+                    <h3>Resumen diario de novedades</h3>
+                    <p style="margin: 0 0 0.55rem; font-size: 0.8rem; color: var(--gray-600);">Misma fuente que Conserjería WM. El resumen no modifica el libro.</p>
+                    <div class="pcsh-resumen-toolbar">
+                        <div>
+                            <label for="pcshResumenFechaGestion">Fecha</label>
+                            <input type="date" id="pcshResumenFechaGestion">
+                        </div>
+                        <button type="button" class="btn btn-primary" id="pcshResumenGenerarBtnGestion" style="padding: 0.4rem 0.75rem; font-size: 0.8rem;">Generar resumen</button>
+                        <button type="button" class="btn btn-secondary" id="pcshResumenActualizarBtnGestion" style="padding: 0.4rem 0.75rem; font-size: 0.8rem;">Actualizar</button>
+                        <button type="button" class="btn btn-secondary" id="pcshResumenCopiarBtnGestion" style="padding: 0.4rem 0.75rem; font-size: 0.8rem;">Copiar</button>
+                    </div>
+                    <div id="pcshResumenBodyGestion"><p style="margin:0;color:var(--gray-500);font-size:0.85rem;">Cargue el módulo o genere el resumen.</p></div>
+                </div>
                 <div class="conserjeria-modulo__panel" id="conserjeriaDestacadasWrap">
                     <h3>Novedades destacadas</h3>
                     <div id="conserjeriaDestacadasList"><p style="margin: 0; color: var(--gray-500); font-size: 0.85rem;">Cargando…</p></div>
@@ -16097,9 +16233,176 @@
             if (el) el.classList.remove('active');
         }
 
+        function pcshResumenGestionHoyYmd() {
+            try {
+                return new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Santiago', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
+            } catch (e) {
+                var d = new Date();
+                return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+            }
+        }
+        function pcshResumenGestionYmd(fecha) {
+            var s = String(fecha || '').trim();
+            var m1 = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+            if (m1) return m1[3] + '-' + String(m1[2]).padStart(2, '0') + '-' + String(m1[1]).padStart(2, '0');
+            var m2 = s.match(/^(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})/);
+            if (m2) return m2[1] + '-' + String(m2[2]).padStart(2, '0') + '-' + String(m2[3]).padStart(2, '0');
+            return '';
+        }
+        function pcshResumenGestionFechaLarga(ymd) {
+            var p = String(ymd || '').split('-');
+            if (p.length !== 3) return ymd || '';
+            var meses = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+            return parseInt(p[2], 10) + ' de ' + (meses[parseInt(p[1], 10) - 1] || p[1]) + ' de ' + p[0];
+        }
+        function pcshResumenGestionHtml(dia, esc) {
+            esc = esc || (typeof escaparHtmlModuloConserjeria === 'function' ? escaparHtmlModuloConserjeria : function (s) { return String(s == null ? '' : s); });
+            if (!dia) return '<p style="margin:0;color:var(--gray-500);font-size:0.85rem;">Sin resumen.</p>';
+            var c = dia.conteos || {};
+            var html = '<div class="pcsh-resumen-meta">';
+            html += '<span class="pcsh-resumen-chip">' + esc(pcshResumenGestionFechaLarga(dia.ymd)) + '</span>';
+            html += '<span class="pcsh-resumen-chip">' + (dia.total || 0) + ' novedades analizadas</span>';
+            html += '<span class="pcsh-resumen-chip">🔴 ' + (c.critica || 0) + '</span>';
+            html += '<span class="pcsh-resumen-chip">🟠 ' + (c.importante || 0) + '</span>';
+            html += '<span class="pcsh-resumen-chip">🟡 ' + (c.pendiente || 0) + '</span>';
+            html += '<span class="pcsh-resumen-chip">🟢 ' + (c.general || 0) + '</span>';
+            html += '</div>';
+            html += '<div class="pcsh-resumen-sec"><h4>Resumen de la jornada</h4><p class="pcsh-resumen-sit">' + esc(dia.resumenGeneral || '') + '</p></div>';
+            if (dia.vacio) return html + '<p style="margin:0;color:var(--gray-500);font-size:0.85rem;">No se registraron novedades durante este día.</p>';
+            function bloque(titulo, arr) {
+                var out = '<div class="pcsh-resumen-sec"><h4>' + esc(titulo) + '</h4>';
+                if (!arr || !arr.length) return out + '<p style="margin:0;color:var(--gray-500);font-size:0.8rem;">Ninguna.</p></div>';
+                arr.forEach(function (g) {
+                    out += '<button type="button" class="pcsh-resumen-item" data-resumen-cors="' + (g.cors || []).join(',') + '"><strong>' + esc(g.titulo || '') + '</strong>' +
+                        (g.estado ? ' · ' + esc(g.estado) : '') +
+                        (g.bullets || []).map(function (b) { return '<p>' + esc(b) + '</p>'; }).join('') +
+                        '<p style="margin:0.2rem 0 0;font-size:0.7rem;color:var(--gray-500);">Novedades: ' + esc((g.libros || []).join(' · ')) + '</p></button>';
+                });
+                return out + '</div>';
+            }
+            html += bloque('Lo más importante', [].concat(dia.criticas || [], dia.importantes || []));
+            html += bloque('Pendientes y seguimiento', dia.pendientes || []);
+            if (dia.recomendaciones && dia.recomendaciones.length) {
+                html += '<div class="pcsh-resumen-sec"><h4>Recomendaciones para el relevo</h4><ul style="margin:0;padding-left:1.1rem;font-size:0.8rem;">';
+                dia.recomendaciones.forEach(function (r) { html += '<li>' + esc(r) + '</li>'; });
+                html += '</ul></div>';
+            }
+            return html;
+        }
+        async function pcshResumenGestionLeer(ymd) {
+            try {
+                var sdb = await obtenerDbConserjeriaOperativa();
+                var snap = await sdb.collection('pcsh_settings').doc('resumenesDiarios').get();
+                var data = (snap && snap.exists) ? (snap.data() || {}) : {};
+                return data.dias && data.dias[ymd] ? data.dias[ymd] : null;
+            } catch (e) {
+                return null;
+            }
+        }
+        async function pcshResumenGestionGuardar(dia) {
+            if (!dia || !dia.ymd) return;
+            var sdb = await obtenerDbConserjeriaOperativa();
+            var ref = sdb.collection('pcsh_settings').doc('resumenesDiarios');
+            var snap = await ref.get();
+            var data = (snap && snap.exists) ? (snap.data() || {}) : {};
+            var dias = (data.dias && typeof data.dias === 'object') ? data.dias : {};
+            dias[dia.ymd] = dia;
+            await ref.set({ dias: dias, updatedAt: new Date().toISOString() }, { merge: true });
+        }
+        function pcshResumenGestionLista() {
+            var cache = window._moduloConserjeriaCache || {};
+            return cache.novedadesAll && cache.novedadesAll.length ? cache.novedadesAll : (cache.novedades || []);
+        }
+        function pcshResumenGestionConstruir(lista, ymd) {
+            var items = (lista || []).filter(function (n) {
+                return n && !n.turnoSep && n.tipo !== 'resumen_diario' && !n.minimizada && pcshResumenGestionYmd(n.fecha) === ymd;
+            });
+            var critRe = /incend|fuego|filtraci|inund|robo|gas\b|ascensor|alarma|emergencia|urgente|amenaza/i;
+            var pendRe = /pendiente|por revisar|falta\b|sin resolver|esperando|seguimiento/i;
+            var grupos = items.map(function (n) {
+                var txt = String(n.texto || '').replace(/\s+/g, ' ').trim();
+                var prio = critRe.test(txt) ? 'critica' : ((n.relevante || n.destacada || pendRe.test(txt) || /reclamo|multa|seguridad|incidente/i.test(String(n.categoria || ''))) ? 'importante' : 'general');
+                var pend = pendRe.test(txt);
+                return {
+                    titulo: (n.categoria || 'Novedad') + (txt ? ' — ' + txt.slice(0, 70) : ''),
+                    prioridad: prio,
+                    estado: pend ? 'Pendiente' : (prio === 'critica' ? 'Urgente' : 'Informativo'),
+                    cors: [Number(n.correlativo) || 0],
+                    libros: ['#' + (n.correlativo || '—')],
+                    bullets: [(String(n.hora || '').slice(0, 5) || '—') + ' · ' + txt.slice(0, 180)],
+                    pendiente: pend
+                };
+            });
+            var criticas = grupos.filter(function (g) { return g.prioridad === 'critica'; });
+            var importantes = grupos.filter(function (g) { return g.prioridad === 'importante' && !g.pendiente; });
+            var pendientes = grupos.filter(function (g) { return g.pendiente; });
+            var generales = grupos.filter(function (g) { return g.prioridad === 'general' && !g.pendiente; });
+            var resumen = items.length
+                ? ('Durante la jornada se registraron ' + items.length + ' novedades. ' + (criticas.length ? ('Hay ' + criticas.length + ' situación(es) crítica(s). ') : 'No se identifican situaciones críticas. ') + (pendientes.length ? ('Quedan ' + pendientes.length + ' pendientes.') : ''))
+                : ('No se registraron novedades de bitácora el ' + pcshResumenGestionFechaLarga(ymd) + '.');
+            return {
+                ymd: ymd,
+                generadoAt: new Date().toISOString(),
+                origen: 'gestion-wm',
+                motor: 'local',
+                total: items.length,
+                vacio: !items.length,
+                conteos: { critica: criticas.length, importante: importantes.length, pendiente: pendientes.length, general: generales.length },
+                resumenGeneral: resumen,
+                criticas: criticas.slice(0, 8),
+                importantes: importantes.slice(0, 8),
+                pendientes: pendientes.slice(0, 10),
+                recomendaciones: pendientes.slice(0, 6).map(function (g) { return 'Dar seguimiento a ' + g.titulo; })
+            };
+        }
+        function pcshResumenGestionPintar(dia) {
+            var body = document.getElementById('pcshResumenBodyGestion');
+            if (!body) return;
+            body.innerHTML = pcshResumenGestionHtml(dia);
+            window._pcshResumenDiaGestion = dia;
+        }
+        function pcshResumenBindUiGestion() {
+            if (window._pcshResumenGestionBound) return;
+            window._pcshResumenGestionBound = true;
+            var inp = document.getElementById('pcshResumenFechaGestion');
+            var btnG = document.getElementById('pcshResumenGenerarBtnGestion');
+            var btnA = document.getElementById('pcshResumenActualizarBtnGestion');
+            var btnC = document.getElementById('pcshResumenCopiarBtnGestion');
+            var body = document.getElementById('pcshResumenBodyGestion');
+            if (inp && !inp.value) inp.value = pcshResumenGestionHoyYmd();
+            async function cargar(ymd, forzar) {
+                if (!forzar) {
+                    var cache = await pcshResumenGestionLeer(ymd);
+                    if (cache) { pcshResumenGestionPintar(cache); return; }
+                }
+                var dia = pcshResumenGestionConstruir(pcshResumenGestionLista(), ymd);
+                pcshResumenGestionPintar(dia);
+                try { await pcshResumenGestionGuardar(dia); } catch (e) {}
+            }
+            if (inp) inp.addEventListener('change', function () { cargar(inp.value, false); });
+            if (btnG) btnG.addEventListener('click', function () { cargar((inp && inp.value) || pcshResumenGestionHoyYmd(), false); });
+            if (btnA) btnA.addEventListener('click', function () { cargar((inp && inp.value) || pcshResumenGestionHoyYmd(), true); });
+            if (btnC) btnC.addEventListener('click', function () {
+                var d = window._pcshResumenDiaGestion;
+                if (!d) return;
+                var t = (d.resumenGeneral || '') + '\n';
+                if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t);
+            });
+            if (body) {
+                body.addEventListener('click', function (ev) {
+                    var b = ev.target && ev.target.closest ? ev.target.closest('[data-resumen-cors]') : null;
+                    if (!b) return;
+                    var cor = Number(String(b.getAttribute('data-resumen-cors') || '').split(',')[0]);
+                    if (isFinite(cor) && typeof window.enfocarNovedadConserjeriaGestion === 'function') window.enfocarNovedadConserjeriaGestion(cor);
+                });
+            }
+            cargar((inp && inp.value) || pcshResumenGestionHoyYmd(), false);
+        }
+
         function bindUiModuloConserjeria() {
             if (window._moduloConserjeriaUiBound) return;
             window._moduloConserjeriaUiBound = true;
+            if (typeof pcshResumenBindUiGestion === 'function') pcshResumenBindUiGestion();
             var btn = document.getElementById('btnActualizarModuloConserjeria');
             if (btn) {
                 btn.addEventListener('click', function () {
@@ -16389,6 +16692,7 @@
             pintarKpisModuloConserjeria();
             pintarDestacadasModuloConserjeria();
             pintarAnalisisNovedadesConserjeria();
+            if (typeof pcshResumenBindUiGestion === 'function') pcshResumenBindUiGestion();
             if (typeof sincronizarMultasDesdeConserjeria === 'function') {
                 sincronizarMultasDesdeConserjeria().then(function () {
                     if (typeof obtenerDatosMes !== 'function' || typeof pintarAlertasMultasPendientes !== 'function') return;
@@ -35492,11 +35796,45 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 'Última Nómina': 'nomina',
                 'Postventa': 'postventa',
                 'Conserjería': 'conserjeria',
+                'Ocupación': 'ocupacion',
                 'Balance Neto': 'dashboard'
             };
             return map[title] || null;
         }
         window.dashboardTarjetaTabPorTitulo = dashboardTarjetaTabPorTitulo;
+
+        var DASHBOARD_GRUPOS_TARJETAS = [
+            { id: 'edificio', titulo: 'Edificio y residentes', tabs: ['conserjeria', 'ocupacion', 'mudanzas', 'aperturas', 'tarjetas', 'espacios'] },
+            { id: 'convivencia', titulo: 'Convivencia y cobranza', tabs: ['multas', 'morosos', 'postventa'] },
+            { id: 'finanzas', titulo: 'Finanzas y servicios', tabs: ['caja', 'lecturasAgua', 'pagos-aseo', 'nomina', 'insumos', 'mantenciones'] }
+        ];
+
+        function dashboardGrupoDeTarjeta(stat) {
+            var tab = (stat && (stat.onClickTab || dashboardTarjetaTabPorTitulo(stat.title))) || '';
+            for (var i = 0; i < DASHBOARD_GRUPOS_TARJETAS.length; i++) {
+                if (DASHBOARD_GRUPOS_TARJETAS[i].tabs.indexOf(tab) >= 0) return DASHBOARD_GRUPOS_TARJETAS[i].id;
+            }
+            return 'otros';
+        }
+
+        function actualizarEtiquetasMenuLateral() {
+            var menu = document.getElementById('tabsMenu');
+            if (!menu) return;
+            var labels = menu.querySelectorAll('.tabs-group-label');
+            labels.forEach(function (lab) {
+                var n = lab.nextElementSibling;
+                var visible = false;
+                while (n && !n.classList.contains('tabs-group-label')) {
+                    if (n.id === 'btnLogout' || (n.querySelector && n.querySelector('#btnLogout')) || n.classList.contains('tabs-menu-dev-logo')) break;
+                    if (n.classList.contains('tab-button') && n.style.display !== 'none') {
+                        visible = true;
+                        break;
+                    }
+                    n = n.nextElementSibling;
+                }
+                lab.hidden = !visible;
+            });
+        }
 
         // Función para obtener módulos visibles (por defecto todos)
         async function obtenerModulosVisibles() {
@@ -35682,7 +36020,9 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     return;
                 }
                 
-                lista.innerHTML = Object.entries(MODULOS_DISPONIBLES).map(([key, modulo]) => {
+                var gruposCfg = (typeof DASHBOARD_GRUPOS_TARJETAS !== 'undefined' ? DASHBOARD_GRUPOS_TARJETAS : []).concat([{ id: 'otros', titulo: 'Otros', tabs: [] }]);
+                var keysUsadas = {};
+                function htmlToggleModulo(key, modulo) {
                     const estaVisible = modulosVisibles.includes(key);
                     return `
                         <div style="display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; background: ${estaVisible ? 'rgba(16, 185, 129, 0.08)' : 'rgba(239, 68, 68, 0.08)'}; border: 2px solid ${estaVisible ? 'var(--success)' : 'var(--danger)'}; border-radius: 8px; transition: all 0.2s ease;">
@@ -35699,6 +36039,16 @@ document.getElementById('chatForm').onsubmit = function (e) {
                             </label>
                         </div>
                     `;
+                }
+                lista.innerHTML = gruposCfg.map(function (g) {
+                    var entradas = Object.entries(MODULOS_DISPONIBLES).filter(function (pair) {
+                        var tab = pair[1].tab;
+                        var enGrupo = g.tabs.indexOf(tab) >= 0 || (g.id === 'otros' && !DASHBOARD_GRUPOS_TARJETAS.some(function (x) { return x.tabs.indexOf(tab) >= 0; }));
+                        if (enGrupo) keysUsadas[pair[0]] = true;
+                        return enGrupo;
+                    });
+                    if (!entradas.length) return '';
+                    return '<div style="grid-column:1/-1;font-size:0.7rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--gray-500);margin:0.35rem 0 0.15rem;">' + g.titulo + '</div>' + entradas.map(function (pair) { return htmlToggleModulo(pair[0], pair[1]); }).join('');
                 }).join('');
             } catch (error) {
                 console.error('Error al cargar configuración de módulos:', error);
@@ -35782,6 +36132,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     window.showTab('dashboard');
                 }
             }
+            if (typeof actualizarEtiquetasMenuLateral === 'function') actualizarEtiquetasMenuLateral();
         }
 
         async function cargarDashboard() {
@@ -46122,7 +46473,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 }
 
                 var subtitulo = document.getElementById('dashboard2Subtitulo');
-                if (subtitulo) subtitulo.textContent = 'Resumen visual del mes';
+                if (subtitulo) subtitulo.textContent = 'Atención, pulso del mes y operación por área';
 
                 // KPIs: actualizar por ID (misma distribución que activa)
                 var totalIngresosEl = document.getElementById('totalIngresos');
@@ -46170,7 +46521,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 if (gridEl) {
                     if (d.stats && Array.isArray(d.stats) && d.stats.length > 0) {
                         var fmtCard = (typeof formatearMoneda === 'function') ? formatearMoneda : function(n) { return '$' + (Number(n) || 0).toLocaleString('es-CL'); };
-                        var cardsHTML = d.stats.map(function(stat, index) {
+                        function htmlTarjetaDashboard(stat) {
                             var esMoneda = typeof stat.value === 'string' && (stat.value.indexOf('$') !== -1 || stat.value.indexOf('CLP') !== -1);
                             var valorMostrar = stat.value || 0;
                             var valorNumerico = valorMostrar;
@@ -46191,8 +46542,33 @@ document.getElementById('chatForm').onsubmit = function (e) {
                             var tabId = (stat.onClickTab && String(stat.onClickTab).replace(/\\/g, '').replace(/'/g, '')) || '';
                             var tabPost = tabId ? ' style="cursor:pointer" role="button" tabindex="0" onclick="if(typeof window.showTab===\'function\')window.showTab(\'' + tabId + '\')" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();if(typeof window.showTab===\'function\')window.showTab(\'' + tabId + '\');}" title="Ir al módulo"' : '';
                             return '<div class="dashboard2-card ' + (stat.iconClass || '') + '"' + tabPost + '>' + semaforoHTML + '<div class="dashboard2-card-icon-wrap">' + iconoSVG + '</div><div class="dashboard2-card-title">' + (stat.title || '') + '</div><div class="dashboard2-card-value">' + valorFinalMostrar + '</div>' + sub + '</div>';
+                        }
+                        var gruposDef = (typeof DASHBOARD_GRUPOS_TARJETAS !== 'undefined' ? DASHBOARD_GRUPOS_TARJETAS : []).concat([{ id: 'otros', titulo: 'Otros', tabs: [] }]);
+                        var buckets = {};
+                        gruposDef.forEach(function (g) { buckets[g.id] = []; });
+                        d.stats.forEach(function (stat) {
+                            var gid = typeof dashboardGrupoDeTarjeta === 'function' ? dashboardGrupoDeTarjeta(stat) : 'otros';
+                            if (!buckets[gid]) buckets[gid] = [];
+                            buckets[gid].push(stat);
+                        });
+                        gruposDef.forEach(function (g) {
+                            if (!g.tabs || !g.tabs.length || !buckets[g.id] || buckets[g.id].length < 2) return;
+                            buckets[g.id].sort(function (a, b) {
+                                var ta = a.onClickTab || (typeof dashboardTarjetaTabPorTitulo === 'function' ? dashboardTarjetaTabPorTitulo(a.title) : '') || '';
+                                var tb = b.onClickTab || (typeof dashboardTarjetaTabPorTitulo === 'function' ? dashboardTarjetaTabPorTitulo(b.title) : '') || '';
+                                var ia = g.tabs.indexOf(ta);
+                                var ib = g.tabs.indexOf(tb);
+                                if (ia < 0) ia = 99;
+                                if (ib < 0) ib = 99;
+                                return ia - ib;
+                            });
+                        });
+                        var cardsHTML = gruposDef.map(function (g) {
+                            var items = buckets[g.id] || [];
+                            if (!items.length) return '';
+                            return '<div class="dashboard2-mod-grupo" data-grupo="' + g.id + '"><h3 class="dashboard2-mod-grupo-title">' + g.titulo + '</h3><div class="dashboard2-stats-grid">' + items.map(htmlTarjetaDashboard).join('') + '</div></div>';
                         }).join('');
-                        gridEl.innerHTML = cardsHTML;
+                        gridEl.innerHTML = cardsHTML || '<p class="dashboard2-empty-msg">No hay datos. Abra el Panel de Control primero.</p>';
                     } else {
                         if (gridEl) gridEl.innerHTML = '<p class="dashboard2-empty-msg">No hay datos. Abra el Panel de Control primero.</p>';
                     }
