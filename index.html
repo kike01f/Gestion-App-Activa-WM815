@@ -13923,16 +13923,9 @@
         }
 
         function estiloBadgeCategoriaNovedad(clave) {
-            var map = {
-                reclamos: { bg: 'rgba(157, 23, 77, 0.3)', fg: '#fbcfe8', bd: 'rgba(190, 24, 93, 0.55)', accent: '#be185d' },
-                incidencias: { bg: 'rgba(220, 38, 38, 0.26)', fg: '#fecaca', bd: 'rgba(185, 28, 28, 0.55)', accent: '#b91c1c' },
-                seguridad: { bg: 'rgba(239, 68, 68, 0.22)', fg: '#fecaca', bd: 'rgba(220, 38, 38, 0.5)', accent: '#dc2626' },
-                aperturas: { bg: 'rgba(34, 197, 94, 0.22)', fg: '#86efac', bd: 'rgba(34, 197, 94, 0.5)', accent: '#22c55e' }
-            };
-            if (map[clave]) return map[clave];
             var et = encontrarEtiquetaNovedadGestion(clave);
-            if (et) return estiloDesdeColorHexNovedad(et.color);
-            return { bg: 'rgba(100, 116, 139, 0.35)', fg: '#cbd5e1', bd: 'rgba(100,116,139,0.45)', accent: '#64748b' };
+            if (et && et.color) return estiloDesdeColorHexNovedad(et.color);
+            return estiloDesdeColorHexNovedad('#64748b');
         }
 
         function pintarSelectsEtiquetasNovedadGestion() {
@@ -13941,7 +13934,7 @@
             if (sel) {
                 var cur = sel.value;
                 sel.innerHTML = '<option value="">Todas las categorías</option>' + shown.map(function (e) {
-                    return '<option value="' + escaparHtmlModuloConserjeria(e.id) + '">' + escaparHtmlModuloConserjeria(e.label) + '</option>';
+                    return '<option value="' + escaparHtmlModuloConserjeria(e.id) + '" style="color:' + escaparHtmlModuloConserjeria(e.color) + ';">' + escaparHtmlModuloConserjeria(e.label) + '</option>';
                 }).join('');
                 if (cur && shown.some(function (e) { return e.id === cur; })) sel.value = cur;
             }
@@ -13950,7 +13943,7 @@
                 var curE = edit.value;
                 var todas = etiquetasNovedadGestion();
                 edit.innerHTML = todas.map(function (e) {
-                    return '<option value="' + escaparHtmlModuloConserjeria(e.label) + '">' + escaparHtmlModuloConserjeria(e.label) + '</option>';
+                    return '<option value="' + escaparHtmlModuloConserjeria(e.label) + '" style="color:' + escaparHtmlModuloConserjeria(e.color) + ';">' + escaparHtmlModuloConserjeria(e.label) + '</option>';
                 }).join('');
                 if (curE) edit.value = curE;
             }
@@ -13981,6 +13974,10 @@
                 actualizadoAt: new Date().toISOString(),
                 origen: 'gestion-wm'
             };
+            window._catalogoNovedadesHuella = JSON.stringify({
+                etiquetas: payload.etiquetas,
+                avisoMejorasActivo: payload.avisoMejorasActivo
+            });
             try {
                 var sdb = await obtenerDbConserjeriaOperativa();
                 await sdb.collection('pcsh_settings').doc('catalogoNovedades').set(payload);
@@ -13989,26 +13986,57 @@
             }
         }
 
+        function huellaCatalogoNovedadesGestion(cat) {
+            var c = cat || window._catalogoNovedadesGestion || {};
+            return JSON.stringify({
+                etiquetas: c.etiquetas || [],
+                avisoMejorasActivo: c.avisoMejorasActivo !== false
+            });
+        }
+
+        function aplicarCatalogoNovedadesGestion(raw) {
+            var d = raw && typeof raw === 'object' ? raw : null;
+            var ets = d && Array.isArray(d.etiquetas) ? d.etiquetas.map(normalizarEtiquetaNovedadGestion).filter(Boolean) : [];
+            if (!ets.length) ets = CG_ETIQUETAS_NOVEDAD_DEFAULT.map(function (e) { return Object.assign({}, e); });
+            var next = {
+                etiquetas: ets,
+                avisoMejorasActivo: !d || d.avisoMejorasActivo !== false,
+                loaded: true
+            };
+            var huella = huellaCatalogoNovedadesGestion(next);
+            var igual = huella === window._catalogoNovedadesHuella;
+            window._catalogoNovedadesGestion = next;
+            window._catalogoNovedadesHuella = huella;
+            var ae = document.activeElement;
+            var editando = !!(ae && ae.classList && (ae.classList.contains('etiqueta-nov-label') || ae.classList.contains('etiqueta-nov-color')));
+            if (!editando) pintarListaEtiquetasNovedadGestion();
+            else pintarSelectsEtiquetasNovedadGestion();
+            if (!igual && typeof pintarTablasModuloConserjeria === 'function') pintarTablasModuloConserjeria();
+        }
+
         async function cargarCatalogoNovedadesGestion() {
             try {
                 var sdb = await obtenerDbConserjeriaOperativa();
-                var snap = await sdb.collection('pcsh_settings').doc('catalogoNovedades').get();
-                if (snap.exists) {
-                    var d = snap.data() || {};
-                    var ets = Array.isArray(d.etiquetas) ? d.etiquetas.map(normalizarEtiquetaNovedadGestion).filter(Boolean) : [];
-                    if (!ets.length) ets = CG_ETIQUETAS_NOVEDAD_DEFAULT.map(function (e) { return Object.assign({}, e); });
-                    window._catalogoNovedadesGestion = {
-                        etiquetas: ets,
-                        avisoMejorasActivo: d.avisoMejorasActivo !== false,
-                        loaded: true
-                    };
+                if (!window._catalogoNovedadesGestion.loaded) {
+                    var snap = await sdb.collection('pcsh_settings').doc('catalogoNovedades').get();
+                    aplicarCatalogoNovedadesGestion(snap.exists ? snap.data() : null);
                 } else {
-                    window._catalogoNovedadesGestion.loaded = true;
+                    pintarListaEtiquetasNovedadGestion();
+                }
+                if (!window._catalogoNovedadesUnsub) {
+                    window._catalogoNovedadesUnsub = sdb.collection('pcsh_settings').doc('catalogoNovedades').onSnapshot(
+                        function (live) {
+                            aplicarCatalogoNovedadesGestion(live.exists ? live.data() : null);
+                        },
+                        function (err) {
+                            console.warn('[catalogo-novedades]', err);
+                        }
+                    );
                 }
             } catch (eC) {
                 window._catalogoNovedadesGestion.loaded = true;
+                pintarListaEtiquetasNovedadGestion();
             }
-            pintarListaEtiquetasNovedadGestion();
             return window._catalogoNovedadesGestion;
         }
 
@@ -14028,14 +14056,19 @@
                 if (lab) et.label = lab;
             } else if (campo === 'color') {
                 et.color = valor;
+                var inpC = document.querySelector('#conserjeriaEtiquetasLista .etiqueta-nov-color[data-id="' + String(id).replace(/"/g, '') + '"]');
+                if (inpC && inpC.parentElement) inpC.parentElement.style.borderLeftColor = valor;
             } else if (campo === 'mostrar') {
                 et.mostrar = !!valor;
             }
             window._catalogoNovedadesGestion.etiquetas = list;
+            window._catalogoNovedadesHuella = huellaCatalogoNovedadesGestion();
             pintarSelectsEtiquetasNovedadGestion();
             programarGuardadoCatalogoNovedades();
             if (campo === 'mostrar' && typeof window.cargarModuloConserjeriaGestion === 'function') {
                 window.cargarModuloConserjeriaGestion({ forzar: true });
+            } else if (typeof pintarTablasModuloConserjeria === 'function') {
+                pintarTablasModuloConserjeria();
             }
         }
 
@@ -14929,6 +14962,14 @@
                     var id = String(t.getAttribute('data-id') || '');
                     if (!id) return;
                     if (t.classList.contains('etiqueta-nov-mostrar')) actualizarEtiquetaNovedadDesdeUi(id, 'mostrar', t.checked);
+                    if (t.classList.contains('etiqueta-nov-color')) actualizarEtiquetaNovedadDesdeUi(id, 'color', t.value);
+                    if (t.classList.contains('etiqueta-nov-label')) actualizarEtiquetaNovedadDesdeUi(id, 'label', t.value);
+                });
+                hostEt.addEventListener('input', function (e) {
+                    var t = e.target;
+                    if (!t) return;
+                    var id = String(t.getAttribute('data-id') || '');
+                    if (!id) return;
                     if (t.classList.contains('etiqueta-nov-color')) actualizarEtiquetaNovedadDesdeUi(id, 'color', t.value);
                     if (t.classList.contains('etiqueta-nov-label')) actualizarEtiquetaNovedadDesdeUi(id, 'label', t.value);
                 });
