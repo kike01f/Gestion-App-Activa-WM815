@@ -6347,7 +6347,7 @@
             </div>
             <div class="form-section" id="conserjeriaAnalisisWrap" style="margin-bottom: 1rem;">
                 <h3 style="margin: 0 0 0.35rem 0; font-size: 1rem; font-weight: 700;">Análisis de novedades</h3>
-                <p style="margin: 0 0 0.75rem 0; font-size: 0.8rem; color: var(--gray-600); line-height: 1.45;">Lee el mes por tipo (reclamos, incidencias, seguridad y aperturas), ordena los temas que más se repiten y propone mejoras con una solución concreta. Pulse un tipo del ranking para filtrar el listado.</p>
+                <p style="margin: 0 0 0.75rem 0; font-size: 0.8rem; color: var(--gray-600); line-height: 1.45;">Lee el mes por tipo, ordena los temas y propone mejoras con una solución. Puede editar esas propuestas: se guardan solas en el mes. Pulse un tipo del ranking para filtrar el listado.</p>
                 <div id="conserjeriaAnalisis"><p style="margin: 0; color: var(--gray-500); font-size: 0.85rem;">Cargando análisis…</p></div>
             </div>
             <div class="form-section" style="margin-bottom: 1rem;">
@@ -12921,6 +12921,187 @@
             return (t && t.label) || id;
         }
 
+        function textoUnidadesAnalisis(list) {
+            if (!list || !list.length) return '';
+            if (typeof list[0] === 'object') {
+                return list.map(function (u) { return (u.unidad || u) + (u.n ? ' (' + u.n + ')' : ''); }).join(', ');
+            }
+            return list.join(', ');
+        }
+
+        function sugerenciaDinamicaNovedad(id, tema, extra) {
+            var n = (tema && tema.n) || (extra && extra.n) || 0;
+            var und = textoUnidadesAnalisis((tema && tema.unidades) || (extra && extra.unidades) || []);
+            var base = SUGERENCIAS_TEMA_NOVEDAD[id] || SUGERENCIAS_TEMA_NOVEDAD.otros;
+            var mejora = base.mejora;
+            var solucion = base.solucion;
+            if (id === 'ruido') {
+                mejora = 'Hay ' + n + ' novedad' + (n === 1 ? '' : 'es') + ' por ruidos molestos' + (und ? ' en ' + und : '') + '. Fijar y comunicar el horario permitido de obras, música y ruidos.';
+                solucion = 'Mediar el mismo día entre las unidades afectadas' + (und ? ' (' + und + ')' : '') + '. Avisar por escrito a quien genera el ruido; si se repite fuera de horario, aplicar el reglamento.';
+            } else if (id === 'acceso') {
+                mejora = n + ' caso' + (n === 1 ? '' : 's') + ' de llaves o tarjetas' + (und ? ' (' + und + ')' : '') + '. Trazar quién deja, quién retira y qué pedido sigue pendiente.';
+                solucion = 'Planilla de casillero con plazo de retiro y respuesta a solicitudes de tarjeta extra en 48 horas.';
+            } else if (id === 'autorizados') {
+                mejora = n + ' ingreso' + (n === 1 ? '' : 's') + ' de personas autorizadas o corredoras' + (und ? ' en ' + und : '') + '. Unificar el protocolo de portería.';
+                solucion = 'Exigir unidad, RUT, horario y responsable; registrar en bitácora y no entregar tarjetas de áreas comunes sin acta de devolución.';
+            } else if (id === 'apertura') {
+                mejora = 'Se registraron ' + n + ' apertura' + (n === 1 ? '' : 's') + ' de puerta' + (und ? ' (' + und + ')' : '') + '. Bajar reincidencias con copias de respaldo.';
+                solucion = 'Recordar el protocolo y ofrecer llave o tarjeta de respaldo a las unidades que ya reinciden; cobrar según reglamento.';
+            } else if (id === 'alarma') {
+                mejora = n + ' alarma o sensor sin foco confirmado' + (und ? ' (' + und + ')' : '') + '. Revisar el sistema de detección.';
+                solucion = 'Orden de trabajo al proveedor de detección e inspección de la zona marcada en la bitácora.';
+            } else if (id === 'infra') {
+                mejora = n + ' novedad' + (n === 1 ? '' : 'es') + ' de infraestructura o iluminación' + (und ? ' (' + und + ')' : '') + '. Cerrar el desperfecto antes de que se repita.';
+                solucion = 'Generar orden de mantención con foto o video y fecha de reparación comprometida.';
+            } else if (id === 'espacios') {
+                mejora = n + ' caso' + (n === 1 ? '' : 's') + ' de espacios comunes o reservas. Dejar visible que el uso exige reserva.';
+                solucion = 'Aviso en Comunidad Feliz y en el acceso al recinto; el conserje recuerda la reserva al ingreso.';
+            } else if (id === 'visitas_nov') {
+                mejora = n + ' visita' + (n === 1 ? '' : 's') + ' anunciada' + (n === 1 ? '' : 's') + (und ? ' (' + und + ')' : '') + '. Anticipar el aviso a portería.';
+                solucion = 'Pedir aviso previo por escrito (nombre, RUT y horario) y aplicar la regla de permanencia vehicular si corresponde.';
+            } else if (id === 'unidades') {
+                mejora = 'Hay ' + n + ' unidad' + (n === 1 ? '' : 'es') + ' que se repiten en la bitácora. Priorizar seguimiento.';
+                solucion = 'Hacer seguimiento a ' + (und || 'esas unidades') + '.';
+            } else if (id === 'visitas_multa') {
+                mejora = n + ' visita' + (n === 1 ? '' : 's') + ' con multa por permanencia. Recordar en portería el tope de 5 horas más 15 minutos.';
+                solucion = 'Avisar al residente anfitrión al acercarse al límite y dejar constancia si la visita se extiende.';
+            } else if (und) {
+                solucion = solucion + ' Unidades: ' + und + '.';
+            }
+            return { mejora: mejora, solucion: solucion };
+        }
+
+        window._analisisNovedadesStore = window._analisisNovedadesStore || { mes: '', acciones: [], huella: '', loaded: false };
+
+        function huellaAnalisisNovedades(novedades, visitas) {
+            var nov = Array.isArray(novedades) ? novedades : [];
+            var vis = Array.isArray(visitas) ? visitas : [];
+            var dest = nov.filter(novedadEstaDestacadaGestion).length;
+            var cors = nov.map(function (n) { return String(n.correlativo || n.id || ''); }).sort().join(',');
+            return nov.length + '|' + dest + '|' + vis.length + '|' + cors;
+        }
+
+        function puedeEditarAnalisisNovedades() {
+            return !(window.mesEnConsulta && !window.mesReabierto);
+        }
+
+        function fusionarAccionesAnalisisNovedades(generadas, guardadas) {
+            var map = {};
+            (Array.isArray(guardadas) ? guardadas : []).forEach(function (a) {
+                if (a && a.id) map[a.id] = a;
+            });
+            var used = {};
+            var out = (Array.isArray(generadas) ? generadas : []).map(function (g) {
+                var s = map[g.id];
+                used[g.id] = true;
+                if (!s) return g;
+                return {
+                    id: g.id,
+                    tema: g.tema,
+                    n: g.n,
+                    tipo: g.tipo,
+                    clave: g.clave,
+                    unidades: g.unidades || [],
+                    mejora: (s.editado && s.mejora) ? s.mejora : g.mejora,
+                    solucion: (s.editado && s.solucion) ? s.solucion : g.solucion,
+                    estado: s.estado || 'pendiente',
+                    editado: !!s.editado
+                };
+            });
+            (Array.isArray(guardadas) ? guardadas : []).forEach(function (s) {
+                if (!s || !s.id || used[s.id]) return;
+                if (s.editado || s.estado === 'en_curso' || s.estado === 'hecha') out.push(s);
+            });
+            return out;
+        }
+
+        async function cargarAnalisisNovedadesGuardado(mes) {
+            if (window._analisisNovedadesStore.loaded && window._analisisNovedadesStore.mes === mes) return window._analisisNovedadesStore;
+            var raw = [];
+            try {
+                if (typeof obtenerDatosMes === 'function') raw = await obtenerDatosMes('analisisNovedades');
+            } catch (e) {
+                raw = [];
+            }
+            window._analisisNovedadesStore = {
+                mes: mes || '',
+                acciones: Array.isArray(raw) ? raw : [],
+                huella: '',
+                loaded: true
+            };
+            return window._analisisNovedadesStore;
+        }
+
+        function programarGuardadoAnalisisNovedades() {
+            if (!puedeEditarAnalisisNovedades()) return;
+            clearTimeout(window._analisisNovedadesSaveT);
+            window._analisisNovedadesSaveT = setTimeout(function () {
+                guardarAnalisisNovedadesAhora();
+            }, 550);
+        }
+
+        async function guardarAnalisisNovedadesAhora() {
+            if (!puedeEditarAnalisisNovedades()) return;
+            var store = window._analisisNovedadesStore || {};
+            var lista = Array.isArray(store.acciones) ? store.acciones : [];
+            try {
+                if (typeof guardarDatosMes === 'function') {
+                    await guardarDatosMes('analisisNovedades', lista);
+                }
+                marcarAnalisisNovedadesGuardadoUi('Guardado');
+            } catch (e) {
+                console.warn('[analisis-novedades] No se pudo guardar:', e);
+                marcarAnalisisNovedadesGuardadoUi('Sin guardar');
+            }
+        }
+
+        function marcarAnalisisNovedadesGuardadoUi(txt) {
+            var el = document.getElementById('conserjeriaAnalisisSaveHint');
+            if (!el) return;
+            el.textContent = txt || 'Guardado';
+            el.style.opacity = '1';
+            clearTimeout(window._analisisNovedadesHintT);
+            window._analisisNovedadesHintT = setTimeout(function () {
+                if (el) el.style.opacity = '0.65';
+            }, 1600);
+        }
+
+        function actualizarAccionAnalisisDesdeUi(el) {
+            if (!el || !puedeEditarAnalisisNovedades()) return;
+            var id = String(el.getAttribute('data-id') || '');
+            var store = window._analisisNovedadesStore || {};
+            var lista = Array.isArray(store.acciones) ? store.acciones : [];
+            var acc = lista.filter(function (a) { return a && a.id === id; })[0];
+            if (!acc) return;
+            if (el.classList.contains('analisis-nov-mejora')) {
+                acc.mejora = el.value;
+                acc.editado = true;
+            } else if (el.classList.contains('analisis-nov-solucion')) {
+                acc.solucion = el.value;
+                acc.editado = true;
+            } else if (el.classList.contains('analisis-nov-estado')) {
+                acc.estado = el.value || 'pendiente';
+            }
+            marcarAnalisisNovedadesGuardadoUi('Guardando…');
+            programarGuardadoAnalisisNovedades();
+        }
+
+        function bindAnalisisNovedadesUi() {
+            var wrap = document.getElementById('conserjeriaAnalisis');
+            if (!wrap || wrap._analisisBound) return;
+            wrap._analisisBound = true;
+            wrap.addEventListener('input', function (e) {
+                var t = e.target;
+                if (!t || (!t.classList.contains('analisis-nov-mejora') && !t.classList.contains('analisis-nov-solucion'))) return;
+                actualizarAccionAnalisisDesdeUi(t);
+            });
+            wrap.addEventListener('change', function (e) {
+                var t = e.target;
+                if (!t || !t.classList.contains('analisis-nov-estado')) return;
+                actualizarAccionAnalisisDesdeUi(t);
+            });
+        }
+
         function pesoTipoNovedadGestion(clave) {
             if (clave === 'seguridad') return 3;
             if (clave === 'reclamos') return 2.6;
@@ -13014,33 +13195,48 @@
             }
             var acciones = [];
             rankingTemas.slice(0, 5).forEach(function (tema) {
-                var sug = SUGERENCIAS_TEMA_NOVEDAD[tema.id] || SUGERENCIAS_TEMA_NOVEDAD.otros;
-                var und = tema.unidades.length ? (' Unidades: ' + tema.unidades.slice(0, 8).join(', ') + '.') : '';
+                var sug = sugerenciaDinamicaNovedad(tema.id, tema, null);
                 acciones.push({
+                    id: tema.id,
                     tema: tema.label,
                     n: tema.n,
                     tipo: tema.catLabel || '—',
                     clave: tema.catPrincipal || '',
+                    unidades: (tema.unidades || []).slice(0, 8),
                     mejora: sug.mejora,
-                    solucion: sug.solucion + und
+                    solucion: sug.solucion,
+                    estado: 'pendiente',
+                    editado: false
                 });
             });
             if (rankingUnidades.length) {
+                var sugU = sugerenciaDinamicaNovedad('unidades', null, { n: rankingUnidades.length, unidades: rankingUnidades });
                 acciones.push({
+                    id: 'unidades',
                     tema: 'Unidades que se repiten',
                     n: rankingUnidades.length,
                     tipo: 'Cruce',
-                    mejora: 'Priorizar las unidades que aparecen más de una vez en la bitácora.',
-                    solucion: 'Hacer seguimiento a ' + rankingUnidades.map(function (u) { return u.unidad + ' (' + u.n + ')'; }).join(', ') + '.'
+                    clave: '',
+                    unidades: rankingUnidades.map(function (u) { return u.unidad; }),
+                    mejora: sugU.mejora,
+                    solucion: sugU.solucion,
+                    estado: 'pendiente',
+                    editado: false
                 });
             }
             if (vis.length) {
+                var sugV = sugerenciaDinamicaNovedad('visitas_multa', null, { n: vis.length });
                 acciones.push({
+                    id: 'visitas_multa',
                     tema: 'Visitas con multa',
                     n: vis.length,
                     tipo: 'Visitas',
-                    mejora: 'Recordar en portería el tope de 5 horas más 15 minutos de gracia.',
-                    solucion: 'Avisar al residente anfitrión al acercarse al límite y dejar constancia si la visita se extiende.'
+                    clave: '',
+                    unidades: [],
+                    mejora: sugV.mejora,
+                    solucion: sugV.solucion,
+                    estado: 'pendiente',
+                    editado: false
                 });
             }
             return {
@@ -13089,13 +13285,26 @@
                     '<td style="' + td + ';font-size:0.75rem;color:var(--gray-600);">' + (t.unidades.slice(0, 6).join(', ') || '—') + '</td>' +
                     '</tr>';
             }).join('');
+            var ro = !puedeEditarAnalisisNovedades();
+            var roAttr = ro ? ' readonly' : '';
             var cards = a.acciones.map(function (ac, i) {
                 var stA = estiloBadgeCategoriaNovedad(ac.clave);
+                var id = escaparHtmlModuloConserjeria(ac.id || ('acc-' + i));
+                var est = ac.estado || 'pendiente';
                 return '<article style="border:1px solid var(--border-color);border-left:3px solid ' + (stA.accent || stA.bd) + ';border-radius:10px;padding:0.7rem 0.8rem;background:var(--bg-primary);">' +
+                    '<div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:0.35rem 0.6rem;">' +
                     '<div style="font-size:0.72rem;font-weight:800;color:' + stA.fg + ';text-transform:uppercase;letter-spacing:0.03em;">Prioridad ' + (i + 1) + ' · ' + escaparHtmlModuloConserjeria(ac.tipo) + ' · ' + ac.n + (ac.n === 1 ? ' caso' : ' casos') + '</div>' +
-                    '<h4 style="margin:0.25rem 0 0.45rem 0;font-size:0.92rem;">' + escaparHtmlModuloConserjeria(ac.tema) + '</h4>' +
-                    '<p style="margin:0 0 0.35rem 0;font-size:0.8rem;line-height:1.45;color:var(--gray-700);"><strong>Mejora:</strong> ' + escaparHtmlModuloConserjeria(ac.mejora) + '</p>' +
-                    '<p style="margin:0;font-size:0.8rem;line-height:1.45;color:var(--gray-700);"><strong>Solución sugerida:</strong> ' + escaparHtmlModuloConserjeria(ac.solucion) + '</p>' +
+                    '<label style="font-size:0.72rem;color:var(--gray-600);display:inline-flex;align-items:center;gap:0.35rem;">Estado' +
+                    '<select class="analisis-nov-estado form-input" data-id="' + id + '"' + (ro ? ' disabled' : '') + ' style="padding:0.2rem 0.4rem;font-size:0.75rem;min-width:7.5rem;">' +
+                    '<option value="pendiente"' + (est === 'pendiente' ? ' selected' : '') + '>Pendiente</option>' +
+                    '<option value="en_curso"' + (est === 'en_curso' ? ' selected' : '') + '>En curso</option>' +
+                    '<option value="hecha"' + (est === 'hecha' ? ' selected' : '') + '>Hecha</option>' +
+                    '</select></label></div>' +
+                    '<h4 style="margin:0.35rem 0 0.45rem 0;font-size:0.92rem;">' + escaparHtmlModuloConserjeria(ac.tema) + '</h4>' +
+                    '<label style="display:block;font-size:0.72rem;font-weight:700;margin-bottom:0.2rem;">Mejora</label>' +
+                    '<textarea class="analisis-nov-mejora form-input" data-id="' + id + '" rows="3"' + roAttr + ' style="width:100%;font-size:0.8rem;line-height:1.4;margin-bottom:0.45rem;resize:vertical;">' + escaparHtmlModuloConserjeria(ac.mejora || '') + '</textarea>' +
+                    '<label style="display:block;font-size:0.72rem;font-weight:700;margin-bottom:0.2rem;">Solución sugerida</label>' +
+                    '<textarea class="analisis-nov-solucion form-input" data-id="' + id + '" rows="3"' + roAttr + ' style="width:100%;font-size:0.8rem;line-height:1.4;resize:vertical;">' + escaparHtmlModuloConserjeria(ac.solucion || '') + '</textarea>' +
                     '</article>';
             }).join('');
             return '<p style="margin:0 0 0.85rem 0;font-size:0.86rem;line-height:1.55;color:var(--gray-800);">' + escaparHtmlModuloConserjeria(a.resumen) + '</p>' +
@@ -13108,7 +13317,11 @@
                 '<div style="overflow-x:auto;"><table data-no-filtro="1" style="width:100%;border-collapse:collapse;"><thead><tr>' +
                 '<th style="' + th + '">#</th><th style="' + th + '">Tema</th><th style="' + th + '">Tipo</th><th style="' + th + '">Casos</th><th style="' + th + '">Unidades</th>' +
                 '</tr></thead><tbody>' + filasTema + '</tbody></table></div></div></div>' +
-                '<h4 style="margin:0 0 0.45rem 0;font-size:0.84rem;">Mejoras y soluciones sugeridas</h4>' +
+                '<div style="display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:0.4rem 0.8rem;margin:0 0 0.45rem 0;">' +
+                '<h4 style="margin:0;font-size:0.84rem;">Mejoras y soluciones sugeridas</h4>' +
+                '<span id="conserjeriaAnalisisSaveHint" style="font-size:0.72rem;color:var(--gray-500);opacity:0.75;">Se guarda solo</span>' +
+                '</div>' +
+                '<p style="margin:0 0 0.55rem 0;font-size:0.75rem;color:var(--gray-600);line-height:1.4;">Se arman con las novedades del mes. Puede editar el texto; el cambio se guarda solo. Si no lo toca, se actualiza cuando cambie la bitácora.</p>' +
                 '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(16rem,1fr));gap:0.65rem;">' + cards + '</div>';
         }
 
@@ -13123,12 +13336,28 @@
         function pintarAnalisisNovedadesConserjeria() {
             var wrap = document.getElementById('conserjeriaAnalisis');
             if (!wrap) return;
+            bindAnalisisNovedadesUi();
             var cache = window._moduloConserjeriaCache || {};
             if (cache.error && !(cache.novedades || []).length) {
                 wrap.innerHTML = '<p style="margin:0;color:var(--gray-500);font-size:0.85rem;">' + escaparHtmlModuloConserjeria(cache.error) + '</p>';
                 return;
             }
-            wrap.innerHTML = htmlRankingNovedadesConserjeria(analizarNovedadesConserjeriaGestion(cache.novedades || [], cache.visitas || []));
+            var analisis = analizarNovedadesConserjeriaGestion(cache.novedades || [], cache.visitas || []);
+            var store = window._analisisNovedadesStore || {};
+            var mismoMes = store.loaded && store.mes === (cache.mes || '');
+            var guardadas = mismoMes ? store.acciones : [];
+            analisis.acciones = fusionarAccionesAnalisisNovedades(analisis.acciones, guardadas);
+            var huella = huellaAnalisisNovedades(cache.novedades || [], cache.visitas || []);
+            window._analisisNovedadesStore = {
+                mes: cache.mes || store.mes || '',
+                acciones: analisis.acciones,
+                huella: huella,
+                loaded: !!mismoMes
+            };
+            wrap.innerHTML = htmlRankingNovedadesConserjeria(analisis);
+            if (puedeEditarAnalisisNovedades() && mismoMes && store.huella !== huella) {
+                programarGuardadoAnalisisNovedades();
+            }
         }
 
         function mesDesdeFechaNovedadGestion(fecha) {
@@ -13702,8 +13931,12 @@
             opts = opts || {};
             bindUiModuloConserjeria();
             var mes = (typeof obtenerMesPeriodoVista === 'function') ? obtenerMesPeriodoVista() : '';
+            if (window._analisisNovedadesStore && window._analisisNovedadesStore.mes !== mes) {
+                window._analisisNovedadesStore = { mes: mes, acciones: [], huella: '', loaded: false };
+            }
             var cache = window._moduloConserjeriaCache || {};
             if (!opts.forzar && cache.mes === mes && (cache.novedades || cache.visitas) && !cache.error) {
+                await cargarAnalisisNovedadesGuardado(mes);
                 pintarTablasModuloConserjeria();
                 return cache;
             }
@@ -13722,6 +13955,7 @@
                     notasByCor: datos.notasByCor || {},
                     error: ''
                 };
+                await cargarAnalisisNovedadesGuardado(mes);
                 pintarTablasModuloConserjeria();
             } catch (e) {
                 var msg = (e && e.message) ? e.message : 'No se pudo leer Conserjería WM.';
@@ -36673,7 +36907,7 @@
             try {
                 mostrarAlerta('Reabriendo mes... Por favor espere.', 'Procesando');
                 
-                const modulos = ['mudanzas', 'aperturas', 'tarjetas', 'espacios', 'multas', 'morosos', 'ocupacion-residentes', 'caja', 'mantenciones', 'visitas-extraordinarias', 'pagosAseo', 'nomina', 'nomina-reemplazos', 'insumos', 'lecturasAguaCaliente'];
+                const modulos = ['mudanzas', 'aperturas', 'tarjetas', 'espacios', 'multas', 'morosos', 'ocupacion-residentes', 'caja', 'mantenciones', 'visitas-extraordinarias', 'pagosAseo', 'nomina', 'nomina-reemplazos', 'insumos', 'lecturasAguaCaliente', 'analisisNovedades'];
                 // Agregar módulos de configuración que también deben reabrirse
                 const modulosConfig = ['mantenciones-config', 'caja-config'];
                 let datosReabiertos = 0;
