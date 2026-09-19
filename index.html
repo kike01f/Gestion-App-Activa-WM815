@@ -1136,6 +1136,48 @@
             line-height: 1.45;
             color: var(--gray-600);
         }
+        #conserjeria .pcsh-entrega-toolbar {
+            display: flex; flex-wrap: wrap; align-items: flex-end; gap: 0.45rem 0.65rem; margin-bottom: 0.65rem;
+        }
+        #conserjeria .pcsh-entrega-toolbar label { font-size: 0.75rem; font-weight: 700; color: var(--gray-600); display: block; margin-bottom: 0.2rem; }
+        #conserjeria .pcsh-entrega-toolbar input[type="date"] {
+            padding: 0.4rem 0.55rem; border-radius: 8px; border: 1px solid var(--border-color);
+            background: var(--bg-primary); color: var(--text-primary); font-size: 0.82rem;
+        }
+        #conserjeria .pcsh-entrega-meta { display: flex; flex-wrap: wrap; gap: 0.35rem; margin: 0 0 0.65rem; }
+        #conserjeria .pcsh-entrega-chip {
+            display: inline-flex; align-items: center; gap: 0.28rem; padding: 0.22rem 0.5rem;
+            border-radius: 999px; border: 1px solid var(--border-color); font-size: 0.7rem; font-weight: 700;
+            background: var(--bg-secondary); color: var(--gray-700);
+        }
+        #conserjeria .pcsh-entrega-chip.prio { border-color: rgba(220,38,38,0.35); color: #b91c1c; background: rgba(220,38,38,0.1); }
+        #conserjeria .pcsh-entrega-chip.dest { border-color: rgba(217,119,6,0.4); color: #b45309; background: rgba(245,158,11,0.12); }
+        #conserjeria .pcsh-entrega-chip.ok { border-color: rgba(5,150,105,0.35); color: #047857; background: rgba(16,185,129,0.1); }
+        #conserjeria .pcsh-entrega-sit {
+            margin: 0 0 0.7rem; font-size: 0.84rem; line-height: 1.5; color: var(--gray-800);
+            padding: 0.6rem 0.7rem; border-radius: 10px; border: 1px solid var(--border-color);
+            background: rgba(37, 99, 235, 0.08);
+        }
+        #conserjeria .pcsh-entrega-sec { margin: 0 0 0.7rem; }
+        #conserjeria .pcsh-entrega-sec h4 {
+            margin: 0 0 0.35rem; font-size: 0.74rem; font-weight: 800; letter-spacing: 0.04em;
+            text-transform: uppercase; color: var(--gray-500);
+        }
+        #conserjeria .pcsh-entrega-item {
+            display: block; width: 100%; text-align: left; border: 1px solid var(--border-color);
+            background: var(--bg-primary); color: var(--text-primary); border-radius: 8px;
+            padding: 0.45rem 0.55rem; margin: 0 0 0.35rem; cursor: pointer; font: inherit;
+        }
+        #conserjeria .pcsh-entrega-item:hover { border-color: rgba(117, 187, 33, 0.45); }
+        #conserjeria .pcsh-entrega-item strong { font-size: 0.78rem; }
+        #conserjeria .pcsh-entrega-item p { margin: 0.18rem 0 0; font-size: 0.78rem; line-height: 1.4; color: var(--gray-600); }
+        #conserjeria .pcsh-entrega-turno {
+            border: 1px solid var(--border-color); border-radius: 10px; padding: 0.55rem 0.65rem; margin: 0 0 0.55rem;
+            background: var(--bg-secondary);
+        }
+        #conserjeria .pcsh-entrega-turno h5 { margin: 0 0 0.25rem; font-size: 0.84rem; color: var(--gray-900); }
+        #conserjeria .pcsh-entrega-cats { font-size: 0.75rem; color: var(--gray-600); line-height: 1.45; margin: 0; }
+        #conserjeria .pcsh-entrega-hint { margin: 0.45rem 0 0; font-size: 0.72rem; color: var(--gray-500); }
         #conserjeria #conserjeriaKpis.resumen-ocupacion-map {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(128px, 1fr));
@@ -7779,6 +7821,7 @@
 
             <nav id="conserjeriaModuloNav" class="conserjeria-modulo__nav" aria-label="Secciones del módulo Conserjería">
                 <a href="#conserjeriaSecOperacion" class="is-active">Operación</a>
+                <a href="#conserjeriaEntregaWrap">Entrega</a>
                 <a href="#conserjeriaAnalisisWrap">Análisis</a>
                 <a href="#conserjeriaAvisoWrap">Aviso</a>
                 <a href="#conserjeriaCatalogoWrap">Categorías</a>
@@ -7791,6 +7834,18 @@
                     <p>Primero el pulso del mes, luego las destacadas y el listado para trabajar. Pulse un indicador para filtrar.</p>
                 </header>
                 <div id="conserjeriaKpis" class="resumen-ocupacion-map"></div>
+                <div class="conserjeria-modulo__panel" id="conserjeriaEntregaWrap">
+                    <h3>Entrega de turno · resumen IA</h3>
+                    <p style="margin: 0 0 0.65rem 0; font-size: 0.8rem; color: var(--gray-600); line-height: 1.45;">Resumen profesional del día y de cada turno: destacadas, lo más importante y lo rutinario agrupado, para el relevo sin leer novedad por novedad.</p>
+                    <div class="pcsh-entrega-toolbar">
+                        <div>
+                            <label for="pcshEntregaFecha">Día (Santiago)</label>
+                            <input type="date" id="pcshEntregaFecha">
+                        </div>
+                        <button type="button" class="btn btn-primary" id="pcshEntregaGenerarBtn" style="padding: 0.4rem 0.75rem; font-size: 0.8rem;">Generar resumen</button>
+                    </div>
+                    <div id="pcshEntregaBody"><p style="margin: 0; color: var(--gray-500); font-size: 0.85rem;">Cargando resumen…</p></div>
+                </div>
                 <div class="conserjeria-modulo__panel" id="conserjeriaDestacadasWrap">
                     <h3>Novedades destacadas</h3>
                     <div id="conserjeriaDestacadasList"><p style="margin: 0; color: var(--gray-500); font-size: 0.85rem;">Cargando…</p></div>
@@ -15724,9 +15779,314 @@
             if (el) el.classList.remove('active');
         }
 
+        var PCSH_ENTREGA_PESO_CAT = {
+            seguridad: 90, incidentes: 88, reclamos: 82, multa: 72, mantenimiento: 56,
+            eventos: 46, mudanza: 42, proveedores: 36, apertura: 32, aperturas: 32,
+            ronda: 18, general: 16, otros: 15
+        };
+        var PCSH_ENTREGA_KW = [
+            { re: /incend|fuego|humo\b/i, w: 42 },
+            { re: /filtraci[oó]n|inund|anegad|rebalse/i, w: 36 },
+            { re: /robo|asalto|hurto|intrus/i, w: 38 },
+            { re: /carabinero|pdi\b|ambulancia|bombero/i, w: 34 },
+            { re: /gas\b|fuga|olor a gas|corte de (luz|agua|gas)/i, w: 32 },
+            { re: /accidente|ca[ií]da|lesi[oó]n|herid/i, w: 30 },
+            { re: /amenaza|agresi[oó]n|pelea|violencia/i, w: 30 },
+            { re: /alarma|emergencia|urgente/i, w: 22 },
+            { re: /rotura|quiebre|da[nñ]o estructural/i, w: 18 }
+        ];
+        function pcshEntregaNormCat(cat) {
+            return String(cat || 'general').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+        }
+        function pcshEntregaYmd(fecha) {
+            var s = String(fecha || '').trim();
+            var m1 = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+            if (m1) return m1[3] + '-' + String(m1[2]).padStart(2, '0') + '-' + String(m1[1]).padStart(2, '0');
+            var m2 = s.match(/^(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})/);
+            if (m2) return m2[1] + '-' + String(m2[2]).padStart(2, '0') + '-' + String(m2[3]).padStart(2, '0');
+            return '';
+        }
+        function pcshEntregaHoyYmd() {
+            try {
+                return new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Santiago', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
+            } catch (e) {
+                var d = new Date();
+                return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+            }
+        }
+        function pcshEntregaFechaLarga(ymd) {
+            var p = String(ymd || '').split('-');
+            if (p.length !== 3) return ymd || '';
+            var meses = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+            return parseInt(p[2], 10) + ' de ' + (meses[parseInt(p[1], 10) - 1] || p[1]) + ' de ' + p[0];
+        }
+        function pcshEntregaEsBitacora(n) {
+            return !!(n && !n.turnoSep && n.tipo !== 'resumen_diario' && !n.minimizada);
+        }
+        function pcshEntregaAbstracto(texto, maxLen) {
+            var s = String(texto || '').replace(/\s+/g, ' ').trim();
+            var max = maxLen || 160;
+            if (s.length <= max) return s;
+            var cut = s.lastIndexOf(' ', max);
+            return s.slice(0, cut > 50 ? cut : max) + '…';
+        }
+        function pcshEntregaEsPendiente(n) {
+            return /pendiente|queda pendiente|por revisar|falta\b|no se pudo|sin resolver|esperando|informar a gesti[oó]n|derivar|seguimiento/i.test(String((n && n.texto) || ''));
+        }
+        function pcshEntregaScore(n) {
+            var s = 0;
+            if (n && (n.relevante || n.destacada)) s += 100;
+            s += PCSH_ENTREGA_PESO_CAT[pcshEntregaNormCat(n && n.categoria)] || 16;
+            var txt = String((n && n.texto) || '');
+            PCSH_ENTREGA_KW.forEach(function (k) { if (k.re.test(txt)) s += k.w; });
+            if (pcshEntregaEsPendiente(n)) s += 24;
+            return s;
+        }
+        function pcshEntregaEsCritica(n) {
+            if (!n) return false;
+            if ((n.relevante || n.destacada) && pcshEntregaScore(n) >= 120) return true;
+            return pcshEntregaScore(n) >= 78;
+        }
+        function pcshEntregaHoraCorta(h) {
+            return String(h || '').slice(0, 5) || '—';
+        }
+        function pcshEntregaMapaNumeros(lista) {
+            var map = {};
+            var vis = (lista || []).filter(pcshEntregaEsBitacora).slice().sort(function (a, b) {
+                return (Number(b.correlativo) || 0) - (Number(a.correlativo) || 0);
+            });
+            var num = vis.length;
+            vis.forEach(function (n) { map[n.correlativo] = num--; });
+            return map;
+        }
+        function pcshEntregaRefItem(n, nums) {
+            var libro = nums && nums[n.correlativo] != null ? ('#' + nums[n.correlativo]) : '—';
+            return {
+                cor: Number(n.correlativo) || 0,
+                libro: libro,
+                hora: pcshEntregaHoraCorta(n.hora),
+                categoria: String(n.categoria || 'General'),
+                conserje: String(n.conserje || '—'),
+                texto: pcshEntregaAbstracto(n.texto, 170),
+                destacada: !!(n.relevante || n.destacada),
+                critica: pcshEntregaEsCritica(n),
+                pendiente: pcshEntregaEsPendiente(n),
+                score: pcshEntregaScore(n)
+            };
+        }
+        function pcshEntregaRedactarSituacion(t, dest, crit, nTurnos, nPend) {
+            if (!t) return 'No hay novedades de bitácora en esta fecha. El relevo se entrega sin incidencias registradas.';
+            var bits = [];
+            if (crit >= 3) bits.push('Jornada de alta exigencia: hay ' + crit + ' novedades de atención prioritaria.');
+            else if (crit === 2) bits.push('Hay 2 novedades de atención prioritaria que el turno entrante debe tomar de inmediato.');
+            else if (crit === 1) bits.push('Se identifica 1 novedad de atención prioritaria para el relevo.');
+            else bits.push('Operación dentro de lo habitual, sin alertas críticas.');
+            if (dest === 1) bits.push('El libro marca 1 novedad destacada.');
+            else if (dest > 1) bits.push('El libro marca ' + dest + ' novedades destacadas.');
+            bits.push('Se consolidaron ' + t + (t === 1 ? ' registro' : ' registros') + ' en ' + nTurnos + (nTurnos === 1 ? ' turno' : ' turnos') + '.');
+            if (nPend === 1) bits.push('Queda 1 pendiente explícito para el turno que entra.');
+            else if (nPend > 1) bits.push('Quedan ' + nPend + ' pendientes explícitos para el turno que entra.');
+            return bits.join(' ');
+        }
+        function pcshEntregaSegmentarTurnos(lista) {
+            var ord = (lista || []).slice().sort(function (a, b) {
+                return (Number(a.correlativo) || 0) - (Number(b.correlativo) || 0);
+            });
+            var segs = [];
+            var cur = { items: [], sepFin: null };
+            ord.forEach(function (n) {
+                if (!n) return;
+                if (n.turnoSep) {
+                    cur.sepFin = n;
+                    segs.push(cur);
+                    cur = { items: [], sepFin: null };
+                    return;
+                }
+                if (pcshEntregaEsBitacora(n)) cur.items.push(n);
+            });
+            if (cur.items.length || !segs.length) segs.push(cur);
+            return segs;
+        }
+        function pcshEntregaConstruirDia(lista, ymd) {
+            var nums = pcshEntregaMapaNumeros(lista);
+            var segs = pcshEntregaSegmentarTurnos(lista);
+            var turnos = [];
+            var delDia = [];
+            segs.forEach(function (seg, idx) {
+                var items = (seg.items || []).filter(function (n) { return pcshEntregaYmd(n.fecha) === ymd; });
+                if (!items.length) return;
+                items.forEach(function (n) { delDia.push(n); });
+                var ranked = items.slice().sort(function (a, b) { return pcshEntregaScore(b) - pcshEntregaScore(a); });
+                var dests = ranked.filter(function (n) { return n.relevante || n.destacada; });
+                var crits = ranked.filter(function (n) { return pcshEntregaEsCritica(n) && !(n.relevante || n.destacada); }).slice(0, 5);
+                var pends = ranked.filter(pcshEntregaEsPendiente).slice(0, 6);
+                var cats = {};
+                items.forEach(function (n) {
+                    var k = String(n.categoria || 'General');
+                    cats[k] = (cats[k] || 0) + 1;
+                });
+                var catList = Object.keys(cats).map(function (k) { return { nombre: k, count: cats[k] }; })
+                    .sort(function (a, b) { return b.count - a.count; });
+                var conserjes = [];
+                items.forEach(function (n) {
+                    var c = String(n.conserje || '').trim();
+                    if (c && conserjes.indexOf(c) < 0) conserjes.push(c);
+                });
+                var abierto = !seg.sepFin;
+                turnos.push({
+                    indice: turnos.length + 1,
+                    abierto: abierto,
+                    desdeHora: pcshEntregaHoraCorta(items[0] && items[0].hora),
+                    hastaHora: abierto ? 'en curso' : pcshEntregaHoraCorta(seg.sepFin && seg.sepFin.hora),
+                    conserjes: conserjes,
+                    total: items.length,
+                    destacadasCount: dests.length,
+                    criticasCount: dests.length + crits.length,
+                    situacion: pcshEntregaRedactarSituacion(items.length, dests.length, dests.length + crits.length, 1, pends.length),
+                    destacadas: dests.map(function (n) { return pcshEntregaRefItem(n, nums); }),
+                    importantes: crits.map(function (n) { return pcshEntregaRefItem(n, nums); }),
+                    pendientes: pends.map(function (n) { return pcshEntregaRefItem(n, nums); }),
+                    categorias: catList
+                });
+            });
+            var rankedDia = delDia.slice().sort(function (a, b) { return pcshEntregaScore(b) - pcshEntregaScore(a); });
+            var destDia = rankedDia.filter(function (n) { return n.relevante || n.destacada; });
+            var critDia = rankedDia.filter(function (n) { return pcshEntregaEsCritica(n) && !(n.relevante || n.destacada); }).slice(0, 6);
+            var pendDia = rankedDia.filter(pcshEntregaEsPendiente).slice(0, 8);
+            return {
+                ymd: ymd,
+                generadoAt: new Date().toISOString(),
+                origen: 'gestion-wm',
+                totalNovedades: delDia.length,
+                totalDestacadas: destDia.length,
+                totalCriticas: destDia.length + critDia.length,
+                totalPendientes: pendDia.length,
+                nTurnos: turnos.length,
+                situacion: pcshEntregaRedactarSituacion(delDia.length, destDia.length, destDia.length + critDia.length, turnos.length || 1, pendDia.length),
+                destacadas: destDia.map(function (n) { return pcshEntregaRefItem(n, nums); }),
+                importantes: critDia.map(function (n) { return pcshEntregaRefItem(n, nums); }),
+                pendientes: pendDia.map(function (n) { return pcshEntregaRefItem(n, nums); }),
+                turnos: turnos
+            };
+        }
+        function pcshEntregaHtmlItems(arr, esc) {
+            if (!arr || !arr.length) return '<p class="pcsh-entrega-cats">Ninguna.</p>';
+            return arr.map(function (it) {
+                var marca = it.destacada ? ' · Destacada' : (it.critica ? ' · Prioritaria' : '');
+                return '<button type="button" class="pcsh-entrega-item" data-entrega-cor="' + it.cor + '">' +
+                    '<strong>' + esc(it.libro) + '</strong> · ' + esc(it.hora) + ' · ' + esc(it.categoria) + ' · ' + esc(it.conserje) + esc(marca) +
+                    '<p>' + esc(it.texto || 'Sin detalle') + '</p></button>';
+            }).join('');
+        }
+        function pcshEntregaHtml(dia, esc) {
+            esc = esc || escaparHtmlModuloConserjeria;
+            if (!dia) return '<p style="margin:0;color:var(--gray-500);font-size:0.85rem;">Sin resumen.</p>';
+            var html = '';
+            html += '<div class="pcsh-entrega-meta">';
+            html += '<span class="pcsh-entrega-chip">' + esc(pcshEntregaFechaLarga(dia.ymd)) + '</span>';
+            html += '<span class="pcsh-entrega-chip">' + (dia.totalNovedades || 0) + ' registros</span>';
+            html += '<span class="pcsh-entrega-chip dest">' + (dia.totalDestacadas || 0) + ' destacadas</span>';
+            html += '<span class="pcsh-entrega-chip prio">' + (dia.totalCriticas || 0) + ' prioritarias</span>';
+            html += '<span class="pcsh-entrega-chip' + ((dia.totalPendientes || 0) ? '' : ' ok') + '">' + (dia.totalPendientes || 0) + ' pendientes</span>';
+            html += '<span class="pcsh-entrega-chip">' + (dia.nTurnos || 0) + ((dia.nTurnos === 1) ? ' turno' : ' turnos') + '</span>';
+            html += '</div>';
+            html += '<p class="pcsh-entrega-sit">' + esc(dia.situacion || '') + '</p>';
+            html += '<div class="pcsh-entrega-sec"><h4>Destacadas del día</h4>' + pcshEntregaHtmlItems(dia.destacadas, esc) + '</div>';
+            html += '<div class="pcsh-entrega-sec"><h4>Atención prioritaria</h4>' + pcshEntregaHtmlItems(dia.importantes, esc) + '</div>';
+            if (dia.pendientes && dia.pendientes.length) {
+                html += '<div class="pcsh-entrega-sec"><h4>Pendientes para el turno entrante</h4>' + pcshEntregaHtmlItems(dia.pendientes, esc) + '</div>';
+            }
+            (dia.turnos || []).forEach(function (t) {
+                var titulo = (t.abierto ? 'Turno en curso' : ('Turno ' + t.indice)) + ' · ' + t.desdeHora + ' a ' + t.hastaHora;
+                if (t.conserjes && t.conserjes.length) titulo += ' · ' + t.conserjes.join(', ');
+                html += '<article class="pcsh-entrega-turno">';
+                html += '<h5>' + esc(titulo) + '</h5>';
+                html += '<p class="pcsh-entrega-cats">' + esc(t.situacion || '') + '</p>';
+                if (t.destacadas && t.destacadas.length) html += '<div class="pcsh-entrega-sec" style="margin-top:0.45rem"><h4>Destacadas del turno</h4>' + pcshEntregaHtmlItems(t.destacadas, esc) + '</div>';
+                if (t.importantes && t.importantes.length) html += '<div class="pcsh-entrega-sec"><h4>Prioritarias del turno</h4>' + pcshEntregaHtmlItems(t.importantes, esc) + '</div>';
+                if (t.pendientes && t.pendientes.length) html += '<div class="pcsh-entrega-sec"><h4>Pendientes del turno</h4>' + pcshEntregaHtmlItems(t.pendientes, esc) + '</div>';
+                if (t.categorias && t.categorias.length) {
+                    html += '<p class="pcsh-entrega-cats"><strong>Resto agrupado:</strong> ' +
+                        t.categorias.map(function (c) { return esc(c.nombre) + ' ' + c.count; }).join(' · ') + '</p>';
+                }
+                html += '</article>';
+            });
+            if (!(dia.turnos || []).length && !(dia.totalNovedades)) {
+                html += '<p style="margin:0;color:var(--gray-500);font-size:0.85rem;">No hay bitácora para esta fecha.</p>';
+            }
+            html += '<p class="pcsh-entrega-hint">Pulse un registro para abrirlo en el listado. El resumen ordena la entrega; no sustituye el libro.</p>';
+            return html;
+        }
+        async function pcshEntregaPersistir(dia) {
+            if (!dia || !dia.ymd) return;
+            try {
+                var sdb = await obtenerDbConserjeriaOperativa();
+                var ref = sdb.collection('pcsh_settings').doc('resumenesEntrega');
+                var snap = await ref.get();
+                var data = (snap && snap.exists) ? (snap.data() || {}) : {};
+                var dias = (data.dias && typeof data.dias === 'object') ? data.dias : {};
+                dias[dia.ymd] = dia;
+                var keys = Object.keys(dias).sort();
+                while (keys.length > 60) {
+                    delete dias[keys.shift()];
+                    keys = Object.keys(dias).sort();
+                }
+                await ref.set({ dias: dias, updatedAt: new Date().toISOString() }, { merge: true });
+            } catch (e) {
+                console.warn('[entrega] No se pudo guardar el resumen:', e);
+            }
+        }
+        function pcshEntregaListaFuenteGestion() {
+            var cache = window._moduloConserjeriaCache || {};
+            if (cache.novedadesAll && cache.novedadesAll.length) return cache.novedadesAll;
+            return cache.novedades || [];
+        }
+        function pcshEntregaPintarDesdeCacheGestion() {
+            var inp = document.getElementById('pcshEntregaFecha');
+            if (inp && !inp.value) inp.value = pcshEntregaHoyYmd();
+            var ymd = (inp && inp.value) || pcshEntregaHoyYmd();
+            var body = document.getElementById('pcshEntregaBody');
+            if (!body) return;
+            var lista = pcshEntregaListaFuenteGestion();
+            if (!lista.length) {
+                body.innerHTML = '<p style="margin:0;color:var(--gray-500);font-size:0.85rem;">Cargue el módulo Conserjería para generar el resumen de entrega.</p>';
+                return;
+            }
+            var dia = pcshEntregaConstruirDia(lista, ymd);
+            body.innerHTML = pcshEntregaHtml(dia, escaparHtmlModuloConserjeria);
+        }
+        function pcshEntregaBindUiGestion() {
+            if (window._pcshEntregaGestionBound) return;
+            window._pcshEntregaGestionBound = true;
+            var inp = document.getElementById('pcshEntregaFecha');
+            var btn = document.getElementById('pcshEntregaGenerarBtn');
+            var body = document.getElementById('pcshEntregaBody');
+            if (inp && !inp.value) inp.value = pcshEntregaHoyYmd();
+            if (inp) inp.addEventListener('change', function () { pcshEntregaPintarDesdeCacheGestion(); });
+            if (btn) {
+                btn.addEventListener('click', function () {
+                    var ymd = (inp && inp.value) || pcshEntregaHoyYmd();
+                    var dia = pcshEntregaConstruirDia(pcshEntregaListaFuenteGestion(), ymd);
+                    var el = document.getElementById('pcshEntregaBody');
+                    if (el) el.innerHTML = pcshEntregaHtml(dia, escaparHtmlModuloConserjeria);
+                    pcshEntregaPersistir(dia);
+                });
+            }
+            if (body) {
+                body.addEventListener('click', function (ev) {
+                    var b = ev.target && ev.target.closest ? ev.target.closest('[data-entrega-cor]') : null;
+                    if (!b) return;
+                    var cor = Number(b.getAttribute('data-entrega-cor'));
+                    if (!isFinite(cor)) return;
+                    if (typeof window.enfocarNovedadConserjeriaGestion === 'function') window.enfocarNovedadConserjeriaGestion(cor);
+                });
+            }
+        }
+
         function bindUiModuloConserjeria() {
             if (window._moduloConserjeriaUiBound) return;
             window._moduloConserjeriaUiBound = true;
+            pcshEntregaBindUiGestion();
             var btn = document.getElementById('btnActualizarModuloConserjeria');
             if (btn) {
                 btn.addEventListener('click', function () {
@@ -15877,7 +16237,7 @@
                 irASeccionModuloConserjeria(String(a.getAttribute('href') || '').replace(/^#/, ''));
             });
             if (typeof IntersectionObserver === 'function') {
-                var ids = ['conserjeriaSecOperacion', 'conserjeriaAnalisisWrap', 'conserjeriaAvisoWrap', 'conserjeriaCatalogoWrap'];
+                var ids = ['conserjeriaSecOperacion', 'conserjeriaEntregaWrap', 'conserjeriaAnalisisWrap', 'conserjeriaAvisoWrap', 'conserjeriaCatalogoWrap'];
                 var root = null;
                 var obs = new IntersectionObserver(function (entries) {
                     var visible = entries.filter(function (en) { return en.isIntersecting; }).sort(function (a, b) {
@@ -16016,6 +16376,7 @@
             pintarKpisModuloConserjeria();
             pintarDestacadasModuloConserjeria();
             pintarAnalisisNovedadesConserjeria();
+            if (typeof pcshEntregaPintarDesdeCacheGestion === 'function') pcshEntregaPintarDesdeCacheGestion();
         }
 
         async function cargarDatosCrudosModuloConserjeria(mes) {
@@ -16063,6 +16424,7 @@
                 } catch (eNt) {
                     console.warn('[conserjeria-modulo] Notas:', eNt);
                 }
+                window._moduloConserjeriaNovedadesAll = todas;
                 novedades = todasMes.filter(function (d) {
                     return etiquetaSeMuestraEnGestion(d.categoria);
                 }).map(function (d) {
@@ -16146,7 +16508,7 @@
                 console.warn('[conserjeria-modulo] Visitas:', eV);
                 throw eV;
             }
-            return { novedades: novedades, visitas: visitas, notasByCor: window._moduloConserjeriaNotasByCor || {} };
+            return { novedades: novedades, novedadesAll: window._moduloConserjeriaNovedadesAll || [], visitas: visitas, notasByCor: window._moduloConserjeriaNotasByCor || {} };
         }
 
         window.cargarModuloConserjeriaGestion = async function (opts) {
@@ -16181,6 +16543,7 @@
                 window._moduloConserjeriaCache = {
                     mes: mes,
                     novedades: datos.novedades || [],
+                    novedadesAll: datos.novedadesAll || [],
                     visitas: datos.visitas || [],
                     notasByCor: datos.notasByCor || {},
                     error: ''
@@ -16192,6 +16555,7 @@
                 window._moduloConserjeriaCache = {
                     mes: mes,
                     novedades: (cache.novedades || []),
+                    novedadesAll: (cache.novedadesAll || []),
                     visitas: (cache.visitas || []),
                     notasByCor: (cache.notasByCor || {}),
                     error: 'Sin conexión con Conserjería WM: ' + msg
