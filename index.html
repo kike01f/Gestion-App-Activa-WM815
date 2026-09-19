@@ -7324,7 +7324,7 @@
             },
             collection: "pcsh_wm815",
             docId: "state",
-            useAnonymousAuth: true,
+            useAnonymousAuth: false,
             kpiTotalUnidadesEdificio: 259
         };
 
@@ -7345,7 +7345,7 @@
             unitsKvKey: "wm815_units",
             welcomeEmailsKvKey: "wm815_welcome_emails",
             welcomeMailQueueKvKey: "wm815_welcome_mail_queue",
-            useAnonymousAuth: true,
+            useAnonymousAuth: false,
             kpiTotalUnidadesEdificio: 259
         };
 
@@ -7359,9 +7359,6 @@
             if (typeof firebase !== 'undefined') {
                 firebase.initializeApp(firebaseConfig);
                 db = firebase.firestore();
-                try {
-                    db.settings({ experimentalAutoDetectLongPolling: true });
-                } catch (e) {}
                 storage = firebase.storage();
                 auth = firebase.auth();
                 firebaseInitialized = true;
@@ -8818,35 +8815,8 @@
             return out;
         }
 
-        let _appBienvenidaMail = null;
-        let _bienvenidaAnonFallida = false;
         async function obtenerDbBienvenidaNube() {
-            if (typeof firebase === 'undefined') return db;
-            try {
-                if (auth && auth.currentUser && db) return db;
-            } catch (e0) {}
-            if (_bienvenidaAnonFallida) return (auth && auth.currentUser) ? db : null;
-            try {
-                if (!_appBienvenidaMail) {
-                    try {
-                        _appBienvenidaMail = firebase.app('wm-bienvenida-mail');
-                    } catch (eApp) {
-                        _appBienvenidaMail = firebase.initializeApp(firebaseConfig, 'wm-bienvenida-mail');
-                    }
-                }
-                const authSec = firebase.auth(_appBienvenidaMail);
-                if (authSec && !authSec.currentUser) {
-                    await authSec.signInAnonymously();
-                }
-                return firebase.firestore(_appBienvenidaMail);
-            } catch (e) {
-                _bienvenidaAnonFallida = true;
-                console.warn('[bienvenida] Canal anónimo de Gestión WM no disponible:', e && (e.code || e.message) ? (e.code || e.message) : e);
-                try {
-                    if (auth && auth.currentUser && db) return db;
-                } catch (e1) {}
-                return null;
-            }
+            return db || null;
         }
 
         // Requiere que la extensión "Trigger Email" esté instalada en Firebase
@@ -8879,13 +8849,7 @@
 
             if (!usuarioActual && permitirSinLogin) {
                 try {
-                    dbEnvio = await obtenerDbBienvenidaNube();
-                    try {
-                        if (_appBienvenidaMail) {
-                            const uSec = firebase.auth(_appBienvenidaMail).currentUser;
-                            if (uSec) usuarioActual = uSec;
-                        }
-                    } catch (eU) {}
+                    dbEnvio = await obtenerDbBienvenidaNube() || db;
                 } catch (eCanal) {
                     console.warn('[correo] Canal sin login de operador:', eCanal);
                 }
@@ -12770,51 +12734,8 @@
             }
         }
 
-        function authAnonimaNoDisponible(err) {
-            var code = String((err && err.code) || '');
-            var msg = String((err && (err.message || err)) || '');
-            var blob = (code + ' ' + msg).toLowerCase();
-            return /configuration-not-found|admin-restricted-operation|operation-not-allowed|unauthorized-domain|auth\/api-key-not-valid/.test(blob);
-        }
-
         async function asegurarFirestoreConserjeria2(app) {
-            var sdb = app.firestore();
-            if (!sdb.__wmSettingsApplied) {
-                try {
-                    sdb.settings({
-                        merge: true,
-                        ignoreUndefinedProperties: true,
-                        experimentalForceLongPolling: true,
-                        experimentalAutoDetectLongPolling: false
-                    });
-                } catch (eS) {}
-                sdb.__wmSettingsApplied = true;
-            }
-            var cfg = window.CG_GESTION_CONSERJERIA_SOURCE || {};
-            if (!cfg.useAnonymousAuth || !app.auth) return sdb;
-            if (window._authConserjeria2Skip) return sdb;
-            try {
-                var authP = app.auth();
-                if (authP && authP.currentUser) return sdb;
-                if (!window._authConserjeria2Promise) {
-                    window._authConserjeria2Promise = authP.signInAnonymously().catch(function (eA) {
-                        window._authConserjeria2Skip = true;
-                        if (!window._authConserjeria2Warned) {
-                            window._authConserjeria2Warned = true;
-                            var det = (eA && (eA.code || eA.message)) || eA;
-                            console.warn('[conserjeria2-1] Auth anónima no disponible (' + det + '). Se lee y escribe Firestore sin esa sesión.');
-                        }
-                    });
-                }
-                await window._authConserjeria2Promise;
-            } catch (eAuth) {
-                window._authConserjeria2Skip = true;
-                if (!window._authConserjeria2Warned) {
-                    window._authConserjeria2Warned = true;
-                    console.warn('[conserjeria2-1] Auth anónima no disponible:', eAuth && (eAuth.code || eAuth.message) ? (eAuth.code || eAuth.message) : eAuth);
-                }
-            }
-            return sdb;
+            return app.firestore();
         }
 
         async function obtenerRefWelcomeCompartido() {
