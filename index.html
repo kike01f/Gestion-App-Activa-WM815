@@ -185,13 +185,14 @@
             opacity: 0;
             animation: dashboardBlockIn 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
         }
-        #dashboard .dashboard2-body .dashboard2-block:nth-child(1) { animation-delay: 0.03s; }
-        #dashboard .dashboard2-body .dashboard2-block:nth-child(2) { animation-delay: 0.08s; }
-        #dashboard .dashboard2-body .dashboard2-block:nth-child(3) { animation-delay: 0.14s; }
-        #dashboard .dashboard2-body .dashboard2-block:nth-child(4) { animation-delay: 0.20s; }
-        #dashboard .dashboard2-body .dashboard2-block:nth-child(5) { animation-delay: 0.26s; }
-        #dashboard .dashboard2-body .dashboard2-block:nth-child(6) { animation-delay: 0.32s; }
-        #dashboard .dashboard2-body .dashboard2-block:nth-child(7) { animation-delay: 0.38s; }
+        #dashboard .dashboard2-hero .dashboard2-block--arturito { animation-delay: 0.04s; }
+        #dashboard .dashboard2-hero .dashboard2-block--kpis { animation-delay: 0.10s; }
+        #dashboard .dashboard2-workspace-main .dashboard2-block { animation-delay: 0.14s; }
+        #dashboard .dashboard2-workspace-side .dashboard2-block:nth-of-type(1) { animation-delay: 0.16s; }
+        #dashboard .dashboard2-workspace-side .dashboard2-block:nth-of-type(2) { animation-delay: 0.20s; }
+        #dashboard .dashboard2-workspace-side .dashboard2-block:nth-of-type(3) { animation-delay: 0.24s; }
+        #dashboard .dashboard2-block--charts { animation-delay: 0.28s; }
+        #dashboard .dashboard2-block--actions { animation-delay: 0.32s; }
         @keyframes dashboardBlockIn {
             from { opacity: 0; transform: translateY(6px); }
             to { opacity: 1; transform: translateY(0); }
@@ -2608,7 +2609,7 @@
             position: relative;
         }
         .dashboard2-banner-inner {
-            max-width: 1200px;
+            max-width: 1320px;
             margin: 0 auto;
             position: relative;
             z-index: 1;
@@ -2667,28 +2668,81 @@
         .dashboard2-btn-link:hover { background: rgba(255,255,255,0.3); color: #fff; }
 
         .dashboard2-body {
-            max-width: 1200px;
+            max-width: 1320px;
             margin: 0 auto;
-            padding: 0.75rem 1rem 1.25rem;
+            padding: 1rem 1.1rem 4.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.9rem;
         }
         .dashboard2-block {
-            margin-bottom: 0.75rem;
+            margin-bottom: 0;
         }
         .dashboard2-block-title {
             margin: 0 0 0.55rem 0;
-            font-size: 0.95rem;
-            font-weight: 700;
-            color: #f8fafc;
-            padding-bottom: 0.4rem;
-            border-bottom: 2px solid rgba(255,255,255,0.16);
+            font-size: 0.72rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: #cbd5e1;
+            padding: 0 0 0.45rem 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
         }
-        #dashboard .dashboard2-block-title { color: #f8fafc; }
+        #dashboard .dashboard2-block-title { color: #cbd5e1; }
+
+        .dashboard2-hero {
+            display: grid;
+            grid-template-columns: minmax(0, 1.15fr) minmax(0, 1.35fr);
+            gap: 0.85rem 1rem;
+            align-items: stretch;
+            background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 16px;
+            padding: 0.85rem 1rem 1rem;
+        }
+        .dashboard2-hero .dashboard2-block-title {
+            margin-bottom: 0.5rem;
+        }
+        .dashboard2-workspace {
+            display: grid;
+            grid-template-columns: minmax(0, 1.7fr) minmax(280px, 0.86fr);
+            gap: 0.9rem;
+            align-items: start;
+        }
+        .dashboard2-workspace-main,
+        .dashboard2-workspace-side {
+            min-width: 0;
+        }
+        .dashboard2-workspace-side {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+        .dashboard2-col-kicker {
+            margin: 0 0 0.1rem 0;
+            font-size: 0.68rem;
+            font-weight: 800;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: #86efac;
+        }
+        .dashboard2-workspace-main > .dashboard2-block,
+        .dashboard2-workspace-side > .dashboard2-block,
+        .dashboard2-block--charts {
+            background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 16px;
+            padding: 0.85rem 0.95rem 0.95rem;
+        }
+        .dashboard2-workspace-side > .dashboard2-block {
+            padding: 0.75rem 0.8rem 0.85rem;
+        }
 
         .dashboard2-atencion {
             display: flex;
             flex-direction: column;
             gap: 0.65rem;
-            margin-bottom: 1.15rem;
+            margin-bottom: 0;
         }
         #dashboard .dashboard-resumen-aviso,
         #dashboard .multas-alerta {
@@ -2707,15 +2761,20 @@
         /* Resumen KPIs */
         .dashboard2-kpi-row {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-            gap: 0.5rem;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 0.55rem;
+            height: calc(100% - 1.6rem);
         }
         .dashboard2-kpi {
-            background: var(--bg-primary);
-            border-radius: var(--radius-lg);
-            padding: 0.55rem 0.75rem;
-            border: 1px solid var(--border-color);
+            background: rgba(15, 23, 42, 0.72);
+            border-radius: 12px;
+            padding: 0.7rem 0.8rem 0.75rem;
+            border: 1px solid rgba(255,255,255,0.12);
             transition: transform 0.15s ease, border-color 0.15s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            min-height: 7.2rem;
         }
         .dashboard2-kpi:hover {
             transform: translateY(-1px);
@@ -2729,7 +2788,7 @@
             letter-spacing: 0.05em;
             margin-bottom: 0.25rem;
         }
-        .dashboard2-kpi-value { font-size: 1.35rem; font-weight: 800; color: #fff; font-variant-numeric: tabular-nums; }
+        .dashboard2-kpi-value { font-size: 1.45rem; font-weight: 800; color: #fff; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
         .dashboard2-kpi-icon { width: 1rem; height: 1rem; margin-bottom: 0.3rem; color: var(--primary); }
         .dashboard2-kpi-semaforo { position: absolute; top: 0.5rem; right: 0.5rem; width: 8px; height: 8px; border-radius: 50%; box-shadow: 0 0 6px currentColor; }
         .dashboard2-kpi-tendencia { margin-top: 0.3rem; font-size: 0.72rem; font-weight: 600; color: #cbd5e1; display: flex; align-items: center; gap: 0.25rem; min-height: 1em; }
@@ -2748,32 +2807,32 @@
         #dashboard2StatsGrid.dashboard2-stats-stack {
             display: flex;
             flex-direction: column;
-            gap: 0.55rem;
+            gap: 0.85rem;
         }
         .dashboard2-mod-grupo-title {
-            margin: 0 0 0.3rem 0;
-            font-size: 0.68rem;
-            font-weight: 700;
-            letter-spacing: 0.06em;
+            margin: 0.15rem 0 0.4rem 0;
+            font-size: 0.64rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
             text-transform: uppercase;
-            color: #cbd5e1;
+            color: #94a3b8;
         }
         [data-theme="dark"] .dashboard2-mod-grupo-title {
             color: #cbd5e1;
         }
         .dashboard2-stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(128px, 1fr));
-            gap: 0.4rem;
+            grid-template-columns: repeat(auto-fill, minmax(138px, 1fr));
+            gap: 0.5rem;
         }
         .dashboard2-card {
-            background: linear-gradient(180deg, #1e293b 0%, #334155 100%);
-            border: 1px solid rgba(255,255,255,0.16);
-            border-radius: 8px;
-            padding: 0.5rem 0.55rem 0.55rem;
+            background: rgba(15, 23, 42, 0.72);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 12px;
+            padding: 0.6rem 0.65rem 0.65rem;
             min-height: 0;
             position: relative;
-            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
         }
         .dashboard2-card:hover { border-color: rgba(117, 187, 33, 0.4); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
         .dashboard2-card-semaforo {
@@ -3127,13 +3186,13 @@
         /* Gráficos */
         .dashboard2-charts-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 0.65rem;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 0.75rem;
         }
         .dashboard2-chart-card {
-            background: linear-gradient(180deg, #1e293b 0%, #334155 100%);
-            border-radius: var(--radius-lg);
-            padding: 0.75rem;
+            background: rgba(15, 23, 42, 0.55);
+            border-radius: 12px;
+            padding: 0.7rem 0.75rem 0.8rem;
             border: 1px solid rgba(255,255,255,0.1);
         }
         .dashboard2-chart-card:hover { border-color: rgba(117, 187, 33, 0.25); }
@@ -3208,7 +3267,7 @@
         .bienvenida-panel--basico { padding: 0; background: transparent; border: none; box-shadow: none; }
         .bienvenida-panel-kpis--basico {
             grid-template-columns: repeat(2, minmax(0, 1fr));
-            max-width: 340px;
+            max-width: none;
             margin-bottom: 0;
         }
         .bienvenida-panel-kpi {
@@ -3409,10 +3468,10 @@
             gap: 0.65rem;
         }
         .dashboard2-extra-grid--solo {
-            grid-template-columns: minmax(240px, 440px);
+            grid-template-columns: minmax(0, 1fr);
         }
         .dashboard2-block--mantenciones {
-            max-width: 440px;
+            max-width: none;
         }
         .dashboard2-block--mantenciones .dashboard2-extra-col > div {
             padding: 0.5rem 0.65rem !important;
@@ -3423,10 +3482,10 @@
             line-height: 1.35;
         }
         .dashboard2-extra-col > div {
-            background: linear-gradient(180deg, #1e293b 0%, #334155 100%) !important;
-            border: 1px solid rgba(255,255,255,0.16) !important;
-            border-radius: var(--radius-lg) !important;
-            padding: 0.85rem !important;
+            background: rgba(15, 23, 42, 0.55) !important;
+            border: 1px solid rgba(255,255,255,0.1) !important;
+            border-radius: 12px !important;
+            padding: 0.7rem 0.75rem !important;
             color: #f8fafc !important;
         }
         .dashboard2-extra-col[style*="display: none"] { display: none !important; }
@@ -3600,8 +3659,19 @@
         #dashboard #dashboardMantenciones > div > div:first-child {
             border-bottom-color: rgba(255,255,255,0.15) !important;
         }
-        /* Arturito en Panel 2 - mismo estilo que Panel principal */
-        .dashboard2-block--arturito .dashboard2-block-title { margin-bottom: 0.5rem; }
+        .dashboard2-hero .dashboard2-block--arturito,
+        .dashboard2-hero .dashboard2-block--kpis {
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+        .dashboard2-hero .arturito-mensajes-box {
+            flex: 1;
+            min-height: 7.2rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
         .arturito-mensajes-box {
             margin: 0;
             background: linear-gradient(135deg, rgba(117, 187, 33, 0.12) 0%, rgba(117, 187, 33, 0.06) 100%);
@@ -3626,6 +3696,26 @@
             50% {
                 opacity: 0.8;
             }
+        }
+
+        @media (max-width: 760px) {
+            .dashboard2-hero,
+            .dashboard2-workspace {
+                grid-template-columns: 1fr;
+            }
+            .dashboard2-kpi-row {
+                height: auto;
+            }
+            .dashboard2-hero .arturito-mensajes-box {
+                min-height: 0;
+            }
+        }
+        @media (max-width: 640px) {
+            .dashboard2-kpi-row,
+            .dashboard2-charts-grid {
+                grid-template-columns: 1fr;
+            }
+            .dashboard2-kpi { min-height: 0; }
         }
 
         /* Responsive Design */
@@ -6490,7 +6580,7 @@
                                     <svg class="dashboard2-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg>
                                     Panel de Control
                                 </h1>
-                                <p id="dashboard2Subtitulo" class="dashboard2-subtitulo">Arturito, operación, finanzas y correo</p>
+                                <p id="dashboard2Subtitulo" class="dashboard2-subtitulo">Resumen del mes · finanzas, operación y correo</p>
                                 <p id="dashboard2MesTexto" class="dashboard2-mes-texto"></p>
                             </div>
                         </div>
@@ -6511,19 +6601,14 @@
                 <div id="dashboardMultasPendientesWrap" class="multas-alerta" role="status"></div>
                 <div id="dashboardResumenNovedadesWrap" class="dashboard-resumen-aviso" role="status" aria-live="polite"></div>
                 </div>
+
+                <div class="dashboard2-hero">
                 <!-- 0. Asistente Arturito -->
                 <section class="dashboard2-block dashboard2-block--arturito" aria-label="Asistente Arturito">
                     <h2 class="dashboard2-block-title">Asistente Arturito</h2>
                     <div id="arturitoMensajes2" class="arturito-mensajes-box" onclick="toggleArturitoMensajes2()" role="button" tabindex="0" aria-expanded="false" aria-label="Ver mensajes de Arturito">
                         <!-- Se rellena al cargar mensajes (sincronizado con Panel principal) -->
                         <p class="arturito-placeholder">Cargando asistente…</p>
-                    </div>
-                </section>
-                <!-- 1. Tarjetas de módulos compactas -->
-                <section class="dashboard2-block dashboard2-block--modulos" aria-label="Actividad por área">
-                    <h2 class="dashboard2-block-title">Actividad por área</h2>
-                    <div class="dashboard2-stats-wrap" id="dashboard2Stats">
-                        <div class="dashboard2-stats-stack" id="dashboard2StatsGrid"></div>
                     </div>
                 </section>
                 <!-- 2. Pulso financiero -->
@@ -6553,6 +6638,20 @@
                         </div>
                     </div>
                 </section>
+                </div>
+
+                <div class="dashboard2-workspace">
+                    <div class="dashboard2-workspace-main">
+                <!-- 1. Tarjetas de módulos compactas -->
+                <section class="dashboard2-block dashboard2-block--modulos" aria-label="Actividad por área">
+                    <h2 class="dashboard2-block-title">Actividad por área</h2>
+                    <div class="dashboard2-stats-wrap" id="dashboard2Stats">
+                        <div class="dashboard2-stats-stack" id="dashboard2StatsGrid"></div>
+                    </div>
+                </section>
+                    </div>
+                    <aside class="dashboard2-workspace-side" aria-label="Operación del mes">
+                        <p class="dashboard2-col-kicker">Operación del mes</p>
                 <!-- 3. Nómina (seguimiento operativo) -->
                 <section class="dashboard2-block dashboard2-block--extra" aria-label="Nómina y seguimiento">
                     <h2 class="dashboard2-block-title">Seguimiento operativo</h2>
@@ -6624,6 +6723,9 @@
                         </div>
                     </div>
                 </section>
+                    </aside>
+                </div>
+
                 <!-- 6. Panorama del mes -->
                 <section class="dashboard2-block dashboard2-block--charts" aria-label="Panorama del mes">
                     <h2 class="dashboard2-block-title">Panorama del mes</h2>
@@ -14845,24 +14947,7 @@
             return out;
         }
 
-        function etiquetaEstadoBienvenida(est) {
-            if (est === 'enviada') return 'Bienvenida enviada';
-            if (est === 'en-cola') return 'Bienvenida en cola (aún no enviada)';
-            if (est === 'pendiente') return 'Bienvenida pendiente (no enviada)';
-            if (est === 'sin-correo') return 'Sin correo registrado';
-            return '';
-        }
 
-        function cargarHuellasBienvenidaLocal() {
-            const out = new Set();
-            cargarRegistrosBienvenidaLocal();
-            try {
-                const raw = localStorage.getItem(LS_WELCOME_EMAILS_SENT);
-                const arr = raw ? JSON.parse(raw) : [];
-                if (Array.isArray(arr)) arr.forEach(function (h) { if (h) out.add(String(h)); });
-            } catch (e) {}
-            return out;
-        }
 
         function guardarHuellasBienvenidaLocal(setHuellas) {
             try {
@@ -18447,20 +18532,6 @@ function pcshChatRenderMessages(snap) {
  * Mantiene el chat en la misma zona que antes (anclado a la derecha, como el panel flotante)
  * y alinea la vertical con el botón «Chat interno» del menú (centro del panel ≈ centro del botón).
  */
-function pcshChatAnchorStackToSidebarBtn() {
-  var stack = document.getElementById('chatStack');
-  var btn = document.getElementById('chatBtn');
-  if (!stack || !btn) return;
-  var br = btn.getBoundingClientRect();
-  if (br.width < 2 && br.height < 2) return;
-  stack.style.left = 'auto';
-  stack.style.bottom = 'auto';
-  stack.style.right = 'max(1rem, env(safe-area-inset-right, 0px))';
-  var sr = stack.getBoundingClientRect();
-  var h = sr.height > 40 ? sr.height : Math.min(600, Math.max(280, window.innerHeight * 0.55));
-  var top = br.top + br.height / 2 - h / 2;
-  stack.style.top = Math.round(top) + 'px';
-}
 
 function setChatOpen(open) {
   chatVisible = !!open;
@@ -19418,16 +19489,6 @@ document.getElementById('chatForm').onsubmit = function (e) {
             return new Set();
         }
 
-        async function obtenerHuellasBienvenidaDesdePuenteConserjeria() {
-            var out = new Set();
-            try {
-                var snap = await (await obtenerRefWelcomeCompartido()).get();
-                if (snap && snap.exists) out = parseHuellasDesdeWelcomeDoc(snap.data() || {});
-            } catch (e) {
-                console.warn('[bienvenida] Lectura estado compartido Conserjería:', e);
-            }
-            return out;
-        }
 
         async function guardarHuellasBienvenidaEnPuenteConserjeria(setHuellas) {
             var ref = await obtenerRefWelcomeCompartido();
@@ -19622,36 +19683,6 @@ document.getElementById('chatForm').onsubmit = function (e) {
             return iniciarEscuchaColaBienvenidaConserjeria();
         }
 
-        async function cargarHuellasBienvenidaCloud() {
-            const out = new Set();
-            try {
-                const puente = await obtenerHuellasBienvenidaDesdePuenteConserjeria();
-                puente.forEach(function (h) { out.add(h); });
-            } catch (eP) {}
-            try {
-                const dbNube = await obtenerDbBienvenidaNube();
-                if (!dbNube) return out;
-                const snap = await dbNube.collection('comunidad').doc('welcomeEmailsEnviados').get();
-                if (!snap || !snap.exists) return out;
-                const data = snap.data() || {};
-                const inner = (data.datos && typeof data.datos === 'object') ? data.datos : data;
-                const mapa = (inner.huellas && typeof inner.huellas === 'object' && !Array.isArray(inner.huellas))
-                    ? inner.huellas
-                    : inner;
-                fusionarRegistrosBienvenidaDesdeMapa(mapa);
-                if (mapa && typeof mapa === 'object' && !Array.isArray(mapa)) {
-                    Object.keys(mapa).forEach(function (k) {
-                        if (!k || k === 'updatedAt' || k === 'huellas' || k === 'datos') return;
-                        const v = mapa[k];
-                        if (v === false || v === 0 || v === '0') return;
-                        out.add(String(k));
-                    });
-                }
-            } catch (e) {
-                console.warn('[bienvenida] No se pudieron leer huellas en nube:', e);
-            }
-            return out;
-        }
 
         async function guardarHuellasBienvenidaCloud(setHuellas) {
             try {
@@ -20843,10 +20874,6 @@ document.getElementById('chatForm').onsubmit = function (e) {
             return personalizacion.jefeEdificio;
         }
 
-        async function obtenerNumeroDeptos() {
-            const personalizacion = await obtenerPersonalizacion();
-            return personalizacion.deptos;
-        }
 
         // Función para generar ID único
         function generarId() {
@@ -21011,25 +21038,6 @@ document.getElementById('chatForm').onsubmit = function (e) {
             return obtenerMesPeriodoVista();
         }
 
-        // Función auxiliar para obtener el mes anterior dado un mes/año (YYYY-MM)
-        function obtenerMesAnterior(mesAnio) {
-            if (!mesAnio || typeof mesAnio !== 'string') return null;
-            const partes = mesAnio.split('-');
-            if (partes.length !== 2) return null;
-            let año = parseInt(partes[0], 10);
-            let mes = parseInt(partes[1], 10);
-            if (isNaN(año) || isNaN(mes)) return null;
-            
-            mes -= 1;
-            if (mes === 0) {
-                mes = 12;
-                año -= 1;
-            }
-            
-            const añoStr = año.toString().padStart(4, '0');
-            const mesStr = mes.toString().padStart(2, '0');
-            return `${añoStr}-${mesStr}`;
-        }
 
         /** Último día calendario del mes YYYY-MM (YYYY-MM-DD). Referencia de período en reportes. */
         function obtenerUltimoDiaMesAnio(mesAnio) {
@@ -21132,61 +21140,6 @@ document.getElementById('chatForm').onsubmit = function (e) {
             return [];
         }
 
-        // Función para obtener datos de un mes específico (activo o archivado)
-        async function obtenerDatosMesEspecifico(key, mesAnio) {
-            if (!mesAnio) return [];
-            // Priorizar datos activos (reabiertos), luego archivados
-            const posiblesClaves = [`${key}_${mesAnio}`, `${key}_archivo_${mesAnio}`];
-            
-            for (const docKey of posiblesClaves) {
-                // Intentar obtener de Firestore
-                if (firebaseInitialized && db) {
-                    try {
-                        const docRef = db.collection('comunidad').doc(docKey);
-                        const doc = await docRef.get();
-                        if (doc.exists) {
-                            const data = doc.data();
-                            const resultado = data.datos || [];
-                            // Para configuraciones, siempre retornar si hay datos
-                            if (key.includes('-config')) {
-                                if (Array.isArray(resultado) && resultado.length > 0) {
-                                    return resultado;
-                                }
-                            } else {
-                                // Para otros módulos, verificar flag reabierto si es necesario
-                                if (docKey.includes('_archivo_') || (data.reabierto === true && docKey === `${key}_${mesAnio}`)) {
-                                    if (Array.isArray(resultado) && resultado.length > 0) {
-                                        return resultado;
-                                    }
-                                } else if (!docKey.includes('_archivo_')) {
-                                    // Datos activos (pueden ser reabiertos o del mes actual)
-                                    if (Array.isArray(resultado) && resultado.length > 0) {
-                                        return resultado;
-                                    }
-                                }
-                            }
-                        }
-                    } catch (error) {
-                        console.error(`Error al leer de Firestore para ${docKey}:`, error);
-                    }
-                }
-                
-                // Respaldo: LocalStorage
-                try {
-                    const datosLS = localStorage.getItem(lsKey(docKey));
-                    if (datosLS && datosLS !== '[]' && datosLS !== 'null') {
-                        const parsed = JSON.parse(datosLS);
-                        if (Array.isArray(parsed) && parsed.length > 0) {
-                            return parsed;
-                        }
-                    }
-                } catch (error) {
-                    console.error(`Error al leer de LocalStorage para ${docKey}:`, error);
-                }
-            }
-            
-            return [];
-        }
 
         // Función para obtener datos archivados de un mes específico (para reportes)
         async function obtenerDatosArchivados(key, mesAnio) {
@@ -21418,24 +21371,6 @@ document.getElementById('chatForm').onsubmit = function (e) {
             return false;
         }
 
-        // Función de verificación mensual (SIN archivado automático).
-        // Regla de negocio: los datos solo se archivan mediante cierre manual del mes
-        // desde Panel de Control (botón "✅ Cerrar Mes").
-        async function verificarArchivado() {
-            const mesActual = obtenerMesActual();
-            // Mantener metadata de mes procesado sin tocar registros de módulos.
-            if (firebaseInitialized && db) {
-                try {
-                    await db.collection('comunidad').doc('config').set({
-                        ultimoMesProcesado: mesActual,
-                        actualizado: firebase.firestore.FieldValue.serverTimestamp()
-                    }, { merge: true });
-                } catch (error) {
-                    console.error('Error al guardar config de mes procesado:', error);
-                }
-            }
-            localStorage.setItem(lsKey('ultimoMesProcesado'), mesActual);
-        }
 
         // Variable global para rastrear edición
         window.editandoMudanza = null;
@@ -23642,9 +23577,6 @@ document.getElementById('chatForm').onsubmit = function (e) {
             renderTarjetaLineasLista();
         }
 
-        function actualizarMontoTarjetaDesdeLineas() {
-            actualizarMontoTarjeta();
-        }
 
         async function editarTarjeta(id) {
             if (window.mesEnConsulta && !window.mesReabierto) {
@@ -27809,722 +27741,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
             }
         }
         
-        async function generarReporteExcelComoAdjunto(datos, nombreArchivo, nombreHoja = 'Datos') {
-            try {
-                console.log('🔄 Generando Excel como adjunto:', nombreArchivo);
-                
-                if (!datos || !Array.isArray(datos) || datos.length === 0) {
-                    console.warn('⚠️ No hay datos para generar Excel');
-                    return null;
-                }
-                
-                // Verificar que XLSX esté disponible
-                if (typeof XLSX === 'undefined' || !XLSX) {
-                    console.error('❌ XLSX (SheetJS) no está disponible. Verifica que la librería esté cargada.');
-                    return null;
-                }
-                
-                // Crear workbook
-                const wb = XLSX.utils.book_new();
-                
-                // Convertir datos a worksheet
-                const ws = XLSX.utils.json_to_sheet(datos);
-                
-                // Agregar worksheet al workbook
-                XLSX.utils.book_append_sheet(wb, ws, nombreHoja);
-                
-                // Generar Excel como base64
-                const excelBase64 = XLSX.write(wb, { type: 'base64', bookType: 'xlsx' });
-                
-                if (!excelBase64 || excelBase64.length === 0) {
-                    console.error('❌ El Excel generado está vacío');
-                    return null;
-                }
-                
-                // Validar formato base64
-                const base64Valido = /^[A-Za-z0-9+/=]+$/.test(excelBase64);
-                if (!base64Valido) {
-                    console.error('❌ El base64 del Excel no tiene un formato válido');
-                    return null;
-                }
-                
-                console.log('✅ Excel generado exitosamente:', {
-                    nombreArchivo,
-                    tamañoBase64: excelBase64.length + ' caracteres',
-                    registros: datos.length,
-                    primerosCaracteres: excelBase64.substring(0, 50) + '...',
-                    esBase64Valido: base64Valido
-                });
-                
-                return {
-                    filename: nombreArchivo,
-                    content: excelBase64, // Base64 sin prefijo
-                    contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-                    encoding: 'base64'
-                };
-            } catch (error) {
-                console.error('❌ Error completo al generar Excel como adjunto:', error);
-                console.error('Stack trace:', error.stack);
-                return null;
-            }
-        }
         
-        // Funciones auxiliares para generar HTML de reportes (sin descargar)
-        // Reutiliza la lógica completa de las funciones de reporte existentes
-        async function generarHTMLReporteCajaChica(mesAnio, nombreMes) {
-            try {
-                console.log('🔄 Generando HTML completo de reporte de caja chica...');
-                console.log('📅 Mes solicitado:', mesAnio, nombreMes);
-                
-                console.log('📊 Obteniendo datos de caja chica para el período del reporte...');
-                let caja;
-                
-                if (periodoReporteUsaObtenerDatosMes(mesAnio)) {
-                    caja = await obtenerDatosMes('caja');
-                    console.log('✅ Datos vía vista activa (mes en pantalla):', caja.length, 'registros');
-                } else {
-                    try {
-                        const datosMesEspecifico = await obtenerDatosMesEspecifico('caja', mesAnio);
-                        if (datosMesEspecifico && Array.isArray(datosMesEspecifico) && datosMesEspecifico.length > 0) {
-                            caja = datosMesEspecifico;
-                            console.log('✅ Datos del mes (activos):', caja.length, 'registros');
-                        } else {
-                            caja = await obtenerDatosArchivados('caja', mesAnio);
-                            console.log('✅ Datos del mes archivado:', caja ? caja.length : 0, 'registros');
-                        }
-                    } catch (error) {
-                        console.warn('⚠️ Error al obtener datos del mes, usando respaldo:', error);
-                        caja = await obtenerDatosMes('caja');
-                        console.log('✅ Fallback vista actual:', caja.length, 'registros');
-                    }
-                }
-                
-                // Asegurar que caja sea un array
-                if (!Array.isArray(caja)) {
-                    console.warn('⚠️ Los datos no son un array, inicializando como array vacío');
-                    caja = [];
-                }
-                
-                // Calcular total solo si hay datos
-                const totalCaja = Array.isArray(caja) && caja.length > 0 
-                    ? caja.reduce((sum, m) => sum + (parseFloat(m.monto) || 0), 0)
-                    : 0;
-                
-                console.log('📊 Resumen de datos de caja chica:', {
-                    totalRegistros: caja.length,
-                    totalMonto: totalCaja,
-                    fechaGeneracion: new Date().toISOString()
-                });
-                const fechaCierrePeriodo = formatearFechaCierrePeriodoReporte(mesAnio);
-                const fechaEmisionDocumento = formatearFechaParaCorreo(obtenerFechaHoy());
-                
-                const personalizacion = await obtenerPersonalizacion();
-                const nombreComunidad = personalizacion.comunidad || 'Activa WM815';
-                const jefeEdificio = personalizacion.jefeEdificio || 'Angel Avendaño';
-                const numeroDeptos = personalizacion.deptos || '259';
-                
-                let linkCarpetaComprobantes = '';
-                try {
-                    let configCaja = await obtenerDatosMesEspecifico('caja-config', mesAnio);
-                    if (!configCaja || !Array.isArray(configCaja) || configCaja.length === 0) {
-                        configCaja = await obtenerDatosArchivados('caja-config', mesAnio);
-                    }
-                    
-                    if (Array.isArray(configCaja) && configCaja.length > 0 && configCaja[0].link) {
-                        linkCarpetaComprobantes = configCaja[0].link;
-                        console.log('✅ Link de carpeta de comprobantes obtenido');
-                    }
-                } catch (e) {
-                    console.warn('⚠️ No se pudo obtener configuración de carpeta de caja chica:', e);
-                }
-                
-                // Generar el contenido HTML usando la misma lógica que generarReporteCajaChicaPDF
-                let contenidoHTML = `
-                <div class="reporte-header">
-                    <img src="https://img.mailinblue.com/8323725/images/content_library/original/6844749040dd0f16c5341248.png" alt="Logo" class="reporte-logo" style="max-width:101px;height:auto;display:block;margin:0 auto 0.5rem auto;">
-                    <div style="margin-bottom: 1.5rem; padding: 1rem; background: #f8fafc; border-radius: 8px; border: 1px solid #e5e7eb;">
-                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; text-align: left;">
-                            <div>
-                                    <p style="margin: 0.25rem 0; font-size: 0.875rem; color: var(--text-tertiary); transition: color 0.3s ease;"><strong>Proyecto:</strong> ${nombreComunidad}</p>
-                                    <p style="margin: 0.25rem 0; font-size: 0.875rem; color: var(--text-tertiary); transition: color 0.3s ease;"><strong>Jefe de Edificio:</strong> ${jefeEdificio}</p>
-                                </div>
-                                <div>
-                                    <p style="margin: 0.25rem 0; font-size: 0.875rem; color: var(--text-tertiary); transition: color 0.3s ease;"><strong>Fecha:</strong> ${nombreMes}</p>
-                                    <p style="margin: 0.25rem 0; font-size: 0.875rem; color: var(--text-tertiary); transition: color 0.3s ease;"><strong>Deptos:</strong> ${numeroDeptos}</p>
-                            </div>
-                        </div>
-                    </div>
-                    <h1>REPORTE DE CAJA CHICA</h1>
-                    <p><strong>Período:</strong> ${nombreMes}</p>
-                    <p><strong>Cierre del período:</strong> ${fechaCierrePeriodo}</p>
-                    <p style="font-size:0.8125rem;color:#6b7280;"><strong>Documento generado el:</strong> ${fechaEmisionDocumento}</p>
-                </div>
-
-                <div class="reporte-section">
-                    <h2>RESUMEN</h2>
-                    <div style="background: #f8fafc; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem;">
-                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;">
-                            <div>
-                                <p style="margin: 0; color: var(--gray-600); font-size: 0.875rem;">Total de Movimientos</p>
-                                <p style="margin: 0.25rem 0 0 0; font-size: 1.25rem; font-weight: 600; color: var(--gray-900);">${caja.length}</p>
-                            </div>
-                            <div>
-                                <p style="margin: 0; color: var(--gray-600); font-size: 0.875rem;">Total Gastado</p>
-                                <p style="margin: 0.25rem 0 0 0; font-size: 1.25rem; font-weight: 600; color: rgba(117, 187, 33, 0.9);">${formatearMoneda(totalCaja)}</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="reporte-section">
-                    <h2>DETALLE DE MOVIMIENTOS</h2>
-            `;
-                
-                if (caja.length > 0) {
-                contenidoHTML += `
-                    <table class="reporte-table">
-                        <thead>
-                            <tr>
-                                <th>N°</th>
-                                <th>Folio</th>
-                                <th>Fecha</th>
-                                <th>N° Documento</th>
-                                <th>Descripción del Gasto</th>
-                                <th>Monto</th>
-                                <th>Comprobantes</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                `;
-                
-                caja.sort((a, b) => new Date(a.fecha) - new Date(b.fecha)).forEach((m, idx) => {
-                    const archivos = m.archivos || [];
-                    const comprobantesHTML = renderizarArchivosReporte(archivos, []);
-                    const folioRep = m.folio || (typeof getFolioCajaProvisional === 'function' ? getFolioCajaProvisional(m, caja, mesAnio) : '—');
-                    contenidoHTML += `
-                        <tr>
-                            <td>${idx + 1}</td>
-                            <td style="font-family: monospace; font-size: 0.8rem;">${folioRep}</td>
-                            <td>${formatearFechaParaCorreo(m.fecha)}</td>
-                            <td>${m.numeroDocumento || '-'}</td>
-                            <td>${m.descripcion}</td>
-                            <td>${formatearMoneda(m.monto)}</td>
-                            <td style="max-width: 200px;">${comprobantesHTML}</td>
-                        </tr>
-                    `;
-                });
-                
-                contenidoHTML += `
-                        </tbody>
-                    </table>
-                `;
-            } else {
-                contenidoHTML += `<p style="color: var(--gray-500); font-style: italic;">No se registraron movimientos de caja chica durante este período.</p>`;
-            }
-            
-            contenidoHTML += `</div>`;
-
-            contenidoHTML += `
-                <div class="reporte-footer">
-                    <p>Reporte generado automáticamente por el Sistema de Gestión de Comunidad</p>
-                </div>
-            `;
-
-            // Sección de carpeta de comprobantes (link mensual) - Justo después del contenido principal
-            contenidoHTML += `
-                <div class="reporte-section" style="margin-top: 0.4rem;">
-                    <h2>CARPETA DE COMPROBANTES</h2>
-            `;
-
-            if (linkCarpetaComprobantes && linkCarpetaComprobantes.trim()) {
-                contenidoHTML += `
-                    <div style="background: #f8fafc; border: 1px solid rgba(117, 187, 33, 0.3); border-radius: 6px; padding: 0.6rem; margin-top: 0.5rem;">
-                        <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.4rem; flex-wrap: wrap;">
-                            <div style="width: 32px; height: 32px; background: rgba(117, 187, 33, 0.2); border: 1px solid rgba(117, 187, 33, 0.4); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 1rem;">
-                                📁
-                            </div>
-                            <div style="flex: 1;">
-                                <h3 style="margin: 0 0 0.1rem 0; color: #1f2937; font-size: 0.9rem; font-weight: 600;">
-                                    Carpeta de Comprobantes de Caja Chica
-                                </h3>
-                                <p style="margin: 0; color: #6b7280; font-size: 0.75rem;">
-                                    Accede a la carpeta con todos los recibos y respaldos de gastos de caja chica del período.
-                                </p>
-                            </div>
-                        </div>
-                        <div style="margin-top: 0.4rem;">
-                            <a href="${linkCarpetaComprobantes}" target="_blank" style="display: inline-flex; align-items: center; gap: 0.3rem; background: rgba(117, 187, 33, 0.9); color: white; padding: 0.4rem 0.9rem; border-radius: 5px; text-decoration: none; font-weight: 600; font-size: 0.75rem; transition: background 0.2s;">
-                                <span>🔗</span>
-                                <span>Abrir Carpeta de Comprobantes</span>
-                            </a>
-                        </div>
-                    </div>
-                `;
-            } else {
-                contenidoHTML += `
-                    <div style="background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 6px; padding: 0.6rem; margin-top: 0.5rem;">
-                        <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
-                            <div style="width: 32px; height: 32px; background: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 1rem;">
-                                ⚠️
-                            </div>
-                            <div style="flex: 1;">
-                                <h3 style="margin: 0 0 0.1rem 0; color: #1f2937; font-size: 0.9rem; font-weight: 600;">
-                                    Carpeta no disponible
-                                </h3>
-                                <p style="margin: 0; color: #6b7280; font-size: 0.75rem;">
-                                    No se registró link de carpeta de comprobantes de caja chica para este período.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }
-
-            contenidoHTML += `</div>`;
-
-            // Usar la misma estructura de descargarReporteHTML para envolver el contenido
-            // Leer los estilos completos de descargarReporteHTML
-            const html = `<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reporte de Caja Chica - ${nombreMes}</title>
-    <style>
-        @media print {
-            @page {
-                size: A4;
-                margin: 0.7cm;
-            }
-            body {
-                margin: 0;
-                padding: 0.25rem;
-                font-size: 9pt;
-                line-height: 1.3;
-            }
-            .reporte-header {
-                margin-bottom: 0.3rem !important;
-                padding-bottom: 0.3rem !important;
-                page-break-after: avoid;
-                page-break-before: avoid;
-                page-break-inside: avoid;
-            }
-            .reporte-header h1 {
-                font-size: 1.1rem !important;
-                margin: 0 0 0.15rem 0 !important;
-                page-break-after: avoid;
-            }
-            .reporte-header p {
-                font-size: 0.7rem !important;
-                margin: 0.05rem 0 !important;
-            }
-            .reporte-header > div[style*="margin-bottom"] {
-                margin-bottom: 0.3rem !important;
-                padding: 0.25rem !important;
-            }
-            .reporte-header > div[style*="margin-bottom"] p {
-                margin: 0.05rem 0 !important;
-                font-size: 0.65rem !important;
-            }
-            .reporte-section:first-of-type {
-                margin-bottom: 0.5rem !important;
-                page-break-inside: auto;
-                page-break-before: avoid;
-                page-break-after: auto;
-                orphans: 2;
-                widows: 2;
-            }
-            .reporte-section:first-of-type h2 {
-                margin-bottom: 0.3rem !important;
-                padding-bottom: 0.15rem !important;
-                font-size: 0.9rem !important;
-                page-break-after: avoid;
-                page-break-inside: avoid;
-                page-break-before: avoid;
-            }
-            .reporte-section:first-of-type .reporte-table {
-                page-break-before: avoid;
-            }
-            .reporte-section:not(:first-of-type) {
-                margin-bottom: 0.5rem !important;
-                page-break-inside: avoid;
-                page-break-before: auto;
-                orphans: 3;
-                widows: 3;
-            }
-            .reporte-section:not(:first-of-type) h2 {
-                margin-bottom: 0.3rem !important;
-                padding-bottom: 0.15rem !important;
-                font-size: 0.9rem !important;
-                page-break-after: avoid;
-                page-break-inside: avoid;
-                page-break-before: auto;
-                orphans: 2;
-                widows: 2;
-            }
-            .reporte-table {
-                page-break-inside: auto;
-                margin-top: 0.2rem;
-                table-layout: auto !important;
-                width: 100% !important;
-            }
-            .reporte-table thead {
-                display: table-header-group;
-            }
-            .reporte-table tbody {
-                display: table-row-group;
-            }
-            .reporte-table tr {
-                page-break-inside: avoid;
-            }
-            .reporte-table tbody tr:first-child {
-                page-break-before: avoid;
-            }
-            div[style*="overflow-x: auto"] {
-                page-break-inside: auto;
-                width: 100% !important;
-                max-width: 100% !important;
-                overflow: visible !important;
-            }
-            .reporte-table th,
-            .reporte-table td {
-                overflow: visible !important;
-                text-overflow: clip !important;
-                white-space: normal !important;
-                max-width: none !important;
-                width: auto !important;
-            }
-            div[style*="margin-bottom"]:has(h3) {
-                page-break-inside: avoid;
-                page-break-before: auto;
-            }
-            div[style*="margin-bottom: 0.5rem"] {
-                page-break-inside: avoid;
-                page-break-before: auto;
-            }
-        }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-            max-width: 210mm;
-            margin: 0 auto;
-            padding: 1rem;
-            background: white;
-            color: #000;
-            font-size: 11pt;
-            line-height: 1.5;
-        }
-        .reporte-header {
-            text-align: center;
-            border-bottom: 1.5px solid rgba(117, 187, 33, 0.4);
-            padding-bottom: 0.4rem;
-            margin-bottom: 0.5rem;
-            page-break-before: avoid;
-            page-break-after: avoid;
-            page-break-inside: avoid;
-        }
-        .reporte-header h1 {
-            font-size: 1.2rem;
-            font-weight: 700;
-            margin: 0 0 0.1rem 0;
-            color: #1f2937;
-            page-break-after: avoid;
-        }
-        .reporte-header p {
-            font-size: 0.7rem;
-            color: #6b7280;
-            margin: 0.08rem 0;
-        }
-        .reporte-section:first-of-type {
-            margin-bottom: 0.75rem;
-            page-break-inside: auto;
-            page-break-before: avoid;
-            page-break-after: auto;
-            orphans: 2;
-            widows: 2;
-        }
-        .reporte-section:first-of-type h2 {
-            font-size: 1rem;
-            font-weight: 600;
-            color: rgba(117, 187, 33, 0.8);
-            border-bottom: 1.5px solid rgba(117, 187, 33, 0.2);
-            padding-bottom: 0.25rem;
-            margin-bottom: 0.5rem;
-            page-break-after: avoid;
-            page-break-before: avoid;
-            page-break-inside: avoid;
-        }
-        .reporte-section:first-of-type .reporte-table {
-            page-break-before: avoid;
-        }
-        .reporte-section:not(:first-of-type) {
-            margin-bottom: 0.75rem;
-            page-break-inside: avoid;
-            page-break-before: auto;
-            orphans: 3;
-            widows: 3;
-        }
-        .reporte-section:not(:first-of-type) h2 {
-            font-size: 1rem;
-            font-weight: 600;
-            color: rgba(117, 187, 33, 0.8);
-            border-bottom: 1.5px solid rgba(117, 187, 33, 0.2);
-            padding-bottom: 0.25rem;
-            margin-bottom: 0.5rem;
-            page-break-after: avoid;
-            page-break-before: auto;
-            orphans: 2;
-            widows: 2;
-        }
-        .reporte-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 0.4rem;
-            font-size: 8pt;
-            table-layout: auto;
-            word-wrap: break-word;
-        }
-        .reporte-table th {
-            background: #f3f4f6;
-            padding: 0.35rem 0.4rem;
-            text-align: left;
-            font-weight: 600;
-            font-size: 0.7rem;
-            letter-spacing: 0.01em;
-            border: 1px solid #e5e7eb;
-            word-wrap: break-word;
-            white-space: normal;
-            vertical-align: top;
-        }
-        .reporte-table td {
-            padding: 0.35rem 0.4rem;
-            border: 1px solid #e5e7eb;
-            word-wrap: break-word;
-            overflow-wrap: break-word;
-            font-size: 0.7rem;
-            line-height: 1.3;
-            vertical-align: top;
-            white-space: normal;
-        }
-        .reporte-table tr:nth-child(even) {
-            background: #f9fafb;
-        }
-        .reporte-table th,
-        .reporte-table td {
-            min-width: 50px;
-            max-width: none;
-        }
-        .reporte-table td {
-            overflow: visible;
-            text-overflow: clip;
-        }
-        div[style*="overflow-x: auto"] {
-            width: 100%;
-            max-width: 100%;
-        }
-        .reporte-footer {
-            margin-top: 1.5rem;
-            padding-top: 0.75rem;
-            border-top: 1px solid #e5e7eb;
-            text-align: center;
-            font-size: 0.7rem;
-            color: #6b7280;
-        }
-        @media print {
-            .reporte-table {
-                font-size: 7pt;
-                margin-bottom: 0.4rem;
-            }
-            .reporte-table th {
-                font-size: 0.55rem;
-                padding: 0.2rem 0.25rem;
-            }
-            .reporte-table td {
-                font-size: 0.6rem;
-                padding: 0.2rem 0.25rem;
-                line-height: 1.15;
-            }
-            body {
-                max-width: 100%;
-                padding: 0.3rem;
-            }
-            .reporte-header > div[style*="display: flex"] {
-                display: block !important;
-            }
-            .reporte-header > div[style*="display: flex"] > div {
-                width: 100% !important;
-                margin-bottom: 0.15rem;
-            }
-            .reporte-header > div[style*="margin-bottom"] {
-                margin-bottom: 0.4rem !important;
-                padding: 0.3rem !important;
-            }
-            .reporte-header > div[style*="margin-bottom"] p {
-                margin: 0.05rem 0 !important;
-                font-size: 0.65rem !important;
-            }
-            h3 {
-                margin: 0 0 0.4rem 0 !important;
-                font-size: 0.85rem !important;
-            }
-            div[style*="margin-bottom: 1.5rem"] {
-                margin-bottom: 0.5rem !important;
-            }
-            div[style*="margin-bottom: 1rem"] {
-                margin-bottom: 0.4rem !important;
-            }
-            div[style*="margin-bottom: 0.75rem"] {
-                margin-bottom: 0.3rem !important;
-            }
-            div[style*="margin-bottom: 0.6rem"] {
-                margin-bottom: 0.25rem !important;
-            }
-            .reporte-header {
-                page-break-after: avoid !important;
-                page-break-before: avoid !important;
-                page-break-inside: avoid !important;
-            }
-            .reporte-section:first-of-type {
-                page-break-inside: auto;
-                page-break-before: avoid;
-                page-break-after: auto;
-                orphans: 2;
-                widows: 2;
-            }
-            .reporte-section:first-of-type h2 {
-                page-break-after: avoid;
-                page-break-before: avoid;
-                page-break-inside: avoid;
-            }
-            .reporte-section:first-of-type .reporte-table {
-                page-break-before: avoid;
-            }
-            .reporte-section:not(:first-of-type) {
-                page-break-inside: avoid;
-                page-break-before: auto;
-                orphans: 3;
-                widows: 3;
-            }
-            .reporte-section:not(:first-of-type) h2 {
-                page-break-after: avoid;
-                page-break-before: auto;
-                page-break-inside: avoid;
-                orphans: 2;
-                widows: 2;
-            }
-            .reporte-table {
-                page-break-inside: auto;
-                table-layout: auto !important;
-                width: 100% !important;
-            }
-            .reporte-table thead {
-                display: table-header-group;
-            }
-            .reporte-table tbody {
-                display: table-row-group;
-            }
-            .reporte-table tr {
-                page-break-inside: avoid;
-                page-break-after: auto;
-            }
-            .reporte-table tbody tr:first-child {
-                page-break-before: avoid;
-            }
-            div[style*="overflow-x: auto"] {
-                width: 100% !important;
-                max-width: 100% !important;
-                page-break-inside: auto;
-                overflow: visible !important;
-            }
-            .reporte-table th,
-            .reporte-table td {
-                overflow: visible !important;
-                text-overflow: clip !important;
-                white-space: normal !important;
-                max-width: none !important;
-                width: auto !important;
-                padding: 0.35rem 0.4rem !important;
-            }
-            .reporte-section > div {
-                margin-top: 0.25rem !important;
-            }
-            .reporte-section:first-of-type {
-                margin-top: 0 !important;
-            }
-        }
-        div[style*="display: flex"] {
-            display: -webkit-flex;
-            display: flex;
-        }
-        div[style*="overflow-x: auto"] {
-            width: 100%;
-            max-width: 100%;
-        }
-        .reporte-section > div[style*="background"] {
-            max-width: 100%;
-            word-wrap: break-word;
-        }
-        .reporte-table a {
-            word-break: break-all;
-            font-size: 0.7rem;
-        }
-        body { position: relative; }
-        .informe-marca-agua-wm815 {
-            position: fixed;
-            left: 50%;
-            top: 50%;
-            transform: translate(-50%, -50%);
-            width: min(72vmin, 420px);
-            max-width: 92vw;
-            z-index: 0;
-            pointer-events: none;
-            opacity: 0.125;
-            -webkit-print-color-adjust: exact;
-            print-color-adjust: exact;
-        }
-        .informe-marca-agua-wm815 img {
-            width: 100%;
-            height: auto;
-            display: block;
-            object-fit: contain;
-        }
-        .informe-doc-principal {
-            position: relative;
-            z-index: 1;
-        }
-        .informe-doc-principal .reporte-table thead th {
-            background: rgba(243, 244, 246, 0.76) !important;
-            -webkit-print-color-adjust: exact;
-            print-color-adjust: exact;
-        }
-        .informe-doc-principal .reporte-table tbody td {
-            background: rgba(255, 255, 255, 0.68) !important;
-            -webkit-print-color-adjust: exact;
-            print-color-adjust: exact;
-        }
-        .informe-doc-principal .reporte-table tbody tr:nth-child(even) td {
-            background: rgba(248, 250, 252, 0.62) !important;
-        }
-        .informe-doc-principal .reporte-summary,
-        .informe-doc-principal .reporte-summary[style] {
-            background: rgba(243, 244, 246, 0.7) !important;
-        }
-    </style>
-</head>
-<body>
-    <div class="informe-marca-agua-wm815" aria-hidden="true"><img src="https://img.mailinblue.com/8323725/images/content_library/original/6844749040dd0f16c5341248.png" alt=""></div>
-    <div class="informe-doc-principal">
-    ${contenidoHTML}
-    </div>
-</body>
-</html>`;
-                
-                console.log('✅ HTML de reporte de caja chica generado:', html.length, 'caracteres');
-                return html;
-            } catch (error) {
-                console.error('❌ Error al generar HTML de reporte de caja chica:', error);
-                return null;
-            }
-        }
         
         async function generarHTMLReporteMantenciones(mesAnio, nombreMes) {
             try {
@@ -29604,78 +28821,6 @@ document.getElementById('chatForm').onsubmit = function (e) {
             return generarPlantillaCorreoNotificacion('Caja Chica', nombreComunidad, nombreMes, contenido, true);
         }
         
-        // Generar correo de notificación de Pagos de Aseo
-        async function generarCorreoNotificacionPagosAseo(nombreComunidad, nombreMes, mensajeAdicional = '') {
-            const pagos = await obtenerDatosMes('pagosAseo');
-            const pendientes = pagos.filter(p => !p.pagado || p.pagado === false);
-            const totalPendiente = pendientes.reduce((s, p) => s + (parseFloat(p.monto) || 0), 0);
-            
-            const linkEsc = (v) => String(v || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-            const fmtMoneda = (typeof window.formatearMoneda === 'function') ? window.formatearMoneda : ((n) => '$' + Number(n).toLocaleString('es-CL'));
-            
-            let contenido = `
-                <p style="margin: 0 0 8px 0; font-size: 14px; color: #333333; line-height: 1.55;">
-                    Se adjunta el resumen de <strong>pagos de aseo</strong> para el mes de <strong>${linkEsc(nombreMes)}</strong>.
-                </p>
-                <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color: #f8faf8; border-radius: 8px; border: 1px solid #e8eee8; margin: 12px 0;">
-                    <tr><td class="data-cell" style="padding: 10px 14px; font-size: 13px; color: #666666; border-bottom: 1px solid #e8eee8; width: 38%;">Pagos Pendientes</td><td class="data-cell" style="padding: 10px 14px; font-size: 14px; color: #1a1a1a; font-weight: 600; border-bottom: 1px solid #e8eee8;">${pendientes.length}</td></tr>
-                    <tr><td class="data-cell" style="padding: 10px 14px; font-size: 13px; color: #666666; font-weight: 700;">Total Pendiente</td><td class="data-cell" style="padding: 10px 14px; font-size: 14px; color: #1a1a1a; font-weight: 700;">${linkEsc(fmtMoneda(totalPendiente))}</td></tr>
-                </table>
-            `;
-            
-            if (mensajeAdicional) {
-                contenido += `
-                    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color: #fff8e1; border-radius: 8px; border: 1px solid #ffecb3; margin: 12px 0;">
-                        <tr>
-                            <td style="padding: 12px 14px;">
-                                <p style="margin: 0; font-size: 14px; color: #333333; line-height: 1.5;">${linkEsc(mensajeAdicional)}</p>
-                            </td>
-                        </tr>
-                    </table>
-                `;
-            }
-            
-            return generarPlantillaCorreoNotificacion('Pagos de Aseo', nombreComunidad, nombreMes, contenido, false);
-        }
-        
-        // Generar correo de notificación de Lecturas de Agua
-        async function generarCorreoNotificacionLecturasAgua(nombreComunidad, nombreMes, mensajeAdicional = '') {
-            const lecturas = await obtenerDatosMes('lecturasAgua');
-            const totalLecturas = lecturas.length;
-            const totalConsumo = lecturas.reduce((s, l) => s + (parseFloat(l.consumoTotal) || 0), 0);
-            
-            const linkEsc = (v) => String(v || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-            
-            let contenido = `
-                <p style="margin: 0 0 8px 0; font-size: 14px; color: #333333; line-height: 1.55;">
-                    Se adjunta el resumen completo de <strong>lecturas de agua caliente</strong> para el período de <strong>${linkEsc(nombreMes)}</strong>. El reporte incluye todas las lecturas registradas por unidad con sus consumos calculados.
-                </p>
-            `;
-            
-            // Solo mostrar la tabla de resumen si hay datos (valores mayores a 0)
-            if (totalLecturas > 0 || totalConsumo > 0) {
-                contenido += `
-                    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color: #f8faf8; border-radius: 8px; border: 1px solid #e8eee8; margin: 12px 0;">
-                        <tr><td class="data-cell" style="padding: 10px 14px; font-size: 13px; color: #666666; border-bottom: 1px solid #e8eee8; width: 38%;">Total de Lecturas</td><td class="data-cell" style="padding: 10px 14px; font-size: 14px; color: #1a1a1a; font-weight: 600; border-bottom: 1px solid #e8eee8;">${totalLecturas}</td></tr>
-                        <tr><td class="data-cell" style="padding: 10px 14px; font-size: 13px; color: #666666; font-weight: 700;">Consumo Total</td><td class="data-cell" style="padding: 10px 14px; font-size: 14px; color: #1a1a1a; font-weight: 700;">${linkEsc(totalConsumo.toLocaleString('es-CL'))} m³</td></tr>
-                    </table>
-                `;
-            }
-            
-            if (mensajeAdicional) {
-                contenido += `
-                    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color: #fff8e1; border-radius: 8px; border: 1px solid #ffecb3; margin: 12px 0;">
-                        <tr>
-                            <td style="padding: 12px 14px;">
-                                <p style="margin: 0; font-size: 14px; color: #333333; line-height: 1.5;">${linkEsc(mensajeAdicional)}</p>
-                            </td>
-                        </tr>
-                    </table>
-                `;
-            }
-            
-            return generarPlantillaCorreoNotificacion('Lecturas de Agua Caliente', nombreComunidad, nombreMes, contenido, true);
-        }
         
         // Generar correo de notificación de Insumos
         async function generarCorreoNotificacionInsumos(nombreComunidad, nombreMes, mensajeAdicional = '') {
@@ -29902,125 +29047,6 @@ document.getElementById('chatForm').onsubmit = function (e) {
             return generarPlantillaCorreoNotificacion('Postventa', nombreComunidad, nombreMes, contenido, true);
         }
         
-        // Generar correo de notificación de Reporte Comité
-        async function generarCorreoNotificacionReporteCierre(nombreComunidad, nombreMes, mensajeAdicional = '') {
-            const linkEsc = (v) => String(v || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-            
-            let contenido = `
-                <p style="margin: 0 0 8px 0; font-size: 14px; color: #333333; line-height: 1.55;">
-                    Se adjunta el <strong>Reporte Comité</strong> para el período de <strong>${linkEsc(nombreMes)}</strong>. Este reporte consolidado incluye el resumen completo de todas las operaciones, movimientos y actividades registradas durante el mes.
-                </p>
-            `;
-            
-            if (mensajeAdicional) {
-                contenido += `
-                    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color: #fff8e1; border-radius: 8px; border: 1px solid #ffecb3; margin: 12px 0;">
-                        <tr>
-                            <td style="padding: 12px 14px;">
-                                <p style="margin: 0; font-size: 14px; color: #333333; line-height: 1.5;">${linkEsc(mensajeAdicional)}</p>
-                            </td>
-                        </tr>
-                    </table>
-                `;
-            }
-            
-            return generarPlantillaCorreoNotificacion('Reporte Comité', nombreComunidad, nombreMes, contenido, true);
-        }
-        
-        // Plantilla base para correos de notificación - Diseño mejorado y unificado
-        function generarPlantillaCorreoNotificacion(titulo, nombreComunidad, nombreMes, contenido, tieneAdjunto = true, omitirSaludoEstimado = false) {
-            const linkEsc = (v) => String(v || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-            
-            // Sección de adjunto con estilo similar al comprobante
-            const esReporteComite = titulo.includes('Reporte Comité');
-            const formatoArchivo = esReporteComite
-                ? 'HTML e informe Excel (.xlsx)'
-                : (titulo.includes('Mantenciones') || titulo.includes('Caja') || titulo.includes('Insumos') ? 'HTML' : 'Excel');
-            const iconoArchivo = esReporteComite ? '📎' : (formatoArchivo === 'HTML' ? '📄' : '📊');
-            
-            const seccionAdjunto = tieneAdjunto ? `
-              <tr>
-                <td class="content-padding" style="padding: 0 28px 10px 28px;">
-                  <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color: #fff8e1; border: 1px solid #ffecb3; border-radius: 8px;">
-                    <tr>
-                      <td style="padding: 12px 14px;">
-                        <p style="margin: 0 0 4px 0; font-size: 12px; font-weight: 700; color: #795548; text-transform: uppercase; letter-spacing: 0.04em;">Información importante</p>
-                        <p style="margin: 0; font-size: 14px; color: #333333; line-height: 1.5;">Este correo incluye un reporte en formato ${formatoArchivo} del período <strong>${linkEsc(nombreMes)}</strong>.</p>
-                      </td>
-                    </tr>
-                  </table>
-                </td>
-              </tr>
-              <tr>
-                <td class="content-padding" style="padding: 0 28px 10px 28px;">
-                  <!-- ENLACES_ADJUNTOS_AQUI -->
-                </td>
-              </tr>
-            ` : '';
-            
-            return `<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <title>Notificación - ${linkEsc(titulo)}</title>
-  <!--[if mso]>
-  <style type="text/css">
-    body, table, td, a { font-family: Arial, Helvetica, sans-serif !important; }
-  </style>
-  <![endif]-->
-  <style type="text/css">
-    /* Estilos básicos para compatibilidad con clientes de correo */
-    body, p, h1, h2, a, td, span { font-family: Arial, Helvetica, sans-serif; }
-    body { margin: 0; padding: 0; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
-    table { border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
-    img { border: 0; outline: none; text-decoration: none; -ms-interpolation-mode: bicubic; }
-    a { text-decoration: none; }
-    /* Media queries solo para móviles modernos */
-    @media only screen and (max-width: 620px) {
-      .wrapper-td { padding: 16px 8px !important; }
-      .main-table { width: 100% !important; max-width: 100% !important; }
-      .content-padding { padding-left: 20px !important; padding-right: 20px !important; }
-      .content-padding-lg { padding: 24px 20px !important; }
-      .data-cell { padding: 12px 16px !important; }
-      h2 { font-size: 17px !important; }
-    }
-  </style>
-</head>
-<body style="margin: 0; padding: 0; background-color: #ffffff; font-family: Arial, Helvetica, sans-serif; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%;">
-  <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color: #ffffff;">
-    <tr>
-      <td class="wrapper-td" align="center" style="padding: 16px 10px;">
-        <table class="main-table" role="presentation" cellpadding="0" cellspacing="0" border="0" width="600" style="max-width: 600px; width: 100%; background-color: #ffffff; border-radius: 12px;">
-          <tr>
-            <td class="content-padding content-padding-lg" style="padding: 18px 28px 14px 28px; border-bottom: 3px solid #74BD20; background-color: #ffffff; border-radius: 12px 12px 0 0;">
-              <div style="text-align:center;margin-bottom:12px"><img src="https://img.mailinblue.com/8323725/images/content_library/original/6844749040dd0f16c5341248.png" alt="Logo" style="max-width:120px;height:auto;"></div>
-              <p style="margin: 0 0 2px 0; font-size: 11px; font-weight: 700; letter-spacing: 0.05em; color: #74BD20; text-transform: uppercase;">Notificación Administrativa</p>
-              <h2 style="margin: 0 0 4px 0; font-size: 20px; font-weight: 700; color: #1a1a1a;">${linkEsc(titulo)}</h2>
-              <p style="margin: 0 0 4px 0; font-size: 14px; color: #555555;">${linkEsc(nombreComunidad)}</p>
-              <p style="margin: 0; font-size: 13px; color: #666666;">${linkEsc(nombreMes)}</p>
-            </td>
-          </tr>
-          <tr>
-            <td class="content-padding" style="padding: 14px 28px 10px 28px;">
-              ${omitirSaludoEstimado ? '' : '<p style="margin: 0 0 6px 0; font-size: 15px; color: #1a1a1a; line-height: 1.5;">Estimado/a,</p>'}
-              <div style="margin: 0 0 8px 0; font-size: 14px; color: #333333; line-height: 1.55;">${contenido}</div>
-            </td>
-          </tr>
-          ${seccionAdjunto}
-          <tr>
-            <td style="padding: 14px 28px 18px 28px; text-align: center; border-top: 1px solid #eeeeee; background-color: #fafafa; border-radius: 0 0 12px 12px;">
-              <p style="margin: 0; font-size: 12px; color: #888888;">Notificación generada automáticamente desde el sistema de gestión.</p>
-            </td>
-          </tr>
-        </table>
-      </td>
-    </tr>
-  </table>
-</body>
-</html>`;
-        }
 
         // ============================================
         // MÓDULO 7: LECTURAS AGUA CALIENTE
@@ -33982,22 +33008,6 @@ document.getElementById('chatForm').onsubmit = function (e) {
             document.getElementById('statsTotal').textContent = total;
         }
 
-        function aplicarFiltrosMantenciones(mantenciones) {
-            const busqueda = document.getElementById('buscarMantencion')?.value.toLowerCase() || '';
-            const filtroEstado = document.getElementById('filtroEstadoMantencion')?.value || 'todos';
-
-            return mantenciones.filter(m => {
-                const coincideBusqueda = !busqueda || coincidirFiltroInteligente(
-                    textoBuscableRegistro(m) + ' ' + (m.proveedor || '') + ' ' + (m.servicio || ''),
-                    busqueda
-                );
-
-                // Filtro de estado
-                const coincideEstado = filtroEstado === 'todos' || m.estado.estado === filtroEstado;
-
-                return coincideBusqueda && coincideEstado;
-            });
-        }
 
         function aplicarFiltrosMantencionesAgrupadas(mantencionesAgrupadas) {
             const busqueda = document.getElementById('buscarMantencion')?.value.toLowerCase() || '';
@@ -37487,12 +36497,6 @@ document.getElementById('chatForm').onsubmit = function (e) {
             window.generarReportesMesConsulta();
         }
 
-        // Función para obtener nombre del mes
-        function obtenerNombreMes(mesAnio) {
-            const [year, month] = mesAnio.split('-');
-            const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
-            return `${meses[parseInt(month) - 1]} ${year}`;
-        }
 
         // ============================================
         // SISTEMA DE REPORTE DE CIERRE DE MES - NUEVO
@@ -38011,10 +37015,6 @@ document.getElementById('chatForm').onsubmit = function (e) {
             function postventaEstadoLabel(codigo) {
                 var e = POSTVENTA_ESTADOS[codigo] || POSTVENTA_ESTADOS.pendiente;
                 return e.emoji + ' ' + e.label;
-            }
-            function postventaEstadoEmoji(codigo) {
-                var e = POSTVENTA_ESTADOS[codigo] || POSTVENTA_ESTADOS.pendiente;
-                return e.emoji || '';
             }
             /** Texto estado para Excel: emoji + etiqueta en minúsculas */
             function postventaEstadoExcelLabel(codigo) {
@@ -41965,95 +40965,6 @@ document.getElementById('chatForm').onsubmit = function (e) {
             datos.push(['TOTALES', orden.length, '', '', sum]);
             return datos;
         }
-        function _construirAOACajaChicaReporte(caja, mesAnio) {
-            var datos = [['REPORTE DE CAJA CHICA']];
-            datos.push([]);
-            datos.push(['N°', 'Folio', 'Fecha', 'N° Documento', 'Descripción', 'Monto', 'Comprobantes', 'Enlaces comprobantes']);
-            var orden = [].concat(caja || []).sort(function (a, b) { return new Date(a.fecha) - new Date(b.fecha); });
-            var sum = 0;
-            orden.forEach(function (m, idx) {
-                if (!m) return;
-                var mo = parseFloat(m.monto) || 0;
-                sum += mo;
-                var folio = m.folio || (typeof getFolioCajaProvisional === 'function' ? getFolioCajaProvisional(m, orden, mesAnio) : '-');
-                var comps = (m.archivos || []).map(function (a) { return a.nombre || 'Archivo'; }).join(' | ') || '-';
-                var enlaces = (m.archivos || []).map(function (a) { return a.url || ''; }).filter(Boolean).join('\n') || '-';
-                datos.push([
-                    idx + 1,
-                    folio,
-                    m.fecha ? formatearFechaParaCorreo(m.fecha) : '-',
-                    m.numeroDocumento || '-',
-                    m.descripcion || '-',
-                    mo,
-                    comps,
-                    enlaces
-                ]);
-            });
-            datos.push([]);
-            datos.push(['TOTALES', orden.length, '', '', '', sum, '', '']);
-            return datos;
-        }
-        function _escribirHojaEnlacesComprobantesCaja(sheet, caja, mesAnio) {
-            var thin = _excelBordeFino();
-            var orden = [].concat(caja || []).sort(function (a, b) { return new Date(a.fecha) - new Date(b.fecha); });
-            var r = 1;
-            sheet.mergeCells(r, 1, r, 5);
-            sheet.getCell(r, 1).value = 'ENLACES DE COMPROBANTES';
-            sheet.getCell(r, 1).font = { bold: true, size: _EXCEL_TAM_TITULO_TABLA, color: { argb: 'FF111827' } };
-            sheet.getCell(r, 1).alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
-            r += 2;
-            var hdr = ['Folio', 'Fecha', 'Descripción gasto', 'Archivo', 'Enlace'];
-            hdr.forEach(function (h, j) {
-                var c = sheet.getCell(r, j + 1);
-                c.value = h;
-                _estilizarEncabezadoColumnaTabla(c);
-            });
-            r++;
-            orden.forEach(function (m) {
-                if (!m) return;
-                var folio = m.folio || (typeof getFolioCajaProvisional === 'function' ? getFolioCajaProvisional(m, orden, mesAnio) : '-');
-                var fecha = m.fecha ? formatearFechaParaCorreo(m.fecha) : '-';
-                var desc = m.descripcion || '-';
-                var archivos = m.archivos || [];
-                if (!archivos.length) {
-                    var rowVacia = [folio, fecha, desc, '-', '-'];
-                    rowVacia.forEach(function (val, j) {
-                        var cell = sheet.getCell(r, j + 1);
-                        cell.value = val;
-                        cell.font = { size: _EXCEL_TAM_TEXTO_CELDA };
-                        cell.border = thin;
-                    });
-                    r++;
-                    return;
-                }
-                archivos.forEach(function (arch) {
-                    var nombre = arch.nombre || 'Archivo';
-                    var url = arch.url || '';
-                    sheet.getCell(r, 1).value = folio;
-                    sheet.getCell(r, 2).value = fecha;
-                    sheet.getCell(r, 3).value = desc;
-                    sheet.getCell(r, 4).value = nombre;
-                    var cellLink = sheet.getCell(r, 5);
-                    if (url) {
-                        cellLink.value = { text: url, hyperlink: url };
-                        cellLink.font = { size: _EXCEL_TAM_TEXTO_CELDA, color: { argb: 'FF0563C1' }, underline: true };
-                    } else {
-                        cellLink.value = '-';
-                        cellLink.font = { size: _EXCEL_TAM_TEXTO_CELDA };
-                    }
-                    for (var col = 1; col <= 4; col++) {
-                        sheet.getCell(r, col).font = { size: _EXCEL_TAM_TEXTO_CELDA };
-                        sheet.getCell(r, col).border = thin;
-                    }
-                    cellLink.border = thin;
-                    r++;
-                });
-            });
-            var anchos = [16, 14, 36, 28, 52];
-            anchos.forEach(function (w, i) {
-                sheet.getColumn(i + 1).width = w;
-            });
-        }
         function _escribirHojaControlCajaChica(sheet, caja, opciones) {
             opciones = opciones || {};
             var thinBlack = {
@@ -44130,12 +43041,6 @@ document.getElementById('chatForm').onsubmit = function (e) {
             return extension ? base + extension : base;
         }
 
-        function _pdfTextoSeguro(texto) {
-            return String(texto == null ? '' : texto)
-                .normalize('NFD')
-                .replace(/[\u0300-\u036f]/g, '')
-                .replace(/[^\x20-\x7E\n\r\t]/g, '');
-        }
 
         async function generarReporteCajaChicaXLSX(mesAnio, nombreMes, opciones) {
             opciones = opciones || {};
@@ -44196,10 +43101,6 @@ document.getElementById('chatForm').onsubmit = function (e) {
             return 'image/jpeg';
         }
 
-        async function _fetchUrlComoArrayBuffer(url) {
-            var desc = await _descargarComprobanteBytes(url);
-            return desc.bytes.buffer.slice(desc.bytes.byteOffset, desc.bytes.byteOffset + desc.bytes.byteLength);
-        }
 
         function _tipoArchivoComprobanteCaja(archivo) {
             var nombre = String((archivo && archivo.nombre) || '').toLowerCase();
@@ -44253,47 +43154,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
             return yy + lineHeight;
         }
 
-        async function _generarPngPlaceholderComprobante(titulo, lineas) {
-            var canvas = document.createElement('canvas');
-            canvas.width = 1240;
-            canvas.height = 1754;
-            var ctx = canvas.getContext('2d');
-            ctx.fillStyle = '#f3f4f6';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = '#374151';
-            var y = 120;
-            y = _dibujarTextoEnCanvas(ctx, titulo || 'Comprobante no disponible', 80, y, 1080, 40, 'bold 36px sans-serif');
-            y += 20;
-            (lineas || []).forEach(function (ln) {
-                y = _dibujarTextoEnCanvas(ctx, ln, 80, y, 1080, 34, '28px sans-serif');
-            });
-            return _canvasAPngBytes(canvas);
-        }
 
-        async function _bytesImagenAPng(bytes, mimeHint) {
-            return new Promise(function (resolve, reject) {
-                try {
-                    var blob = new Blob([bytes], { type: mimeHint || 'image/jpeg' });
-                    var objUrl = URL.createObjectURL(blob);
-                    var img = new Image();
-                    img.onload = function () {
-                        var canvas = document.createElement('canvas');
-                        canvas.width = img.naturalWidth || img.width;
-                        canvas.height = img.naturalHeight || img.height;
-                        canvas.getContext('2d').drawImage(img, 0, 0);
-                        URL.revokeObjectURL(objUrl);
-                        resolve(_canvasAPngBytes(canvas));
-                    };
-                    img.onerror = function (err) {
-                        URL.revokeObjectURL(objUrl);
-                        reject(err || new Error('imagen invalida'));
-                    };
-                    img.src = objUrl;
-                } catch (err) {
-                    reject(err);
-                }
-            });
-        }
 
         async function _blobADataUrlJpeg(blob, maxPx) {
             maxPx = maxPx || 1400;
@@ -46711,7 +45572,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 }
 
                 var subtitulo = document.getElementById('dashboard2Subtitulo');
-                if (subtitulo) subtitulo.textContent = 'Arturito, operación, finanzas y correo';
+                if (subtitulo) subtitulo.textContent = 'Resumen del mes · finanzas, operación y correo';
 
                 // KPIs: actualizar por ID (misma distribución que activa)
                 var totalIngresosEl = document.getElementById('totalIngresos');
@@ -47029,40 +45890,6 @@ document.getElementById('chatForm').onsubmit = function (e) {
             }
         };
 
-        // Función auxiliar para generar HTML de tarjeta
-        function generarHTMLTarjeta(stat, index) {
-            const esMoneda = typeof stat.value === 'string' && (stat.value.includes('$') || stat.value.includes('CLP'));
-            const valorMostrar = stat.value || 0;
-            let valorNumerico = valorMostrar;
-            if (esMoneda) {
-                const valorSinFormato = valorMostrar.toString()
-                    .replace(/\$/g, '')
-                    .replace(/CLP/g, '')
-                    .replace(/\./g, '')
-                    .replace(/\s/g, '')
-                    .replace(/[^0-9.-]/g, '');
-                valorNumerico = valorSinFormato ? parseFloat(valorSinFormato) : 0;
-            } else if (typeof valorMostrar === 'string') {
-                valorNumerico = parseFloat(valorMostrar) || 0;
-            } else if (typeof valorMostrar === 'number') {
-                valorNumerico = valorMostrar;
-            }
-            
-            return `
-                <div class="dashboard-card" data-stat="${stat.title.toLowerCase().replace(/\s+/g, '-')}" style="animation-delay: ${index * 0.1}s;">
-                    <div class="dashboard-card-header">
-                        <div>
-                            <div class="dashboard-card-title">${stat.title}</div>
-                            <div class="dashboard-card-value" data-value="${valorNumerico}" data-es-moneda="${esMoneda}">${valorMostrar}</div>
-                            ${stat.subtitle ? `<div class="dashboard-card-subtitle">${stat.subtitle}</div>` : ''}
-                        </div>
-                        <div class="dashboard-card-icon ${stat.iconClass || 'primary'}" style="background: ${stat.gradient || 'linear-gradient(135deg, rgba(117, 187, 33, 0.15) 0%, rgba(117, 187, 33, 0.05) 100%)'};">
-                            ${obtenerIconoSVG(stat.icon || 'dashboard')}
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
         
         // Función para animar contadores numéricos
         function animarContadores() {
@@ -48133,15 +46960,6 @@ document.getElementById('chatForm').onsubmit = function (e) {
             }
         }
 
-        // Función para expandir/colapsar mensajes de Arturito (Panel principal)
-        function toggleArturitoMensajes() {
-            var detalle = document.getElementById('arturitoMensajesDetalle');
-            var icono = document.getElementById('arturitoToggleIcon');
-            if (!detalle || !icono) return;
-            var estaVisible = detalle.style.display !== 'none';
-            detalle.style.display = estaVisible ? 'none' : 'block';
-            icono.style.transform = estaVisible ? 'rotate(0deg)' : 'rotate(180deg)';
-        }
 
         // Función para expandir/colapsar mensajes de Arturito en Panel 2
         function toggleArturitoMensajes2() {
@@ -50070,19 +48888,6 @@ document.getElementById('chatForm').onsubmit = function (e) {
             if (responsableInput) responsableInput.value = encabezado.responsable;
         }
 
-        // Función para actualizar fecha hasta basada en fecha desde (mantener para compatibilidad)
-        function actualizarFechaHasta() {
-            const fechaDesde = document.getElementById('nominaDesde').value;
-            if (fechaDesde) {
-                const fecha = new Date(fechaDesde);
-                // Establecer fecha hasta como último día del mes
-                const ultimoDia = new Date(fecha.getFullYear(), fecha.getMonth() + 1, 0);
-                const fechaHasta = document.getElementById('nominaHasta');
-                if (fechaHasta) {
-                    fechaHasta.value = ultimoDia.toISOString().split('T')[0];
-                }
-            }
-        }
 
         // Valores por defecto para cálculos (configuración fija)
         const VALORES_NOMINA = {
@@ -52895,54 +51700,6 @@ document.getElementById('chatForm').onsubmit = function (e) {
             }
         }
 
-        // Función para sincronizar cargo desde nómina al personal del edificio
-        async function sincronizarCargoDesdeNomina() {
-            const personal = await obtenerDatos('personalEdificio');
-            const mesActual = obtenerMesActual();
-            const nominaActual = await obtenerDatosMes('nomina');
-            
-            // Buscar en todos los meses disponibles (actual y archivados)
-            const todosLosMeses = [mesActual];
-            
-            // Buscar meses archivados
-            for (let i = 1; i <= 12; i++) {
-                const [año, mes] = mesActual.split('-').map(Number);
-                let mesBuscar = mes - i;
-                let añoBuscar = año;
-                
-                if (mesBuscar < 1) {
-                    mesBuscar += 12;
-                    añoBuscar -= 1;
-                }
-                
-                todosLosMeses.push(`${añoBuscar}-${String(mesBuscar).padStart(2, '0')}`);
-            }
-            
-            // Para cada personal, buscar su cargo más reciente en nóminas
-            for (const p of personal) {
-                if (!p.cargo || p.cargo === '') {
-                    // Buscar cargo en nóminas
-                    for (const mes of todosLosMeses) {
-                        let nomina;
-                        if (mes === mesActual) {
-                            nomina = nominaActual;
-                        } else {
-                            nomina = await obtenerDatosArchivados('nomina', mes);
-                        }
-                        
-                        const trabajador = nomina.find(t => t.nombre === p.nombre);
-                        if (trabajador && trabajador.cargo) {
-                            p.cargo = trabajador.cargo;
-                            break;
-                        }
-                    }
-                }
-            }
-            
-            // Guardar actualizaciones
-            await guardarDatos('personalEdificio', personal);
-            await cargarPersonalEdificio();
-        }
 
         // Función para actualizar select de personal en módulo de pago de aseo
         async function actualizarSelectPersonalAseo() {
