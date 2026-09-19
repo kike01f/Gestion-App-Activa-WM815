@@ -2734,13 +2734,14 @@
         }
         #ocupacion .ocupacion-mapa-axis {
             display: grid;
-            grid-template-columns: 42px repeat(15, minmax(0, 1fr));
+            grid-template-columns: 42px repeat(15, minmax(34px, 1fr));
             gap: 3px;
             align-items: center;
             padding: 8px 14px 6px;
             position: sticky;
             top: 0;
             z-index: 4;
+            min-width: 620px;
             background: color-mix(in srgb, var(--bg-primary) 94%, transparent);
             backdrop-filter: blur(6px);
         }
@@ -2779,7 +2780,7 @@
         }
         #ocupacion .building-map-edificio .floor-row {
             display: grid;
-            grid-template-columns: 42px repeat(15, minmax(0, 1fr));
+            grid-template-columns: 42px repeat(15, minmax(34px, 1fr));
             gap: 3px;
             padding: 3px 0;
             background: transparent;
@@ -2787,6 +2788,7 @@
             border-radius: 0;
             position: relative;
             align-items: stretch;
+            min-width: 620px;
         }
         #ocupacion .building-map-edificio .floor-label {
             display: flex;
@@ -38010,6 +38012,17 @@ document.getElementById('chatForm').onsubmit = function (e) {
             var suf = parseInt(digits, 10) % 100;
             return (suf >= 1 && suf <= 15) ? suf : 0;
         }
+        function ocupacionClaveNumero(unitNumber) {
+            return String(unitNumber || '').replace(/\D/g, '');
+        }
+        function ocupacionBuscarUnidad(unitNumber) {
+            var key = ocupacionClaveNumero(unitNumber);
+            if (!key) return null;
+            var units = window.vinculacionUnits || [];
+            return units.find(function (u) {
+                return ocupacionClaveNumero(u && u.unitNumber) === key;
+            }) || null;
+        }
         function ocupacionVistaActiva() {
             var on = document.querySelector('#ocupacionMapaVistas .ocupacion-vista-btn.is-on');
             return on ? String(on.getAttribute('data-vista') || '') : '';
@@ -38024,10 +38037,14 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 return d >= 0 && d <= weekMs;
             });
         }
+        function ocupacionUnidadEstaVacia(unit) {
+            if (!unit) return true;
+            return !(Array.isArray(unit.residents) && unit.residents.length);
+        }
         function ocupacionCoincideVista(unit, unitNumber, vista, now, weekMs) {
             if (!vista) return true;
             var estB = typeof estadoBienvenidaUnidad === 'function' && unit ? estadoBienvenidaUnidad(unit) : '';
-            if (vista === 'vacia') return !unit;
+            if (vista === 'vacia') return ocupacionUnidadEstaVacia(unit);
             if (vista === 'nuevas') return !!(unit && ocupacionUnidadEsNueva(unit, now, weekMs));
             if (vista === 'bienvenida') return estB === 'pendiente' || estB === 'en-cola';
             if (!unit) return false;
@@ -38052,7 +38069,6 @@ document.getElementById('chatForm').onsubmit = function (e) {
             var filterValue = filterInput ? filterInput.value.toLowerCase().trim() : '';
             var vista = ocupacionVistaActiva();
             buildingMap.innerHTML = '';
-            var units = window.vinculacionUnits || [];
             var now = new Date();
             var ONE_WEEK_MS = 7 * 24 * 60 * 60 * 1000;
 
@@ -38108,18 +38124,21 @@ document.getElementById('chatForm').onsubmit = function (e) {
             }
 
             var MAX_COLUMNAS_POR_PISO = 15;
+            var hits = 0;
             Object.keys(BUILDING_STRUCTURE_OCUPACION).sort(function(a, b) { return parseInt(b, 10) - parseInt(a, 10); }).forEach(function(floor) {
                 var floorDiv = document.createElement('div');
                 floorDiv.className = 'floor-row';
-                floorDiv.setAttribute('data-floor', 'P' + floor);
-                floorDiv.style.gridTemplateColumns = 'repeat(' + MAX_COLUMNAS_POR_PISO + ', minmax(0, 1fr))';
+                floorDiv.setAttribute('data-floor', floor);
+                var floorLab = document.createElement('div');
+                floorLab.className = 'floor-label';
+                floorLab.textContent = floor;
+                floorDiv.appendChild(floorLab);
                 var unitNumbers = BUILDING_STRUCTURE_OCUPACION[floor] || [];
                 var byCol = {};
                 unitNumbers.forEach(function (num) {
                     var col = ocupacionColumnaDesdeNumero(num);
                     if (col) byCol[col] = num;
                 });
-                var hasVisibleUnits = false;
                 for (var i = 1; i <= MAX_COLUMNAS_POR_PISO; i++) {
                     var unitNumber = byCol[i];
                     if (!unitNumber) {
@@ -38129,11 +38148,11 @@ document.getElementById('chatForm').onsubmit = function (e) {
                         floorDiv.appendChild(slotVacio);
                         continue;
                     }
-                    var unit = units.find(function(u) { return u.unitNumber === unitNumber; });
+                    var unit = ocupacionBuscarUnidad(unitNumber);
                     var hitTexto = matchesFilter(unit, unitNumber);
                     var hitVista = ocupacionCoincideVista(unit, unitNumber, vista, now, ONE_WEEK_MS);
                     var shouldShow = hitTexto && hitVista;
-                    hasVisibleUnits = true;
+                    if (shouldShow) hits += 1;
                     var cell = document.createElement('div');
                     cell.className = 'unit-cell';
                     if ((filterValue || vista) && !shouldShow) cell.classList.add('is-dim');
@@ -38199,13 +38218,38 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     }
                     floorDiv.appendChild(cell);
                 }
-                if (hasVisibleUnits || !filterValue) buildingMap.appendChild(floorDiv);
+                buildingMap.appendChild(floorDiv);
             });
+
+            var hint = document.getElementById('ocupacionMapaHint');
+            if (hint) {
+                if (filterValue || vista) {
+                    var vistaNombres = { habitacional: 'Habitacional', arriendo: 'Arriendo', vacia: 'Vacías', nuevas: 'Nuevas', bienvenida: 'Bienvenida pendiente' };
+                    var vistaTxt = vista ? ('vista «' + (vistaNombres[vista] || vista) + '»') : '';
+                    var busTxt = filterValue ? ('búsqueda «' + filterValue + '»') : '';
+                    var sep = (vistaTxt && busTxt) ? ' + ' : '';
+                    hint.textContent = hits + ' coincidencia' + (hits === 1 ? '' : 's') + ' · ' + busTxt + sep + vistaTxt + '. El resto se atenúa para no perder la forma del edificio.';
+                } else {
+                    hint.textContent = 'Columnas fijas 01–15. Los huecos (por ejemplo 202 o 1901) son departamentos que no existen en ese piso.';
+                }
+            }
 
             var filterEl = document.getElementById('buildingMapFilterOcupacion');
             if (filterEl && !filterEl._ocupacionBound) {
                 filterEl._ocupacionBound = true;
                 filterEl.addEventListener('input', function() { updateBuildingMapOcupacion(); });
+            }
+            var vistasEl = document.getElementById('ocupacionMapaVistas');
+            if (vistasEl && !vistasEl._ocupacionBound) {
+                vistasEl._ocupacionBound = true;
+                vistasEl.addEventListener('click', function (ev) {
+                    var btn = ev.target && ev.target.closest ? ev.target.closest('.ocupacion-vista-btn') : null;
+                    if (!btn || !vistasEl.contains(btn)) return;
+                    vistasEl.querySelectorAll('.ocupacion-vista-btn').forEach(function (b) {
+                        b.classList.toggle('is-on', b === btn);
+                    });
+                    updateBuildingMapOcupacion();
+                });
             }
         }
 
