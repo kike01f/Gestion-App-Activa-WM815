@@ -35883,6 +35883,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
             const content = document.getElementById('herramientasAppContent');
             const toggle = document.getElementById('herramientasAppToggle');
             const header = document.querySelector('.dashboard2-herramientas-header');
+            if (typeof window.bindHerramientasAppListeners === 'function') window.bindHerramientasAppListeners();
             if (content && toggle) {
                 const isVisible = content.style.display !== 'none';
                 content.style.display = isVisible ? 'none' : 'block';
@@ -35891,6 +35892,97 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 if (header) header.setAttribute('aria-expanded', isVisible ? 'false' : 'true');
             }
         }
+
+        window.bindHerramientasAppListeners = function() {
+            if (window._herramientasAppListenersBound) return;
+            function wireClick(id, handler) {
+                var el = document.getElementById(id);
+                if (!el) return;
+                el.addEventListener('click', handler);
+            }
+            wireClick('btnReportesConsulta', function() {
+                if (typeof window.generarReportesMesConsulta === 'function') window.generarReportesMesConsulta();
+            });
+            wireClick('btnReabrirMes', async function() {
+                if (typeof window.reabrirMes !== 'function') return;
+                try { await window.reabrirMes(); }
+                catch (error) {
+                    console.error('Error al reabrir mes:', error);
+                    if (typeof mostrarAlerta === 'function') mostrarAlerta('Ocurrió un error al reabrir el mes. Por favor, intente nuevamente.', 'Error');
+                }
+            });
+            wireClick('btnVolverActual', function() {
+                if (typeof window.volverMesActual === 'function') window.volverMesActual();
+            });
+            wireClick('btnCerrarMes', async function() {
+                if (typeof window.cerrarMesYGenerarReporte !== 'function') return;
+                try {
+                    window.cierreMesManualSolicitado = true;
+                    await window.cerrarMesYGenerarReporte();
+                } catch (error) {
+                    console.error('Error al cerrar mes:', error);
+                    if (typeof mostrarAlerta === 'function') mostrarAlerta('Ocurrió un error al cerrar el mes. Por favor, intente nuevamente.', 'Error');
+                } finally {
+                    window.cierreMesManualSolicitado = false;
+                }
+            });
+            wireClick('btnDescargarExcel', async function() {
+                try {
+                    var mesParaReporte = typeof obtenerMesPeriodoVista === 'function' ? obtenerMesPeriodoVista() : '';
+                    var nombreMes = typeof obtenerNombreMes === 'function' ? obtenerNombreMes(mesParaReporte) : mesParaReporte;
+                    if (typeof window.exportarInformeMensualXLSX === 'function') {
+                        await window.exportarInformeMensualXLSX({
+                            mesAnio: mesParaReporte,
+                            nombreMes: nombreMes,
+                            esPrevisualizacion: true,
+                            descargar: true
+                        });
+                    } else if (typeof generarReporteExcel === 'function') {
+                        await generarReporteExcel(mesParaReporte, nombreMes, true);
+                    }
+                } catch (error) {
+                    console.error('Error al descargar Excel:', error);
+                    if (typeof mostrarAlerta === 'function') mostrarAlerta('Error al descargar el reporte Excel. Por favor, intente nuevamente.', 'Error');
+                }
+            });
+            wireClick('btnPrevisualizarReporteTop', async function() {
+                if (typeof window.previsualizarReportePDF !== 'function') return;
+                try { await window.previsualizarReportePDF(); }
+                catch (error) {
+                    console.error('Error al previsualizar reporte:', error);
+                    if (typeof mostrarAlerta === 'function') mostrarAlerta('Ocurrió un error al generar la previsualización. Por favor, intente nuevamente.', 'Error');
+                }
+            });
+            wireClick('btnEnviarCorreoCierreMes', async function() {
+                if (typeof window.enviarCorreoConReporteCierreMes !== 'function') return;
+                try { await window.enviarCorreoConReporteCierreMes(); }
+                catch (error) {
+                    console.error('Error al enviar reporte de cierre por correo:', error);
+                    if (typeof mostrarAlerta === 'function') mostrarAlerta('Ocurrió un error al preparar el correo de cierre de mes. Por favor, intente nuevamente.', 'Error');
+                }
+            });
+            wireClick('btnBuscarMeses', function() {
+                if (typeof window.buscarMesesDisponibles === 'function') window.buscarMesesDisponibles();
+            });
+            wireClick('btnAbrirTrasladarCargos', function() {
+                if (typeof window.abrirPanelTrasladarCargos === 'function') window.abrirPanelTrasladarCargos();
+            });
+            wireClick('btnRecuperarFirestore', async function() {
+                if (typeof window.recuperarTodoFirestore !== 'function') return;
+                try { await window.recuperarTodoFirestore(); }
+                catch (error) {
+                    console.error('Error al recuperar datos:', error);
+                    if (typeof mostrarAlerta === 'function') mostrarAlerta('Ocurrió un error al recuperar los datos. Por favor, intente nuevamente.', 'Error');
+                }
+            });
+            var mesConsulta = document.getElementById('mesConsulta');
+            if (mesConsulta) {
+                mesConsulta.addEventListener('change', function() {
+                    if (typeof window.cargarMesConsulta === 'function') window.cargarMesConsulta();
+                });
+            }
+            if (document.getElementById('btnRecuperarFirestore')) window._herramientasAppListenersBound = true;
+        };
 
         // Función para toggle de configuración de módulos (disponible globalmente)
         window.toggleConfigModulos = async function() {
@@ -48453,114 +48545,8 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 }
 
                 // Agregar event listeners a otros botones
-                const btnReportesConsulta = document.getElementById('btnReportesConsulta');
-                if (btnReportesConsulta) {
-                    btnReportesConsulta.addEventListener('click', function() {
-                        if (typeof window.generarReportesMesConsulta === 'function') {
-                            window.generarReportesMesConsulta();
-                        }
-                    });
-                }
-                
-                const btnReabrirMes = document.getElementById('btnReabrirMes');
-                if (btnReabrirMes) {
-                    btnReabrirMes.addEventListener('click', async function() {
-                        if (typeof window.reabrirMes === 'function') {
-                            try {
-                                await window.reabrirMes();
-                            } catch (error) {
-                                console.error('Error al reabrir mes:', error);
-                                mostrarAlerta('Ocurrió un error al reabrir el mes. Por favor, intente nuevamente.', 'Error');
-                            }
-                        }
-                    });
-                }
-                
-                const btnVolverActual = document.getElementById('btnVolverActual');
-                if (btnVolverActual) {
-                    btnVolverActual.addEventListener('click', function() {
-                        if (typeof window.volverMesActual === 'function') {
-                            window.volverMesActual();
-                        }
-                    });
-                }
-                
-                // Event listeners para botones de cierre de mes
-                const btnCerrarMes = document.getElementById('btnCerrarMes');
-                if (btnCerrarMes) {
-                    btnCerrarMes.addEventListener('click', async function() {
-                        if (typeof window.cerrarMesYGenerarReporte === 'function') {
-                            try {
-                                window.cierreMesManualSolicitado = true;
-                                await window.cerrarMesYGenerarReporte();
-                            } catch (error) {
-                                console.error('Error al cerrar mes:', error);
-                                mostrarAlerta('Ocurrió un error al cerrar el mes. Por favor, intente nuevamente.', 'Error');
-                            } finally {
-                                window.cierreMesManualSolicitado = false;
-                            }
-                        }
-                    });
-                }
-                
-                const btnDescargarExcel = document.getElementById('btnDescargarExcel');
-                if (btnDescargarExcel) {
-                    btnDescargarExcel.addEventListener('click', async function() {
-                        try {
-                            const mesParaReporte = obtenerMesPeriodoVista();
-                            const nombreMes = obtenerNombreMes(mesParaReporte);
-                            if (typeof window.exportarInformeMensualXLSX === 'function') {
-                                await window.exportarInformeMensualXLSX({
-                                    mesAnio: mesParaReporte,
-                                    nombreMes: nombreMes,
-                                    esPrevisualizacion: true,
-                                    descargar: true
-                                });
-                            } else {
-                                await generarReporteExcel(mesParaReporte, nombreMes, true);
-                            }
-                        } catch (error) {
-                            console.error('Error al descargar Excel:', error);
-                            mostrarAlerta('Error al descargar el reporte Excel. Por favor, intente nuevamente.', 'Error');
-                        }
-                    });
-                }
-                
-                const btnPrevisualizarReporteTop = document.getElementById('btnPrevisualizarReporteTop');
-                if (btnPrevisualizarReporteTop) {
-                    btnPrevisualizarReporteTop.addEventListener('click', async function() {
-                        if (typeof window.previsualizarReportePDF === 'function') {
-                            try {
-                                await window.previsualizarReportePDF();
-                            } catch (error) {
-                                console.error('Error al previsualizar reporte:', error);
-                                mostrarAlerta('Ocurrió un error al generar la previsualización. Por favor, intente nuevamente.', 'Error');
-                            }
-                        }
-                    });
-                }
-
-                const btnEnviarCorreoCierreMes = document.getElementById('btnEnviarCorreoCierreMes');
-                if (btnEnviarCorreoCierreMes) {
-                    btnEnviarCorreoCierreMes.addEventListener('click', async function() {
-                        if (typeof window.enviarCorreoConReporteCierreMes === 'function') {
-                            try {
-                                await window.enviarCorreoConReporteCierreMes();
-                            } catch (error) {
-                                console.error('Error al enviar reporte de cierre por correo:', error);
-                                mostrarAlerta('Ocurrió un error al preparar el correo de cierre de mes. Por favor, intente nuevamente.', 'Error');
-                            }
-                        }
-                    });
-                }
-                
-                const mesConsulta = document.getElementById('mesConsulta');
-                if (mesConsulta) {
-                    mesConsulta.addEventListener('change', function() {
-                        if (typeof window.cargarMesConsulta === 'function') {
-                            window.cargarMesConsulta();
-                        }
-                    });
+                if (typeof window.bindHerramientasAppListeners === 'function') {
+                    window.bindHerramientasAppListeners();
                 }
                 
                 // Agregar event listeners a formularios
@@ -49293,39 +49279,9 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     });
                 }
                 
-                // Event listener para botón de buscar meses
-                const btnBuscarMeses = document.getElementById('btnBuscarMeses');
-                if (btnBuscarMeses) {
-                    btnBuscarMeses.addEventListener('click', function() {
-                        if (typeof window.buscarMesesDisponibles === 'function') {
-                            window.buscarMesesDisponibles();
-                        }
-                    });
-                }
+                // Event listener para botón de buscar meses / respaldo / cargos:
+                // se enlazan en bindHerramientasAppListeners()
 
-                const btnAbrirTrasladarCargos = document.getElementById('btnAbrirTrasladarCargos');
-                if (btnAbrirTrasladarCargos) {
-                    btnAbrirTrasladarCargos.addEventListener('click', function() {
-                        if (typeof window.abrirPanelTrasladarCargos === 'function') {
-                            window.abrirPanelTrasladarCargos();
-                        }
-                    });
-                }
-                
-                // Event listener para botón de recuperar todo de Firestore
-                const btnRecuperarFirestore = document.getElementById('btnRecuperarFirestore');
-                if (btnRecuperarFirestore) {
-                    btnRecuperarFirestore.addEventListener('click', async function() {
-                        if (typeof window.recuperarTodoFirestore === 'function') {
-                            try {
-                                await window.recuperarTodoFirestore();
-                            } catch (error) {
-                                console.error('Error al recuperar datos:', error);
-                                mostrarAlerta('Ocurrió un error al recuperar los datos. Por favor, intente nuevamente.', 'Error');
-                            }
-                        }
-                    });
-                }
                 
                 // Event listener para formulario de personalización
                 // Nota: El formulario ya tiene onsubmit="guardarPersonalizacion(event)" en el HTML
