@@ -8207,19 +8207,12 @@
                     <p>Primero el pulso del mes, luego las destacadas y el listado para trabajar. Pulse un indicador para filtrar.</p>
                 </header>
                 <div id="conserjeriaKpis" class="resumen-ocupacion-map"></div>
-                <div class="conserjeria-modulo__panel" id="conserjeriaResumenDiarioWrap">
-                    <h3>Resumen diario de novedades</h3>
-                    <p style="margin: 0 0 0.55rem; font-size: 0.8rem; color: var(--gray-600);">Misma fuente que Conserjería WM. El resumen no modifica el libro.</p>
-                    <div class="pcsh-resumen-toolbar">
-                        <div>
-                            <label for="pcshResumenFechaGestion">Fecha</label>
-                            <input type="date" id="pcshResumenFechaGestion">
-                        </div>
-                        <button type="button" class="btn btn-primary" id="pcshResumenGenerarBtnGestion" style="padding: 0.4rem 0.75rem; font-size: 0.8rem;">Generar resumen</button>
-                        <button type="button" class="btn btn-secondary" id="pcshResumenActualizarBtnGestion" style="padding: 0.4rem 0.75rem; font-size: 0.8rem;">Actualizar</button>
-                        <button type="button" class="btn btn-secondary" id="pcshResumenCopiarBtnGestion" style="padding: 0.4rem 0.75rem; font-size: 0.8rem;">Copiar</button>
-                    </div>
-                    <div id="pcshResumenBodyGestion"><p style="margin:0;color:var(--gray-500);font-size:0.85rem;">Cargue el módulo o genere el resumen.</p></div>
+                <div class="conserjeria-modulo__panel" id="conserjeriaResumenDiarioWrap" hidden>
+                    <input type="date" id="pcshResumenFechaGestion" tabindex="-1">
+                    <button type="button" id="pcshResumenGenerarBtnGestion" hidden></button>
+                    <button type="button" id="pcshResumenActualizarBtnGestion" hidden></button>
+                    <button type="button" id="pcshResumenCopiarBtnGestion" hidden></button>
+                    <div id="pcshResumenBodyGestion" hidden></div>
                 </div>
                 <div class="conserjeria-modulo__panel" id="conserjeriaDestacadasWrap">
                     <h3>Novedades destacadas</h3>
@@ -16278,8 +16271,23 @@
             return cache.novedadesAll && cache.novedadesAll.length ? cache.novedadesAll : (cache.novedades || []);
         }
         function pcshResumenGestionConstruir(lista, ymd) {
-            var items = (lista || []).filter(function (n) {
-                return n && !n.turnoSep && n.tipo !== 'resumen_diario' && !n.minimizada && pcshResumenGestionYmd(n.fecha) === ymd;
+            var arr = (lista || []).slice().sort(function (a, b) {
+                return (Number(a && a.correlativo) || 0) - (Number(b && b.correlativo) || 0);
+            });
+            var items = [];
+            var acc = [];
+            arr.forEach(function (n) {
+                if (!n) return;
+                if (n.turnoSep) {
+                    if (pcshResumenGestionYmd(n.fecha) === ymd) {
+                        acc.forEach(function (it) {
+                            if (it && !it.turnoSep && it.tipo !== 'resumen_diario' && !it.minimizada) items.push(it);
+                        });
+                    }
+                    acc = [];
+                    return;
+                }
+                acc.push(n);
             });
             var critRe = /incend|fuego|filtraci|inund|robo|gas\b|ascensor|alarma|emergencia|urgente|amenaza/i;
             var pendRe = /pendiente|por revisar|falta\b|sin resolver|esperando|seguimiento/i;
@@ -16303,7 +16311,7 @@
             var generales = grupos.filter(function (g) { return g.prioridad === 'general' && !g.pendiente; });
             var resumen = items.length
                 ? ('Durante la jornada se registraron ' + items.length + ' novedades. ' + (criticas.length ? ('Hay ' + criticas.length + ' situación(es) crítica(s). ') : 'No se identifican situaciones críticas. ') + (pendientes.length ? ('Quedan ' + pendientes.length + ' pendientes.') : ''))
-                : ('No se registraron novedades de bitácora el ' + pcshResumenGestionFechaLarga(ymd) + '.');
+                : ('No se registraron novedades en turnos cerrados el ' + pcshResumenGestionFechaLarga(ymd) + '.');
             return {
                 ymd: ymd,
                 generadoAt: new Date().toISOString(),
@@ -16331,7 +16339,7 @@
             var toneClass = dia.vacio ? ' is-vacio' : (c.critica ? ' is-crit' : '');
             var destacados = [].concat(dia.criticas || [], dia.importantes || [], dia.pendientes || []).slice(0, 5);
             var html = '<h3>Resumen diario de novedades</h3>';
-            html += '<p class="sub">' + esc(pcshResumenGestionFechaLarga(dia.ymd)) + ' · ' + (dia.total || 0) + ' novedades · emitido automáticamente</p>';
+            html += '<p class="sub">' + esc(pcshResumenGestionFechaLarga(dia.ymd)) + ' · ' + (dia.total || 0) + ' novedades de turnos cerrados · emitido automáticamente</p>';
             html += '<div class="chips">';
             html += '<span class="chip">🔴 ' + (c.critica || 0) + ' críticas</span>';
             html += '<span class="chip">🟠 ' + (c.importante || 0) + ' importantes</span>';
