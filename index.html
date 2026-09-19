@@ -6374,17 +6374,24 @@
                 <p id="conserjeriaFuenteDatos" style="color: var(--gray-600); font-size: 0.875rem; margin: 0.5rem 0 0 0; max-width: 42rem; line-height: 1.45;">Novedades e incidencias de Conserjería WM. Puede destacar, anotar y editar desde aquí; los cambios quedan en la bitácora de conserjería.</p>
             </div>
             <p id="conserjeriaMesTexto" style="margin: 0 0 1rem 0; font-size: 0.82rem; color: var(--gray-600);"></p>
-            <div id="conserjeriaKpis" class="resumen-ocupacion-map" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0.85rem; margin-bottom: 1.25rem;">
-                <div class="resumen-item"><div class="valor" id="conserjeriaKpiReclamos" style="color: #fbcfe8;">0</div><div class="etiqueta">Reclamos</div></div>
-                <div class="resumen-item"><div class="valor" id="conserjeriaKpiIncidencias" style="color: #fecaca;">0</div><div class="etiqueta">Incidencias</div></div>
-                <div class="resumen-item"><div class="valor" id="conserjeriaKpiSeguridad" style="color: #fecaca;">0</div><div class="etiqueta">Seguridad</div></div>
-                <div class="resumen-item"><div class="valor" id="conserjeriaKpiAperturas" style="color: #86efac;">0</div><div class="etiqueta">Aperturas</div></div>
-                <div class="resumen-item"><div class="valor" id="conserjeriaKpiDestacadas" style="color: #b45309;">0</div><div class="etiqueta">Destacadas</div></div>
-                <div class="resumen-item"><div class="valor" id="conserjeriaKpiVisitasMulta" style="color: #b45309;">0</div><div class="etiqueta">Visitas con multa</div></div>
+            <div class="form-section" id="conserjeriaCatalogoWrap" style="margin-bottom: 1rem;">
+                <h3 style="margin: 0 0 0.35rem 0; font-size: 1rem; font-weight: 700;">Tipificación y avisos</h3>
+                <p style="margin: 0 0 0.65rem 0; font-size: 0.8rem; color: var(--gray-600); line-height: 1.45;">Las etiquetas se usan en Conserjería WM para tipificar. Marque cuáles se ven en este módulo. El aviso de mejoras se puede apagar sin borrar el análisis.</p>
+                <label style="display:inline-flex;align-items:center;gap:0.45rem;font-size:0.82rem;font-weight:600;margin-bottom:0.75rem;">
+                    <input type="checkbox" id="conserjeriaAvisoMejorasActivo" checked>
+                    Publicar aviso de mejoras en Conserjería WM
+                </label>
+                <div id="conserjeriaEtiquetasLista" style="display:flex;flex-direction:column;gap:0.4rem;margin-bottom:0.65rem;"></div>
+                <div style="display:flex;flex-wrap:wrap;gap:0.4rem;align-items:center;">
+                    <input type="text" id="conserjeriaNuevaEtiquetaNombre" class="form-input" placeholder="Nueva etiqueta…" maxlength="40" style="padding:0.4rem 0.5rem;font-size:0.8rem;min-width:12rem;">
+                    <input type="color" id="conserjeriaNuevaEtiquetaColor" value="#64748b" title="Color" style="width:2.2rem;height:1.8rem;padding:0;border:1px solid var(--border-color);background:transparent;">
+                    <button type="button" class="btn btn-primary" id="btnAgregarEtiquetaNovedad" style="padding:0.35rem 0.7rem;font-size:0.78rem;">Agregar etiqueta</button>
+                </div>
             </div>
+            <div id="conserjeriaKpis" class="resumen-ocupacion-map" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0.85rem; margin-bottom: 1.25rem;"></div>
             <div class="form-section" id="conserjeriaAnalisisWrap" style="margin-bottom: 1rem;">
                 <h3 style="margin: 0 0 0.35rem 0; font-size: 1rem; font-weight: 700;">Análisis de novedades</h3>
-                <p style="margin: 0 0 0.75rem 0; font-size: 0.8rem; color: var(--gray-600); line-height: 1.45;">Lee el mes por tipo, ordena los temas y propone mejoras con una solución. Puede editar esas propuestas: se guardan solas en el mes y se publican como aviso mensual en Conserjería WM. Pulse un tipo del ranking para filtrar el listado.</p>
+                <p style="margin: 0 0 0.75rem 0; font-size: 0.8rem; color: var(--gray-600); line-height: 1.45;">Resume el mes con datos de la bitácora. Las recomendaciones son objetivas (conteo, unidades y qué revisar). Se guardan solas. Pulse un tipo del ranking para filtrar el listado.</p>
                 <div id="conserjeriaAnalisis"><p style="margin: 0; color: var(--gray-500); font-size: 0.85rem;">Cargando análisis…</p></div>
             </div>
             <div class="form-section" style="margin-bottom: 1rem;">
@@ -12873,21 +12880,102 @@
             return '—';
         }
 
-        function categoriaNovedadGestion(cat) {
-            var s = String(cat || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '');
+        var CG_ETIQUETAS_NOVEDAD_DEFAULT = [
+            { id: 'general', label: 'General', color: '#64748b', mostrar: false, sistema: true },
+            { id: 'aperturas', label: 'Apertura', color: '#22c55e', mostrar: true, sistema: true },
+            { id: 'mudanza', label: 'Mudanza', color: '#0ea5e9', mostrar: false, sistema: true },
+            { id: 'eventos', label: 'Eventos', color: '#8b5cf6', mostrar: false, sistema: true },
+            { id: 'mantenimiento', label: 'Mantenimiento', color: '#f59e0b', mostrar: false, sistema: true },
+            { id: 'seguridad', label: 'Seguridad', color: '#dc2626', mostrar: true, sistema: true },
+            { id: 'ronda', label: 'Ronda', color: '#14b8a6', mostrar: false, sistema: true },
+            { id: 'proveedores', label: 'Proveedores', color: '#6366f1', mostrar: false, sistema: true },
+            { id: 'incidencias', label: 'Incidentes', color: '#b91c1c', mostrar: true, sistema: true },
+            { id: 'reclamos', label: 'Reclamos', color: '#be185d', mostrar: true, sistema: true },
+            { id: 'multa', label: 'Multa', color: '#ea580c', mostrar: false, sistema: true },
+            { id: 'otros', label: 'Otros', color: '#78716c', mostrar: false, sistema: true }
+        ];
+        window._catalogoNovedadesGestion = window._catalogoNovedadesGestion || {
+            etiquetas: CG_ETIQUETAS_NOVEDAD_DEFAULT.map(function (e) { return Object.assign({}, e); }),
+            avisoMejorasActivo: true,
+            loaded: false
+        };
+
+        function slugEtiquetaNovedadGestion(label) {
+            var s = String(label || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '');
             if (s.indexOf('reclamo') === 0) return 'reclamos';
-            if (s.indexOf('incident') === 0 || s.indexOf('incidencia') === 0) return 'incidencias';
+            if (s.indexOf('incident') === 0) return 'incidencias';
             if (s.indexOf('segur') === 0) return 'seguridad';
             if (s.indexOf('apertur') === 0) return 'aperturas';
-            return '';
+            return s || 'otros';
+        }
+
+        function normalizarEtiquetaNovedadGestion(raw) {
+            if (!raw || typeof raw !== 'object') return null;
+            var label = String(raw.label || '').trim().slice(0, 40);
+            if (!label) return null;
+            var id = String(raw.id || slugEtiquetaNovedadGestion(label)).trim() || slugEtiquetaNovedadGestion(label);
+            var color = /^#[0-9a-fA-F]{6}$/.test(String(raw.color || '')) ? String(raw.color) : '#64748b';
+            return { id: id, label: label, color: color, mostrar: raw.mostrar !== false, sistema: !!raw.sistema };
+        }
+
+        function etiquetasNovedadGestion() {
+            var list = (window._catalogoNovedadesGestion && window._catalogoNovedadesGestion.etiquetas) || [];
+            if (!list.length) list = CG_ETIQUETAS_NOVEDAD_DEFAULT;
+            return list.map(normalizarEtiquetaNovedadGestion).filter(Boolean);
+        }
+
+        function etiquetasMostradasGestion() {
+            return etiquetasNovedadGestion().filter(function (e) { return e.mostrar; });
+        }
+
+        function avisoMejorasActivoGestion() {
+            return !window._catalogoNovedadesGestion || window._catalogoNovedadesGestion.avisoMejorasActivo !== false;
+        }
+
+        function encontrarEtiquetaNovedadGestion(cat) {
+            var clave = slugEtiquetaNovedadGestion(cat);
+            var list = etiquetasNovedadGestion();
+            var i;
+            for (i = 0; i < list.length; i++) {
+                if (list[i].id === clave || slugEtiquetaNovedadGestion(list[i].label) === clave) return list[i];
+            }
+            return null;
+        }
+
+        function categoriaNovedadGestion(cat) {
+            var et = encontrarEtiquetaNovedadGestion(cat);
+            if (et) return et.id;
+            return slugEtiquetaNovedadGestion(cat);
+        }
+
+        function etiquetaSeMuestraEnGestion(cat) {
+            var et = encontrarEtiquetaNovedadGestion(cat);
+            if (et) return !!et.mostrar;
+            return false;
         }
 
         function etiquetaCategoriaNovedadGestion(clave) {
+            var et = encontrarEtiquetaNovedadGestion(clave);
+            if (et) return et.label;
             if (clave === 'reclamos') return 'Reclamos';
-            if (clave === 'incidencias') return 'Incidencias';
+            if (clave === 'incidencias') return 'Incidentes';
             if (clave === 'seguridad') return 'Seguridad';
-            if (clave === 'aperturas') return 'Aperturas';
+            if (clave === 'aperturas') return 'Apertura';
             return clave || '—';
+        }
+
+        function estiloDesdeColorHexNovedad(hex) {
+            var h = String(hex || '#64748b').replace('#', '');
+            if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
+            var r = parseInt(h.slice(0, 2), 16) || 100;
+            var g = parseInt(h.slice(2, 4), 16) || 116;
+            var b = parseInt(h.slice(4, 6), 16) || 139;
+            return {
+                bg: 'rgba(' + r + ',' + g + ',' + b + ',0.24)',
+                fg: '#f8fafc',
+                bd: 'rgba(' + r + ',' + g + ',' + b + ',0.55)',
+                accent: '#' + h
+            };
         }
 
         function estiloBadgeCategoriaNovedad(clave) {
@@ -12897,7 +12985,128 @@
                 seguridad: { bg: 'rgba(239, 68, 68, 0.22)', fg: '#fecaca', bd: 'rgba(220, 38, 38, 0.5)', accent: '#dc2626' },
                 aperturas: { bg: 'rgba(34, 197, 94, 0.22)', fg: '#86efac', bd: 'rgba(34, 197, 94, 0.5)', accent: '#22c55e' }
             };
-            return map[clave] || { bg: 'rgba(100, 116, 139, 0.35)', fg: '#cbd5e1', bd: 'rgba(100,116,139,0.45)', accent: '#64748b' };
+            if (map[clave]) return map[clave];
+            var et = encontrarEtiquetaNovedadGestion(clave);
+            if (et) return estiloDesdeColorHexNovedad(et.color);
+            return { bg: 'rgba(100, 116, 139, 0.35)', fg: '#cbd5e1', bd: 'rgba(100,116,139,0.45)', accent: '#64748b' };
+        }
+
+        function pintarSelectsEtiquetasNovedadGestion() {
+            var shown = etiquetasMostradasGestion();
+            var sel = document.getElementById('conserjeriaFiltroCategoria');
+            if (sel) {
+                var cur = sel.value;
+                sel.innerHTML = '<option value="">Todas las categorías</option>' + shown.map(function (e) {
+                    return '<option value="' + escaparHtmlModuloConserjeria(e.id) + '">' + escaparHtmlModuloConserjeria(e.label) + '</option>';
+                }).join('');
+                if (cur && shown.some(function (e) { return e.id === cur; })) sel.value = cur;
+            }
+            var edit = document.getElementById('editNovedadCategoriaGestion');
+            if (edit) {
+                var curE = edit.value;
+                var todas = etiquetasNovedadGestion();
+                edit.innerHTML = todas.map(function (e) {
+                    return '<option value="' + escaparHtmlModuloConserjeria(e.label) + '">' + escaparHtmlModuloConserjeria(e.label) + '</option>';
+                }).join('');
+                if (curE) edit.value = curE;
+            }
+        }
+
+        function pintarListaEtiquetasNovedadGestion() {
+            var host = document.getElementById('conserjeriaEtiquetasLista');
+            if (!host) return;
+            var list = etiquetasNovedadGestion();
+            host.innerHTML = list.map(function (e) {
+                var del = e.sistema ? '' : '<button type="button" class="btn btn-danger btn-sm etiqueta-nov-del" data-id="' + escaparHtmlModuloConserjeria(e.id) + '" style="padding:0.15rem 0.4rem;font-size:0.68rem;">Eliminar</button>';
+                return '<div style="display:flex;flex-wrap:wrap;align-items:center;gap:0.4rem;padding:0.35rem 0.45rem;border:1px solid var(--border-color);border-radius:8px;border-left:3px solid ' + escaparHtmlModuloConserjeria(e.color) + ';">' +
+                    '<input type="text" class="form-input etiqueta-nov-label" data-id="' + escaparHtmlModuloConserjeria(e.id) + '" value="' + escaparHtmlModuloConserjeria(e.label) + '" maxlength="40" style="padding:0.25rem 0.4rem;font-size:0.78rem;width:9.5rem;">' +
+                    '<input type="color" class="etiqueta-nov-color" data-id="' + escaparHtmlModuloConserjeria(e.id) + '" value="' + escaparHtmlModuloConserjeria(e.color) + '" style="width:1.8rem;height:1.5rem;padding:0;border:1px solid var(--border-color);">' +
+                    '<label style="display:inline-flex;align-items:center;gap:0.3rem;font-size:0.75rem;color:var(--gray-700);"><input type="checkbox" class="etiqueta-nov-mostrar" data-id="' + escaparHtmlModuloConserjeria(e.id) + '"' + (e.mostrar ? ' checked' : '') + '> Mostrar en Gestión</label>' +
+                    del +
+                    '</div>';
+            }).join('');
+            var chk = document.getElementById('conserjeriaAvisoMejorasActivo');
+            if (chk) chk.checked = avisoMejorasActivoGestion();
+            pintarSelectsEtiquetasNovedadGestion();
+        }
+
+        async function guardarCatalogoNovedadesGestion() {
+            var payload = {
+                etiquetas: etiquetasNovedadGestion(),
+                avisoMejorasActivo: avisoMejorasActivoGestion(),
+                actualizadoAt: new Date().toISOString(),
+                origen: 'gestion-wm'
+            };
+            try {
+                var sdb = await obtenerDbConserjeriaOperativa();
+                await sdb.collection('pcsh_settings').doc('catalogoNovedades').set(payload);
+            } catch (e) {
+                console.warn('[catalogo-novedades]', e);
+            }
+        }
+
+        async function cargarCatalogoNovedadesGestion() {
+            try {
+                var sdb = await obtenerDbConserjeriaOperativa();
+                var snap = await sdb.collection('pcsh_settings').doc('catalogoNovedades').get();
+                if (snap.exists) {
+                    var d = snap.data() || {};
+                    var ets = Array.isArray(d.etiquetas) ? d.etiquetas.map(normalizarEtiquetaNovedadGestion).filter(Boolean) : [];
+                    if (!ets.length) ets = CG_ETIQUETAS_NOVEDAD_DEFAULT.map(function (e) { return Object.assign({}, e); });
+                    window._catalogoNovedadesGestion = {
+                        etiquetas: ets,
+                        avisoMejorasActivo: d.avisoMejorasActivo !== false,
+                        loaded: true
+                    };
+                } else {
+                    window._catalogoNovedadesGestion.loaded = true;
+                }
+            } catch (eC) {
+                window._catalogoNovedadesGestion.loaded = true;
+            }
+            pintarListaEtiquetasNovedadGestion();
+            return window._catalogoNovedadesGestion;
+        }
+
+        function programarGuardadoCatalogoNovedades() {
+            clearTimeout(window._catalogoNovedadesSaveT);
+            window._catalogoNovedadesSaveT = setTimeout(function () {
+                guardarCatalogoNovedadesGestion();
+            }, 400);
+        }
+
+        function actualizarEtiquetaNovedadDesdeUi(id, campo, valor) {
+            var list = etiquetasNovedadGestion();
+            var et = list.filter(function (e) { return e.id === id; })[0];
+            if (!et) return;
+            if (campo === 'label') {
+                var lab = String(valor || '').trim().slice(0, 40);
+                if (lab) et.label = lab;
+            } else if (campo === 'color') {
+                et.color = valor;
+            } else if (campo === 'mostrar') {
+                et.mostrar = !!valor;
+            }
+            window._catalogoNovedadesGestion.etiquetas = list;
+            pintarSelectsEtiquetasNovedadGestion();
+            programarGuardadoCatalogoNovedades();
+            if (campo === 'mostrar' && typeof window.cargarModuloConserjeriaGestion === 'function') {
+                window.cargarModuloConserjeriaGestion({ forzar: true });
+            }
+        }
+
+        async function setAvisoMejorasActivoGestion(on) {
+            window._catalogoNovedadesGestion.avisoMejorasActivo = !!on;
+            try {
+                var sdb = await obtenerDbConserjeriaOperativa();
+                await sdb.collection('pcsh_settings').doc('catalogoNovedades').set({ avisoMejorasActivo: !!on }, { merge: true });
+                await sdb.collection('pcsh_settings').doc('mejorasGestion').set({ activo: !!on }, { merge: true });
+                if (on && typeof publicarMejorasAnalisisEnConserjeria === 'function') {
+                    await publicarMejorasAnalisisEnConserjeria();
+                }
+            } catch (eA) {
+                console.warn('[aviso-mejoras]', eA);
+            }
         }
 
         var TEMAS_ANALISIS_NOVEDADES = [
@@ -12996,41 +13205,19 @@
         function sugerenciaDinamicaNovedad(id, tema, extra) {
             var n = (tema && tema.n) || (extra && extra.n) || 0;
             var und = textoUnidadesAnalisis((tema && tema.unidades) || (extra && extra.unidades) || []);
-            var base = SUGERENCIAS_TEMA_NOVEDAD[id] || SUGERENCIAS_TEMA_NOVEDAD.otros;
-            var mejora = base.mejora;
-            var solucion = base.solucion;
-            if (id === 'ruido') {
-                mejora = 'Hay ' + n + ' novedad' + (n === 1 ? '' : 'es') + ' por ruidos molestos' + (und ? ' en ' + und : '') + '. Fijar y comunicar el horario permitido de obras, música y ruidos.';
-                solucion = 'Mediar el mismo día entre las unidades afectadas' + (und ? ' (' + und + ')' : '') + '. Avisar por escrito a quien genera el ruido; si se repite fuera de horario, aplicar el reglamento.';
-            } else if (id === 'acceso') {
-                mejora = n + ' caso' + (n === 1 ? '' : 's') + ' de llaves o tarjetas' + (und ? ' (' + und + ')' : '') + '. Trazar quién deja, quién retira y qué pedido sigue pendiente.';
-                solucion = 'Planilla de casillero con plazo de retiro y respuesta a solicitudes de tarjeta extra en 48 horas.';
-            } else if (id === 'autorizados') {
-                mejora = n + ' ingreso' + (n === 1 ? '' : 's') + ' de personas autorizadas o corredoras' + (und ? ' en ' + und : '') + '. Unificar el protocolo de portería.';
-                solucion = 'Exigir unidad, RUT, horario y responsable; registrar en bitácora y no entregar tarjetas de áreas comunes sin acta de devolución.';
-            } else if (id === 'apertura') {
-                mejora = 'Se registraron ' + n + ' apertura' + (n === 1 ? '' : 's') + ' de puerta' + (und ? ' (' + und + ')' : '') + '. Bajar reincidencias con copias de respaldo.';
-                solucion = 'Recordar el protocolo y ofrecer llave o tarjeta de respaldo a las unidades que ya reinciden; cobrar según reglamento.';
-            } else if (id === 'alarma') {
-                mejora = n + ' alarma o sensor sin foco confirmado' + (und ? ' (' + und + ')' : '') + '. Revisar el sistema de detección.';
-                solucion = 'Orden de trabajo al proveedor de detección e inspección de la zona marcada en la bitácora.';
-            } else if (id === 'infra') {
-                mejora = n + ' novedad' + (n === 1 ? '' : 'es') + ' de infraestructura o iluminación' + (und ? ' (' + und + ')' : '') + '. Cerrar el desperfecto antes de que se repita.';
-                solucion = 'Generar orden de mantención con foto o video y fecha de reparación comprometida.';
-            } else if (id === 'espacios') {
-                mejora = n + ' caso' + (n === 1 ? '' : 's') + ' de espacios comunes o reservas. Dejar visible que el uso exige reserva.';
-                solucion = 'Aviso en Comunidad Feliz y en el acceso al recinto; el conserje recuerda la reserva al ingreso.';
-            } else if (id === 'visitas_nov') {
-                mejora = n + ' visita' + (n === 1 ? '' : 's') + ' anunciada' + (n === 1 ? '' : 's') + (und ? ' (' + und + ')' : '') + '. Anticipar el aviso a portería.';
-                solucion = 'Pedir aviso previo por escrito (nombre, RUT y horario) y aplicar la regla de permanencia vehicular si corresponde.';
-            } else if (id === 'unidades') {
-                mejora = 'Hay ' + n + ' unidad' + (n === 1 ? '' : 'es') + ' que se repiten en la bitácora. Priorizar seguimiento.';
-                solucion = 'Hacer seguimiento a ' + (und || 'esas unidades') + '.';
+            var label = (tema && tema.label) || etiquetaTemaNovedadGestion(id);
+            var undTxt = und ? ' Unidades: ' + und + '.' : '';
+            var mejora = '';
+            var solucion = '';
+            if (id === 'unidades') {
+                mejora = n + ' unidad' + (n === 1 ? '' : 'es') + ' aparecen más de una vez en la bitácora del mes.' + (und ? ' ' + und + '.' : '');
+                solucion = 'Revisar en bitácora las entradas de ' + (und || 'esas unidades') + ' y anotar si el seguimiento quedó cerrado.';
             } else if (id === 'visitas_multa') {
-                mejora = n + ' visita' + (n === 1 ? '' : 's') + ' con multa por permanencia. Recordar en portería el tope de 5 horas más 15 minutos.';
-                solucion = 'Avisar al residente anfitrión al acercarse al límite y dejar constancia si la visita se extiende.';
-            } else if (und) {
-                solucion = solucion + ' Unidades: ' + und + '.';
+                mejora = n + ' visita' + (n === 1 ? '' : 's') + ' vehicular' + (n === 1 ? '' : 'es') + ' superó el tope de 5 horas más 15 minutos.';
+                solucion = 'Contrastar ingreso y salida de esas ' + n + ' visita' + (n === 1 ? '' : 's') + ' en el módulo de visitas.';
+            } else {
+                mejora = n + ' registro' + (n === 1 ? '' : 's') + ' de «' + label + '» en el mes.' + undTxt;
+                solucion = 'Abrir las ' + n + ' novedad' + (n === 1 ? '' : 'es') + ' de este tema en la bitácora' + (und ? ' (' + und + ')' : '') + ' y dejar constancia del estado (pendiente o cerrado).';
             }
             return { mejora: mejora, solucion: solucion };
         }
@@ -13125,6 +13312,7 @@
                 nombreMes: nombre,
                 resumen: String(resumen || '').trim().slice(0, 700),
                 puntos: puntos,
+                activo: avisoMejorasActivoGestion(),
                 publicadoAt: new Date().toISOString(),
                 origen: 'gestion-wm'
             };
@@ -13137,9 +13325,17 @@
             if (!mes || !actual || mes !== actual) return;
             if (!puedeEditarAnalisisNovedades()) return;
             var payload = payloadMejorasAnalisisParaConserjeria(mes, store.acciones, store.resumen);
-            if (!payload.puntos.length) return;
             try {
                 var sdb = await obtenerDbConserjeriaOperativa();
+                if (!payload.puntos.length) {
+                    await sdb.collection('pcsh_settings').doc('mejorasGestion').set({
+                        mes: payload.mes,
+                        activo: payload.activo,
+                        puntos: [],
+                        publicadoAt: payload.publicadoAt
+                    }, { merge: true });
+                    return;
+                }
                 await sdb.collection('pcsh_settings').doc('mejorasGestion').set(payload);
                 await sdb.collection('mejoras_gestion').doc(mes).set(payload, { merge: true });
             } catch (ePub) {
@@ -13221,7 +13417,8 @@
         function analizarNovedadesConserjeriaGestion(novedades, visitas) {
             var nov = Array.isArray(novedades) ? novedades.filter(Boolean) : [];
             var vis = Array.isArray(visitas) ? visitas.filter(Boolean) : [];
-            var tiposBase = ['reclamos', 'incidencias', 'seguridad', 'aperturas'];
+            var tiposBase = etiquetasMostradasGestion().map(function (e) { return e.id; });
+            if (!tiposBase.length) tiposBase = ['reclamos', 'incidencias', 'seguridad', 'aperturas'];
             var porTipo = {};
             tiposBase.forEach(function (k) {
                 porTipo[k] = { clave: k, label: etiquetaCategoriaNovedadGestion(k), n: 0, dest: 0, unidades: [], score: 0 };
@@ -13285,21 +13482,19 @@
             if (!nov.length) {
                 resumen = 'No hay novedades tipificadas en este período para armar un ranking.';
             } else {
-                resumen = 'En el mes se tipificaron ' + nov.length + ' novedad' + (nov.length === 1 ? '' : 'es') + '.';
+                resumen = nov.length + ' novedad' + (nov.length === 1 ? '' : 'es') + ' tipificada' + (nov.length === 1 ? '' : 's') + ' en el mes.';
                 if (liderTipo) {
-                    resumen += ' El tipo que más pesa es ' + liderTipo.label + ' (' + liderTipo.n + ').';
+                    resumen += ' Tipo con más registros: ' + liderTipo.label + ' (' + liderTipo.n + ').';
                 }
                 if (liderTema) {
-                    resumen += ' El tema que más se repite es «' + liderTema.label + '» (' + liderTema.n + ').';
+                    resumen += ' Tema más repetido: «' + liderTema.label + '» (' + liderTema.n + ').';
                 }
                 if (dest) {
-                    resumen += ' Hay ' + dest + ' destacada' + (dest === 1 ? '' : 's') + ' que conviene revisar primero.';
+                    resumen += ' Destacadas: ' + dest + '.';
                 }
-                if (vis.length) {
-                    resumen += ' Además hay ' + vis.length + ' visita' + (vis.length === 1 ? '' : 's') + ' con multa por permanencia.';
-                } else {
-                    resumen += ' No hay visitas con multa en el período.';
-                }
+                resumen += vis.length
+                    ? ' Visitas con multa: ' + vis.length + '.'
+                    : ' Visitas con multa: 0.';
             }
             var acciones = [];
             rankingTemas.slice(0, 5).forEach(function (tema) {
@@ -13429,7 +13624,7 @@
                 '<h4 style="margin:0;font-size:0.84rem;">Mejoras y soluciones sugeridas</h4>' +
                 '<span id="conserjeriaAnalisisSaveHint" style="font-size:0.72rem;color:var(--gray-500);opacity:0.75;">Se guarda solo</span>' +
                 '</div>' +
-                '<p style="margin:0 0 0.55rem 0;font-size:0.75rem;color:var(--gray-600);line-height:1.4;">Se arman con las novedades del mes. El texto se guarda solo y el aviso del mes se publica en el panel de Conserjería WM para el personal. Si no lo edita, se actualiza cuando cambie la bitácora.</p>' +
+                '<p style="margin:0 0 0.55rem 0;font-size:0.75rem;color:var(--gray-600);line-height:1.4;">Texto objetivo a partir de conteos y unidades. Se guarda solo. El aviso en Conserjería se puede apagar arriba, en Tipificación y avisos.</p>' +
                 '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(16rem,1fr));gap:0.65rem;">' + cards + '</div>';
         }
 
@@ -13464,7 +13659,16 @@
                 loaded: !!mismoMes
             };
             wrap.innerHTML = htmlRankingNovedadesConserjeria(analisis);
-            if (puedeEditarAnalisisNovedades() && mismoMes && store.huella !== huella) {
+            var cambioTexto = false;
+            if (mismoMes && Array.isArray(guardadas)) {
+                analisis.acciones.forEach(function (a) {
+                    var s = guardadas.filter(function (x) { return x && x.id === a.id; })[0];
+                    if (s && !s.editado && (String(s.mejora || '') !== String(a.mejora || '') || String(s.solucion || '') !== String(a.solucion || ''))) {
+                        cambioTexto = true;
+                    }
+                });
+            }
+            if (puedeEditarAnalisisNovedades() && mismoMes && (store.huella !== huella || cambioTexto)) {
                 programarGuardadoAnalisisNovedades();
             }
         }
@@ -13683,19 +13887,15 @@
             var cache = window._moduloConserjeriaCache || {};
             var nov = Array.isArray(cache.novedades) ? cache.novedades : [];
             var vis = Array.isArray(cache.visitas) ? cache.visitas : [];
-            var rec = 0, inc = 0, seg = 0, ape = 0;
+            var porTipo = {};
             nov.forEach(function (n) {
-                if (n.catClave === 'reclamos') rec++;
-                else if (n.catClave === 'incidencias') inc++;
-                else if (n.catClave === 'seguridad') seg++;
-                else if (n.catClave === 'aperturas') ape++;
+                var k = n.catClave || '';
+                if (!k) return;
+                porTipo[k] = (porTipo[k] || 0) + 1;
             });
             return {
                 mes: cache.mes || '',
-                reclamos: rec,
-                incidencias: inc,
-                seguridad: seg,
-                aperturas: ape,
+                porTipo: porTipo,
                 destacadas: nov.filter(function (n) { return novedadEstaDestacadaGestion(n); }).length,
                 totalNovedades: nov.length,
                 visitasMulta: vis.length
@@ -13771,6 +13971,55 @@
             if (inp) inp.addEventListener('input', pintarTablasModuloConserjeria);
             if (sel) sel.addEventListener('change', pintarTablasModuloConserjeria);
             if (dest) dest.addEventListener('change', pintarTablasModuloConserjeria);
+            var chkAviso = document.getElementById('conserjeriaAvisoMejorasActivo');
+            if (chkAviso) {
+                chkAviso.addEventListener('change', function () {
+                    setAvisoMejorasActivoGestion(!!chkAviso.checked);
+                });
+            }
+            var hostEt = document.getElementById('conserjeriaEtiquetasLista');
+            if (hostEt) {
+                hostEt.addEventListener('change', function (e) {
+                    var t = e.target;
+                    if (!t) return;
+                    var id = String(t.getAttribute('data-id') || '');
+                    if (!id) return;
+                    if (t.classList.contains('etiqueta-nov-mostrar')) actualizarEtiquetaNovedadDesdeUi(id, 'mostrar', t.checked);
+                    if (t.classList.contains('etiqueta-nov-color')) actualizarEtiquetaNovedadDesdeUi(id, 'color', t.value);
+                    if (t.classList.contains('etiqueta-nov-label')) actualizarEtiquetaNovedadDesdeUi(id, 'label', t.value);
+                });
+                hostEt.addEventListener('click', function (e) {
+                    var t = e.target;
+                    if (!t || !t.classList.contains('etiqueta-nov-del')) return;
+                    var id = String(t.getAttribute('data-id') || '');
+                    if (!id || !window.confirm('¿Eliminar esta etiqueta? Las novedades ya tipificadas conservan el nombre anterior.')) return;
+                    window._catalogoNovedadesGestion.etiquetas = etiquetasNovedadGestion().filter(function (x) { return x.id !== id; });
+                    pintarListaEtiquetasNovedadGestion();
+                    guardarCatalogoNovedadesGestion();
+                    if (typeof window.cargarModuloConserjeriaGestion === 'function') window.cargarModuloConserjeriaGestion({ forzar: true });
+                });
+            }
+            var btnAddEt = document.getElementById('btnAgregarEtiquetaNovedad');
+            if (btnAddEt) {
+                btnAddEt.addEventListener('click', function () {
+                    var inp = document.getElementById('conserjeriaNuevaEtiquetaNombre');
+                    var col = document.getElementById('conserjeriaNuevaEtiquetaColor');
+                    var lab = inp ? String(inp.value || '').trim().slice(0, 40) : '';
+                    if (!lab) return;
+                    var id = slugEtiquetaNovedadGestion(lab);
+                    var list = etiquetasNovedadGestion();
+                    if (list.some(function (e) { return e.id === id || e.label.toLowerCase() === lab.toLowerCase(); })) {
+                        if (typeof mostrarAlerta === 'function') mostrarAlerta('Esa etiqueta ya existe.', 'Etiqueta');
+                        return;
+                    }
+                    list.push({ id: id, label: lab, color: (col && col.value) || '#64748b', mostrar: true, sistema: false });
+                    window._catalogoNovedadesGestion.etiquetas = list;
+                    if (inp) inp.value = '';
+                    pintarListaEtiquetasNovedadGestion();
+                    guardarCatalogoNovedadesGestion();
+                    if (typeof window.cargarModuloConserjeriaGestion === 'function') window.cargarModuloConserjeriaGestion({ forzar: true });
+                });
+            }
             var btnCerrarNota = document.getElementById('btnCerrarNotaConserjeria');
             var btnGuardarNota = document.getElementById('btnGuardarNotaConserjeria');
             if (btnCerrarNota) btnCerrarNota.addEventListener('click', function () { cerrarOverlayGestion('modalNotaConserjeriaGestion'); });
@@ -13787,16 +14036,17 @@
 
         function pintarKpisModuloConserjeria() {
             var r = resumenModuloConserjeriaDesdeCache();
-            var setTxt = function (id, val) {
-                var el = document.getElementById(id);
-                if (el) el.textContent = String(val);
-            };
-            setTxt('conserjeriaKpiReclamos', r.reclamos);
-            setTxt('conserjeriaKpiIncidencias', r.incidencias);
-            setTxt('conserjeriaKpiSeguridad', r.seguridad);
-            setTxt('conserjeriaKpiAperturas', r.aperturas);
-            setTxt('conserjeriaKpiDestacadas', r.destacadas);
-            setTxt('conserjeriaKpiVisitasMulta', r.visitasMulta);
+            var wrap = document.getElementById('conserjeriaKpis');
+            if (wrap) {
+                var shown = etiquetasMostradasGestion();
+                var cards = shown.map(function (e) {
+                    var st = estiloBadgeCategoriaNovedad(e.id);
+                    return '<div class="resumen-item"><div class="valor" style="color:' + st.fg + ';">' + (r.porTipo[e.id] || 0) + '</div><div class="etiqueta">' + escaparHtmlModuloConserjeria(e.label) + '</div></div>';
+                }).join('');
+                cards += '<div class="resumen-item"><div class="valor" id="conserjeriaKpiDestacadas" style="color: #b45309;">' + r.destacadas + '</div><div class="etiqueta">Destacadas</div></div>';
+                cards += '<div class="resumen-item"><div class="valor" id="conserjeriaKpiVisitasMulta" style="color: #b45309;">' + r.visitasMulta + '</div><div class="etiqueta">Visitas con multa</div></div>';
+                wrap.innerHTML = cards;
+            }
             var mesEl = document.getElementById('conserjeriaMesTexto');
             if (mesEl) {
                 var nombre = (typeof obtenerNombreMes === 'function' && r.mes) ? obtenerNombreMes(r.mes) : (r.mes || '');
@@ -13853,7 +14103,7 @@
                 if (cache.error && !nov.length) {
                     tbN.innerHTML = '<tr><td colspan="7" class="empty-state"><p>' + escaparHtmlModuloConserjeria(cache.error) + '</p></td></tr>';
                 } else if (!nov.length) {
-                    tbN.innerHTML = '<tr><td colspan="7" class="empty-state"><p>No hay novedades de reclamos, incidencias, seguridad o aperturas en este mes.</p></td></tr>';
+                    tbN.innerHTML = '<tr><td colspan="7" class="empty-state"><p>No hay novedades de las etiquetas marcadas para este mes. Active más etiquetas en Tipificación y avisos.</p></td></tr>';
                 } else {
                     tbN.innerHTML = nov.map(function (n) {
                         var st = estiloBadgeCategoriaNovedad(n.catClave);
@@ -13955,7 +14205,7 @@
                     console.warn('[conserjeria-modulo] Notas:', eNt);
                 }
                 novedades = todasMes.filter(function (d) {
-                    return !!categoriaNovedadGestion(d.categoria);
+                    return etiquetaSeMuestraEnGestion(d.categoria);
                 }).map(function (d) {
                     var cor = d.correlativo;
                     var nLibro = libroPorCorr[cor];
@@ -14043,6 +14293,11 @@
         window.cargarModuloConserjeriaGestion = async function (opts) {
             opts = opts || {};
             bindUiModuloConserjeria();
+            if (!window._catalogoNovedadesGestion.loaded) {
+                await cargarCatalogoNovedadesGestion();
+            } else {
+                pintarListaEtiquetasNovedadGestion();
+            }
             var mes = (typeof obtenerMesPeriodoVista === 'function') ? obtenerMesPeriodoVista() : '';
             if (window._analisisNovedadesStore && window._analisisNovedadesStore.mes !== mes) {
                 window._analisisNovedadesStore = { mes: mes, acciones: [], resumen: '', huella: '', loaded: false };
