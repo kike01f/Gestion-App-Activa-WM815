@@ -3182,6 +3182,12 @@
             gap: 0.5rem;
             margin-bottom: 0.85rem;
         }
+        .bienvenida-panel--basico { padding: 0; background: transparent; border: none; box-shadow: none; }
+        .bienvenida-panel-kpis--basico {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            max-width: 420px;
+            margin-bottom: 0;
+        }
         .bienvenida-panel-kpi {
             padding: 0.55rem 0.7rem;
             border-radius: 8px;
@@ -6535,92 +6541,50 @@
                         </article>
                     </div>
                 </section>
-                <!-- 3b. Correo de bienvenida por unidad -->
+                <!-- Correo de bienvenida: solo enviados y pendientes en el panel -->
                 <section class="dashboard2-block" id="dashboardBienvenidaBlock" aria-label="Correo de bienvenida">
                     <h2 class="dashboard2-block-title">Correo de bienvenida</h2>
-                    <div class="bienvenida-panel">
-                        <div class="bienvenida-panel-head">
-                            <p class="bienvenida-panel-lead">Estado por unidad del correo de bienvenida a propietarios, arrendatarios y familiares. Pulse un número para abrir la unidad en Ocupación.</p>
-                            <div class="bienvenida-panel-meta">
-                                <span class="bienvenida-meta-chip ok" id="dashboardBienvenidaCobertura">0% con envío confirmado</span>
-                                <span class="bienvenida-meta-chip alerta" id="dashboardBienvenidaAtencion">0 unidades requieren acción</span>
-                                <span class="bienvenida-meta-chip" id="dashboardBienvenidaUltimo">Último envío: —</span>
-                            </div>
-                        </div>
-                        <div class="bienvenida-cobertura" aria-hidden="true">
-                            <div class="bienvenida-cobertura-bar">
-                                <span class="ok" id="dashboardBienvenidaBarOk"></span>
-                                <span class="cola" id="dashboardBienvenidaBarCola"></span>
-                                <span class="no" id="dashboardBienvenidaBarNo"></span>
-                                <span class="na" id="dashboardBienvenidaBarNa"></span>
-                            </div>
-                        </div>
-                        <div class="bienvenida-panel-kpis">
+                    <div class="bienvenida-panel bienvenida-panel--basico">
+                        <div class="bienvenida-panel-kpis bienvenida-panel-kpis--basico">
                             <div class="bienvenida-panel-kpi ok">
-                                <div class="lbl">Envío confirmado</div>
+                                <div class="lbl">Enviados</div>
                                 <div class="val" id="dashboardBienvenidaEnviadasCount">0</div>
-                                <div class="hint" id="dashboardBienvenidaEnviadasHint">Correo escrito en el servicio</div>
-                            </div>
-                            <div class="bienvenida-panel-kpi cola">
-                                <div class="lbl">En cola</div>
-                                <div class="val" id="dashboardBienvenidaEnColaCount">0</div>
-                                <div class="hint" id="dashboardBienvenidaEnColaHint">Programado, aún no enviado</div>
+                                <div class="hint">Correo enviado</div>
                             </div>
                             <div class="bienvenida-panel-kpi no">
-                                <div class="lbl">Pendiente de envío</div>
+                                <div class="lbl">Pendientes</div>
                                 <div class="val" id="dashboardBienvenidaPendientesCount">0</div>
-                                <div class="hint" id="dashboardBienvenidaPendientesHint">Tiene correo y falta enviar</div>
-                            </div>
-                            <div class="bienvenida-panel-kpi na">
-                                <div class="lbl">Sin correo registrado</div>
-                                <div class="val" id="dashboardBienvenidaSinCorreoCount">0</div>
-                                <div class="hint" id="dashboardBienvenidaSinCorreoHint">No se puede enviar aún</div>
+                                <div class="hint">Falta enviar</div>
                             </div>
                         </div>
-                        <div class="bienvenida-panel-toolbar">
-                            <label for="dashboardBienvenidaFiltro">Buscar unidad en este apartado</label>
-                            <input type="search" id="dashboardBienvenidaFiltro" class="bienvenida-panel-filtro" placeholder="Filtrar por número de unidad…" autocomplete="off">
-                        </div>
-                        <div class="bienvenida-sec bienvenida-sec--accion">
-                            <h3>Requieren atención</h3>
-                            <p class="desc">Primero lo que falta: pendientes, cola y unidades sin correo. «En cola» no cuenta como envío.</p>
-                            <div class="bienvenida-panel-grid">
-                                <div class="bienvenida-panel-col">
-                                    <h4>Pendiente de envío <span class="bienvenida-col-count" id="dashboardBienvenidaPendientesHead">0</span></h4>
-                                    <div class="bienvenida-chips" id="dashboardBienvenidaPendientesList"><span class="bienvenida-vacio">Cargando…</span></div>
-                                </div>
-                                <div class="bienvenida-panel-col">
-                                    <h4>En cola <span class="bienvenida-col-count" id="dashboardBienvenidaEnColaHead">0</span></h4>
-                                    <div class="bienvenida-chips" id="dashboardBienvenidaEnColaList"><span class="bienvenida-vacio">Cargando…</span></div>
-                                </div>
-                                <div class="bienvenida-panel-col" id="dashboardBienvenidaSinCorreoWrap">
-                                    <h4>Sin correo registrado <span class="bienvenida-col-count" id="dashboardBienvenidaSinCorreoHead">0</span></h4>
-                                    <div class="bienvenida-chips" id="dashboardBienvenidaSinCorreoList"><span class="bienvenida-vacio">Cargando…</span></div>
-                                </div>
+                        <div hidden>
+                            <span id="dashboardBienvenidaCobertura"></span>
+                            <span id="dashboardBienvenidaAtencion"></span>
+                            <span id="dashboardBienvenidaUltimo"></span>
+                            <span id="dashboardBienvenidaBarOk"></span>
+                            <span id="dashboardBienvenidaBarCola"></span>
+                            <span id="dashboardBienvenidaBarNo"></span>
+                            <span id="dashboardBienvenidaBarNa"></span>
+                            <span id="dashboardBienvenidaEnColaCount">0</span>
+                            <span id="dashboardBienvenidaEnviadasHint"></span>
+                            <span id="dashboardBienvenidaPendientesHint"></span>
+                            <span id="dashboardBienvenidaEnColaHint"></span>
+                            <span id="dashboardBienvenidaSinCorreoCount">0</span>
+                            <span id="dashboardBienvenidaSinCorreoHint"></span>
+                            <input type="search" id="dashboardBienvenidaFiltro" tabindex="-1" aria-hidden="true">
+                            <span id="dashboardBienvenidaPendientesHead">0</span>
+                            <div id="dashboardBienvenidaPendientesList"></div>
+                            <span id="dashboardBienvenidaEnColaHead">0</span>
+                            <div id="dashboardBienvenidaEnColaList"></div>
+                            <div id="dashboardBienvenidaSinCorreoWrap">
+                                <span id="dashboardBienvenidaSinCorreoHead">0</span>
+                                <div id="dashboardBienvenidaSinCorreoList"></div>
                             </div>
-                        </div>
-                        <div class="bienvenida-sec bienvenida-sec--ok">
-                            <h3>Envío confirmado</h3>
-                            <p class="desc">Solo unidades cuyo correo quedó escrito en el servicio, con fecha y hora de Santiago.</p>
-                            <div class="bienvenida-panel-col">
-                                <h4>Unidades enviadas <span class="bienvenida-col-count" id="dashboardBienvenidaEnviadasHead">0</span></h4>
-                                <div class="bienvenida-chips" id="dashboardBienvenidaEnviadasList"><span class="bienvenida-vacio">Cargando…</span></div>
+                            <span id="dashboardBienvenidaEnviadasHead">0</span>
+                            <div id="dashboardBienvenidaEnviadasList"></div>
+                            <div id="dashboardBienvenidaRegistroWrap">
+                                <div id="dashboardBienvenidaRegistro"></div>
                             </div>
-                        </div>
-                        <div class="bienvenida-sec" id="dashboardBienvenidaRegistroWrap">
-                            <h3>Registro de envíos</h3>
-                            <p class="desc">Historial por unidad. La más reciente aparece primero.</p>
-                            <div class="bienvenida-registro" id="dashboardBienvenidaRegistro"><span class="bienvenida-vacio">Cargando…</span></div>
-                        </div>
-                        <div class="bienvenida-sec">
-                            <h3>Reglas de envío</h3>
-                            <ul class="bienvenida-reglas">
-                                <li>«Enviada» solo si el correo se escribió en el servicio de correo.</li>
-                                <li>«En cola» está programada; todavía no es un envío.</li>
-                                <li>Destinatarios: propietarios, arrendatarios y familiares.</li>
-                                <li>Copia (CC) a conserjería: conserjeria.wm815@gmail.com.</li>
-                                <li>Las visitas frecuentes o autorizadas no reciben este correo.</li>
-                            </ul>
                         </div>
                     </div>
                 </section>
