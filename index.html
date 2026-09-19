@@ -939,6 +939,50 @@
         .multas-alerta strong { font-size: 0.88rem; }
         .multas-alerta p { margin: 0.15rem 0 0; font-size: 0.8rem; color: var(--gray-700); }
         .multas-alerta .btn { padding: 0.35rem 0.75rem; font-size: 0.78rem; }
+        .reclamos-alerta {
+            display: none;
+            margin: 0 0 1rem;
+            padding: 0.75rem 1rem;
+            border-radius: 12px;
+            border: 1px solid rgba(225, 29, 72, 0.5);
+            background: rgba(244, 63, 94, 0.14);
+            color: var(--gray-900);
+        }
+        .reclamos-alerta.is-on { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.55rem 1rem; }
+        .reclamos-alerta strong { font-size: 0.88rem; }
+        .reclamos-alerta p { margin: 0.15rem 0 0; font-size: 0.8rem; color: var(--gray-700); }
+        .reclamos-alerta .btn { padding: 0.35rem 0.75rem; font-size: 0.78rem; }
+        .reclamos-estado {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.12rem 0.5rem;
+            border-radius: 999px;
+            font-size: 0.68rem;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        .reclamos-estado.es-pendiente { background: #ffedd5; color: #9a3412; }
+        .reclamos-estado.es-en_revision { background: #dbeafe; color: #1e40af; }
+        .reclamos-estado.es-en_gestion { background: #ede9fe; color: #5b21b6; }
+        .reclamos-estado.es-resuelto { background: #dcfce7; color: #166534; }
+        .reclamos-estado.es-no_procede { background: #e5e7eb; color: #374151; }
+        .reclamos-filtro-estados { display: flex; flex-wrap: wrap; gap: 0.3rem; margin: 0 0 0.65rem; }
+        .reclamos-filtro-estados button {
+            border: 1px solid var(--border-color);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            border-radius: 999px;
+            padding: 0.2rem 0.55rem;
+            font-size: 0.7rem;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        .reclamos-filtro-estados button.is-on {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: #111827;
+        }
         .dashboard-resumen-aviso {
             display: none;
             margin: 0 0 1rem;
@@ -1036,25 +1080,31 @@
         }
         [data-theme="dark"] #multas .btn-primary,
         [data-theme="dark"] .multas-alerta .btn-primary,
-        [data-theme="dark"] #modalDetalleMulta .btn-primary {
+        [data-theme="dark"] .reclamos-alerta .btn-primary,
+        [data-theme="dark"] #modalDetalleMulta .btn-primary,
+        [data-theme="dark"] #modalDetalleReclamo .btn-primary {
             background: #86c933;
             color: #111827;
             font-weight: 700;
         }
         [data-theme="dark"] #multas .btn-primary:hover,
         [data-theme="dark"] .multas-alerta .btn-primary:hover,
-        [data-theme="dark"] #modalDetalleMulta .btn-primary:hover {
+        [data-theme="dark"] .reclamos-alerta .btn-primary:hover,
+        [data-theme="dark"] #modalDetalleMulta .btn-primary:hover,
+        [data-theme="dark"] #modalDetalleReclamo .btn-primary:hover {
             background: #a3e635;
             color: #111827;
         }
         [data-theme="dark"] #multas .btn-secondary,
-        [data-theme="dark"] #modalDetalleMulta .btn-secondary {
+        [data-theme="dark"] #modalDetalleMulta .btn-secondary,
+        [data-theme="dark"] #modalDetalleReclamo .btn-secondary {
             background: #4b5563;
             color: #f9fafb;
             border: 1px solid #d1d5db;
         }
         [data-theme="dark"] #multas .btn-secondary:hover,
-        [data-theme="dark"] #modalDetalleMulta .btn-secondary:hover {
+        [data-theme="dark"] #modalDetalleMulta .btn-secondary:hover,
+        [data-theme="dark"] #modalDetalleReclamo .btn-secondary:hover {
             background: #6b7280;
             color: #ffffff;
         }
@@ -1083,6 +1133,9 @@
         #modalDetalleMulta .multa-detalle-sec { margin: 0 0 0.85rem; }
         #modalDetalleMulta .multa-detalle-sec h4 { margin: 0 0 0.35rem; font-size: 0.82rem; }
         #modalDetalleMulta .multa-detalle-sec p { margin: 0 0 0.25rem; font-size: 0.8rem; line-height: 1.45; }
+        #modalDetalleReclamo .reclamo-detalle-sec { margin: 0 0 0.85rem; }
+        #modalDetalleReclamo .reclamo-detalle-sec h4 { margin: 0 0 0.35rem; font-size: 0.82rem; }
+        #modalDetalleReclamo .reclamo-detalle-sec p { margin: 0 0 0.25rem; font-size: 0.8rem; line-height: 1.45; }
 
         .btn {
             padding: 0.625rem 1.25rem;
@@ -2741,6 +2794,46 @@
         .dashboard2-workspace-side > .dashboard2-block {
             padding: 0.75rem 0.8rem 0.85rem;
         }
+        #dashboardReclamosPendientesSec .dashboard2-block-title { margin-bottom: 0.35rem; }
+        #dashboardReclamosPendientesSec .reclamos-dash-hint {
+            margin: 0 0 0.55rem;
+            font-size: 0.74rem;
+            color: #cbd5e1;
+        }
+        #dashboardReclamosPendientesSec .reclamos-filtro-estados button {
+            background: #334155;
+            color: #f8fafc;
+            border-color: #64748b;
+        }
+        #dashboardReclamosPendientesSec .reclamos-filtro-estados button.is-on {
+            background: #86c933;
+            border-color: #a3e635;
+            color: #111827;
+        }
+        #dashboardReclamosPendientesSec table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.76rem;
+            color: #e2e8f0;
+        }
+        #dashboardReclamosPendientesSec th,
+        #dashboardReclamosPendientesSec td {
+            padding: 0.4rem 0.45rem;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            text-align: left;
+            vertical-align: top;
+        }
+        #dashboardReclamosPendientesSec th {
+            font-size: 0.68rem;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            color: #94a3b8;
+        }
+        #dashboardReclamosPendientesSec .btn {
+            margin: 0;
+            padding: 0.28rem 0.6rem;
+            font-size: 0.72rem;
+        }
 
         .dashboard2-atencion {
             display: flex;
@@ -2749,14 +2842,17 @@
             margin-bottom: 0;
         }
         #dashboard .dashboard-resumen-aviso,
-        #dashboard .multas-alerta {
+        #dashboard .multas-alerta,
+        #dashboard .reclamos-alerta {
             color: #f8fafc;
         }
         #dashboard .dashboard-resumen-aviso h3,
-        #dashboard .multas-alerta strong { color: #fff; }
+        #dashboard .multas-alerta strong,
+        #dashboard .reclamos-alerta strong { color: #fff; }
         #dashboard .dashboard-resumen-aviso .sub,
         #dashboard .dashboard-resumen-aviso .chip,
-        #dashboard .multas-alerta p {
+        #dashboard .multas-alerta p,
+        #dashboard .reclamos-alerta p {
             color: #e2e8f0;
         }
         #dashboard .dashboard-resumen-aviso .lead,
@@ -3541,145 +3637,148 @@
         }
         .dashboard2-btn-primary:hover { opacity: 0.9; }
 
-        /* Herramientas: mismo patrón que tarjetas de módulos */
+        /* Herramientas de la App (panel original) */
         #dashboard .dashboard2-block--actions {
             margin-bottom: 0;
-        }
-        #dashboard #dashboardHerramientasWrap {
             background: transparent;
             border: none;
+            padding: 0;
             border-radius: 0;
-            overflow: visible;
+        }
+        #dashboard #dashboardHerramientasWrap {
+            background: linear-gradient(180deg, #1e293b 0%, #334155 100%);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
         }
         .dashboard2-herramientas-header {
             display: flex;
             align-items: center;
             justify-content: space-between;
+            flex-wrap: wrap;
             gap: 0.5rem;
-            padding: 0;
-            margin: 0 0 0.55rem 0;
+            padding: 0.6rem 0.85rem;
             cursor: pointer;
-            background: transparent;
+            transition: background 0.2s ease;
         }
-        .dashboard2-herramientas-header:hover { background: transparent; }
-        .dashboard2-herramientas-header .dashboard2-block-title {
+        .dashboard2-herramientas-header:hover {
+            background: rgba(255,255,255,0.06);
+        }
+        .dashboard2-herramientas-header-left {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .dashboard2-herramientas-header-icon {
+            width: 2.25rem;
+            height: 2.25rem;
+            background: rgba(117, 187, 33, 0.25);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+        .dashboard2-herramientas-header-text h2 {
+            margin: 0 0 0.15rem 0;
+            font-size: 1rem;
+            font-weight: 700;
+            color: #fff;
+        }
+        .dashboard2-herramientas-header-text p {
             margin: 0;
-            flex: 1;
-            border-bottom: none;
-            padding-bottom: 0;
+            font-size: 0.75rem;
+            color: rgba(255,255,255,0.65);
         }
         .dashboard2-herramientas-chevron {
-            font-size: 0.7rem;
-            color: #94a3b8;
-            transition: transform 0.25s ease;
+            font-size: 1rem;
+            color: rgba(255,255,255,0.5);
+            transition: transform 0.3s ease;
         }
         #dashboard #herramientasAppContent {
-            padding: 0;
-            border-top: none;
+            padding: 0.75rem;
+            border-top: 1px solid rgba(255,255,255,0.08);
         }
-        .dashboard2-tools-grid {
-            align-items: stretch;
-        }
-        #dashboard .dashboard2-htool-card {
-            background: rgba(15, 23, 42, 0.72);
-            border: 1px solid rgba(255,255,255,0.12);
-            border-radius: 12px;
-            padding: 0.6rem 0.65rem 0.7rem;
-            display: flex;
-            flex-direction: column;
-            gap: 0.15rem;
-        }
-        #dashboard .dashboard2-htool-card:hover {
-            transform: none;
-            border-color: rgba(117, 187, 33, 0.4);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        }
-        #dashboard .dashboard2-htool-card--wide {
-            grid-column: 1 / -1;
-            padding: 0.7rem 0.75rem 0.8rem;
-        }
-        #dashboard .dashboard2-htool-card .dashboard2-card-icon-wrap {
-            color: var(--primary-light);
-        }
-        .dashboard2-tool-link {
-            margin-top: 0.35rem;
-            width: 100%;
-            padding: 0.38rem 0.5rem;
-            border-radius: 8px;
-            border: 1px solid rgba(117, 187, 33, 0.35);
-            background: rgba(117, 187, 33, 0.16);
-            color: #fff;
-            font-size: 0.68rem;
-            font-weight: 700;
-            letter-spacing: 0.03em;
-            text-transform: uppercase;
-            cursor: pointer;
-        }
-        .dashboard2-tool-link--ghost {
-            background: rgba(255,255,255,0.06);
-            border-color: rgba(255,255,255,0.14);
-        }
-        .dashboard2-tool-link--danger {
-            background: rgba(239, 68, 68, 0.16);
-            border-color: rgba(239, 68, 68, 0.35);
-        }
-        .dashboard2-tool-link:disabled {
-            opacity: 0.45;
-            cursor: not-allowed;
-        }
-        .dashboard2-tool-period {
+        .dashboard2-herramientas-grid {
             display: grid;
-            grid-template-columns: minmax(160px, 220px) 1fr;
-            gap: 0.55rem 0.75rem;
-            align-items: end;
-            margin-top: 0.55rem;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 0.65rem;
         }
-        .dashboard2-tool-period--cierre {
-            margin-top: 0.7rem;
-            padding-top: 0.65rem;
-            border-top: 1px solid rgba(255,255,255,0.1);
-            grid-template-columns: 1fr;
+        .dashboard2-htool-card {
+            background: rgba(0,0,0,0.2);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 0.75rem;
+            transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
         }
-        .dashboard2-tool-label {
-            display: block;
-            margin-bottom: 0.3rem;
-            font-size: 0.64rem;
-            font-weight: 800;
-            letter-spacing: 0.06em;
-            text-transform: uppercase;
-            color: #94a3b8;
+        .dashboard2-htool-card:hover {
+            transform: translateY(-2px);
+            border-color: rgba(117, 187, 33, 0.3);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
         }
-        .dashboard2-tool-select {
-            width: 100%;
-            padding: 0.4rem 0.5rem;
+        .dashboard2-htool-card--wide { grid-column: 1 / -1; }
+        .dashboard2-htool-card .htool-icon {
+            width: 1.85rem;
+            height: 1.85rem;
             border-radius: 8px;
-            font-size: 0.8rem;
-            background: rgba(0,0,0,0.3);
-            border: 1px solid rgba(255,255,255,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            margin-bottom: 0.45rem;
+        }
+        .dashboard2-htool-card .htool-icon--purple { background: rgba(139, 92, 246, 0.25); }
+        .dashboard2-htool-card .htool-icon--green { background: rgba(34, 197, 94, 0.25); }
+        .dashboard2-htool-card .htool-icon--amber { background: rgba(245, 158, 11, 0.25); }
+        .dashboard2-htool-card .htool-title {
+            margin: 0 0 0.25rem 0;
+            font-size: 0.88rem;
+            font-weight: 700;
             color: #fff;
         }
-        .dashboard2-tool-actions {
+        .dashboard2-htool-card .htool-desc {
+            margin: 0 0 0.55rem 0;
+            font-size: 0.72rem;
+            color: rgba(255,255,255,0.72);
+            line-height: 1.4;
+        }
+        .dashboard2-htool-card .htool-toggle {
             display: flex;
-            flex-wrap: wrap;
-            gap: 0.35rem;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.6rem 0.75rem;
+            background: rgba(255,255,255,0.08);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s ease;
         }
-        .dashboard2-tool-actions .dashboard2-tool-link {
-            width: auto;
-            flex: 0 1 auto;
-        }
-        #dashboard .dashboard2-htool-card .htool-content-inner {
-            margin-top: 0.45rem;
-            padding-top: 0.45rem;
+        .dashboard2-htool-card .htool-toggle:hover { background: rgba(255,255,255,0.12); }
+        .dashboard2-htool-card .htool-toggle span:first-child { font-size: 0.8125rem; font-weight: 600; color: rgba(255,255,255,0.9); }
+        .dashboard2-htool-card .htool-content-inner {
+            margin-top: 1rem;
+            padding-top: 1rem;
             border-top: 1px solid rgba(255,255,255,0.1);
         }
-        #dashboard .dashboard2-htool-card .btn {
+        .dashboard2-htool-card .btn {
             width: 100%;
-            padding: 0.4rem 0.6rem;
+            padding: 0.6rem 1rem;
             border-radius: 8px;
-            font-size: 0.72rem;
-            font-weight: 700;
+            font-size: 0.875rem;
+            font-weight: 500;
             border: none;
+            transition: opacity 0.2s ease, transform 0.2s ease;
         }
+        .dashboard2-htool-card .btn:hover { opacity: 0.9; transform: translateY(-1px); }
+        .dashboard2-htool-card .btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+        .dashboard2-htool-card div[style*="display: flex"] > .btn {
+            width: auto;
+            flex: 1 1 140px;
+        }
+        .dashboard2-htool-card label { color: rgba(255,255,255,0.85) !important; }
+        .dashboard2-htool-card select,
+        .dashboard2-htool-card input { background: rgba(0,0,0,0.3) !important; border-color: rgba(255,255,255,0.2) !important; color: #fff !important; }
+        .dashboard2-htool-card small { color: rgba(255,255,255,0.55) !important; }
         #dashboard #infoMesConsulta { background: rgba(0,0,0,0.2) !important; border-color: rgba(255,255,255,0.1) !important; color: rgba(255,255,255,0.85) !important; }
 
         #dashboard #dashboardMantenciones > div > div:first-child {
@@ -3742,7 +3841,6 @@
                 grid-template-columns: 1fr;
             }
             .dashboard2-kpi { min-height: 0; }
-            .dashboard2-tool-period { grid-template-columns: 1fr; }
             .dashboard2-mail-grid { max-width: none; }
         }
 
@@ -6627,6 +6725,7 @@
                 </div>
                 <div id="alertasDashboard" style="display: none;"><!-- Gestionado por Arturito --></div>
                 <div id="dashboardMultasPendientesWrap" class="multas-alerta" role="status"></div>
+                <div id="dashboardReclamosPendientesWrap" class="reclamos-alerta" role="status"></div>
                 <div id="dashboardResumenNovedadesWrap" class="dashboard-resumen-aviso" role="status" aria-live="polite"></div>
                 </div>
 
@@ -6675,6 +6774,34 @@
                     <h2 class="dashboard2-block-title">Actividad por área</h2>
                     <div class="dashboard2-stats-wrap" id="dashboard2Stats">
                         <div class="dashboard2-stats-stack" id="dashboard2StatsGrid"></div>
+                    </div>
+                </section>
+                <section class="dashboard2-block" id="dashboardReclamosPendientesSec" hidden aria-label="Reclamos de Conserjería">
+                    <h2 class="dashboard2-block-title">Reclamos de Conserjería</h2>
+                    <p class="reclamos-dash-hint">Los estados se actualizan en la bitácora de Conserjería WM.</p>
+                    <div class="reclamos-filtro-estados" id="reclamosFiltroEstados">
+                        <button type="button" data-reclamo-filtro="tratamiento" class="is-on">Por tratar</button>
+                        <button type="button" data-reclamo-filtro="">Todos</button>
+                        <button type="button" data-reclamo-filtro="pendiente">Pendiente</button>
+                        <button type="button" data-reclamo-filtro="en_revision">En revisión</button>
+                        <button type="button" data-reclamo-filtro="en_gestion">En gestión</button>
+                        <button type="button" data-reclamo-filtro="resuelto">Resuelto</button>
+                        <button type="button" data-reclamo-filtro="no_procede">No procede</button>
+                    </div>
+                    <div style="overflow-x:auto;">
+                        <table id="tablaReclamosDashboard">
+                            <thead>
+                                <tr>
+                                    <th>Novedad</th>
+                                    <th>Fecha</th>
+                                    <th>Depto.</th>
+                                    <th>Resumen</th>
+                                    <th>Estado</th>
+                                    <th>Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbodyReclamosDashboard"></tbody>
+                        </table>
                     </div>
                 </section>
                 <!-- 6. Panorama del mes -->
@@ -6768,89 +6895,87 @@
                     </aside>
                 </div>
 
-                <!-- 7. Herramientas de la App -->
+                <!-- 7. Acciones - Herramientas de la App -->
                 <section class="dashboard2-block dashboard2-block--actions" aria-label="Herramientas de la App">
                     <div id="dashboardHerramientasWrap">
-                        <div class="dashboard2-herramientas-header" onclick="toggleHerramientasApp()" role="button" tabindex="0" aria-expanded="true" aria-label="Expandir o contraer Herramientas de la App">
-                            <h2 class="dashboard2-block-title">Herramientas de la App</h2>
-                            <span id="herramientasAppToggle" class="dashboard2-herramientas-chevron">▼</span>
-                        </div>
-                        <div id="herramientasAppContent" style="display: block;">
-                            <div class="dashboard2-mod-grupo">
-                                <h3 class="dashboard2-mod-grupo-title">Ajustes y respaldo</h3>
-                                <div class="dashboard2-stats-grid dashboard2-tools-grid">
-                                    <div class="dashboard2-card dashboard2-htool-card">
-                                        <div class="dashboard2-card-icon-wrap" aria-hidden="true">
-                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-                                        </div>
-                                        <div class="dashboard2-card-title">Módulos</div>
-                                        <div class="dashboard2-card-value">Menú</div>
-                                        <div class="dashboard2-card-sub">Mostrar u ocultar módulos</div>
-                                        <button type="button" class="dashboard2-tool-link" onclick="event.stopPropagation(); toggleConfigModulos();">
-                                            Ver configuración <span id="configModulosToggle">▼</span>
-                                        </button>
-                                        <div id="configModulosContent" style="display: none;" class="htool-content-inner">
-                                            <div id="listaModulosConfig" class="dashboard2-stats-grid"><!-- Se llena dinámicamente --></div>
-                                        </div>
-                                    </div>
-                                    <div class="dashboard2-card dashboard2-htool-card">
-                                        <div class="dashboard2-card-icon-wrap" aria-hidden="true">
-                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                                        </div>
-                                        <div class="dashboard2-card-title">Respaldo</div>
-                                        <div class="dashboard2-card-value">Recuperar</div>
-                                        <div class="dashboard2-card-sub">Restaurar datos de Firestore</div>
-                                        <button class="dashboard2-tool-link" id="btnRecuperarFirestore">Recuperar todo</button>
-                                        <button class="dashboard2-tool-link dashboard2-tool-link--ghost" id="btnBuscarMeses">Buscar meses</button>
-                                        <div id="mesesDisponibles" style="display: none;" class="htool-content-inner"><!-- Se llena dinámicamente --></div>
-                                    </div>
-                                    <div class="dashboard2-card dashboard2-htool-card">
-                                        <div class="dashboard2-card-icon-wrap" aria-hidden="true">
-                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
-                                        </div>
-                                        <div class="dashboard2-card-title">Cargos</div>
-                                        <div class="dashboard2-card-value">Trasladar</div>
-                                        <div class="dashboard2-card-sub">Mover entre meses</div>
-                                        <button type="button" class="dashboard2-tool-link" id="btnAbrirTrasladarCargos">Abrir traslado</button>
-                                    </div>
+                        <div class="dashboard2-herramientas-header" onclick="toggleHerramientasApp()" role="button" tabindex="0" aria-expanded="false" aria-label="Expandir o contraer Herramientas de la App">
+                            <div class="dashboard2-herramientas-header-left">
+                                <div class="dashboard2-herramientas-header-icon">🔧</div>
+                                <div class="dashboard2-herramientas-header-text">
+                                    <h2>Herramientas de la App</h2>
+                                    <p>Módulos, respaldo, cargos y cierre de mes</p>
                                 </div>
                             </div>
-                            <div class="dashboard2-mod-grupo">
-                                <h3 class="dashboard2-mod-grupo-title">Período y cierre</h3>
-                                <div class="dashboard2-card dashboard2-htool-card dashboard2-htool-card--wide">
-                                    <div class="dashboard2-card-title">Consultar meses y cierre</div>
-                                    <div class="dashboard2-card-sub">Historial, reportes, reabrir o cerrar el mes</div>
-                                    <div class="dashboard2-tool-period">
+                            <span id="herramientasAppToggle" class="dashboard2-herramientas-chevron">▼</span>
+                        </div>
+                        <div id="herramientasAppContent" style="display: none;">
+                            <div class="dashboard2-herramientas-grid">
+                                <!-- Configuración de Módulos -->
+                                <div class="dashboard2-htool-card">
+                                    <div class="htool-icon htool-icon--purple">⚙️</div>
+                                    <h4 class="htool-title">Configuración de Módulos</h4>
+                                    <p class="htool-desc">Muestre u oculte módulos del menú y de los reportes.</p>
+                                    <div class="htool-toggle" onclick="toggleConfigModulos()">
+                                        <span>Ver configuración</span>
+                                        <span id="configModulosToggle">▼</span>
+                                    </div>
+                                    <div id="configModulosContent" style="display: none;" class="htool-content-inner">
+                                        <div id="listaModulosConfig" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 0.5rem;"><!-- Se llena dinámicamente --></div>
+                                    </div>
+                                </div>
+                                <!-- Recuperar datos Firestore -->
+                                <div class="dashboard2-htool-card">
+                                    <div class="htool-icon htool-icon--green">🔧</div>
+                                    <h4 class="htool-title">Recuperar Datos</h4>
+                                    <p class="htool-desc">Restaure datos de Firestore si un mes se cerró por error.</p>
+                                    <button class="btn" id="btnRecuperarFirestore" style="background: var(--primary); color: white; margin-bottom: 0.5rem;">⬇️ Recuperar Todo de Firestore</button>
+                                    <button class="btn" id="btnBuscarMeses" style="background: rgba(255,255,255,0.2); color: #fff; border: 1px solid rgba(255,255,255,0.3);">🔍 Buscar Meses Disponibles</button>
+                                    <div id="mesesDisponibles" style="display: none; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.1);"><!-- Se llena dinámicamente --></div>
+                                </div>
+                                <!-- Trasladar cargos entre meses -->
+                                <div class="dashboard2-htool-card">
+                                    <div class="htool-icon htool-icon--amber">↔</div>
+                                    <h4 class="htool-title">Trasladar Cargos entre Meses</h4>
+                                    <p class="htool-desc">Mueva cargos entre períodos, incluidos meses archivados.</p>
+                                    <button type="button" class="btn" id="btnAbrirTrasladarCargos" style="background: #f59e0b; color: #111827; font-weight: 600; border: none;">↔ Trasladar cargos</button>
+                                </div>
+                                <!-- Consultar meses y cierre -->
+                                <div class="dashboard2-htool-card dashboard2-htool-card--wide">
+                                    <div class="htool-icon htool-icon--amber">📅</div>
+                                    <h4 class="htool-title">Consultar Meses Anteriores y Cierre de Mes</h4>
+                                    <p class="htool-desc">Consulte historial, reporte PDF, reabra o cierre el mes.</p>
+                                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0.65rem; margin-bottom: 0.65rem;">
                                         <div class="form-group" style="margin: 0;">
-                                            <label class="dashboard2-tool-label">Mes a consultar</label>
-                                            <select id="mesConsulta" class="dashboard2-tool-select"><option value="">Seleccione un mes...</option></select>
+                                            <label style="font-size: 0.8125rem; font-weight: 600; margin-bottom: 0.4rem; display: block;">Mes a consultar</label>
+                                            <select id="mesConsulta" style="width: 100%; padding: 0.6rem 0.75rem; border-radius: 8px; font-size: 0.875rem;"><option value="">Seleccione un mes...</option></select>
                                         </div>
-                                        <div class="dashboard2-tool-actions">
-                                            <button class="dashboard2-tool-link" id="btnReportesConsulta" disabled>Reportes PDF</button>
-                                            <button class="dashboard2-tool-link dashboard2-tool-link--ghost" id="btnReabrirMes" disabled>Reabrir</button>
-                                            <button class="dashboard2-tool-link dashboard2-tool-link--danger" id="btnEliminarMes" disabled onclick="eliminarMesSeleccionado()">Eliminar</button>
-                                            <button class="dashboard2-tool-link dashboard2-tool-link--ghost" id="btnVolverActual" style="display: none;">Volver al mes actual</button>
+                                        <div class="form-group" style="margin: 0;">
+                                            <label style="font-size: 0.8125rem; font-weight: 600; margin-bottom: 0.4rem; display: block;">Acciones</label>
+                                            <div style="display: flex; gap: 0.4rem; flex-wrap: wrap;">
+                                                <button class="btn btn-primary" id="btnReportesConsulta" disabled style="min-width: 120px; padding: 0.5rem 0.75rem; font-size: 0.8125rem;">📄 Reportes PDF</button>
+                                                <button class="btn btn-warning" id="btnReabrirMes" disabled style="min-width: 100px; padding: 0.5rem 0.75rem; font-size: 0.8125rem;">🔓 Reabrir</button>
+                                                <button class="btn btn-danger" id="btnEliminarMes" disabled onclick="eliminarMesSeleccionado()" style="min-width: 100px; padding: 0.5rem 0.75rem; font-size: 0.8125rem;">🗑️ Eliminar</button>
+                                            </div>
+                                            <button class="btn btn-secondary" id="btnVolverActual" style="display: none; width: 100%; margin-top: 0.5rem; padding: 0.5rem; font-size: 0.8125rem;">Volver al Mes Actual</button>
                                         </div>
                                     </div>
-                                    <div class="dashboard2-tool-period dashboard2-tool-period--cierre">
-                                        <div class="dashboard2-card-title">Cierre de mes</div>
-                                        <div class="dashboard2-card-sub">Previsualice o descargue el reporte antes de cerrar</div>
-                                        <div class="dashboard2-tool-actions">
-                                            <button class="dashboard2-tool-link" id="btnPrevisualizarReporteTop">Previsualizar</button>
-                                            <button class="dashboard2-tool-link" id="btnEnviarCorreoCierreMes">Enviar por correo</button>
-                                            <button class="dashboard2-tool-link dashboard2-tool-link--ghost" id="btnDescargarExcel">Excel</button>
-                                            <button class="dashboard2-tool-link" id="btnCerrarMes">Cerrar mes</button>
+                                    <div style="padding: 0.7rem 0.75rem; background: rgba(117, 187, 33, 0.12); border-radius: 10px; border: 1px solid rgba(117, 187, 33, 0.25); margin-bottom: 0.65rem;">
+                                        <h3 style="font-size: 0.9rem; font-weight: 600; color: #fff; margin: 0 0 0.5rem 0;">📊 Cierre de Mes y Reporte</h3>
+                                        <p style="font-size: 0.75rem; color: rgba(255,255,255,0.75); margin: 0 0 0.75rem 0;">Previsualice o descargue el reporte antes de cerrar el mes.</p>
+                                        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                                            <button class="btn btn-info" id="btnPrevisualizarReporteTop" style="min-width: 140px; padding: 0.5rem 0.75rem; font-size: 0.8125rem; background: #0ea5e9; color: white; border: none;">👁️ Previsualizar</button>
+                                            <button class="btn btn-success" id="btnEnviarCorreoCierreMes" style="min-width: 160px; padding: 0.5rem 0.75rem; font-size: 0.8125rem; background: #10b981; color: white; border: none;">📧 Enviar por Correo</button>
+                                            <button class="btn btn-secondary" id="btnDescargarExcel" style="min-width: 120px; padding: 0.5rem 0.75rem; font-size: 0.8125rem; background: #10b981; color: white; border: none;">📊 Excel</button>
+                                            <button class="btn btn-success" id="btnCerrarMes" style="min-width: 160px; padding: 0.5rem 0.75rem; font-size: 0.8125rem; background: rgba(117, 187, 33, 0.9); color: white; border: none;">✅ Cerrar Mes</button>
                                         </div>
-                                        <p class="dashboard2-card-sub">Al cerrar, los datos se archivan hasta reabrir el mes.</p>
+                                        <small style="display: block; margin-top: 0.5rem; font-size: 0.7rem;">⚠️ Al cerrar, los datos se archivan hasta reabrir el mes.</small>
                                     </div>
-                                    <div id="infoMesConsulta" style="margin-top: 0.5rem; display: none;"><!-- Se llena dinámicamente --></div>
+                                    <div id="infoMesConsulta" style="margin-top: 0.5rem; padding: 0.75rem; border-radius: 8px; display: none;"><!-- Se llena dinámicamente --></div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </section>
-            </div>
-        </div>
 
         <!-- MÓDULO 1: MUDANZAS -->
         <div id="mudanzas" class="tab-content">
@@ -9494,6 +9619,33 @@
                 <button type="button" class="btn btn-secondary" id="btnCerrarDetalleMulta">Cerrar</button>
                 <button type="button" class="btn btn-secondary" id="btnDetalleMultaIrNovedad">Ver novedad original</button>
                 <button type="button" class="btn btn-primary" id="btnGuardarDetalleMulta">Guardar gestión</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modalDetalleReclamo" class="modal-overlay">
+        <div class="modal-confirm" style="max-width: 720px; width: 100%; max-height: 90vh; overflow: auto;">
+            <h3 style="margin: 0 0 0.35rem 0;">Gestión de reclamo</h3>
+            <p style="margin: 0 0 0.75rem 0; color: var(--gray-600); font-size: 0.82rem;">El estado y las observaciones se reflejan en la bitácora de Conserjería WM.</p>
+            <div id="reclamoDetalleCuerpo"></div>
+            <div class="form-group" style="margin: 0.75rem 0 0.5rem;">
+                <label for="reclamoDetalleEstado" style="margin-bottom: 0.25rem; font-size: 0.875rem;">Estado de gestión</label>
+                <select id="reclamoDetalleEstado" style="padding: 0.5rem; font-size: 0.875rem; width: 100%;">
+                    <option value="pendiente">Pendiente</option>
+                    <option value="en_revision">En revisión</option>
+                    <option value="en_gestion">En gestión</option>
+                    <option value="resuelto">Resuelto</option>
+                    <option value="no_procede">No procede</option>
+                </select>
+            </div>
+            <div class="form-group" style="margin-bottom: 0.75rem;">
+                <label for="reclamoDetalleObsAdmin" style="margin-bottom: 0.25rem; font-size: 0.875rem;">Observaciones de Administración</label>
+                <textarea id="reclamoDetalleObsAdmin" rows="3" style="width: 100%; padding: 0.5rem; font-size: 0.875rem; box-sizing: border-box;" placeholder="Queda visible para Conserjería"></textarea>
+            </div>
+            <div class="modal-buttons">
+                <button type="button" class="btn btn-secondary" id="btnCerrarDetalleReclamo">Cerrar</button>
+                <button type="button" class="btn btn-secondary" id="btnDetalleReclamoIrNovedad">Ver novedad original</button>
+                <button type="button" class="btn btn-primary" id="btnGuardarDetalleReclamo">Guardar gestión</button>
             </div>
         </div>
     </div>
@@ -17043,6 +17195,11 @@
                 sincronizarMultasDesdeConserjeria().then(function () {
                     if (typeof obtenerDatosMes !== 'function' || typeof pintarAlertasMultasPendientes !== 'function') return;
                     return obtenerDatosMes('multas').then(function (list) { pintarAlertasMultasPendientes(list); });
+                }).catch(function () {});
+            }
+            if (typeof sincronizarReclamosDesdeConserjeria === 'function') {
+                sincronizarReclamosDesdeConserjeria().then(function () {
+                    if (typeof reclamosEscucharColaConserjeria === 'function') reclamosEscucharColaConserjeria();
                 }).catch(function () {});
             }
         }
@@ -24816,6 +24973,476 @@ document.getElementById('chatForm').onsubmit = function (e) {
         }
         window.abrirDetalleMulta = abrirDetalleMulta;
         window.sincronizarMultasDesdeConserjeria = sincronizarMultasDesdeConserjeria;
+
+        var RECLAMO_ESTADOS_GESTION = {
+            pendiente: { label: 'Pendiente', emoji: '🟠' },
+            en_revision: { label: 'En revisión', emoji: '🔵' },
+            en_gestion: { label: 'En gestión', emoji: '🟣' },
+            resuelto: { label: 'Resuelto', emoji: '🟢' },
+            no_procede: { label: 'No procede', emoji: '⚫' }
+        };
+        window._reclamosFiltroEstado = window._reclamosFiltroEstado || 'tratamiento';
+        window._reclamoDetalleId = null;
+        window._reclamosGestion = window._reclamosGestion || [];
+        var RECLAMO_ALERTA_DIAS = 30;
+
+        function reclamoNormCat(cat) {
+            return String(cat || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '');
+        }
+        function reclamoEsCategoriaNovedad(cat) {
+            var s = reclamoNormCat(cat);
+            return s === 'reclamos' || s === 'reclamo' || s.indexOf('reclamo') === 0;
+        }
+        function reclamoEstadoRegistro(r) {
+            if (!r) return 'pendiente';
+            if (r.estadoGestion && RECLAMO_ESTADOS_GESTION[r.estadoGestion]) return r.estadoGestion;
+            return 'pendiente';
+        }
+        function reclamoRequiereTratamiento(r) {
+            var e = reclamoEstadoRegistro(r);
+            return e === 'pendiente' || e === 'en_revision' || e === 'en_gestion';
+        }
+        function reclamoYmd(fecha) {
+            var s = String(fecha || '').trim();
+            var m1 = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+            if (m1) return m1[3] + '-' + String(m1[2]).padStart(2, '0') + '-' + String(m1[1]).padStart(2, '0');
+            var m2 = s.match(/^(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})/);
+            if (m2) return m2[1] + '-' + String(m2[2]).padStart(2, '0') + '-' + String(m2[3]).padStart(2, '0');
+            return String(fecha || '').slice(0, 10);
+        }
+        function reclamoHoyYmdChile() {
+            try {
+                return new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Santiago', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
+            } catch (eH) {
+                return new Date().toISOString().slice(0, 10);
+            }
+        }
+        function reclamoEsReciente(r, dias) {
+            dias = dias || RECLAMO_ALERTA_DIAS;
+            var ymd = reclamoYmd(r && (r.fecha || r.publishedAt || r.updatedAt));
+            if (!ymd || !/^\d{4}-\d{2}-\d{2}/.test(ymd)) return true;
+            var tHoy = Date.parse(reclamoHoyYmdChile() + 'T12:00:00');
+            var tDoc = Date.parse(ymd.slice(0, 10) + 'T12:00:00');
+            if (!isFinite(tHoy) || !isFinite(tDoc)) return true;
+            return (tHoy - tDoc) <= dias * 86400000;
+        }
+        function reclamoHtmlEstado(r) {
+            var e = reclamoEstadoRegistro(r);
+            var meta = RECLAMO_ESTADOS_GESTION[e] || RECLAMO_ESTADOS_GESTION.pendiente;
+            return '<span class="reclamos-estado es-' + e + '">' + meta.emoji + ' ' + meta.label + '</span>';
+        }
+        function reclamoOperadorActual() {
+            try {
+                if (typeof auth !== 'undefined' && auth && auth.currentUser) {
+                    return auth.currentUser.email || auth.currentUser.displayName || 'Administración';
+                }
+            } catch (eOp) {}
+            return 'Administración';
+        }
+        function reclamoEscHtml(v) {
+            return String(v == null ? '' : v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
+        }
+        function reclamoInferirDepto(texto) {
+            if (typeof multaInferirDeptoTexto === 'function') return multaInferirDeptoTexto(texto);
+            var s = String(texto || '');
+            var m = s.match(/(?:dpto\.?|depto\.?|departamento|unidad|#)\s*(\d{2,4})\b/i);
+            if (m) return m[1];
+            var m2 = s.match(/\b(\d{3,4})\b/);
+            return m2 ? m2[1] : '';
+        }
+        function reclamoMotivoDesdeTexto(texto) {
+            var s = String(texto || '').replace(/\s+/g, ' ').trim();
+            if (!s) return 'Reclamo desde Conserjería';
+            var cut = s.split(/[.!?]/)[0] || s;
+            return cut.length > 90 ? cut.slice(0, 87) + '…' : cut;
+        }
+        function reclamoIdDesdeNovedad(cor) {
+            return 'rec-' + String(cor);
+        }
+        function reclamoHistorialPush(r, accion, extra) {
+            if (!r) return;
+            if (!Array.isArray(r.historialEstados)) r.historialEstados = [];
+            r.historialEstados.unshift(Object.assign({
+                at: new Date().toISOString(),
+                por: reclamoOperadorActual(),
+                accion: accion || 'cambio'
+            }, extra || {}));
+            if (r.historialEstados.length > 30) r.historialEstados = r.historialEstados.slice(0, 30);
+        }
+        function reclamoHtmlHistorial(r) {
+            var hist = (r && r.historialEstados) || [];
+            if (!hist.length) return '<p style="color:var(--gray-500);font-size:0.78rem;">Sin movimientos.</p>';
+            return '<ul style="margin:0;padding-left:1.1rem;font-size:0.78rem;line-height:1.45;">' + hist.slice(0, 8).map(function (h) {
+                var when = '';
+                try { when = h.at ? new Date(h.at).toLocaleString('es-CL') : ''; } catch (eH) { when = h.at || ''; }
+                var est = h.estado && RECLAMO_ESTADOS_GESTION[h.estado] ? RECLAMO_ESTADOS_GESTION[h.estado].label : '';
+                return '<li>' + reclamoEscHtml(when) + (h.por ? ' · ' + reclamoEscHtml(h.por) : '') + (est ? ' · ' + reclamoEscHtml(est) : '') + (h.obs ? ' — ' + reclamoEscHtml(h.obs) : '') + '</li>';
+            }).join('') + '</ul>';
+        }
+        function reclamoLsKey() {
+            return typeof lsKey === 'function' ? lsKey('reclamos_gestion') : 'reclamos_gestion';
+        }
+        function reclamoPersistirLocal(lista) {
+            window._reclamosGestion = Array.isArray(lista) ? lista : [];
+            try { localStorage.setItem(reclamoLsKey(), JSON.stringify(window._reclamosGestion)); } catch (eLs) {}
+        }
+        function reclamoLeerLocal() {
+            try {
+                var raw = localStorage.getItem(reclamoLsKey());
+                var arr = raw ? JSON.parse(raw) : [];
+                if (Array.isArray(arr)) window._reclamosGestion = arr;
+            } catch (eLs) {}
+            return window._reclamosGestion || [];
+        }
+        async function reclamoPersistirEnCola(r) {
+            if (!r || r.correlativo == null) return;
+            try {
+                var sdb = typeof obtenerDbConserjeriaOperativa === 'function' ? await obtenerDbConserjeriaOperativa() : null;
+                if (!sdb) return;
+                await sdb.collection('reclamos_desde_novedad').doc(String(r.correlativo)).set({
+                    correlativo: Number(r.correlativo),
+                    fecha: r.fecha || '',
+                    hora: r.hora || '',
+                    conserje: r.conserje || '',
+                    texto: r.texto || '',
+                    categoria: r.categoria || 'Reclamos',
+                    notaInterna: r.notaInterna || '',
+                    depto: r.depto || '',
+                    activa: r.activa !== false,
+                    huella: r.huella || '',
+                    estadoGestion: reclamoEstadoRegistro(r),
+                    observacionAdmin: r.observacionAdmin || '',
+                    revisadoAt: r.revisadoAt || '',
+                    revisadoPor: r.revisadoPor || '',
+                    historialEstados: Array.isArray(r.historialEstados) ? r.historialEstados.slice(0, 20) : [],
+                    novedadLibro: r.novedadLibro != null ? r.novedadLibro : null,
+                    updatedAt: new Date().toISOString()
+                }, { merge: true });
+            } catch (eFs) {
+                console.warn('[reclamos] persistir cola:', eFs);
+            }
+        }
+        function reclamoPayloadDesdeNovedad(n, libroNum) {
+            var cor = Number(n.correlativo);
+            var texto = n.texto || '';
+            var depto = String(n.depto || n.departamento || reclamoInferirDepto(texto) || '').trim();
+            var num = libroNum != null ? libroNum : (n.numeroLibro != null ? n.numeroLibro : cor);
+            return {
+                id: reclamoIdDesdeNovedad(cor),
+                origen: 'conserjeria',
+                correlativo: cor,
+                novedadCorrelativo: cor,
+                novedadLibro: num,
+                fecha: n.fecha || '',
+                hora: n.hora || '',
+                conserje: n.conserje || '',
+                texto: texto,
+                categoria: n.categoria || 'Reclamos',
+                notaInterna: n.notaInterna || '',
+                depto: depto || '—',
+                motivo: reclamoMotivoDesdeTexto(texto),
+                huella: [cor, n.fecha, n.hora, n.categoria, n.texto, n.notaInterna].join('|'),
+                activa: true,
+                estadoGestion: n.estadoGestion && RECLAMO_ESTADOS_GESTION[n.estadoGestion] ? n.estadoGestion : 'pendiente',
+                observacionAdmin: n.observacionAdmin || '',
+                revisadoAt: n.revisadoAt || '',
+                revisadoPor: n.revisadoPor || '',
+                historialEstados: Array.isArray(n.historialEstados) ? n.historialEstados.slice() : []
+            };
+        }
+        function reclamoBuscarEnLista(lista, cor) {
+            var id = reclamoIdDesdeNovedad(cor);
+            return (lista || []).find(function (r) {
+                return r && (r.id === id || Number(r.correlativo) === Number(cor) || Number(r.novedadCorrelativo) === Number(cor));
+            }) || null;
+        }
+        function reclamoFuenteNovedadesParaSync() {
+            var cache = window._moduloConserjeriaCache || {};
+            var raw = (cache.novedadesAll && cache.novedadesAll.length) ? cache.novedadesAll : (cache.novedades || []);
+            return (raw || []).filter(function (n) {
+                if (!n || n.turnoSep || n.tipo === 'resumen_diario' || n.minimizada) return false;
+                return reclamoEsCategoriaNovedad(n.categoria);
+            });
+        }
+        async function reclamoLeerColaConserjeria() {
+            var out = [];
+            try {
+                var sdb = typeof obtenerDbConserjeriaOperativa === 'function' ? await obtenerDbConserjeriaOperativa() : null;
+                if (!sdb) return out;
+                var snap = await sdb.collection('reclamos_desde_novedad').get();
+                snap.forEach(function (doc) {
+                    var d = doc.data() || {};
+                    d.correlativo = d.correlativo != null ? d.correlativo : Number(doc.id);
+                    out.push(d);
+                });
+            } catch (eCol) {
+                console.warn('[reclamos] cola Conserjería:', eCol);
+            }
+            return out;
+        }
+        async function sincronizarReclamosDesdeConserjeria() {
+            if (window._reclamosSyncLock) return window._reclamosSyncLock;
+            var job = (async function () {
+                try {
+                    if (typeof multaAsegurarNovedadesConserjeria === 'function') {
+                        await multaAsegurarNovedadesConserjeria();
+                    }
+                    var cola = await reclamoLeerColaConserjeria();
+                    var porCor = {};
+                    cola.forEach(function (d) {
+                        if (d && d.activa !== false && isFinite(Number(d.correlativo))) porCor[Number(d.correlativo)] = d;
+                    });
+                    reclamoFuenteNovedadesParaSync().forEach(function (n) {
+                        porCor[Number(n.correlativo)] = Object.assign({}, porCor[Number(n.correlativo)] || {}, n, { activa: true });
+                    });
+                    var lista = reclamoLeerLocal();
+                    var nums = {};
+                    var rawAll = (window._moduloConserjeriaCache && window._moduloConserjeriaCache.novedadesAll) || [];
+                    if (typeof numerosLibroNovedadesGestion === 'function' && rawAll.length) {
+                        nums = numerosLibroNovedadesGestion(rawAll);
+                    }
+                    var keys = Object.keys(porCor);
+                    var cambiadas = false;
+                    keys.forEach(function (k) {
+                        var n = porCor[k];
+                        var cor = Number(n.correlativo);
+                        if (!isFinite(cor)) return;
+                        var exist = reclamoBuscarEnLista(lista, cor);
+                        var libro = nums[cor] != null ? nums[cor] : n.numeroLibro;
+                        if (!exist) {
+                            var neu = reclamoPayloadDesdeNovedad(n, libro);
+                            if (!neu.historialEstados.length) reclamoHistorialPush(neu, 'creada_desde_novedad', { estado: neu.estadoGestion });
+                            lista.unshift(neu);
+                            cambiadas = true;
+                            reclamoPersistirEnCola(neu);
+                            return;
+                        }
+                        var huella = [cor, n.fecha, n.hora, n.categoria, n.texto, n.notaInterna].join('|');
+                        if (n.estadoGestion && RECLAMO_ESTADOS_GESTION[n.estadoGestion] && n.estadoGestion !== exist.estadoGestion) {
+                            exist.estadoGestion = n.estadoGestion;
+                            exist.observacionAdmin = n.observacionAdmin != null ? n.observacionAdmin : exist.observacionAdmin;
+                            exist.revisadoAt = n.revisadoAt || exist.revisadoAt;
+                            exist.revisadoPor = n.revisadoPor || exist.revisadoPor;
+                            if (Array.isArray(n.historialEstados) && n.historialEstados.length) exist.historialEstados = n.historialEstados;
+                            cambiadas = true;
+                        }
+                        if (exist.huella === huella && exist.activa !== false) return;
+                        exist.fecha = n.fecha || exist.fecha;
+                        exist.hora = n.hora || exist.hora;
+                        exist.conserje = n.conserje || exist.conserje;
+                        exist.categoria = n.categoria || exist.categoria;
+                        exist.notaInterna = n.notaInterna != null ? n.notaInterna : exist.notaInterna;
+                        exist.novedadLibro = libro != null ? libro : exist.novedadLibro;
+                        exist.huella = huella;
+                        exist.activa = true;
+                        if (reclamoRequiereTratamiento(exist) && n.texto) {
+                            exist.texto = String(n.texto);
+                            exist.motivo = reclamoMotivoDesdeTexto(n.texto);
+                            var deptoN = reclamoInferirDepto(n.texto);
+                            if (deptoN && (!exist.depto || exist.depto === '—')) exist.depto = deptoN;
+                        }
+                        cambiadas = true;
+                    });
+                    if (cambiadas) reclamoPersistirLocal(lista);
+                    else window._reclamosGestion = lista;
+                    pintarAlertasReclamosPendientes(lista);
+                    return lista;
+                } catch (eSync) {
+                    console.warn('[reclamos] sync Conserjería:', eSync);
+                    var fallback = reclamoLeerLocal();
+                    pintarAlertasReclamosPendientes(fallback);
+                    return fallback;
+                } finally {
+                    if (window._reclamosSyncLock === job) window._reclamosSyncLock = null;
+                }
+            })();
+            window._reclamosSyncLock = job;
+            return job;
+        }
+        function pintarAlertasReclamosPendientes(reclamos) {
+            var list = Array.isArray(reclamos) ? reclamos : (window._reclamosGestion || []);
+            list = list.filter(function (r) { return r && r.activa !== false; });
+            var pend = list.filter(function (r) { return reclamoRequiereTratamiento(r) && reclamoEsReciente(r); });
+            var n = pend.length;
+            var filtro = window._reclamosFiltroEstado || 'tratamiento';
+            var html = '';
+            if (n) {
+                html = '<div><strong>RECLAMOS PENDIENTES</strong><p>📣 ' + n + ' reclamo' + (n === 1 ? '' : 's') + ' de Conserjería requieren gestión</p></div>' +
+                    '<button type="button" class="btn btn-primary" data-ir-reclamos-pend>Gestionar</button>';
+            }
+            var wrap = document.getElementById('dashboardReclamosPendientesWrap');
+            if (wrap) {
+                wrap.innerHTML = html;
+                wrap.classList.toggle('is-on', !!n);
+            }
+            var sec = document.getElementById('dashboardReclamosPendientesSec');
+            if (sec) sec.hidden = !list.length;
+            var tb = document.getElementById('tbodyReclamosDashboard');
+            if (tb) {
+                var vis = list.filter(function (r) {
+                    if (!filtro) return true;
+                    if (filtro === 'tratamiento') return reclamoRequiereTratamiento(r) && reclamoEsReciente(r);
+                    return reclamoEstadoRegistro(r) === filtro;
+                }).sort(function (a, b) {
+                    return String(b.fecha || '').localeCompare(String(a.fecha || ''));
+                });
+                if (!vis.length) {
+                    tb.innerHTML = '<tr><td colspan="6" style="color:#94a3b8;">No hay reclamos en este filtro.</td></tr>';
+                } else {
+                    tb.innerHTML = vis.map(function (r) {
+                        var libro = r.novedadLibro != null ? r.novedadLibro : r.correlativo;
+                        return '<tr>' +
+                            '<td>#' + reclamoEscHtml(libro) + '</td>' +
+                            '<td>' + reclamoEscHtml(r.fecha || '—') + (r.hora ? '<br><span style="opacity:.75">' + reclamoEscHtml(String(r.hora).slice(0, 5)) + '</span>' : '') + '</td>' +
+                            '<td>' + reclamoEscHtml(r.depto || '—') + '</td>' +
+                            '<td>' + reclamoEscHtml(r.motivo || reclamoMotivoDesdeTexto(r.texto)) + '</td>' +
+                            '<td>' + reclamoHtmlEstado(r) + '</td>' +
+                            '<td><button type="button" class="btn btn-primary" data-revisar-reclamo="' + reclamoEscHtml(r.id) + '">Gestionar</button></td>' +
+                            '</tr>';
+                    }).join('');
+                }
+            }
+            var filtros = document.getElementById('reclamosFiltroEstados');
+            if (filtros) {
+                filtros.querySelectorAll('[data-reclamo-filtro]').forEach(function (b) {
+                    b.classList.toggle('is-on', (b.getAttribute('data-reclamo-filtro') || '') === filtro);
+                });
+            }
+        }
+        function abrirDetalleReclamo(id) {
+            var lista = window._reclamosGestion || reclamoLeerLocal();
+            var r = (lista || []).find(function (x) { return x && x.id === id; });
+            if (!r) return;
+            window._reclamoDetalleId = id;
+            var modal = document.getElementById('modalDetalleReclamo');
+            var body = document.getElementById('reclamoDetalleCuerpo');
+            var sel = document.getElementById('reclamoDetalleEstado');
+            var obs = document.getElementById('reclamoDetalleObsAdmin');
+            var libro = r.novedadLibro != null ? '#' + r.novedadLibro : (r.correlativo != null ? '#' + r.correlativo : '—');
+            var texto = r.texto || '';
+            if (body) {
+                body.innerHTML =
+                    '<div class="reclamo-detalle-sec"><h4>Origen</h4>' +
+                    '<p><strong>Novedad:</strong> ' + reclamoEscHtml(libro) + (r.correlativo != null ? ' <span style="color:var(--gray-500)">(correlativo ' + reclamoEscHtml(r.correlativo) + ')</span>' : '') + '</p>' +
+                    '<p><strong>Fecha y hora:</strong> ' + reclamoEscHtml(r.fecha || '—') + (r.hora ? ' · ' + reclamoEscHtml(String(r.hora).slice(0, 5)) : '') + '</p>' +
+                    '<p><strong>Conserje:</strong> ' + reclamoEscHtml(r.conserje || '—') + '</p>' +
+                    '<p><strong>Departamento:</strong> ' + reclamoEscHtml(r.depto || '—') + '</p></div>' +
+                    '<div class="reclamo-detalle-sec"><h4>Reclamo</h4>' +
+                    '<p>' + reclamoEscHtml(texto || 'Sin descripción.').replace(/\n/g, '<br>') + '</p>' +
+                    (r.notaInterna ? '<p><em>Nota interna:</em> ' + reclamoEscHtml(r.notaInterna) + '</p>' : '') + '</div>' +
+                    '<div class="reclamo-detalle-sec"><h4>Gestión administrativa</h4>' +
+                    '<p><strong>Estado actual:</strong> ' + reclamoHtmlEstado(r) + '</p>' +
+                    '<p><strong>Última revisión:</strong> ' + reclamoEscHtml(r.revisadoAt ? (function () { try { return new Date(r.revisadoAt).toLocaleString('es-CL'); } catch (eR) { return r.revisadoAt; } })() : 'Aún no revisada') + (r.revisadoPor ? ' · ' + reclamoEscHtml(r.revisadoPor) : '') + '</p>' +
+                    '<p><strong>Historial</strong></p>' + reclamoHtmlHistorial(r) + '</div>';
+            }
+            if (sel) sel.value = reclamoEstadoRegistro(r);
+            if (obs) obs.value = r.observacionAdmin || '';
+            if (modal) modal.classList.add('active');
+        }
+        function cerrarDetalleReclamo() {
+            var modal = document.getElementById('modalDetalleReclamo');
+            if (modal) modal.classList.remove('active');
+            window._reclamoDetalleId = null;
+        }
+        async function guardarDetalleReclamo() {
+            var id = window._reclamoDetalleId;
+            if (!id) return;
+            var lista = window._reclamosGestion || reclamoLeerLocal();
+            var idx = (lista || []).findIndex(function (x) { return x && x.id === id; });
+            if (idx < 0) return;
+            var r = lista[idx];
+            var sel = document.getElementById('reclamoDetalleEstado');
+            var obs = document.getElementById('reclamoDetalleObsAdmin');
+            var nuevo = sel ? sel.value : reclamoEstadoRegistro(r);
+            var textoObs = obs ? String(obs.value || '').trim() : '';
+            var prev = reclamoEstadoRegistro(r);
+            r.estadoGestion = nuevo;
+            r.observacionAdmin = textoObs;
+            r.revisadoAt = new Date().toISOString();
+            r.revisadoPor = reclamoOperadorActual();
+            reclamoHistorialPush(r, prev === nuevo ? 'observacion' : 'cambio_estado', { estado: nuevo, estadoAnterior: prev, obs: textoObs });
+            lista[idx] = r;
+            reclamoPersistirLocal(lista);
+            await reclamoPersistirEnCola(r);
+            if (typeof window.registrarMovimiento === 'function') {
+                window.registrarMovimiento('actualizar', 'reclamos', 'Estado de reclamo ' + (r.novedadLibro != null ? '#' + r.novedadLibro : r.id) + ': ' + (RECLAMO_ESTADOS_GESTION[nuevo] || {}).label);
+            }
+            cerrarDetalleReclamo();
+            pintarAlertasReclamosPendientes(lista);
+            if (typeof mostrarToast === 'function') mostrarToast('Gestión del reclamo actualizada. El estado ya es visible en Conserjería.', 'success');
+        }
+        function irANovedadDesdeReclamo(r) {
+            if (!r) return;
+            if (typeof window.showTab === 'function') window.showTab('conserjeria');
+            var cor = Number(r.novedadCorrelativo || r.correlativo);
+            setTimeout(function () {
+                if (isFinite(cor) && typeof window.enfocarNovedadConserjeriaGestion === 'function') {
+                    window.enfocarNovedadConserjeriaGestion(cor);
+                }
+            }, 280);
+        }
+        function bindUiReclamosGestionEstados() {
+            if (window._reclamosEstadosBound) return;
+            window._reclamosEstadosBound = true;
+            document.addEventListener('click', function (ev) {
+                var t = ev.target;
+                if (!t || !t.closest) return;
+                if (t.closest('[data-ir-reclamos-pend]')) {
+                    if (typeof window.showTab === 'function') window.showTab('dashboard');
+                    window._reclamosFiltroEstado = 'tratamiento';
+                    pintarAlertasReclamosPendientes(window._reclamosGestion || []);
+                    var sec = document.getElementById('dashboardReclamosPendientesSec');
+                    if (sec) {
+                        sec.hidden = false;
+                        if (sec.scrollIntoView) setTimeout(function () { sec.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 80);
+                    }
+                    return;
+                }
+                var rev = t.closest('[data-revisar-reclamo]');
+                if (rev) {
+                    abrirDetalleReclamo(rev.getAttribute('data-revisar-reclamo'));
+                    return;
+                }
+                var fil = t.closest('[data-reclamo-filtro]');
+                if (fil) {
+                    window._reclamosFiltroEstado = fil.getAttribute('data-reclamo-filtro') || '';
+                    pintarAlertasReclamosPendientes(window._reclamosGestion || []);
+                }
+            });
+            var btnCerrar = document.getElementById('btnCerrarDetalleReclamo');
+            if (btnCerrar) btnCerrar.addEventListener('click', cerrarDetalleReclamo);
+            var btnGuardar = document.getElementById('btnGuardarDetalleReclamo');
+            if (btnGuardar) btnGuardar.addEventListener('click', function () { guardarDetalleReclamo(); });
+            var btnNov = document.getElementById('btnDetalleReclamoIrNovedad');
+            if (btnNov) btnNov.addEventListener('click', function () {
+                var id = window._reclamoDetalleId;
+                var r = (window._reclamosGestion || []).find(function (x) { return x && x.id === id; });
+                cerrarDetalleReclamo();
+                irANovedadDesdeReclamo(r);
+            });
+            var modal = document.getElementById('modalDetalleReclamo');
+            if (modal) modal.addEventListener('click', function (ev) {
+                if (ev.target === modal) cerrarDetalleReclamo();
+            });
+        }
+        async function reclamosEscucharColaConserjeria() {
+            if (window._reclamosColaUnsub) return;
+            try {
+                var sdb = typeof obtenerDbConserjeriaOperativa === 'function' ? await obtenerDbConserjeriaOperativa() : null;
+                if (!sdb || typeof sdb.collection !== 'function') return;
+                window._reclamosColaUnsub = sdb.collection('reclamos_desde_novedad').onSnapshot(function () {
+                    if (typeof sincronizarReclamosDesdeConserjeria === 'function') sincronizarReclamosDesdeConserjeria();
+                }, function (err) {
+                    console.warn('[reclamos] listener cola:', err);
+                });
+            } catch (eLis) {
+                console.warn('[reclamos] no se pudo escuchar cola:', eLis);
+            }
+        }
+        window.abrirDetalleReclamo = abrirDetalleReclamo;
+        window.sincronizarReclamosDesdeConserjeria = sincronizarReclamosDesdeConserjeria;
+        window.pintarAlertasReclamosPendientes = pintarAlertasReclamosPendientes;
+        window.bindUiReclamosGestionEstados = bindUiReclamosGestionEstados;
 
         function aplicarTipoRegistroMultaFormulario() {
             const radAnul = document.getElementById('multaTipoRegistroAnulacion');
@@ -35257,7 +35884,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
             const toggle = document.getElementById('herramientasAppToggle');
             const header = document.querySelector('.dashboard2-herramientas-header');
             if (content && toggle) {
-                const isVisible = content.style.display !== 'none' && content.style.display !== '';
+                const isVisible = content.style.display !== 'none';
                 content.style.display = isVisible ? 'none' : 'block';
                 toggle.textContent = isVisible ? '▶' : '▼';
                 toggle.style.transform = isVisible ? 'rotate(0deg)' : 'rotate(180deg)';
@@ -45576,6 +46203,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     pcshResumenGestionAsegurarHoy().catch(function () {});
                 }
                 if (typeof bindUiMultasGestionEstados === 'function') bindUiMultasGestionEstados();
+                if (typeof bindUiReclamosGestionEstados === 'function') bindUiReclamosGestionEstados();
                 if (typeof sincronizarMultasDesdeConserjeria === 'function') {
                     sincronizarMultasDesdeConserjeria().then(function () {
                         return typeof obtenerDatosMes === 'function' ? obtenerDatosMes('multas') : [];
@@ -45584,6 +46212,11 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     }).catch(function () {});
                 } else if (window.dashboardData && window.dashboardData.multas && typeof pintarAlertasMultasPendientes === 'function') {
                     pintarAlertasMultasPendientes(window.dashboardData.multas);
+                }
+                if (typeof sincronizarReclamosDesdeConserjeria === 'function') {
+                    sincronizarReclamosDesdeConserjeria().then(function () {
+                        if (typeof reclamosEscucharColaConserjeria === 'function') reclamosEscucharColaConserjeria();
+                    }).catch(function () {});
                 }
                 var d = window.dashboardData;
                 var gridEl = document.getElementById('dashboard2StatsGrid');
