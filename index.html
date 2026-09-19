@@ -14133,17 +14133,178 @@
             }
         }
 
-        async function setAvisoMejorasActivoGestion(on) {
-            window._catalogoNovedadesGestion.avisoMejorasActivo = !!on;
+        function avisoGestionDraftVacio() {
+            var mes = (typeof obtenerMesPeriodoVista === 'function') ? obtenerMesPeriodoVista() : ((typeof obtenerMesActual === 'function') ? obtenerMesActual() : '');
+            return {
+                titulo: 'Aviso de gestión · puntos de mejora del mes',
+                resumen: '',
+                puntos: [],
+                activo: false,
+                mes: mes,
+                nombreMes: (typeof obtenerNombreMes === 'function' && mes) ? obtenerNombreMes(mes) : '',
+                publicadoAt: '',
+                loaded: false
+            };
+        }
+
+        window._avisoGestionConserjeria = window._avisoGestionConserjeria || avisoGestionDraftVacio();
+
+        function marcarAvisoGestionEstadoUi(txt) {
+            var el = document.getElementById('avisoGestionEstado');
+            if (!el) return;
+            el.textContent = txt || '';
+        }
+
+        function leerAvisoGestionDesdeUi() {
+            var draft = window._avisoGestionConserjeria || avisoGestionDraftVacio();
+            var tit = document.getElementById('avisoGestionTitulo');
+            var res = document.getElementById('avisoGestionResumen');
+            var chk = document.getElementById('avisoGestionActivo');
+            var host = document.getElementById('avisoGestionPuntosLista');
+            var puntos = [];
+            if (host) {
+                Array.prototype.forEach.call(host.querySelectorAll('.aviso-punto-card'), function (card, i) {
+                    var tema = card.querySelector('.aviso-punto-tema');
+                    var det = card.querySelector('.aviso-punto-detalle');
+                    var sol = card.querySelector('.aviso-punto-solucion');
+                    var est = card.querySelector('.aviso-punto-estado');
+                    var t = tema ? String(tema.value || '').trim() : '';
+                    var d = det ? String(det.value || '').trim() : '';
+                    var s = sol ? String(sol.value || '').trim() : '';
+                    if (!t && !d && !s) return;
+                    puntos.push({
+                        id: String(card.getAttribute('data-id') || ('p' + (i + 1))),
+                        prioridad: puntos.length + 1,
+                        tema: t.slice(0, 80) || ('Punto ' + (puntos.length + 1)),
+                        mejora: d.slice(0, 500),
+                        solucion: s.slice(0, 500),
+                        estado: est ? String(est.value || 'pendiente') : 'pendiente'
+                    });
+                });
+            }
+            draft.titulo = tit ? String(tit.value || '').trim().slice(0, 120) : draft.titulo;
+            draft.resumen = res ? String(res.value || '').trim().slice(0, 700) : '';
+            draft.activo = chk ? !!chk.checked : !!draft.activo;
+            draft.puntos = puntos;
+            window._avisoGestionConserjeria = draft;
+            return draft;
+        }
+
+        function htmlPuntoAvisoGestion(p, idx) {
+            var x = p || {};
+            var id = escaparHtmlModuloConserjeria(x.id || ('p' + Date.now() + '-' + idx));
+            var est = x.estado || 'pendiente';
+            return '<div class="aviso-punto-card" data-id="' + id + '" style="border:1px solid var(--border-color);border-radius:10px;padding:0.65rem 0.7rem;background:var(--bg-primary);">' +
+                '<div style="display:flex;flex-wrap:wrap;gap:0.4rem;align-items:center;margin-bottom:0.4rem;">' +
+                '<input type="text" class="form-input aviso-punto-tema" maxlength="80" placeholder="Título del punto" value="' + escaparHtmlModuloConserjeria(x.tema || '') + '" style="flex:1;min-width:10rem;padding:0.3rem 0.45rem;font-size:0.8rem;">' +
+                '<select class="form-input aviso-punto-estado" style="padding:0.3rem 0.4rem;font-size:0.75rem;min-width:7.5rem;">' +
+                '<option value="pendiente"' + (est === 'pendiente' ? ' selected' : '') + '>Pendiente</option>' +
+                '<option value="en_curso"' + (est === 'en_curso' ? ' selected' : '') + '>En curso</option>' +
+                '<option value="hecha"' + (est === 'hecha' ? ' selected' : '') + '>Hecha</option>' +
+                '</select>' +
+                '<button type="button" class="btn btn-danger btn-sm aviso-punto-del" style="padding:0.2rem 0.45rem;font-size:0.72rem;">Quitar</button>' +
+                '</div>' +
+                '<textarea class="form-input aviso-punto-detalle" rows="2" maxlength="500" placeholder="Detalle del aviso…" style="width:100%;font-size:0.8rem;line-height:1.4;margin-bottom:0.35rem;box-sizing:border-box;resize:vertical;">' + escaparHtmlModuloConserjeria(x.mejora || '') + '</textarea>' +
+                '<textarea class="form-input aviso-punto-solucion" rows="2" maxlength="500" placeholder="Indicación u observación (opcional)" style="width:100%;font-size:0.8rem;line-height:1.4;box-sizing:border-box;resize:vertical;">' + escaparHtmlModuloConserjeria(x.solucion || '') + '</textarea>' +
+                '</div>';
+        }
+
+        function pintarEditorAvisoGestion() {
+            var draft = window._avisoGestionConserjeria || avisoGestionDraftVacio();
+            var tit = document.getElementById('avisoGestionTitulo');
+            var res = document.getElementById('avisoGestionResumen');
+            var chk = document.getElementById('avisoGestionActivo');
+            var host = document.getElementById('avisoGestionPuntosLista');
+            if (tit && document.activeElement !== tit) tit.value = draft.titulo || 'Aviso de gestión · puntos de mejora del mes';
+            if (res && document.activeElement !== res) res.value = draft.resumen || '';
+            if (chk) chk.checked = !!draft.activo;
+            if (host && !(document.activeElement && host.contains(document.activeElement))) {
+                var pts = Array.isArray(draft.puntos) ? draft.puntos : [];
+                host.innerHTML = pts.length
+                    ? pts.map(htmlPuntoAvisoGestion).join('')
+                    : '<p style="margin:0;font-size:0.78rem;color:var(--gray-500);">Sin puntos. Puede enviar solo el mensaje, o agregar puntos con título y detalle.</p>';
+            }
+            if (draft.publicadoAt) {
+                var f = '';
+                try {
+                    f = new Date(draft.publicadoAt).toLocaleString('es-CL', { dateStyle: 'short', timeStyle: 'short' });
+                } catch (eF) {}
+                marcarAvisoGestionEstadoUi((draft.activo ? 'Publicado y visible' : 'Publicado, oculto') + (f ? ' · ' + f : ''));
+            }
+        }
+
+        async function cargarAvisoGestionConserjeria() {
             try {
                 var sdb = await obtenerDbConserjeriaOperativa();
-                await sdb.collection('pcsh_settings').doc('catalogoNovedades').set({ avisoMejorasActivo: !!on }, { merge: true });
-                await sdb.collection('pcsh_settings').doc('mejorasGestion').set({ activo: !!on }, { merge: true });
-                if (on && typeof publicarMejorasAnalisisEnConserjeria === 'function') {
-                    await publicarMejorasAnalisisEnConserjeria();
+                var snap = await sdb.collection('pcsh_settings').doc('mejorasGestion').get();
+                var d = snap.exists ? (snap.data() || {}) : {};
+                var pts = Array.isArray(d.puntos) ? d.puntos : [];
+                window._avisoGestionConserjeria = {
+                    titulo: String(d.titulo || 'Aviso de gestión · puntos de mejora del mes').slice(0, 120),
+                    resumen: String(d.resumen || ''),
+                    puntos: pts,
+                    activo: d.activo !== false && !!(String(d.resumen || '').trim() || pts.length),
+                    mes: String(d.mes || ''),
+                    nombreMes: String(d.nombreMes || ''),
+                    publicadoAt: String(d.publicadoAt || ''),
+                    loaded: true
+                };
+            } catch (eC) {
+                window._avisoGestionConserjeria = window._avisoGestionConserjeria || avisoGestionDraftVacio();
+                window._avisoGestionConserjeria.loaded = true;
+            }
+            pintarEditorAvisoGestion();
+            return window._avisoGestionConserjeria;
+        }
+
+        async function publicarAvisoGestionEnConserjeria() {
+            var draft = leerAvisoGestionDesdeUi();
+            var mes = (typeof obtenerMesActual === 'function') ? obtenerMesActual() : (draft.mes || '');
+            var nombre = (typeof obtenerNombreMes === 'function' && mes) ? obtenerNombreMes(mes) : '';
+            if (!String(draft.titulo || '').trim()) draft.titulo = 'Aviso de gestión · puntos de mejora del mes';
+            if (!String(draft.resumen || '').trim() && !(draft.puntos && draft.puntos.length)) {
+                if (typeof mostrarAlerta === 'function') mostrarAlerta('Escriba un mensaje o agregue al menos un punto antes de publicar.', 'Aviso');
+                return;
+            }
+            var payload = {
+                mes: String(mes || ''),
+                nombreMes: nombre,
+                titulo: String(draft.titulo || '').trim().slice(0, 120),
+                resumen: String(draft.resumen || '').trim().slice(0, 700),
+                puntos: Array.isArray(draft.puntos) ? draft.puntos.slice(0, 12) : [],
+                activo: draft.activo !== false,
+                publicadoAt: new Date().toISOString(),
+                origen: 'gestion-wm-manual'
+            };
+            marcarAvisoGestionEstadoUi('Publicando…');
+            try {
+                var sdb = await obtenerDbConserjeriaOperativa();
+                await sdb.collection('pcsh_settings').doc('mejorasGestion').set(payload);
+                if (payload.mes) await sdb.collection('mejoras_gestion').doc(payload.mes).set(payload, { merge: true });
+                await sdb.collection('pcsh_settings').doc('catalogoNovedades').set({ avisoMejorasActivo: payload.activo !== false }, { merge: true });
+                window._avisoGestionConserjeria = Object.assign({}, draft, payload, { loaded: true });
+                pintarEditorAvisoGestion();
+                if (typeof mostrarAlerta === 'function') {
+                    mostrarAlerta(payload.activo !== false ? 'Aviso publicado en Conserjería WM.' : 'Aviso guardado y oculto en Conserjería WM.', 'Aviso');
                 }
+            } catch (ePub) {
+                console.warn('[aviso-gestion] Publicar:', ePub);
+                marcarAvisoGestionEstadoUi('No se pudo publicar');
+                if (typeof mostrarAlerta === 'function') mostrarAlerta('No se pudo enviar el aviso a Conserjería WM.', 'Error');
+            }
+        }
+
+        async function setAvisoMejorasActivoGestion(on) {
+            window._avisoGestionConserjeria = window._avisoGestionConserjeria || avisoGestionDraftVacio();
+            window._avisoGestionConserjeria.activo = !!on;
+            try {
+                var sdb = await obtenerDbConserjeriaOperativa();
+                await sdb.collection('pcsh_settings').doc('mejorasGestion').set({ activo: !!on }, { merge: true });
+                await sdb.collection('pcsh_settings').doc('catalogoNovedades').set({ avisoMejorasActivo: !!on }, { merge: true });
+                marcarAvisoGestionEstadoUi(!!on ? 'Aviso visible en Conserjería' : 'Aviso oculto en Conserjería');
             } catch (eA) {
-                console.warn('[aviso-mejoras]', eA);
+                console.warn('[aviso-gestion]', eA);
+                marcarAvisoGestionEstadoUi('No se pudo cambiar la visibilidad');
             }
         }
 
@@ -14389,7 +14550,6 @@
                 if (typeof guardarDatosMes === 'function') {
                     await guardarDatosMes('analisisNovedades', lista);
                 }
-                await publicarMejorasAnalisisEnConserjeria();
                 marcarAnalisisNovedadesGuardadoUi('Guardado');
             } catch (e) {
                 console.warn('[analisis-novedades] No se pudo guardar:', e);
@@ -14626,30 +14786,8 @@
                     '<td style="' + td + ';font-size:0.75rem;color:var(--gray-600);">' + (t.unidades.slice(0, 6).join(', ') || '—') + '</td>' +
                     '</tr>';
             }).join('');
-            var ro = !puedeEditarAnalisisNovedades();
-            var roAttr = ro ? ' readonly' : '';
-            var cards = a.acciones.map(function (ac, i) {
-                var stA = estiloBadgeCategoriaNovedad(ac.clave);
-                var id = escaparHtmlModuloConserjeria(ac.id || ('acc-' + i));
-                var est = ac.estado || 'pendiente';
-                return '<article style="border:1px solid var(--border-color);border-left:3px solid ' + (stA.accent || stA.bd) + ';border-radius:10px;padding:0.7rem 0.8rem;background:var(--bg-primary);">' +
-                    '<div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:0.35rem 0.6rem;">' +
-                    '<div style="font-size:0.72rem;font-weight:800;color:' + stA.fg + ';text-transform:uppercase;letter-spacing:0.03em;">Prioridad ' + (i + 1) + ' · ' + escaparHtmlModuloConserjeria(ac.tipo) + ' · ' + ac.n + (ac.n === 1 ? ' caso' : ' casos') + '</div>' +
-                    '<label style="font-size:0.72rem;color:var(--gray-600);display:inline-flex;align-items:center;gap:0.35rem;">Estado' +
-                    '<select class="analisis-nov-estado form-input" data-id="' + id + '"' + (ro ? ' disabled' : '') + ' style="padding:0.2rem 0.4rem;font-size:0.75rem;min-width:7.5rem;">' +
-                    '<option value="pendiente"' + (est === 'pendiente' ? ' selected' : '') + '>Pendiente</option>' +
-                    '<option value="en_curso"' + (est === 'en_curso' ? ' selected' : '') + '>En curso</option>' +
-                    '<option value="hecha"' + (est === 'hecha' ? ' selected' : '') + '>Hecha</option>' +
-                    '</select></label></div>' +
-                    '<h4 style="margin:0.35rem 0 0.45rem 0;font-size:0.92rem;">' + escaparHtmlModuloConserjeria(ac.tema) + '</h4>' +
-                    '<label style="display:block;font-size:0.72rem;font-weight:700;margin-bottom:0.2rem;">Mejora</label>' +
-                    '<textarea class="analisis-nov-mejora form-input" data-id="' + id + '" rows="3"' + roAttr + ' style="width:100%;font-size:0.8rem;line-height:1.4;margin-bottom:0.45rem;resize:vertical;">' + escaparHtmlModuloConserjeria(ac.mejora || '') + '</textarea>' +
-                    '<label style="display:block;font-size:0.72rem;font-weight:700;margin-bottom:0.2rem;">Solución sugerida</label>' +
-                    '<textarea class="analisis-nov-solucion form-input" data-id="' + id + '" rows="3"' + roAttr + ' style="width:100%;font-size:0.8rem;line-height:1.4;resize:vertical;">' + escaparHtmlModuloConserjeria(ac.solucion || '') + '</textarea>' +
-                    '</article>';
-            }).join('');
             return '<p style="margin:0 0 0.85rem 0;font-size:0.86rem;line-height:1.55;color:var(--gray-800);">' + escaparHtmlModuloConserjeria(a.resumen) + '</p>' +
-                '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(16rem,1fr));gap:0.85rem;margin-bottom:0.9rem;">' +
+                '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(16rem,1fr));gap:0.85rem;">' +
                 '<div><h4 style="margin:0 0 0.4rem 0;font-size:0.84rem;">Ranking por tipo</h4>' +
                 '<div style="overflow-x:auto;"><table data-no-filtro="1" style="width:100%;border-collapse:collapse;"><thead><tr>' +
                 '<th style="' + th + '">#</th><th style="' + th + '">Tipo</th><th style="' + th + '">Casos</th><th style="' + th + '">★</th><th style="' + th + '">Unidades</th>' +
@@ -14657,13 +14795,7 @@
                 '<div><h4 style="margin:0 0 0.4rem 0;font-size:0.84rem;">Ranking por tema</h4>' +
                 '<div style="overflow-x:auto;"><table data-no-filtro="1" style="width:100%;border-collapse:collapse;"><thead><tr>' +
                 '<th style="' + th + '">#</th><th style="' + th + '">Tema</th><th style="' + th + '">Tipo</th><th style="' + th + '">Casos</th><th style="' + th + '">Unidades</th>' +
-                '</tr></thead><tbody>' + filasTema + '</tbody></table></div></div></div>' +
-                '<div style="display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:0.4rem 0.8rem;margin:0 0 0.45rem 0;">' +
-                '<h4 style="margin:0;font-size:0.84rem;">Mejoras y soluciones sugeridas</h4>' +
-                '<span id="conserjeriaAnalisisSaveHint" style="font-size:0.72rem;color:var(--gray-500);opacity:0.75;">Se guarda solo</span>' +
-                '</div>' +
-                '<p style="margin:0 0 0.55rem 0;font-size:0.75rem;color:var(--gray-600);line-height:1.4;">Texto objetivo a partir de conteos y unidades. Se guarda solo. El aviso en Conserjería se puede apagar arriba, en Tipificación y avisos.</p>' +
-                '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(16rem,1fr));gap:0.65rem;">' + cards + '</div>';
+                '</tr></thead><tbody>' + filasTema + '</tbody></table></div></div></div>';
         }
 
         window.filtrarNovedadesConserjeriaPorTipo = function (clave) {
@@ -14677,38 +14809,13 @@
         function pintarAnalisisNovedadesConserjeria() {
             var wrap = document.getElementById('conserjeriaAnalisis');
             if (!wrap) return;
-            bindAnalisisNovedadesUi();
             var cache = window._moduloConserjeriaCache || {};
             if (cache.error && !(cache.novedades || []).length) {
                 wrap.innerHTML = '<p style="margin:0;color:var(--gray-500);font-size:0.85rem;">' + escaparHtmlModuloConserjeria(cache.error) + '</p>';
                 return;
             }
             var analisis = analizarNovedadesConserjeriaGestion(cache.novedades || [], cache.visitas || []);
-            var store = window._analisisNovedadesStore || {};
-            var mismoMes = store.loaded && store.mes === (cache.mes || '');
-            var guardadas = mismoMes ? store.acciones : [];
-            analisis.acciones = fusionarAccionesAnalisisNovedades(analisis.acciones, guardadas);
-            var huella = huellaAnalisisNovedades(cache.novedades || [], cache.visitas || []);
-            window._analisisNovedadesStore = {
-                mes: cache.mes || store.mes || '',
-                acciones: analisis.acciones,
-                resumen: analisis.resumen || '',
-                huella: huella,
-                loaded: !!mismoMes
-            };
             wrap.innerHTML = htmlRankingNovedadesConserjeria(analisis);
-            var cambioTexto = false;
-            if (mismoMes && Array.isArray(guardadas)) {
-                analisis.acciones.forEach(function (a) {
-                    var s = guardadas.filter(function (x) { return x && x.id === a.id; })[0];
-                    if (s && !s.editado && (String(s.mejora || '') !== String(a.mejora || '') || String(s.solucion || '') !== String(a.solucion || ''))) {
-                        cambioTexto = true;
-                    }
-                });
-            }
-            if (puedeEditarAnalisisNovedades() && mismoMes && (store.huella !== huella || cambioTexto)) {
-                programarGuardadoAnalisisNovedades();
-            }
         }
 
         function mesDesdeFechaNovedadGestion(fecha) {
@@ -15009,10 +15116,46 @@
             if (inp) inp.addEventListener('input', pintarTablasModuloConserjeria);
             if (sel) sel.addEventListener('change', pintarTablasModuloConserjeria);
             if (dest) dest.addEventListener('change', pintarTablasModuloConserjeria);
-            var chkAviso = document.getElementById('conserjeriaAvisoMejorasActivo');
+            var chkAviso = document.getElementById('avisoGestionActivo');
             if (chkAviso) {
                 chkAviso.addEventListener('change', function () {
+                    leerAvisoGestionDesdeUi();
                     setAvisoMejorasActivoGestion(!!chkAviso.checked);
+                });
+            }
+            var btnAddPunto = document.getElementById('btnAgregarPuntoAviso');
+            if (btnAddPunto) {
+                btnAddPunto.addEventListener('click', function () {
+                    var draft = leerAvisoGestionDesdeUi();
+                    draft.puntos = Array.isArray(draft.puntos) ? draft.puntos : [];
+                    draft.puntos.push({
+                        id: 'p' + Date.now(),
+                        tema: '',
+                        mejora: '',
+                        solucion: '',
+                        estado: 'pendiente',
+                        prioridad: draft.puntos.length + 1
+                    });
+                    window._avisoGestionConserjeria = draft;
+                    var host = document.getElementById('avisoGestionPuntosLista');
+                    if (host) host.innerHTML = draft.puntos.map(htmlPuntoAvisoGestion).join('');
+                });
+            }
+            var hostPuntos = document.getElementById('avisoGestionPuntosLista');
+            if (hostPuntos) {
+                hostPuntos.addEventListener('click', function (e) {
+                    var t = e.target;
+                    if (!t || !t.classList.contains('aviso-punto-del')) return;
+                    var card = t.closest ? t.closest('.aviso-punto-card') : null;
+                    if (card && card.parentNode) card.parentNode.removeChild(card);
+                    leerAvisoGestionDesdeUi();
+                    pintarEditorAvisoGestion();
+                });
+            }
+            var btnPub = document.getElementById('btnPublicarAvisoGestion');
+            if (btnPub) {
+                btnPub.addEventListener('click', function () {
+                    publicarAvisoGestionEnConserjeria();
                 });
             }
             var hostEt = document.getElementById('conserjeriaEtiquetasLista');
@@ -15343,6 +15486,9 @@
                 await cargarCatalogoNovedadesGestion();
             } else {
                 pintarListaEtiquetasNovedadGestion();
+            }
+            if (typeof cargarAvisoGestionConserjeria === 'function') {
+                cargarAvisoGestionConserjeria().catch(function () {});
             }
             var mes = (typeof obtenerMesPeriodoVista === 'function') ? obtenerMesPeriodoVista() : '';
             if (window._analisisNovedadesStore && window._analisisNovedadesStore.mes !== mes) {
