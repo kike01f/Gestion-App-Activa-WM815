@@ -7071,10 +7071,10 @@
                             <select id="mudanzaAutorizada" required style="padding: 0.5rem; font-size: 0.875rem;">
                                 <option value="">Seleccione...</option>
                                 <option value="si">Autorizada</option>
-                                <option value="espera">En espera (falta documentación o acreditación del arrendador)</option>
+                                <option value="pendiente">Pendiente (falta documentación para autorizar)</option>
                                 <option value="no">No autorizada</option>
                             </select>
-                            <small id="mudanzaAutorizadaHint" style="display: none; color: var(--gray-500); font-size: 0.72rem; margin-top: 0.2rem; line-height: 1.35;">Para una salida, use «En espera» si aún no llega la documentación o acreditación del arrendador. La mudanza no se considera autorizada hasta recibir esos antecedentes.</small>
+                            <small id="mudanzaAutorizadaHint" style="display: block; color: var(--gray-500); font-size: 0.72rem; margin-top: 0.2rem; line-height: 1.35;">Si falta algún documento para autorizar, use <strong>Pendiente</strong> y marque qué recibió. El comprobante al residente listará lo que aún falta.</small>
                         </div>
                         <div class="form-group" style="margin-bottom: 0.5rem;">
                             <label style="margin-bottom: 0.25rem; font-size: 0.875rem;">Monto</label>
@@ -7093,11 +7093,11 @@
                     <!-- Campos adicionales para mudanzas de salida -->
                     <div id="camposSalida" style="display: none; margin-top: 1rem; padding: 1rem; background: rgba(245, 158, 11, 0.1); border-radius: 8px; border: 1px solid rgba(245, 158, 11, 0.3); transition: background-color 0.3s ease, border-color 0.3s ease;">
                         <h4 style="margin: 0 0 0.75rem 0; font-size: 0.9375rem; font-weight: 700; color: var(--text-primary); transition: color 0.3s ease;">Información para Comprobante de Salida</h4>
-                        <p style="margin: 0 0 0.75rem 0; font-size: 0.78rem; color: var(--gray-600); line-height: 1.4;">Si falta la documentación o acreditación del arrendador, deje el estado de autorización en <strong>En espera</strong>. La mudanza no queda autorizada hasta recibir esos antecedentes.</p>
+                        <p style="margin: 0 0 0.75rem 0; font-size: 0.78rem; color: var(--gray-600); line-height: 1.4;">Si falta documentación para autorizar, deje el estado en <strong>Pendiente</strong> y complete el checklist. El comprobante al residente indicará qué documento falta.</p>
                         <div class="form-row" style="gap: 0.5rem; margin-bottom: 0.5rem;">
                             <div class="form-group" style="margin-bottom: 0.5rem;">
                                 <label style="margin-bottom: 0.25rem; font-size: 0.875rem;">Tipo Check *</label>
-                                <select id="mudanzaTipoCheck" required style="padding: 0.5rem; font-size: 0.875rem;">
+                                <select id="mudanzaTipoCheck" style="padding: 0.5rem; font-size: 0.875rem;">
                                     <option value="">Seleccione...</option>
                                     <option value="propietario">Propietario</option>
                                     <option value="arrendatario">Arrendatario</option>
@@ -7105,7 +7105,7 @@
                             </div>
                             <div class="form-group" style="margin-bottom: 0.5rem;">
                                 <label style="margin-bottom: 0.25rem; font-size: 0.875rem;">¿Tiene Gastos Comunes al Día? *</label>
-                                <select id="mudanzaTieneGastosComunes" required style="padding: 0.5rem; font-size: 0.875rem;">
+                                <select id="mudanzaTieneGastosComunes" style="padding: 0.5rem; font-size: 0.875rem;">
                                     <option value="">Seleccione...</option>
                                     <option value="si">Sí</option>
                                     <option value="no">No</option>
@@ -7132,6 +7132,16 @@
                             </div>
                         </div>
                     </div>
+
+                    <div id="camposDocsPendiente" style="display: none; margin-top: 1rem; padding: 1rem; background: rgba(217, 119, 6, 0.08); border-radius: 8px; border: 1px solid rgba(217, 119, 6, 0.28);">
+                        <h4 style="margin: 0 0 0.4rem 0; font-size: 0.9375rem; font-weight: 700; color: var(--text-primary);">Documentos para autorización (mudanza pendiente)</h4>
+                        <p style="margin: 0 0 0.75rem 0; font-size: 0.78rem; color: var(--gray-600); line-height: 1.4;">Marque solo los documentos que <strong>ya recibió</strong>. Los no marcados se enviarán al residente en el comprobante como pendientes para autorizar la mudanza.</p>
+                        <div id="listaDocsMudanzaPendiente"></div>
+                        <div class="form-group" style="margin: 0.75rem 0 0 0;">
+                            <label style="margin-bottom: 0.25rem; font-size: 0.875rem;">Otro documento faltante (opcional)</label>
+                            <input type="text" id="mudanzaDocOtroFaltante" placeholder="Ej: poder notarial, certificado de residencia…" style="padding: 0.5rem; font-size: 0.875rem;">
+                        </div>
+                    </div>
                     
                     <button type="submit" class="btn btn-primary" style="padding: 0.5rem 1rem; font-size: 0.875rem; margin-top: 0.5rem;">Registrar Mudanza</button>
                 </form>
@@ -7139,6 +7149,16 @@
 
             <div class="table-section">
                 <h3>Registros de Mudanzas</h3>
+                <div style="display:flex;gap:0.6rem;align-items:center;flex-wrap:wrap;margin:0 0 0.85rem 0;">
+                    <label for="filtroAutorizacionMudanza" style="font-size:0.82rem;color:var(--gray-600);margin:0;">Filtrar autorización</label>
+                    <select id="filtroAutorizacionMudanza" style="padding:0.4rem 0.55rem;font-size:0.82rem;min-width:14rem;">
+                        <option value="">Todas</option>
+                        <option value="pendiente">Pendientes de documentación</option>
+                        <option value="si">Autorizadas</option>
+                        <option value="no">No autorizadas</option>
+                        <option value="cancelada">Canceladas</option>
+                    </select>
+                </div>
                 <table id="tablaMudanzas">
                     <thead>
                         <tr>
@@ -10905,6 +10925,10 @@
                     }
                 }
 
+                if (tabName === 'mudanzas') {
+                    if (typeof window.bindMudanzaPendienteUi === 'function') window.bindMudanzaPendienteUi();
+                }
+
                 // Cargar datos al cambiar de pestaña (solo si el DOM está listo)
                 if (document.readyState === 'complete' || document.readyState === 'interactive') {
                     if (tabName === 'pagos-aseo') {
@@ -12827,6 +12851,7 @@
             { id: 'reportePostventaPendientes', label: 'Postventa — correo con selección de registros' },
             { id: 'comprobanteApertura', label: 'Comprobante — Apertura de puerta' },
             { id: 'confirmacionMudanza', label: 'Mudanzas — Confirmación de mudanza' },
+            { id: 'mudanzaPendienteDocs', label: 'Mudanzas — Pendiente: documentos faltantes' },
             { id: 'cancelacionMudanza', label: 'Mudanzas — Cancelación de reserva' },
             { id: 'comprobanteReservaEspacio', label: 'Comprobante — Confirmación reserva espacio' },
             { id: 'comprobanteTarjetaTag', label: 'Comprobante — Tarjeta / TAG' },
@@ -12846,7 +12871,8 @@
                 ['{{fecha}}', ctx.fechaEmision != null ? String(ctx.fechaEmision) : ''],
                 ['{{espacio}}', ctx.nombreEspacio != null ? String(ctx.nombreEspacio) : ''],
                 ['{{departamento}}', ctx.departamento != null ? String(ctx.departamento) : ''],
-                ['{{residente}}', ctx.nombreResidente != null ? String(ctx.nombreResidente) : '']
+                ['{{residente}}', ctx.nombreResidente != null ? String(ctx.nombreResidente) : ''],
+                ['{{documentos}}', ctx.documentos != null ? String(ctx.documentos) : '']
             ];
             rep.forEach(function (pair) {
                 s = s.split(pair[0]).join(pair[1]);
@@ -21651,22 +21677,215 @@ document.getElementById('chatForm').onsubmit = function (e) {
         }
 
         function mudanzaValorAutorizadaForm(m) {
-            if (mudanzaEstaEnEspera(m)) return 'espera';
+            if (mudanzaEstaEnEspera(m)) return 'pendiente';
             if (mudanzaEstaAutorizada(m)) return 'si';
             return 'no';
         }
 
         function textoEstadoAutorizacionMudanza(m) {
             if (mudanzaEstaCancelada(m)) return 'Cancelada';
-            if (mudanzaEstaEnEspera(m)) return 'En espera de documentación del arrendador';
+            if (mudanzaEstaEnEspera(m)) return 'Pendiente de documentación';
             if (mudanzaEstaAutorizada(m)) return 'Autorizada';
             return 'No autorizada';
+        }
+
+        function escaparAttrMudanza(valor) {
+            return String(valor == null ? '' : valor)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+
+        function catalogoDocsMudanza(ctx) {
+            const tipo = String((ctx && (ctx.tipoCheck || ctx.tipo)) || '').toLowerCase();
+            const movimiento = String((ctx && ctx.movimiento) || '').toLowerCase();
+            const cobro = String((ctx && (ctx.aplicaCobro || ctx.cobro)) || '').toLowerCase();
+            const items = [
+                { id: 'aviso48', label: 'Aviso de mudanza con al menos 48 horas de anticipación' },
+                { id: 'identidad', label: 'Cédula de identidad del residente' }
+            ];
+            if (tipo === 'arrendatario') {
+                items.push({ id: 'contratoArriendo', label: 'Contrato de arriendo vigente' });
+                items.push({ id: 'acreditacionArrendador', label: 'Autorización o acreditación del arrendador / propietario' });
+            } else if (tipo === 'propietario') {
+                items.push({ id: 'dominioPropietario', label: 'Acreditación de dominio o calidad de propietario' });
+            }
+            if (cobro === 'si') {
+                items.push({ id: 'pagoResguardo', label: 'Comprobante de pago de resguardo de ascensores ($20.000 a GGCC)' });
+            }
+            if (movimiento === 'salida') {
+                items.push({ id: 'gastosComunes', label: 'Constancia de gastos comunes al día' });
+                items.push({ id: 'salvoconducto', label: 'Salvoconducto de autorización del propietario' });
+                items.push({ id: 'checkSalida', label: 'Check de salida de la unidad' });
+            }
+            return items;
+        }
+
+        function contextoDocsMudanzaDesdeForm() {
+            return {
+                tipo: (document.getElementById('mudanzaTipo') || {}).value || '',
+                tipoCheck: (document.getElementById('mudanzaTipoCheck') || {}).value || '',
+                movimiento: (document.getElementById('mudanzaMovimiento') || {}).value || '',
+                aplicaCobro: (document.getElementById('mudanzaCobro') || {}).value || ''
+            };
+        }
+
+        function mudanzaFormEstaPendiente() {
+            const v = String((document.getElementById('mudanzaAutorizada') || {}).value || '').toLowerCase();
+            return v === 'pendiente' || v === 'espera' || v === 'en-espera' || v === 'en espera';
+        }
+
+        function leerDocsMudanzaDesdeForm() {
+            const recibidos = {};
+            document.querySelectorAll('.mudanza-doc-recibido').forEach(function (cb) {
+                const id = cb.getAttribute('data-doc-id');
+                if (id) recibidos[id] = !!cb.checked;
+            });
+            const otroEl = document.getElementById('mudanzaDocOtroFaltante');
+            return {
+                docsRecibidos: recibidos,
+                docsOtroFaltante: otroEl ? String(otroEl.value || '').trim() : ''
+            };
+        }
+
+        function renderizarChecklistDocsMudanza(mudanza) {
+            const cont = document.getElementById('listaDocsMudanzaPendiente');
+            if (!cont) return;
+            const keepChecks = !mudanza && !!cont.querySelector('.mudanza-doc-recibido');
+            const prev = keepChecks ? leerDocsMudanzaDesdeForm() : { docsRecibidos: {}, docsOtroFaltante: '' };
+            const ctx = mudanza ? mudanza : contextoDocsMudanzaDesdeForm();
+            const recibidos = Object.assign({}, (mudanza && mudanza.docsRecibidos) || {}, prev.docsRecibidos);
+            if (!mudanza && !keepChecks) {
+                const salvo = document.getElementById('mudanzaSalvoconducto');
+                if (salvo && salvo.checked) recibidos.salvoconducto = true;
+                const gc = document.getElementById('mudanzaTieneGastosComunes');
+                if (gc && gc.value === 'si') recibidos.gastosComunes = true;
+            }
+            const items = catalogoDocsMudanza(ctx);
+            cont.innerHTML = items.map(function (item) {
+                return '<label style="display:flex;align-items:flex-start;gap:0.5rem;margin:0.35rem 0;font-size:0.85rem;cursor:pointer;line-height:1.35;">'
+                    + '<input type="checkbox" class="mudanza-doc-recibido" data-doc-id="' + escaparAttrMudanza(item.id) + '"'
+                    + (recibidos[item.id] ? ' checked' : '')
+                    + ' style="width:1.1rem;height:1.1rem;margin-top:0.15rem;flex-shrink:0;">'
+                    + '<span>Recibido: ' + escaparAttrMudanza(item.label) + '</span></label>';
+            }).join('');
+            const otro = document.getElementById('mudanzaDocOtroFaltante');
+            if (otro && !keepChecks) {
+                otro.value = (mudanza && mudanza.docsOtroFaltante) || prev.docsOtroFaltante || '';
+            }
+        }
+
+        function toggleCamposDocsPendiente() {
+            const box = document.getElementById('camposDocsPendiente');
+            if (!box) return;
+            const show = mudanzaFormEstaPendiente();
+            box.style.display = show ? 'block' : 'none';
+            if (show) {
+                renderizarChecklistDocsMudanza(window._docsMudanzaEditando || null);
+            }
+        }
+
+        function listarDocumentosFaltantesMudanza(m) {
+            if (!m) return [];
+            const catalogo = catalogoDocsMudanza(m);
+            const recibidos = (m.docsRecibidos && typeof m.docsRecibidos === 'object') ? m.docsRecibidos : {};
+            const tieneChecklist = Object.keys(recibidos).length > 0;
+            const vistos = {};
+            const faltantes = [];
+            function pushUnique(label) {
+                const k = String(label || '').trim();
+                if (!k || vistos[k]) return;
+                vistos[k] = true;
+                faltantes.push(k);
+            }
+            catalogo.forEach(function (item) {
+                if (!recibidos[item.id]) pushUnique(item.label);
+            });
+            const otro = String(m.docsOtroFaltante || '').trim();
+            if (otro) pushUnique(otro);
+            if (!tieneChecklist && Array.isArray(m.docsFaltantes)) {
+                m.docsFaltantes.forEach(pushUnique);
+            }
+            if (!faltantes.length && !tieneChecklist) {
+                const tipo = String(m.tipoCheck || m.tipo || '').toLowerCase();
+                if (tipo === 'arrendatario') {
+                    pushUnique('Autorización o acreditación del arrendador / propietario');
+                    pushUnique('Contrato de arriendo vigente');
+                }
+                if (m.movimiento === 'salida' && !m.salvoconducto) {
+                    pushUnique('Salvoconducto de autorización del propietario');
+                }
+                if (m.movimiento === 'salida' && m.tieneGastosComunes !== 'si') {
+                    pushUnique('Constancia de gastos comunes al día');
+                }
+                if (!faltantes.length) {
+                    pushUnique('Documentación pendiente de revisión por la administración');
+                }
+            }
+            return faltantes;
+        }
+
+        function textoPrefillCorreoMudanzaPendiente(mudanza, faltantes) {
+            const mov = mudanza && mudanza.movimiento === 'ingreso'
+                ? 'ingreso'
+                : (mudanza && mudanza.movimiento === 'salida' ? 'salida' : 'mudanza');
+            const docs = (Array.isArray(faltantes) && faltantes.length)
+                ? faltantes
+                : listarDocumentosFaltantesMudanza(mudanza);
+            const lista = docs.map(function (d, i) { return (i + 1) + '. ' + d; }).join('\n');
+            return 'Estimado/a ' + ((mudanza && mudanza.nombre) || 'residente') + ':\n\n'
+                + 'Su mudanza de ' + mov + ' del depto. ' + ((mudanza && mudanza.departamento) || '')
+                + ' quedó PENDIENTE DE AUTORIZACIÓN porque falta documentación.\n\n'
+                + 'Para que la administración autorice, debe presentar:\n' + lista + '\n\n'
+                + 'La mudanza no puede realizarse hasta regularizar estos antecedentes.';
+        }
+
+        window.bindMudanzaPendienteUi = function () {
+            const form = document.getElementById('formMudanza');
+            if (form && !form.getAttribute('data-pendiente-ui')) {
+                form.setAttribute('data-pendiente-ui', '1');
+                form.addEventListener('change', function (e) {
+                    const id = (e.target && e.target.id) || '';
+                    if (id === 'mudanzaAutorizada' || id === 'mudanzaTipo' || id === 'mudanzaCobro'
+                        || id === 'mudanzaTipoCheck' || id === 'mudanzaMovimiento'
+                        || id === 'mudanzaTieneGastosComunes' || id === 'mudanzaSalvoconducto') {
+                        if (typeof toggleCamposDocsPendiente === 'function') toggleCamposDocsPendiente();
+                    }
+                });
+            }
+            const filtro = document.getElementById('filtroAutorizacionMudanza');
+            if (filtro && !filtro.getAttribute('data-bound')) {
+                filtro.setAttribute('data-bound', '1');
+                filtro.addEventListener('change', function () {
+                    if (typeof cargarMudanzas === 'function') cargarMudanzas();
+                });
+            }
+            if (typeof toggleCamposDocsPendiente === 'function') toggleCamposDocsPendiente();
+        };
+        setTimeout(function () {
+            if (typeof window.bindMudanzaPendienteUi === 'function') window.bindMudanzaPendienteUi();
+        }, 0);
+
+        function htmlListaDocsFaltantesMudanza(faltantes, linkEsc) {
+            const esc = linkEsc || escaparAttrMudanza;
+            const items = Array.isArray(faltantes) ? faltantes : [];
+            if (!items.length) {
+                return '<p style="margin:0;font-size:14px;color:#333333;line-height:1.5;">La administración aún no ha marcado documentos recibidos. Contacte a administración para regularizar los antecedentes.</p>';
+            }
+            const lis = items.map(function (doc, i) {
+                return '<tr><td style="padding:8px 12px;font-size:13px;color:#92400e;font-weight:700;width:28px;vertical-align:top;">' + (i + 1) + '.</td>'
+                    + '<td style="padding:8px 12px 8px 0;font-size:14px;color:#1a1a1a;line-height:1.45;">' + esc(doc) + '</td></tr>';
+            }).join('');
+            return '<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;">' + lis + '</table>';
         }
 
         function htmlBadgeAutorizacionMudanza(m) {
             if (mudanzaEstaCancelada(m)) return '<span class="badge badge-danger">Cancelada</span>';
             if (mudanzaEstaEnEspera(m)) {
-                return '<span class="badge badge-warning" title="Falta documentación o acreditación del arrendador">En espera</span>';
+                const faltan = listarDocumentosFaltantesMudanza(m);
+                const title = faltan.length ? ('Falta: ' + faltan.join('; ')) : 'Pendiente de documentación para autorizar';
+                return '<span class="badge badge-warning" title="' + escaparAttrMudanza(title) + '">Pendiente</span>';
             }
             if (mudanzaEstaAutorizada(m)) return '<span class="badge badge-success">Autorizada</span>';
             return '<span class="badge badge-danger">No autorizada</span>';
@@ -21737,7 +21956,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
             if (!camposSalida || !tipoCheck || !tieneGastosComunes || !grupoMontoGastosComunes || !gastosComunes || !salvoconducto) return;
 
             const hintAut = document.getElementById('mudanzaAutorizadaHint');
-            if (hintAut) hintAut.style.display = movimientoValue === 'salida' ? 'block' : 'none';
+            if (hintAut) hintAut.style.display = 'block';
             
             if (movimientoValue === 'salida') {
                 camposSalida.style.display = 'block';
@@ -21758,6 +21977,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 }
                 toggleMontoGastosComunes(); // Asegurar que el campo de monto esté oculto
             }
+            if (typeof toggleCamposDocsPendiente === 'function') toggleCamposDocsPendiente();
         }
         
         // Función para mostrar/ocultar campo de monto de gastos comunes
@@ -21793,6 +22013,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
             }
             
             window.editandoMudanza = id;
+            window._docsMudanzaEditando = mudanza;
             
             // Cargar datos en el formulario
             document.getElementById('mudanzaNombre').value = mudanza.nombre || '';
@@ -21805,6 +22026,8 @@ document.getElementById('chatForm').onsubmit = function (e) {
             document.getElementById('mudanzaMonto').value = mudanza.aplicaCobro === 'si' ? formatearMoneda(20000) : '$0';
             document.getElementById('mudanzaCorredor').value = mudanza.corredor || '';
             document.getElementById('mudanzaObservaciones').value = (mudanza.comentarios || mudanza.observaciones || '');
+            const otroDocEl = document.getElementById('mudanzaDocOtroFaltante');
+            if (otroDocEl) otroDocEl.value = mudanza.docsOtroFaltante || '';
             
             // Cargar campos de salida si aplica
             toggleCamposSalida();
@@ -21818,6 +22041,8 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 document.getElementById('mudanzaSalvoconducto').checked = mudanza.salvoconducto || false;
                 document.getElementById('mudanzaSelloAutorizado').checked = mudanza.selloAutorizado || false;
             }
+            if (typeof toggleCamposDocsPendiente === 'function') toggleCamposDocsPendiente();
+            window._docsMudanzaEditando = null;
             
             // Cambiar texto del botón
             const btnSubmit = document.querySelector('#formMudanza button[type="submit"]');
@@ -21849,12 +22074,14 @@ document.getElementById('chatForm').onsubmit = function (e) {
         
         function cancelarEdicionMudanza() {
             window.editandoMudanza = null;
+            window._docsMudanzaEditando = null;
             document.getElementById('formMudanza').reset();
             const fechaHoy = obtenerFechaHoy();
             document.getElementById('mudanzaFecha').value = fechaHoy;
             document.getElementById('mudanzaMonto').value = '$0';
             toggleCamposSalida(); // Ocultar campos de salida
             toggleMontoGastosComunes(); // Asegurar que el campo de monto esté oculto
+            if (typeof toggleCamposDocsPendiente === 'function') toggleCamposDocsPendiente();
             
             const btnSubmit = document.querySelector('#formMudanza button[type="submit"]');
             if (btnSubmit) {
@@ -21866,6 +22093,13 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 btnCancelar.style.display = 'none';
             }
         }
+
+        window.editarMudanza = editarMudanza;
+        window.cancelarEdicionMudanza = cancelarEdicionMudanza;
+        window.registrarMudanza = registrarMudanza;
+        window.toggleCamposDocsPendiente = toggleCamposDocsPendiente;
+        window.toggleCamposSalida = toggleCamposSalida;
+        window.listarDocumentosFaltantesMudanza = listarDocumentosFaltantesMudanza;
 
         async function registrarMudanza(event) {
             event.preventDefault();
@@ -21930,20 +22164,39 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 mudanzaData.selloAutorizado = document.getElementById('mudanzaSelloAutorizado').checked;
             }
 
+            if (mudanzaFormEstaPendiente()) {
+                if (typeof toggleCamposDocsPendiente === 'function') toggleCamposDocsPendiente();
+                if (typeof renderizarChecklistDocsMudanza === 'function') {
+                    renderizarChecklistDocsMudanza(window._docsMudanzaEditando || null);
+                }
+                const docsForm = leerDocsMudanzaDesdeForm();
+                mudanzaData.autorizada = 'pendiente';
+                mudanzaData.docsRecibidos = docsForm.docsRecibidos;
+                mudanzaData.docsOtroFaltante = docsForm.docsOtroFaltante;
+                const faltan = listarDocumentosFaltantesMudanza(mudanzaData);
+                if (!faltan.length) {
+                    mostrarAlerta('Si el estado es Pendiente, indique al menos un documento faltante (desmarque lo no recibido o complete «Otro documento faltante»). Si ya tiene toda la documentación, cambie el estado a Autorizada.', 'Documentos faltantes');
+                    return;
+                }
+                mudanzaData.docsFaltantes = faltan;
+            }
+
             const mudanzas = await obtenerDatosMes('mudanzas');
+            let mudanzaGuardada = null;
+            let fueAlta = false;
             
             if (window.editandoMudanza) {
                 // Modo edición: actualizar registro existente
                 const index = mudanzas.findIndex(m => m.id === window.editandoMudanza);
                 if (index !== -1) {
                     mudanzas[index] = { ...mudanzas[index], ...mudanzaData };
+                    mudanzaGuardada = mudanzas[index];
                     await guardarDatosMes('mudanzas', mudanzas);
                     if (typeof window.registrarMovimiento === 'function') {
                         const mov = mudanzaData.movimiento === 'ingreso' ? 'Ingreso' : mudanzaData.movimiento === 'salida' ? 'Salida' : 'Mudanza';
                         const montoStr = mudanzaData.aplicaCobro === 'si' && mudanzaData.monto ? formatearMoneda(mudanzaData.monto) : '';
                         window.registrarMovimiento('actualizar', 'mudanzas', `${mov} actualizado: Depto ${mudanzaData.departamento} - ${mudanzaData.nombre}${montoStr ? ' - ' + montoStr : ''}`);
                     }
-                    mostrarAlerta('Mudanza actualizada exitosamente.', 'Actualizado');
                     cancelarEdicionMudanza();
                 }
             } else {
@@ -21952,6 +22205,8 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     id: generarId(),
                     ...mudanzaData
                 };
+                mudanzaGuardada = mudanza;
+                fueAlta = true;
                 mudanzas.unshift(mudanza);
                 await guardarDatosMes('mudanzas', mudanzas);
                 if (typeof window.registrarMovimiento === 'function') {
@@ -21959,7 +22214,6 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     const montoStr = mudanza.aplicaCobro === 'si' && mudanza.monto ? formatearMoneda(mudanza.monto) : '';
                     window.registrarMovimiento('crear', 'mudanzas', `${mov}: Depto ${mudanza.departamento} - ${mudanza.nombre}${montoStr ? ' - ' + montoStr : ''}`);
                 }
-                mostrarAlerta('Mudanza registrada exitosamente.', 'Registrado');
                 
                 document.getElementById('formMudanza').reset();
                 document.getElementById('mudanzaMonto').value = '$0';
@@ -21969,6 +22223,18 @@ document.getElementById('chatForm').onsubmit = function (e) {
             }
             
             await cargarMudanzas();
+
+            if (mudanzaGuardada && mudanzaEstaEnEspera(mudanzaGuardada) && typeof window.enviarCorreoMudanzaPendiente === 'function') {
+                const enviar = await confirmarAccion(
+                    (fueAlta ? 'Mudanza pendiente registrada. ' : 'Mudanza pendiente actualizada. ')
+                    + '¿Enviar al residente el comprobante indicando qué documento falta para la autorización?',
+                    'Comprobante de documentos faltantes'
+                );
+                if (enviar) await window.enviarCorreoMudanzaPendiente(mudanzaGuardada.id);
+                else mostrarAlerta('Mudanza pendiente guardada. Use «📧 Docs faltantes» o «📄 Comprobante» cuando quiera notificar al residente qué documento falta.', 'Pendiente de documentación');
+            } else if (mudanzaGuardada) {
+                mostrarAlerta(fueAlta ? 'Mudanza registrada exitosamente.' : 'Mudanza actualizada exitosamente.', fueAlta ? 'Registrado' : 'Actualizado');
+            }
         }
 
         // Inicializar filtros de mudanzas
@@ -21983,13 +22249,29 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 return;
             }
 
-            // Ordenar por fecha (más reciente primero)
-            mudanzas.sort((a, b) => compararRegistrosMasRecientePrimero(a, b));
+            const filtroAut = String((document.getElementById('filtroAutorizacionMudanza') || {}).value || '').toLowerCase();
+            const mudanzasFiltradas = !filtroAut ? mudanzas : mudanzas.filter(function (m) {
+                if (filtroAut === 'cancelada') return mudanzaEstaCancelada(m);
+                if (mudanzaEstaCancelada(m)) return false;
+                if (filtroAut === 'pendiente') return mudanzaEstaEnEspera(m);
+                if (filtroAut === 'si') return mudanzaEstaAutorizada(m);
+                if (filtroAut === 'no') return !mudanzaEstaEnEspera(m) && !mudanzaEstaAutorizada(m);
+                return true;
+            });
 
-            tbody.innerHTML = mudanzas.map(m => {
+            if (!mudanzasFiltradas.length) {
+                tbody.innerHTML = '<tr><td colspan="11" class="empty-state"><p>No hay mudanzas con ese estado de autorización</p></td></tr>';
+                return;
+            }
+
+            // Ordenar por fecha (más reciente primero)
+            mudanzasFiltradas.sort((a, b) => compararRegistrosMasRecientePrimero(a, b));
+
+            tbody.innerHTML = mudanzasFiltradas.map(m => {
                 const tipoTexto = m.tipo === 'propietario' ? 'Propietario' : m.tipo === 'arrendatario' ? 'Arrendatario' : '-';
                 const movimientoTexto = m.movimiento === 'ingreso' ? 'Ingreso' : m.movimiento === 'salida' ? 'Salida' : '-';
                 const cancelada = mudanzaEstaCancelada(m);
+                const pendiente = mudanzaEstaEnEspera(m);
                 const mesArchivado = window.mesEnConsulta && !window.mesReabierto;
                 return `
                     <tr${cancelada ? ' style="opacity: 0.78;"' : ''}>
@@ -22011,11 +22293,14 @@ document.getElementById('chatForm').onsubmit = function (e) {
                                 ${htmlBotonTrasladarCargo('mudanzas', m)}
                                 ${cancelada
                                     ? `<button type="button" class="btn btn-info btn-sm" onclick="enviarCorreoCancelacionMudanza('${m.id}')" style="padding: 0.25rem 0.4rem; font-size: 0.75rem; width: 100%; background: #dc2626; color: white; border: none;" title="Reenviar correo de cancelación">📧 Cancelación</button>`
+                                    : pendiente
+                                    ? `<button type="button" class="btn btn-info btn-sm" onclick="enviarCorreoMudanzaPendiente('${m.id}')" style="padding: 0.25rem 0.4rem; font-size: 0.75rem; width: 100%; background: #d97706; color: white; border: none;" title="Enviar comprobante con los documentos que faltan para autorizar">📧 Docs faltantes</button>`
                                     : `<button type="button" class="btn btn-info btn-sm" onclick="enviarCorreoMudanza('${m.id}')" style="padding: 0.25rem 0.4rem; font-size: 0.75rem; width: 100%; background: #06b6d4; color: white; border: none;" title="Enviar confirmación de mudanza por correo">📧 Enviar</button>`}
                                 ${mesArchivado ? '<span style="color: var(--gray-500); font-size: 0.7rem;">Solo lectura</span>' : `
                                     ${!cancelada ? `<button type="button" class="btn btn-sm" onclick="cancelarReservaMudanza('${m.id}')" style="padding: 0.25rem 0.4rem; font-size: 0.75rem; width: 100%; background: #f59e0b; color: white; border: none;" title="Cancelar reserva de mudanza y notificar por correo">✖ Cancelar</button>` : ''}
                                     <button class="btn btn-primary btn-sm" onclick="editarMudanza('${m.id}')" style="padding: 0.25rem 0.4rem; font-size: 0.75rem; width: 100%;">Editar</button>
-                                    ${(!cancelada && m.movimiento === 'salida') ? `<button class="btn btn-success btn-sm" onclick="generarComprobanteSalida('${m.id}')" style="padding: 0.25rem 0.4rem; font-size: 0.7rem; width: 100%;">📄 Comprobante</button>` : ''}
+                                    ${(!cancelada && pendiente) ? `<button class="btn btn-success btn-sm" onclick="generarComprobantePendienteMudanza('${m.id}')" style="padding: 0.25rem 0.4rem; font-size: 0.7rem; width: 100%;">📄 Comprobante</button>` : ''}
+                                    ${(!cancelada && !pendiente && m.movimiento === 'salida') ? `<button class="btn btn-success btn-sm" onclick="generarComprobanteSalida('${m.id}')" style="padding: 0.25rem 0.4rem; font-size: 0.7rem; width: 100%;">📄 Comprobante</button>` : ''}
                                     <button class="btn btn-danger btn-sm" onclick="eliminarMudanza('${m.id}')" style="padding: 0.25rem 0.4rem; font-size: 0.75rem; width: 100%;">Eliminar</button>
                                 `}
                             </div>
@@ -22057,27 +22342,30 @@ document.getElementById('chatForm').onsubmit = function (e) {
             const fechaStr = mudanza.fecha
                 ? (typeof formatearFechaParaCorreo === 'function' ? formatearFechaParaCorreo(mudanza.fecha) : mudanza.fecha)
                 : '-';
-            const titulo = esIngreso ? 'Confirmación de mudanza de ingreso' : esSalida ? 'Confirmación de mudanza de salida' : 'Confirmación de mudanza';
+            const titulo = enEspera
+                ? 'Mudanza pendiente de autorización'
+                : (esIngreso ? 'Confirmación de mudanza de ingreso' : esSalida ? 'Confirmación de mudanza de salida' : 'Confirmación de mudanza');
             const colorAcento = autorizada ? '#74BD20' : (enEspera ? '#d97706' : '#dc2626');
             const estadoBg = autorizada ? '#e8f5e9' : (enEspera ? '#fff8e1' : '#fee2e2');
             const estadoBorder = autorizada ? '#c8e6c9' : (enEspera ? '#fde68a' : '#fca5a5');
             const estadoColor = autorizada ? '#166534' : (enEspera ? '#92400e' : '#991b1b');
-            const estadoTexto = autorizada ? 'AUTORIZADA' : (enEspera ? 'EN ESPERA' : 'NO AUTORIZADA');
+            const estadoTexto = autorizada ? 'AUTORIZADA' : (enEspera ? 'PENDIENTE DE AUTORIZACIÓN' : 'NO AUTORIZADA');
             const montoBg = servicio.aplica ? '#e8f5e9' : '#f5f5f5';
             const montoColor = servicio.aplica ? '#2e7d32' : '#616161';
             const montoBorder = servicio.aplica ? '#c8e6c9' : '#e0e0e0';
+            const docsFaltantes = enEspera ? listarDocumentosFaltantesMudanza(mudanza) : [];
 
             let parrafoPrincipal = '';
             if (esIngreso && autorizada) {
                 parrafoPrincipal = 'Confirmamos que su <strong>mudanza de ingreso</strong> se encuentra <strong>autorizada</strong> por la administración para la fecha indicada.';
             } else if (esIngreso && enEspera) {
-                parrafoPrincipal = 'Informamos que su <strong>mudanza de ingreso</strong> quedó registrada y se encuentra <strong>en espera de documentación o acreditación del arrendador</strong>.';
+                parrafoPrincipal = 'Informamos que su <strong>mudanza de ingreso</strong> quedó registrada y se encuentra <strong>pendiente de autorización</strong> porque falta documentación. A continuación se detalla qué debe presentar.';
             } else if (esIngreso && !autorizada) {
                 parrafoPrincipal = 'Informamos que su <strong>mudanza de ingreso</strong> quedó registrada, pero <strong>aún no se encuentra autorizada</strong>.';
             } else if (esSalida && autorizada) {
                 parrafoPrincipal = 'Confirmamos que su <strong>mudanza de salida</strong> se encuentra <strong>autorizada</strong> por la administración para la fecha indicada.';
             } else if (esSalida && enEspera) {
-                parrafoPrincipal = 'Informamos que su <strong>mudanza de salida</strong> quedó registrada y se encuentra <strong>en espera de la documentación o acreditación del arrendador</strong>. Hasta recibir esos antecedentes, la administración no autoriza su ejecución.';
+                parrafoPrincipal = 'Informamos que su <strong>mudanza de salida</strong> quedó registrada y se encuentra <strong>pendiente de autorización</strong> porque falta documentación. Hasta regularizar esos antecedentes, la administración no autoriza su ejecución.';
             } else if (esSalida && !autorizada) {
                 parrafoPrincipal = 'Informamos que su <strong>mudanza de salida</strong> quedó registrada, pero <strong>aún no se encuentra autorizada</strong>.';
             } else {
@@ -22135,7 +22423,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
           <tr>
             <td class="content-padding content-padding-lg" style="padding: 18px 28px 14px 28px; border-bottom: 3px solid ${colorAcento}; background-color: #ffffff; border-radius: 12px 12px 0 0;">
               <div style="text-align:center;margin-bottom:12px"><img src="https://img.mailinblue.com/8323725/images/content_library/original/6844749040dd0f16c5341248.png" alt="Logo" style="max-width:120px;height:auto;"></div>
-              <p style="margin: 0 0 2px 0; font-size: 11px; font-weight: 700; letter-spacing: 0.05em; color: ${colorAcento}; text-transform: uppercase;">Notificación de mudanza</p>
+              <p style="margin: 0 0 2px 0; font-size: 11px; font-weight: 700; letter-spacing: 0.05em; color: ${colorAcento}; text-transform: uppercase;">${enEspera ? 'Comprobante de mudanza pendiente' : 'Notificación de mudanza'}</p>
               <h2 style="margin: 0 0 4px 0; font-size: 20px; font-weight: 700; color: #1a1a1a;">${linkEsc(titulo)}</h2>
               <p style="margin: 0; font-size: 14px; color: #555555;">${linkEsc(comunidad)}</p>
             </td>
@@ -22158,6 +22446,21 @@ document.getElementById('chatForm').onsubmit = function (e) {
               </table>
             </td>
           </tr>
+          ${enEspera ? `
+          <tr>
+            <td class="content-padding" style="padding: 0 28px 10px 28px;">
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color: #fff8e1; border-radius: 8px; border: 1px solid #fde68a;">
+                <tr>
+                  <td style="padding: 12px 14px 6px 14px;">
+                    <p style="margin: 0 0 4px 0; font-size: 12px; color: #92400e; text-transform: uppercase; letter-spacing: 0.04em; font-weight: 700;">Documentos faltantes para autorizar</p>
+                    <p style="margin: 0 0 8px 0; font-size: 13px; color: #333333; line-height: 1.45;">Para que la administración autorice esta mudanza, debe presentar:</p>
+                    ${htmlListaDocsFaltantesMudanza(docsFaltantes, linkEsc)}
+                    <p style="margin: 10px 0 0 0; font-size: 12px; color: #666666; line-height: 1.45;">Envíe estos antecedentes a la administración. La mudanza no puede ejecutarse hasta contar con la autorización.</p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>` : ''}
           <tr>
             <td class="content-padding" style="padding: 0 28px 6px 28px;">
               <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color: #f8faf8; border-radius: 8px; border: 1px solid #e8eee8;">
@@ -22195,7 +22498,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 <tr>
                   <td style="padding: 12px 14px;">
                     <p style="margin: 0; font-size: 14px; color: #333333; line-height: 1.5;">${enEspera
-                        ? 'Esta mudanza permanece en espera mientras falta la documentación o acreditación del arrendador. No puede ejecutarse hasta regularizar esos antecedentes y contar con la autorización de la administración.'
+                        ? 'Esta mudanza permanece pendiente de autorización mientras no se presenten los documentos indicados. No puede ejecutarse hasta regularizar esos antecedentes y contar con la autorización de la administración.'
                         : 'Hasta no contar con la autorización de la administración, esta mudanza no puede ejecutarse.'}</p>
                   </td>
                 </tr>
@@ -22213,6 +22516,10 @@ document.getElementById('chatForm').onsubmit = function (e) {
   </table>
 </body>
 </html>`;
+        }
+
+        function generarComprobantePendienteMudanzaHtml(mudanza, nombreComunidad) {
+            return generarConfirmacionMudanzaHtml(mudanza, nombreComunidad);
         }
 
         async function prepararCorreoMudanzaConsejeria() {
@@ -22337,6 +22644,9 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 if (mudanzaEstaCancelada(mudanza)) {
                     return window.enviarCorreoCancelacionMudanza(id);
                 }
+                if (mudanzaEstaEnEspera(mudanza)) {
+                    return window.enviarCorreoMudanzaPendiente(id);
+                }
 
                 const nombreComunidad = typeof obtenerNombreComunidad === 'function'
                     ? await obtenerNombreComunidad()
@@ -22400,6 +22710,94 @@ document.getElementById('chatForm').onsubmit = function (e) {
             } catch (error) {
                 ocultarProgreso();
                 console.error('Error al enviar confirmación de mudanza:', error);
+                mostrarAlerta('Error al enviar correo: ' + (error.message || 'Error desconocido'), 'Error');
+            }
+        };
+
+        window.enviarCorreoMudanzaPendiente = async function(id) {
+            try {
+                const mudanzas = await obtenerDatosMes('mudanzas');
+                const mudanza = mudanzas.find(m => m.id === id);
+                if (!mudanza) {
+                    mostrarAlerta('No se encontró el registro.', 'Error');
+                    return;
+                }
+                if (mudanzaEstaCancelada(mudanza)) {
+                    return window.enviarCorreoCancelacionMudanza(id);
+                }
+                if (!mudanzaEstaEnEspera(mudanza)) {
+                    mostrarAlerta('Esta mudanza no está pendiente de documentación. Use «Enviar» para la confirmación de autorización.', 'Mudanza no pendiente');
+                    return;
+                }
+                const faltan = listarDocumentosFaltantesMudanza(mudanza);
+                if (!faltan.length) {
+                    mostrarAlerta('No hay documentos faltantes marcados. Edite la mudanza y desmarque lo que aún no recibe, o indique otro documento faltante.', 'Sin documentos faltantes');
+                    return;
+                }
+
+                const nombreComunidad = typeof obtenerNombreComunidad === 'function'
+                    ? await obtenerNombreComunidad()
+                    : (localStorage.getItem(lsKey('nombreComunidad')) || 'Comunidad');
+                const htmlPendiente = generarComprobantePendienteMudanzaHtml(mudanza, nombreComunidad);
+                const {
+                    destinatariosUnidad,
+                    destinatariosDirectorio,
+                    residente: residenteInfo
+                } = await obtenerDestinatariosCorreoUnidad(mudanza.departamento, mudanza.nombre);
+
+                if (!residenteInfo || !residenteInfo.correo) {
+                    mostrarAlerta('No se encontraron correos para esta unidad ni en el directorio administrativo. Verifique Ocupación, Conserjería o Central de Notificación.', 'Correo no encontrado');
+                    return;
+                }
+
+                const { correoFijoConsejeria, destinatariosCco, enviarOpciones } = await prepararCorreoMudanzaConsejeria();
+                const movimientoAsunto = mudanza.movimiento === 'ingreso' ? 'ingreso' : (mudanza.movimiento === 'salida' ? 'salida' : 'mudanza');
+                const mapPlant = await obtenerPlantillasCorreoModulosMap();
+                const bloque = obtenerBloquePlantillaModulo(mapPlant, 'mudanzaPendienteDocs');
+                const listaTxt = faltan.map(function (d, i) { return (i + 1) + '. ' + d; }).join('\n');
+                const ctx = {
+                    nombreComunidad,
+                    departamento: mudanza.departamento,
+                    nombreResidente: mudanza.nombre,
+                    fechaEmision: fechaEmisionCorreoHoy(),
+                    documentos: listaTxt
+                };
+                const asuntoBase = `Mudanza pendiente de autorización — documentos faltantes (${movimientoAsunto}) - Depto ${mudanza.departamento} - ${nombreComunidad}`;
+                const prefillDocs = resolverCuerpoInicioPlantillaCorreo(bloque, ctx)
+                    || (typeof textoPrefillCorreoMudanzaPendiente === 'function'
+                        ? textoPrefillCorreoMudanzaPendiente(mudanza, faltan)
+                        : '');
+                const resultado = await mostrarModalPersonalizarCorreoYEnviar({
+                    titulo: 'Enviar comprobante de mudanza pendiente',
+                    asuntoDefecto: resolverAsuntoPlantillaCorreo(bloque, asuntoBase, ctx),
+                    mensajeInicialPrefill: prefillDocs,
+                    htmlBase: htmlPendiente,
+                    residente: residenteInfo,
+                    destinatariosUnidad,
+                    destinatariosDirectorio,
+                    destinatariosCco,
+                    correosSiempreSeleccionados: [correoFijoConsejeria],
+                    etiquetaDestino: 'Residentes de la unidad',
+                    enviarOpciones
+                });
+                if (resultado === null) return;
+
+                if (resultado.exito) {
+                    await persistirNotificacionCorreoTrasEnvio(
+                        'mudanzas',
+                        id,
+                        'mudanza-pendiente-docs',
+                        resultado,
+                        `Comprobante de mudanza pendiente enviado: Depto ${mudanza.departamento} - falta ${faltan.length} documento(s)`
+                    );
+                    mostrarAlerta(resultado.mensaje || 'Comprobante de documentos faltantes enviado correctamente', 'Éxito');
+                    await cargarMudanzas();
+                } else {
+                    mostrarAlerta('Error al enviar correo: ' + (resultado.error || 'Error desconocido'), 'Error');
+                }
+            } catch (error) {
+                ocultarProgreso();
+                console.error('Error al enviar comprobante de mudanza pendiente:', error);
                 mostrarAlerta('Error al enviar correo: ' + (error.message || 'Error desconocido'), 'Error');
             }
         };
@@ -35894,6 +36292,29 @@ document.getElementById('chatForm').onsubmit = function (e) {
             descargarReporteHTML(html, `Comprobante_Salida_Mudanza_${mudanza.id.substring(0, 8)}`, 'Comprobante de Salida');
         }
 
+        window.generarComprobantePendienteMudanza = async function(id) {
+            const mudanzas = await obtenerDatosMes('mudanzas');
+            const mudanza = mudanzas.find(m => m.id === id);
+            if (!mudanza) {
+                mostrarAlerta('Mudanza no encontrada.', 'Error');
+                return;
+            }
+            if (mudanzaEstaCancelada(mudanza)) {
+                mostrarAlerta('No se puede emitir comprobante de una mudanza cancelada.', 'Reserva cancelada');
+                return;
+            }
+            if (!mudanzaEstaEnEspera(mudanza)) {
+                mostrarAlerta('Este comprobante es solo para mudanzas pendientes de documentación.', 'Mudanza no pendiente');
+                return;
+            }
+            const nombreComunidad = typeof obtenerNombreComunidad === 'function'
+                ? await obtenerNombreComunidad()
+                : (localStorage.getItem(lsKey('nombreComunidad')) || 'Comunidad');
+            const html = generarComprobantePendienteMudanzaHtml(mudanza, nombreComunidad);
+            const depto = String(mudanza.departamento || '').replace(/\s+/g, '_') || 'unidad';
+            descargarReporteHTML(html, `Comprobante_Mudanza_Pendiente_${depto}_${String(mudanza.id || '').substring(0, 8)}`, 'Mudanza pendiente — documentos faltantes');
+        }
+
         // ============================================
         // PANEL DE CONTROL
         // ============================================
@@ -48812,6 +49233,16 @@ document.getElementById('chatForm').onsubmit = function (e) {
                         toggleCamposSalida();
                     }
                 }
+
+                ['mudanzaAutorizada', 'mudanzaTipo', 'mudanzaCobro', 'mudanzaTipoCheck'].forEach(function (idCampo) {
+                    const el = document.getElementById(idCampo);
+                    if (!el) return;
+                    el.addEventListener('change', function () {
+                        if (typeof toggleCamposDocsPendiente === 'function') toggleCamposDocsPendiente();
+                    });
+                });
+                if (typeof window.bindMudanzaPendienteUi === 'function') window.bindMudanzaPendienteUi();
+                else if (typeof toggleCamposDocsPendiente === 'function') toggleCamposDocsPendiente();
                 
                 const mudanzaTieneGastosComunes = document.getElementById('mudanzaTieneGastosComunes');
                 if (mudanzaTieneGastosComunes) {
