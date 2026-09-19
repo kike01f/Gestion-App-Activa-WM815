@@ -1206,6 +1206,43 @@
         #conserjeria #conserjeriaSecVisitas {
             scroll-margin-top: 3.6rem;
         }
+        #conserjeria .conserjeria-cat-lista {
+            display: flex;
+            flex-direction: column;
+            gap: 0.45rem;
+        }
+        #conserjeria .conserjeria-cat-row {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.45rem 0.55rem;
+            padding: 0.45rem 0.55rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            border-left-width: 4px;
+            background: var(--bg-primary);
+        }
+        #conserjeria .conserjeria-cat-row .etiqueta-nov-label {
+            padding: 0.3rem 0.45rem;
+            font-size: 0.8rem;
+            width: 11.5rem;
+            font-weight: 600;
+        }
+        #conserjeria .conserjeria-cat-row label {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            font-size: 0.74rem;
+            color: var(--gray-700);
+            white-space: nowrap;
+        }
+        #conserjeria .conserjeria-cat-sistema {
+            font-size: 0.68rem;
+            font-weight: 700;
+            letter-spacing: 0.03em;
+            text-transform: uppercase;
+            color: var(--gray-500);
+        }
         #nomina #tablaNomina th:last-child,
         #nomina #tablaNomina td:last-child {
             width: 6.9rem;
@@ -7440,7 +7477,7 @@
                 <a href="#conserjeriaSecOperacion" class="is-active">Operación</a>
                 <a href="#conserjeriaAnalisisWrap">Análisis</a>
                 <a href="#conserjeriaAvisoWrap">Aviso</a>
-                <a href="#conserjeriaCatalogoWrap">Etiquetas</a>
+                <a href="#conserjeriaCatalogoWrap">Categorías</a>
             </nav>
 
             <section id="conserjeriaSecOperacion" class="conserjeria-modulo__sec" aria-labelledby="conserjeriaOperacionTitulo">
@@ -7554,21 +7591,22 @@
                 </div>
             </section>
 
-            <details class="form-section conserjeria-modulo__sec conserjeria-modulo__panel conserjeria-modulo__details" id="conserjeriaCatalogoWrap">
+            <details class="form-section conserjeria-modulo__sec conserjeria-modulo__panel conserjeria-modulo__details" id="conserjeriaCatalogoWrap" open>
                 <summary>
                     <span>
                         <span class="conserjeria-modulo__kicker">4 · Configuración</span>
-                        <strong style="display:block;font-size:0.95rem;">Tipificación</strong>
+                        <strong style="display:block;font-size:0.95rem;">Categorías de Conserjería WM</strong>
                     </span>
-                    <span style="font-size:0.78rem;color:var(--gray-600);font-weight:500;">Etiquetas compartidas con Conserjería WM y cuáles se ven aquí.</span>
+                    <span style="font-size:0.78rem;color:var(--gray-600);font-weight:500;">Edite nombre, color y visibilidad. El cambio llega a portería.</span>
                 </summary>
                 <div class="conserjeria-modulo__details-body">
-                    <p style="margin: 0 0 0.65rem 0; font-size: 0.8rem; color: var(--gray-600); line-height: 1.45;">Las etiquetas se usan en Conserjería WM para tipificar. Marque cuáles se ven en este módulo.</p>
-                    <div id="conserjeriaEtiquetasLista" style="display:flex;flex-direction:column;gap:0.4rem;margin-bottom:0.65rem;"></div>
-                    <div style="display:flex;flex-wrap:wrap;gap:0.4rem;align-items:center;">
-                        <input type="text" id="conserjeriaNuevaEtiquetaNombre" class="form-input" placeholder="Nueva etiqueta…" maxlength="40" style="padding:0.4rem 0.5rem;font-size:0.8rem;min-width:12rem;">
+                    <p style="margin: 0 0 0.65rem 0; font-size: 0.8rem; color: var(--gray-600); line-height: 1.45;">Estas son las categorías del selector de Conserjería WM. Puede cambiar el nombre y el color de las existentes; al renombrar, la bitácora conserva el mismo tipo. «En Conserjería» las muestra al registrar; «En Gestión» las incluye en este módulo.</p>
+                    <div id="conserjeriaEtiquetasLista" class="conserjeria-cat-lista"></div>
+                    <div style="display:flex;flex-wrap:wrap;gap:0.4rem;align-items:center;margin-top:0.65rem;">
+                        <input type="text" id="conserjeriaNuevaEtiquetaNombre" class="form-input" placeholder="Nueva categoría…" maxlength="40" style="padding:0.4rem 0.5rem;font-size:0.8rem;min-width:12rem;">
                         <input type="color" id="conserjeriaNuevaEtiquetaColor" value="#64748b" title="Color" style="width:2.2rem;height:1.8rem;padding:0;border:1px solid var(--border-color);background:transparent;">
-                        <button type="button" class="btn btn-primary" id="btnAgregarEtiquetaNovedad" style="padding:0.35rem 0.7rem;font-size:0.78rem;">Agregar etiqueta</button>
+                        <button type="button" class="btn btn-primary" id="btnAgregarEtiquetaNovedad" style="padding:0.35rem 0.7rem;font-size:0.78rem;">Agregar categoría</button>
+                        <span id="conserjeriaCatalogoEstado" style="font-size:0.75rem;color:var(--gray-500);"></span>
                     </div>
                 </div>
             </details>
@@ -14073,18 +14111,18 @@
         }
 
         var CG_ETIQUETAS_NOVEDAD_DEFAULT = [
-            { id: 'general', label: 'General', color: '#64748b', mostrar: false, sistema: true },
-            { id: 'aperturas', label: 'Apertura', color: '#22c55e', mostrar: true, sistema: true },
-            { id: 'mudanza', label: 'Mudanza', color: '#0ea5e9', mostrar: false, sistema: true },
-            { id: 'eventos', label: 'Eventos', color: '#8b5cf6', mostrar: false, sistema: true },
-            { id: 'mantenimiento', label: 'Mantenimiento', color: '#f59e0b', mostrar: false, sistema: true },
-            { id: 'seguridad', label: 'Seguridad', color: '#dc2626', mostrar: true, sistema: true },
-            { id: 'ronda', label: 'Ronda', color: '#14b8a6', mostrar: false, sistema: true },
-            { id: 'proveedores', label: 'Proveedores', color: '#6366f1', mostrar: false, sistema: true },
-            { id: 'incidencias', label: 'Incidentes', color: '#b91c1c', mostrar: true, sistema: true },
-            { id: 'reclamos', label: 'Reclamos', color: '#be185d', mostrar: true, sistema: true },
-            { id: 'multa', label: 'Multa', color: '#ea580c', mostrar: false, sistema: true },
-            { id: 'otros', label: 'Otros', color: '#78716c', mostrar: false, sistema: true }
+            { id: 'general', label: 'General', color: '#64748b', mostrar: false, activa: true, sistema: true },
+            { id: 'aperturas', label: 'Apertura', color: '#22c55e', mostrar: true, activa: true, sistema: true },
+            { id: 'mudanza', label: 'Mudanza', color: '#0ea5e9', mostrar: false, activa: true, sistema: true },
+            { id: 'eventos', label: 'Eventos', color: '#8b5cf6', mostrar: false, activa: true, sistema: true },
+            { id: 'mantenimiento', label: 'Mantenimiento', color: '#f59e0b', mostrar: false, activa: true, sistema: true },
+            { id: 'seguridad', label: 'Seguridad', color: '#dc2626', mostrar: true, activa: true, sistema: true },
+            { id: 'ronda', label: 'Ronda', color: '#14b8a6', mostrar: false, activa: true, sistema: true },
+            { id: 'proveedores', label: 'Proveedores', color: '#6366f1', mostrar: false, activa: true, sistema: true },
+            { id: 'incidencias', label: 'Incidentes', color: '#b91c1c', mostrar: true, activa: true, sistema: true },
+            { id: 'reclamos', label: 'Reclamos', color: '#be185d', mostrar: true, activa: true, sistema: true },
+            { id: 'multa', label: 'Multa', color: '#ea580c', mostrar: false, activa: true, sistema: true },
+            { id: 'otros', label: 'Otros', color: '#78716c', mostrar: false, activa: true, sistema: true }
         ];
         window._catalogoNovedadesGestion = window._catalogoNovedadesGestion || {
             etiquetas: CG_ETIQUETAS_NOVEDAD_DEFAULT.map(function (e) { return Object.assign({}, e); }),
@@ -14107,7 +14145,7 @@
             if (!label) return null;
             var id = String(raw.id || slugEtiquetaNovedadGestion(label)).trim() || slugEtiquetaNovedadGestion(label);
             var color = /^#[0-9a-fA-F]{6}$/.test(String(raw.color || '')) ? String(raw.color) : '#64748b';
-            return { id: id, label: label, color: color, mostrar: raw.mostrar !== false, sistema: !!raw.sistema };
+            return { id: id, label: label, color: color, mostrar: raw.mostrar !== false, activa: raw.activa !== false, sistema: !!raw.sistema };
         }
 
         function etiquetasNovedadGestion() {
@@ -14193,8 +14231,22 @@
                 edit.innerHTML = todas.map(function (e) {
                     return '<option value="' + escaparHtmlModuloConserjeria(e.label) + '" style="color:' + escaparHtmlModuloConserjeria(e.color) + ';">' + escaparHtmlModuloConserjeria(e.label) + '</option>';
                 }).join('');
-                if (curE) edit.value = curE;
+                var etCur = encontrarEtiquetaNovedadGestion(curE);
+                if (etCur) edit.value = etCur.label;
+                else if (curE) edit.value = curE;
             }
+        }
+
+        function marcarCatalogoNovedadesEstadoUi(txt) {
+            var el = document.getElementById('conserjeriaCatalogoEstado');
+            if (el) el.textContent = txt || '';
+        }
+
+        function syncCommitLabelsCatalogo(force) {
+            window._etiquetasLabelCommit = window._etiquetasLabelCommit || {};
+            etiquetasNovedadGestion().forEach(function (e) {
+                if (force || !window._etiquetasLabelCommit[e.id]) window._etiquetasLabelCommit[e.id] = e.label;
+            });
         }
 
         function pintarListaEtiquetasNovedadGestion() {
@@ -14202,14 +14254,18 @@
             if (!host) return;
             var list = etiquetasNovedadGestion();
             host.innerHTML = list.map(function (e) {
-                var del = e.sistema ? '' : '<button type="button" class="btn btn-danger btn-sm etiqueta-nov-del" data-id="' + escaparHtmlModuloConserjeria(e.id) + '" style="padding:0.15rem 0.4rem;font-size:0.68rem;">Eliminar</button>';
-                return '<div style="display:flex;flex-wrap:wrap;align-items:center;gap:0.4rem;padding:0.35rem 0.45rem;border:1px solid var(--border-color);border-radius:8px;border-left:3px solid ' + escaparHtmlModuloConserjeria(e.color) + ';">' +
-                    '<input type="text" class="form-input etiqueta-nov-label" data-id="' + escaparHtmlModuloConserjeria(e.id) + '" value="' + escaparHtmlModuloConserjeria(e.label) + '" maxlength="40" style="padding:0.25rem 0.4rem;font-size:0.78rem;width:9.5rem;">' +
-                    '<input type="color" class="etiqueta-nov-color" data-id="' + escaparHtmlModuloConserjeria(e.id) + '" value="' + escaparHtmlModuloConserjeria(e.color) + '" style="width:1.8rem;height:1.5rem;padding:0;border:1px solid var(--border-color);">' +
-                    '<label style="display:inline-flex;align-items:center;gap:0.3rem;font-size:0.75rem;color:var(--gray-700);"><input type="checkbox" class="etiqueta-nov-mostrar" data-id="' + escaparHtmlModuloConserjeria(e.id) + '"' + (e.mostrar ? ' checked' : '') + '> Mostrar en Gestión</label>' +
+                var del = e.sistema
+                    ? '<span class="conserjeria-cat-sistema">Sistema</span>'
+                    : '<button type="button" class="btn btn-danger btn-sm etiqueta-nov-del" data-id="' + escaparHtmlModuloConserjeria(e.id) + '" style="padding:0.15rem 0.4rem;font-size:0.68rem;">Eliminar</button>';
+                return '<div class="conserjeria-cat-row" style="border-left-color:' + escaparHtmlModuloConserjeria(e.color) + ';">' +
+                    '<input type="text" class="form-input etiqueta-nov-label" data-id="' + escaparHtmlModuloConserjeria(e.id) + '" value="' + escaparHtmlModuloConserjeria(e.label) + '" maxlength="40" title="Nombre en Conserjería WM" aria-label="Nombre de la categoría">' +
+                    '<input type="color" class="etiqueta-nov-color" data-id="' + escaparHtmlModuloConserjeria(e.id) + '" value="' + escaparHtmlModuloConserjeria(e.color) + '" title="Color en Conserjería WM" style="width:1.9rem;height:1.6rem;padding:0;border:1px solid var(--border-color);">' +
+                    '<label><input type="checkbox" class="etiqueta-nov-activa" data-id="' + escaparHtmlModuloConserjeria(e.id) + '"' + (e.activa !== false ? ' checked' : '') + '> En Conserjería</label>' +
+                    '<label><input type="checkbox" class="etiqueta-nov-mostrar" data-id="' + escaparHtmlModuloConserjeria(e.id) + '"' + (e.mostrar ? ' checked' : '') + '> En Gestión</label>' +
                     del +
                     '</div>';
             }).join('');
+            syncCommitLabelsCatalogo(false);
             pintarSelectsEtiquetasNovedadGestion();
         }
 
@@ -14224,11 +14280,14 @@
                 etiquetas: payload.etiquetas,
                 avisoMejorasActivo: payload.avisoMejorasActivo
             });
+            marcarCatalogoNovedadesEstadoUi('Guardando en Conserjería WM…');
             try {
                 var sdb = await obtenerDbConserjeriaOperativa();
                 await sdb.collection('pcsh_settings').doc('catalogoNovedades').set(payload);
+                marcarCatalogoNovedadesEstadoUi('Actualizado en Conserjería WM');
             } catch (e) {
                 console.warn('[catalogo-novedades]', e);
+                marcarCatalogoNovedadesEstadoUi('No se pudo guardar en Conserjería WM');
             }
         }
 
@@ -14255,8 +14314,12 @@
             window._catalogoNovedadesHuella = huella;
             var ae = document.activeElement;
             var editando = !!(ae && ae.classList && (ae.classList.contains('etiqueta-nov-label') || ae.classList.contains('etiqueta-nov-color')));
-            if (!editando) pintarListaEtiquetasNovedadGestion();
-            else pintarSelectsEtiquetasNovedadGestion();
+            if (!editando) {
+                syncCommitLabelsCatalogo(true);
+                pintarListaEtiquetasNovedadGestion();
+            } else {
+                pintarSelectsEtiquetasNovedadGestion();
+            }
             if (!igual && typeof pintarTablasModuloConserjeria === 'function') pintarTablasModuloConserjeria();
         }
 
@@ -14293,10 +14356,11 @@
             }, 400);
         }
 
-        function actualizarEtiquetaNovedadDesdeUi(id, campo, valor) {
+        function actualizarEtiquetaNovedadDesdeUi(id, campo, valor, opts) {
             var list = etiquetasNovedadGestion();
             var et = list.filter(function (e) { return e.id === id; })[0];
             if (!et) return;
+            opts = opts || {};
             if (campo === 'label') {
                 var lab = String(valor || '').trim().slice(0, 40);
                 if (lab) et.label = lab;
@@ -14306,15 +14370,67 @@
                 if (inpC && inpC.parentElement) inpC.parentElement.style.borderLeftColor = valor;
             } else if (campo === 'mostrar') {
                 et.mostrar = !!valor;
+            } else if (campo === 'activa') {
+                et.activa = !!valor;
             }
             window._catalogoNovedadesGestion.etiquetas = list;
             window._catalogoNovedadesHuella = huellaCatalogoNovedadesGestion();
             pintarSelectsEtiquetasNovedadGestion();
             programarGuardadoCatalogoNovedades();
+            if (campo === 'label' && opts.commit) confirmarRenombreEtiquetaNovedad(id);
             if (campo === 'mostrar' && typeof window.cargarModuloConserjeriaGestion === 'function') {
                 window.cargarModuloConserjeriaGestion({ forzar: true });
             } else if (typeof pintarTablasModuloConserjeria === 'function') {
                 pintarTablasModuloConserjeria();
+            }
+        }
+
+        function confirmarRenombreEtiquetaNovedad(id) {
+            var et = etiquetasNovedadGestion().filter(function (e) { return e.id === id; })[0];
+            if (!et) return;
+            window._etiquetasLabelCommit = window._etiquetasLabelCommit || {};
+            var prev = window._etiquetasLabelCommit[id];
+            if (prev && et.label && prev !== et.label) {
+                migrarNombreCategoriaNovedadesGestion(id, prev, et.label);
+            }
+            window._etiquetasLabelCommit[id] = et.label;
+        }
+
+        async function migrarNombreCategoriaNovedadesGestion(id, labelAnterior, labelNueva) {
+            var oldL = String(labelAnterior || '').trim();
+            var newL = String(labelNueva || '').trim();
+            if (!oldL || !newL || oldL === newL) return 0;
+            marcarCatalogoNovedadesEstadoUi('Actualizando bitácora de Conserjería WM…');
+            try {
+                var sdb = await obtenerDbConserjeriaOperativa();
+                var snap = await sdb.collection('novedades').where('categoria', '==', oldL).get();
+                var docs = [];
+                snap.forEach(function (doc) { docs.push(doc); });
+                var i = 0;
+                while (i < docs.length) {
+                    var batch = sdb.batch();
+                    var end = Math.min(i + 400, docs.length);
+                    for (; i < end; i++) batch.update(docs[i].ref, { categoria: newL });
+                    await batch.commit();
+                }
+                var cache = window._moduloConserjeriaCache;
+                if (cache && Array.isArray(cache.novedades)) {
+                    cache.novedades.forEach(function (n) {
+                        if (n && n.categoria === oldL) {
+                            n.categoria = newL;
+                            n.catClave = id;
+                        }
+                    });
+                    if (typeof pintarTablasModuloConserjeria === 'function') pintarTablasModuloConserjeria();
+                }
+                marcarCatalogoNovedadesEstadoUi(docs.length
+                    ? ('Nombre actualizado en Conserjería WM · ' + docs.length + ' novedad' + (docs.length === 1 ? '' : 'es'))
+                    : 'Nombre actualizado en Conserjería WM');
+                return docs.length;
+            } catch (eMig) {
+                console.warn('[catalogo-novedades] migrar', eMig);
+                marcarCatalogoNovedadesEstadoUi('El nombre se guardó; revise la bitácora si quedó alguna con el nombre anterior.');
+                return 0;
             }
         }
 
@@ -15363,8 +15479,9 @@
                     var id = String(t.getAttribute('data-id') || '');
                     if (!id) return;
                     if (t.classList.contains('etiqueta-nov-mostrar')) actualizarEtiquetaNovedadDesdeUi(id, 'mostrar', t.checked);
+                    if (t.classList.contains('etiqueta-nov-activa')) actualizarEtiquetaNovedadDesdeUi(id, 'activa', t.checked);
                     if (t.classList.contains('etiqueta-nov-color')) actualizarEtiquetaNovedadDesdeUi(id, 'color', t.value);
-                    if (t.classList.contains('etiqueta-nov-label')) actualizarEtiquetaNovedadDesdeUi(id, 'label', t.value);
+                    if (t.classList.contains('etiqueta-nov-label')) actualizarEtiquetaNovedadDesdeUi(id, 'label', t.value, { commit: true });
                 });
                 hostEt.addEventListener('input', function (e) {
                     var t = e.target;
@@ -15398,7 +15515,7 @@
                         if (typeof mostrarAlerta === 'function') mostrarAlerta('Esa etiqueta ya existe.', 'Etiqueta');
                         return;
                     }
-                    list.push({ id: id, label: lab, color: (col && col.value) || '#64748b', mostrar: true, sistema: false });
+                    list.push({ id: id, label: lab, color: (col && col.value) || '#64748b', mostrar: true, activa: true, sistema: false });
                     window._catalogoNovedadesGestion.etiquetas = list;
                     if (inp) inp.value = '';
                     pintarListaEtiquetasNovedadGestion();
@@ -15533,7 +15650,7 @@
                 if (cache.error && !nov.length) {
                     tbN.innerHTML = '<tr><td colspan="7" class="empty-state"><p>' + escaparHtmlModuloConserjeria(cache.error) + '</p></td></tr>';
                 } else if (!nov.length) {
-                    tbN.innerHTML = '<tr><td colspan="7" class="empty-state"><p>No hay novedades de las etiquetas marcadas para este mes. Active más etiquetas en Tipificación y avisos.</p></td></tr>';
+                    tbN.innerHTML = '<tr><td colspan="7" class="empty-state"><p>No hay novedades de las categorías marcadas para este mes. Active más en Categorías de Conserjería WM.</p></td></tr>';
                 } else {
                     tbN.innerHTML = nov.map(function (n) {
                         var st = estiloBadgeCategoriaNovedad(n.catClave);
@@ -17598,13 +17715,12 @@ document.getElementById('chatForm').onsubmit = function (e) {
             if (hid) hid.value = String(n.correlativo);
             if (info) info.textContent = etiquetaLibroNovedadGestion(n) + ' · ' + (n.conserje || '') + ' · ' + (n.fecha || '');
             if (cat) {
+                pintarSelectsEtiquetasNovedadGestion();
                 var raw = String(n.categoria || '');
-                if (Array.prototype.some.call(cat.options, function (o) { return o.value === raw; })) cat.value = raw;
-                else if (n.catClave === 'incidencias') cat.value = 'Incidentes';
-                else if (n.catClave === 'aperturas') cat.value = 'Apertura';
-                else if (n.catClave === 'reclamos') cat.value = 'Reclamos';
-                else if (n.catClave === 'seguridad') cat.value = 'Seguridad';
-                else cat.value = raw || 'General';
+                var et = encontrarEtiquetaNovedadGestion(raw) || encontrarEtiquetaNovedadGestion(n.catClave);
+                var want = et ? et.label : raw;
+                if (Array.prototype.some.call(cat.options, function (o) { return o.value === want; })) cat.value = want;
+                else cat.value = raw || (cat.options[0] ? cat.options[0].value : '');
             }
             if (txt) txt.value = n.texto || '';
             if (ni) ni.value = n.notaInterna || '';
