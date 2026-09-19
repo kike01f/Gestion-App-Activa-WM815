@@ -2709,11 +2709,14 @@
             gap: 0.9rem;
             align-items: start;
         }
-        .dashboard2-workspace-main,
-        .dashboard2-workspace-side {
+        .dashboard2-workspace-main {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
             min-width: 0;
         }
         .dashboard2-workspace-side {
+            min-width: 0;
             display: flex;
             flex-direction: column;
             gap: 0.75rem;
@@ -2728,7 +2731,8 @@
         }
         .dashboard2-workspace-main > .dashboard2-block,
         .dashboard2-workspace-side > .dashboard2-block,
-        .dashboard2-block--charts {
+        .dashboard2-block--charts,
+        .dashboard2-block--actions {
             background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
             border: 1px solid rgba(255,255,255,0.12);
             border-radius: 16px;
@@ -3186,13 +3190,13 @@
         /* Gráficos */
         .dashboard2-charts-grid {
             display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 0.75rem;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.45rem;
         }
         .dashboard2-chart-card {
             background: rgba(15, 23, 42, 0.55);
             border-radius: 12px;
-            padding: 0.7rem 0.75rem 0.8rem;
+            padding: 0.45rem 0.5rem 0.5rem;
             border: 1px solid rgba(255,255,255,0.1);
         }
         .dashboard2-chart-card:hover { border-color: rgba(117, 187, 33, 0.25); }
@@ -3440,12 +3444,14 @@
         .unit-cell-bienvenida.cola { color: #93c5fd; }
         .unit-cell-bienvenida.no { color: #fbbf24; }
         .dashboard2-chart-title {
-            margin: 0 0 0.5rem 0;
-            font-size: 0.88rem;
-            font-weight: 700;
-            color: #fff;
-            padding-bottom: 0.35rem;
-            border-bottom: 1px solid rgba(255,255,255,0.2);
+            margin: 0 0 0.3rem 0;
+            font-size: 0.68rem;
+            font-weight: 800;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            color: #94a3b8;
+            padding-bottom: 0.25rem;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
             display: flex;
             align-items: center;
             gap: 0.4rem;
@@ -3454,12 +3460,26 @@
         .dashboard2-chart-wrap {
             position: relative;
             width: 100%;
-            height: 180px;
-            background: rgba(0,0,0,0.2);
-            border-radius: var(--radius);
+            height: 118px;
+            background: rgba(0,0,0,0.18);
+            border-radius: 10px;
         }
-        .dashboard2-chart-wrap--tall { height: 260px; }
+        .dashboard2-chart-wrap--tall { height: 160px; }
         .dashboard2-chart-wrap canvas { display: block; width: 100% !important; height: 100% !important; }
+        .dashboard2-mail-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            max-width: 420px;
+        }
+        #dashboardBienvenidaBlock .dashboard2-card.ok .dashboard2-card-value { color: #4ade80; }
+        #dashboardBienvenidaBlock .dashboard2-card.no .dashboard2-card-value { color: #fbbf24; }
+
+        #dashboard .dashboard2-block--charts {
+            padding: 0.7rem 0.8rem 0.75rem;
+        }
+        #dashboard .dashboard2-block--charts .dashboard2-charts-grid {
+            grid-template-columns: 1fr 1fr !important;
+            gap: 0.45rem;
+        }
 
         /* Nómina y mantenciones */
         .dashboard2-extra-grid {
@@ -3521,139 +3541,145 @@
         }
         .dashboard2-btn-primary:hover { opacity: 0.9; }
 
-        /* Herramientas de la App en Panel 2 - presentación mejorada */
+        /* Herramientas: mismo patrón que tarjetas de módulos */
         #dashboard .dashboard2-block--actions {
-            margin-bottom: 1.25rem;
+            margin-bottom: 0;
         }
         #dashboard #dashboardHerramientasWrap {
-            background: linear-gradient(180deg, #1e293b 0%, #334155 100%);
-            border: 1px solid rgba(255,255,255,0.12);
-            border-radius: var(--radius-lg);
-            overflow: hidden;
+            background: transparent;
+            border: none;
+            border-radius: 0;
+            overflow: visible;
         }
         .dashboard2-herramientas-header {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            flex-wrap: wrap;
             gap: 0.5rem;
-            padding: 0.6rem 0.85rem;
+            padding: 0;
+            margin: 0 0 0.55rem 0;
             cursor: pointer;
-            transition: background 0.2s ease;
+            background: transparent;
         }
-        .dashboard2-herramientas-header:hover {
-            background: rgba(255,255,255,0.06);
-        }
-        .dashboard2-herramientas-header-left {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-        .dashboard2-herramientas-header-icon {
-            width: 2.25rem;
-            height: 2.25rem;
-            background: rgba(117, 187, 33, 0.25);
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
-            flex-shrink: 0;
-        }
-        .dashboard2-herramientas-header-text h2 {
-            margin: 0 0 0.15rem 0;
-            font-size: 1rem;
-            font-weight: 700;
-            color: #fff;
-        }
-        .dashboard2-herramientas-header-text p {
+        .dashboard2-herramientas-header:hover { background: transparent; }
+        .dashboard2-herramientas-header .dashboard2-block-title {
             margin: 0;
-            font-size: 0.75rem;
-            color: rgba(255,255,255,0.65);
+            flex: 1;
+            border-bottom: none;
+            padding-bottom: 0;
         }
         .dashboard2-herramientas-chevron {
-            font-size: 1rem;
-            color: rgba(255,255,255,0.5);
-            transition: transform 0.3s ease;
+            font-size: 0.7rem;
+            color: #94a3b8;
+            transition: transform 0.25s ease;
         }
         #dashboard #herramientasAppContent {
-            padding: 0.75rem;
-            border-top: 1px solid rgba(255,255,255,0.08);
+            padding: 0;
+            border-top: none;
         }
-        .dashboard2-herramientas-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 0.65rem;
+        .dashboard2-tools-grid {
+            align-items: stretch;
         }
-        .dashboard2-htool-card {
-            background: rgba(0,0,0,0.2);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 10px;
-            padding: 0.75rem;
-            transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
-        }
-        .dashboard2-htool-card:hover {
-            transform: translateY(-2px);
-            border-color: rgba(117, 187, 33, 0.3);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-        }
-        .dashboard2-htool-card--wide { grid-column: 1 / -1; }
-        .dashboard2-htool-card .htool-icon {
-            width: 1.85rem;
-            height: 1.85rem;
-            border-radius: 8px;
+        #dashboard .dashboard2-htool-card {
+            background: rgba(15, 23, 42, 0.72);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 12px;
+            padding: 0.6rem 0.65rem 0.7rem;
             display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1rem;
-            margin-bottom: 0.45rem;
+            flex-direction: column;
+            gap: 0.15rem;
         }
-        .dashboard2-htool-card .htool-icon--purple { background: rgba(139, 92, 246, 0.25); }
-        .dashboard2-htool-card .htool-icon--green { background: rgba(34, 197, 94, 0.25); }
-        .dashboard2-htool-card .htool-icon--amber { background: rgba(245, 158, 11, 0.25); }
-        .dashboard2-htool-card .htool-title {
-            margin: 0 0 0.25rem 0;
-            font-size: 0.88rem;
+        #dashboard .dashboard2-htool-card:hover {
+            transform: none;
+            border-color: rgba(117, 187, 33, 0.4);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        #dashboard .dashboard2-htool-card--wide {
+            grid-column: 1 / -1;
+            padding: 0.7rem 0.75rem 0.8rem;
+        }
+        #dashboard .dashboard2-htool-card .dashboard2-card-icon-wrap {
+            color: var(--primary-light);
+        }
+        .dashboard2-tool-link {
+            margin-top: 0.35rem;
+            width: 100%;
+            padding: 0.38rem 0.5rem;
+            border-radius: 8px;
+            border: 1px solid rgba(117, 187, 33, 0.35);
+            background: rgba(117, 187, 33, 0.16);
+            color: #fff;
+            font-size: 0.68rem;
             font-weight: 700;
+            letter-spacing: 0.03em;
+            text-transform: uppercase;
+            cursor: pointer;
+        }
+        .dashboard2-tool-link--ghost {
+            background: rgba(255,255,255,0.06);
+            border-color: rgba(255,255,255,0.14);
+        }
+        .dashboard2-tool-link--danger {
+            background: rgba(239, 68, 68, 0.16);
+            border-color: rgba(239, 68, 68, 0.35);
+        }
+        .dashboard2-tool-link:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+        }
+        .dashboard2-tool-period {
+            display: grid;
+            grid-template-columns: minmax(160px, 220px) 1fr;
+            gap: 0.55rem 0.75rem;
+            align-items: end;
+            margin-top: 0.55rem;
+        }
+        .dashboard2-tool-period--cierre {
+            margin-top: 0.7rem;
+            padding-top: 0.65rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            grid-template-columns: 1fr;
+        }
+        .dashboard2-tool-label {
+            display: block;
+            margin-bottom: 0.3rem;
+            font-size: 0.64rem;
+            font-weight: 800;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: #94a3b8;
+        }
+        .dashboard2-tool-select {
+            width: 100%;
+            padding: 0.4rem 0.5rem;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.2);
             color: #fff;
         }
-        .dashboard2-htool-card .htool-desc {
-            margin: 0 0 0.55rem 0;
-            font-size: 0.72rem;
-            color: rgba(255,255,255,0.72);
-            line-height: 1.4;
-        }
-        .dashboard2-htool-card .htool-toggle {
+        .dashboard2-tool-actions {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0.6rem 0.75rem;
-            background: rgba(255,255,255,0.08);
-            border-radius: 8px;
-            cursor: pointer;
-            transition: background 0.2s ease;
+            flex-wrap: wrap;
+            gap: 0.35rem;
         }
-        .dashboard2-htool-card .htool-toggle:hover { background: rgba(255,255,255,0.12); }
-        .dashboard2-htool-card .htool-toggle span:first-child { font-size: 0.8125rem; font-weight: 600; color: rgba(255,255,255,0.9); }
-        .dashboard2-htool-card .htool-content-inner {
-            margin-top: 1rem;
-            padding-top: 1rem;
+        .dashboard2-tool-actions .dashboard2-tool-link {
+            width: auto;
+            flex: 0 1 auto;
+        }
+        #dashboard .dashboard2-htool-card .htool-content-inner {
+            margin-top: 0.45rem;
+            padding-top: 0.45rem;
             border-top: 1px solid rgba(255,255,255,0.1);
         }
-        .dashboard2-htool-card .btn {
+        #dashboard .dashboard2-htool-card .btn {
             width: 100%;
-            padding: 0.6rem 1rem;
+            padding: 0.4rem 0.6rem;
             border-radius: 8px;
-            font-size: 0.875rem;
-            font-weight: 500;
+            font-size: 0.72rem;
+            font-weight: 700;
             border: none;
-            transition: opacity 0.2s ease, transform 0.2s ease;
         }
-        .dashboard2-htool-card .btn:hover { opacity: 0.9; transform: translateY(-1px); }
-        .dashboard2-htool-card label { color: rgba(255,255,255,0.85) !important; }
-        .dashboard2-htool-card select,
-        .dashboard2-htool-card input { background: rgba(0,0,0,0.3) !important; border-color: rgba(255,255,255,0.2) !important; color: #fff !important; }
-        .dashboard2-htool-card small { color: rgba(255,255,255,0.55) !important; }
         #dashboard #infoMesConsulta { background: rgba(0,0,0,0.2) !important; border-color: rgba(255,255,255,0.1) !important; color: rgba(255,255,255,0.85) !important; }
 
         #dashboard #dashboardMantenciones > div > div:first-child {
@@ -3716,6 +3742,8 @@
                 grid-template-columns: 1fr;
             }
             .dashboard2-kpi { min-height: 0; }
+            .dashboard2-tool-period { grid-template-columns: 1fr; }
+            .dashboard2-mail-grid { max-width: none; }
         }
 
         /* Responsive Design */
@@ -6649,49 +6677,37 @@
                         <div class="dashboard2-stats-stack" id="dashboard2StatsGrid"></div>
                     </div>
                 </section>
-                    </div>
-                    <aside class="dashboard2-workspace-side" aria-label="Operación del mes">
-                        <p class="dashboard2-col-kicker">Operación del mes</p>
-                <!-- 3. Nómina (seguimiento operativo) -->
-                <section class="dashboard2-block dashboard2-block--extra" aria-label="Nómina y seguimiento">
-                    <h2 class="dashboard2-block-title">Seguimiento operativo</h2>
-                    <div class="dashboard2-extra-grid dashboard2-extra-grid--solo">
-                        <div class="dashboard2-extra-col" id="dashboard2ProgresoNomina">
-                            <div id="dashboardProgresoNominaWrap" style="margin-top: 0; display: block;">
-                                <div style="background: transparent; border-radius: 0; border: none; padding: 0; box-shadow: none;">
-                                    <div id="progresoNomina"><!-- Se llena dinámicamente --></div>
-                                </div>
-                            </div>
-                        </div>
+                <!-- 6. Panorama del mes -->
+                <section class="dashboard2-block dashboard2-block--charts" aria-label="Panorama del mes">
+                    <h2 class="dashboard2-block-title">Panorama del mes</h2>
+                    <div class="dashboard2-charts-grid">
+                        <article class="dashboard2-chart-card">
+                            <h4 class="dashboard2-chart-title">Actividad por módulo</h4>
+                            <div class="dashboard2-chart-wrap"><canvas id="chartActividadModulos"></canvas></div>
+                        </article>
+                        <article class="dashboard2-chart-card">
+                            <h4 class="dashboard2-chart-title">Ocupación del edificio</h4>
+                            <div class="dashboard2-chart-wrap"><canvas id="chartOcupacionEdificio"></canvas></div>
+                        </article>
                     </div>
                 </section>
-                <!-- 4. Mantenciones compactas -->
-                <section class="dashboard2-block dashboard2-block--mantenciones" aria-label="Mantenciones del mes">
-                    <h2 class="dashboard2-block-title">Mantenciones</h2>
-                    <div class="dashboard2-extra-grid dashboard2-extra-grid--solo">
-                        <div class="dashboard2-extra-col" id="dashboard2Mantenciones">
-                            <div id="dashboardMantencionesWrap" style="margin-top: 0; padding: 0; background: transparent; border: none; border-radius: 0; box-shadow: none;">
-                                <div id="mantencionesMesActual" style="padding: 0.35rem 0;"><!-- Se llena dinámicamente --></div>
-                            </div>
-                        </div>
+                <!-- 5. Correos de bienvenida -->
+                <section class="dashboard2-block dashboard2-block--mail" id="dashboardBienvenidaBlock" aria-label="Correos de bienvenida">
+                    <h2 class="dashboard2-block-title">Correos de bienvenida</h2>
+                    <div class="dashboard2-stats-grid dashboard2-mail-grid">
+                        <article class="dashboard2-card ok">
+                            <div class="dashboard2-card-semaforo" style="background:#10b981"></div>
+                            <div class="dashboard2-card-title">Enviados</div>
+                            <div class="dashboard2-card-value" id="dashboardBienvenidaEnviadasCount">0</div>
+                            <div class="dashboard2-card-sub">Correo enviado</div>
+                        </article>
+                        <article class="dashboard2-card no">
+                            <div class="dashboard2-card-semaforo" style="background:#f59e0b"></div>
+                            <div class="dashboard2-card-title">Pendientes</div>
+                            <div class="dashboard2-card-value" id="dashboardBienvenidaPendientesCount">0</div>
+                            <div class="dashboard2-card-sub">Falta enviar</div>
+                        </article>
                     </div>
-                </section>
-                <!-- 5. Envíos de correo -->
-                <section class="dashboard2-block" id="dashboardBienvenidaBlock" aria-label="Envíos de correo">
-                    <h2 class="dashboard2-block-title">Envíos de correo</h2>
-                    <div class="bienvenida-panel bienvenida-panel--basico">
-                        <div class="bienvenida-panel-kpis bienvenida-panel-kpis--basico">
-                            <div class="bienvenida-panel-kpi ok">
-                                <div class="lbl">Enviados</div>
-                                <div class="val" id="dashboardBienvenidaEnviadasCount">0</div>
-                                <div class="hint">Correo enviado</div>
-                            </div>
-                            <div class="bienvenida-panel-kpi no">
-                                <div class="lbl">Pendientes</div>
-                                <div class="val" id="dashboardBienvenidaPendientesCount">0</div>
-                                <div class="hint">Falta enviar</div>
-                            </div>
-                        </div>
                         <div hidden>
                             <span id="dashboardBienvenidaCobertura"></span>
                             <span id="dashboardBienvenidaAtencion"></span>
@@ -6721,101 +6737,113 @@
                                 <div id="dashboardBienvenidaRegistro"></div>
                             </div>
                         </div>
+                </section>
+                    </div>
+                    <aside class="dashboard2-workspace-side" aria-label="Operación del mes">
+                        <p class="dashboard2-col-kicker">Operación del mes</p>
+                <!-- 3. Nómina (seguimiento operativo) -->
+                <section class="dashboard2-block dashboard2-block--extra" aria-label="Nómina y seguimiento">
+                    <h2 class="dashboard2-block-title">Seguimiento operativo</h2>
+                    <div class="dashboard2-extra-grid dashboard2-extra-grid--solo">
+                        <div class="dashboard2-extra-col" id="dashboard2ProgresoNomina">
+                            <div id="dashboardProgresoNominaWrap" style="margin-top: 0; display: block;">
+                                <div style="background: transparent; border-radius: 0; border: none; padding: 0; box-shadow: none;">
+                                    <div id="progresoNomina"><!-- Se llena dinámicamente --></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                <!-- 4. Mantenciones compactas -->
+                <section class="dashboard2-block dashboard2-block--mantenciones" aria-label="Mantenciones del mes">
+                    <h2 class="dashboard2-block-title">Mantenciones</h2>
+                    <div class="dashboard2-extra-grid dashboard2-extra-grid--solo">
+                        <div class="dashboard2-extra-col" id="dashboard2Mantenciones">
+                            <div id="dashboardMantencionesWrap" style="margin-top: 0; padding: 0; background: transparent; border: none; border-radius: 0; box-shadow: none;">
+                                <div id="mantencionesMesActual" style="padding: 0.35rem 0;"><!-- Se llena dinámicamente --></div>
+                            </div>
+                        </div>
                     </div>
                 </section>
                     </aside>
                 </div>
 
-                <!-- 6. Panorama del mes -->
-                <section class="dashboard2-block dashboard2-block--charts" aria-label="Panorama del mes">
-                    <h2 class="dashboard2-block-title">Panorama del mes</h2>
-                    <div class="dashboard2-charts-grid">
-                        <article class="dashboard2-chart-card">
-                            <h4 class="dashboard2-chart-title">Actividad por módulo</h4>
-                            <div class="dashboard2-chart-wrap"><canvas id="chartActividadModulos"></canvas></div>
-                        </article>
-                        <article class="dashboard2-chart-card">
-                            <h4 class="dashboard2-chart-title">Ocupación del edificio</h4>
-                            <div class="dashboard2-chart-wrap"><canvas id="chartOcupacionEdificio"></canvas></div>
-                        </article>
-                    </div>
-                </section>
-                <!-- 7. Acciones - Herramientas de la App -->
+                <!-- 7. Herramientas de la App -->
                 <section class="dashboard2-block dashboard2-block--actions" aria-label="Herramientas de la App">
                     <div id="dashboardHerramientasWrap">
-                        <div class="dashboard2-herramientas-header" onclick="toggleHerramientasApp()" role="button" tabindex="0" aria-expanded="false" aria-label="Expandir o contraer Herramientas de la App">
-                            <div class="dashboard2-herramientas-header-left">
-                                <div class="dashboard2-herramientas-header-icon">🔧</div>
-                                <div class="dashboard2-herramientas-header-text">
-                                    <h2>Herramientas de la App</h2>
-                                    <p>Módulos, respaldo, cargos y cierre de mes</p>
-                                </div>
-                            </div>
+                        <div class="dashboard2-herramientas-header" onclick="toggleHerramientasApp()" role="button" tabindex="0" aria-expanded="true" aria-label="Expandir o contraer Herramientas de la App">
+                            <h2 class="dashboard2-block-title">Herramientas de la App</h2>
                             <span id="herramientasAppToggle" class="dashboard2-herramientas-chevron">▼</span>
                         </div>
-                        <div id="herramientasAppContent" style="display: none;">
-                            <div class="dashboard2-herramientas-grid">
-                                <!-- Configuración de Módulos -->
-                                <div class="dashboard2-htool-card">
-                                    <div class="htool-icon htool-icon--purple">⚙️</div>
-                                    <h4 class="htool-title">Configuración de Módulos</h4>
-                                    <p class="htool-desc">Muestre u oculte módulos del menú y de los reportes.</p>
-                                    <div class="htool-toggle" onclick="toggleConfigModulos()">
-                                        <span>Ver configuración</span>
-                                        <span id="configModulosToggle">▼</span>
+                        <div id="herramientasAppContent" style="display: block;">
+                            <div class="dashboard2-mod-grupo">
+                                <h3 class="dashboard2-mod-grupo-title">Ajustes y respaldo</h3>
+                                <div class="dashboard2-stats-grid dashboard2-tools-grid">
+                                    <div class="dashboard2-card dashboard2-htool-card">
+                                        <div class="dashboard2-card-icon-wrap" aria-hidden="true">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                                        </div>
+                                        <div class="dashboard2-card-title">Módulos</div>
+                                        <div class="dashboard2-card-value">Menú</div>
+                                        <div class="dashboard2-card-sub">Mostrar u ocultar módulos</div>
+                                        <button type="button" class="dashboard2-tool-link" onclick="event.stopPropagation(); toggleConfigModulos();">
+                                            Ver configuración <span id="configModulosToggle">▼</span>
+                                        </button>
+                                        <div id="configModulosContent" style="display: none;" class="htool-content-inner">
+                                            <div id="listaModulosConfig" class="dashboard2-stats-grid"><!-- Se llena dinámicamente --></div>
+                                        </div>
                                     </div>
-                                    <div id="configModulosContent" style="display: none;" class="htool-content-inner">
-                                        <div id="listaModulosConfig" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 0.5rem;"><!-- Se llena dinámicamente --></div>
+                                    <div class="dashboard2-card dashboard2-htool-card">
+                                        <div class="dashboard2-card-icon-wrap" aria-hidden="true">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                        </div>
+                                        <div class="dashboard2-card-title">Respaldo</div>
+                                        <div class="dashboard2-card-value">Recuperar</div>
+                                        <div class="dashboard2-card-sub">Restaurar datos de Firestore</div>
+                                        <button class="dashboard2-tool-link" id="btnRecuperarFirestore">Recuperar todo</button>
+                                        <button class="dashboard2-tool-link dashboard2-tool-link--ghost" id="btnBuscarMeses">Buscar meses</button>
+                                        <div id="mesesDisponibles" style="display: none;" class="htool-content-inner"><!-- Se llena dinámicamente --></div>
+                                    </div>
+                                    <div class="dashboard2-card dashboard2-htool-card">
+                                        <div class="dashboard2-card-icon-wrap" aria-hidden="true">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+                                        </div>
+                                        <div class="dashboard2-card-title">Cargos</div>
+                                        <div class="dashboard2-card-value">Trasladar</div>
+                                        <div class="dashboard2-card-sub">Mover entre meses</div>
+                                        <button type="button" class="dashboard2-tool-link" id="btnAbrirTrasladarCargos">Abrir traslado</button>
                                     </div>
                                 </div>
-                                <!-- Recuperar datos Firestore -->
-                                <div class="dashboard2-htool-card">
-                                    <div class="htool-icon htool-icon--green">🔧</div>
-                                    <h4 class="htool-title">Recuperar Datos</h4>
-                                    <p class="htool-desc">Restaure datos de Firestore si un mes se cerró por error.</p>
-                                    <button class="btn" id="btnRecuperarFirestore" style="background: var(--primary); color: white; margin-bottom: 0.5rem;">⬇️ Recuperar Todo de Firestore</button>
-                                    <button class="btn" id="btnBuscarMeses" style="background: rgba(255,255,255,0.2); color: #fff; border: 1px solid rgba(255,255,255,0.3);">🔍 Buscar Meses Disponibles</button>
-                                    <div id="mesesDisponibles" style="display: none; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.1);"><!-- Se llena dinámicamente --></div>
-                                </div>
-                                <!-- Trasladar cargos entre meses -->
-                                <div class="dashboard2-htool-card">
-                                    <div class="htool-icon htool-icon--amber">↔</div>
-                                    <h4 class="htool-title">Trasladar Cargos entre Meses</h4>
-                                    <p class="htool-desc">Mueva cargos entre períodos, incluidos meses archivados.</p>
-                                    <button type="button" class="btn" id="btnAbrirTrasladarCargos" style="background: #f59e0b; color: #111827; font-weight: 600; border: none;">↔ Trasladar cargos</button>
-                                </div>
-                                <!-- Consultar meses y cierre -->
-                                <div class="dashboard2-htool-card dashboard2-htool-card--wide">
-                                    <div class="htool-icon htool-icon--amber">📅</div>
-                                    <h4 class="htool-title">Consultar Meses Anteriores y Cierre de Mes</h4>
-                                    <p class="htool-desc">Consulte historial, reporte PDF, reabra o cierre el mes.</p>
-                                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0.65rem; margin-bottom: 0.65rem;">
+                            </div>
+                            <div class="dashboard2-mod-grupo">
+                                <h3 class="dashboard2-mod-grupo-title">Período y cierre</h3>
+                                <div class="dashboard2-card dashboard2-htool-card dashboard2-htool-card--wide">
+                                    <div class="dashboard2-card-title">Consultar meses y cierre</div>
+                                    <div class="dashboard2-card-sub">Historial, reportes, reabrir o cerrar el mes</div>
+                                    <div class="dashboard2-tool-period">
                                         <div class="form-group" style="margin: 0;">
-                                            <label style="font-size: 0.8125rem; font-weight: 600; margin-bottom: 0.4rem; display: block;">Mes a consultar</label>
-                                            <select id="mesConsulta" style="width: 100%; padding: 0.6rem 0.75rem; border-radius: 8px; font-size: 0.875rem;"><option value="">Seleccione un mes...</option></select>
+                                            <label class="dashboard2-tool-label">Mes a consultar</label>
+                                            <select id="mesConsulta" class="dashboard2-tool-select"><option value="">Seleccione un mes...</option></select>
                                         </div>
-                                        <div class="form-group" style="margin: 0;">
-                                            <label style="font-size: 0.8125rem; font-weight: 600; margin-bottom: 0.4rem; display: block;">Acciones</label>
-                                            <div style="display: flex; gap: 0.4rem; flex-wrap: wrap;">
-                                                <button class="btn btn-primary" id="btnReportesConsulta" disabled style="min-width: 120px; padding: 0.5rem 0.75rem; font-size: 0.8125rem;">📄 Reportes PDF</button>
-                                                <button class="btn btn-warning" id="btnReabrirMes" disabled style="min-width: 100px; padding: 0.5rem 0.75rem; font-size: 0.8125rem;">🔓 Reabrir</button>
-                                                <button class="btn btn-danger" id="btnEliminarMes" disabled onclick="eliminarMesSeleccionado()" style="min-width: 100px; padding: 0.5rem 0.75rem; font-size: 0.8125rem;">🗑️ Eliminar</button>
-                                            </div>
-                                            <button class="btn btn-secondary" id="btnVolverActual" style="display: none; width: 100%; margin-top: 0.5rem; padding: 0.5rem; font-size: 0.8125rem;">Volver al Mes Actual</button>
+                                        <div class="dashboard2-tool-actions">
+                                            <button class="dashboard2-tool-link" id="btnReportesConsulta" disabled>Reportes PDF</button>
+                                            <button class="dashboard2-tool-link dashboard2-tool-link--ghost" id="btnReabrirMes" disabled>Reabrir</button>
+                                            <button class="dashboard2-tool-link dashboard2-tool-link--danger" id="btnEliminarMes" disabled onclick="eliminarMesSeleccionado()">Eliminar</button>
+                                            <button class="dashboard2-tool-link dashboard2-tool-link--ghost" id="btnVolverActual" style="display: none;">Volver al mes actual</button>
                                         </div>
                                     </div>
-                                    <div style="padding: 0.7rem 0.75rem; background: rgba(117, 187, 33, 0.12); border-radius: 10px; border: 1px solid rgba(117, 187, 33, 0.25); margin-bottom: 0.65rem;">
-                                        <h3 style="font-size: 0.9rem; font-weight: 600; color: #fff; margin: 0 0 0.5rem 0;">📊 Cierre de Mes y Reporte</h3>
-                                        <p style="font-size: 0.75rem; color: rgba(255,255,255,0.75); margin: 0 0 0.75rem 0;">Previsualice o descargue el reporte antes de cerrar el mes.</p>
-                                        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-                                            <button class="btn btn-info" id="btnPrevisualizarReporteTop" style="min-width: 140px; padding: 0.5rem 0.75rem; font-size: 0.8125rem; background: #0ea5e9; color: white; border: none;">👁️ Previsualizar</button>
-                                            <button class="btn btn-success" id="btnEnviarCorreoCierreMes" style="min-width: 160px; padding: 0.5rem 0.75rem; font-size: 0.8125rem; background: #10b981; color: white; border: none;">📧 Enviar por Correo</button>
-                                            <button class="btn btn-secondary" id="btnDescargarExcel" style="min-width: 120px; padding: 0.5rem 0.75rem; font-size: 0.8125rem; background: #10b981; color: white; border: none;">📊 Excel</button>
-                                            <button class="btn btn-success" id="btnCerrarMes" style="min-width: 160px; padding: 0.5rem 0.75rem; font-size: 0.8125rem; background: rgba(117, 187, 33, 0.9); color: white; border: none;">✅ Cerrar Mes</button>
+                                    <div class="dashboard2-tool-period dashboard2-tool-period--cierre">
+                                        <div class="dashboard2-card-title">Cierre de mes</div>
+                                        <div class="dashboard2-card-sub">Previsualice o descargue el reporte antes de cerrar</div>
+                                        <div class="dashboard2-tool-actions">
+                                            <button class="dashboard2-tool-link" id="btnPrevisualizarReporteTop">Previsualizar</button>
+                                            <button class="dashboard2-tool-link" id="btnEnviarCorreoCierreMes">Enviar por correo</button>
+                                            <button class="dashboard2-tool-link dashboard2-tool-link--ghost" id="btnDescargarExcel">Excel</button>
+                                            <button class="dashboard2-tool-link" id="btnCerrarMes">Cerrar mes</button>
                                         </div>
-                                        <small style="display: block; margin-top: 0.5rem; font-size: 0.7rem;">⚠️ Al cerrar, los datos se archivan hasta reabrir el mes.</small>
+                                        <p class="dashboard2-card-sub">Al cerrar, los datos se archivan hasta reabrir el mes.</p>
                                     </div>
-                                    <div id="infoMesConsulta" style="margin-top: 0.5rem; padding: 0.75rem; border-radius: 8px; display: none;"><!-- Se llena dinámicamente --></div>
+                                    <div id="infoMesConsulta" style="margin-top: 0.5rem; display: none;"><!-- Se llena dinámicamente --></div>
                                 </div>
                             </div>
                         </div>
@@ -35227,11 +35255,13 @@ document.getElementById('chatForm').onsubmit = function (e) {
         window.toggleHerramientasApp = function() {
             const content = document.getElementById('herramientasAppContent');
             const toggle = document.getElementById('herramientasAppToggle');
+            const header = document.querySelector('.dashboard2-herramientas-header');
             if (content && toggle) {
                 const isVisible = content.style.display !== 'none' && content.style.display !== '';
                 content.style.display = isVisible ? 'none' : 'block';
                 toggle.textContent = isVisible ? '▶' : '▼';
                 toggle.style.transform = isVisible ? 'rotate(0deg)' : 'rotate(180deg)';
+                if (header) header.setAttribute('aria-expanded', isVisible ? 'false' : 'true');
             }
         }
 
@@ -45733,10 +45763,15 @@ document.getElementById('chatForm').onsubmit = function (e) {
             var act = d.actividad || {};
             var modLabels = ['Mudanzas','Aperturas','Tarjetas','Espacios','Multas','Morosos','Caja','Mantenciones','Pagos Aseo','Insumos','Lecturas Agua','Postventa'];
             var modKeys = ['mudanzas','aperturas','tarjetas','espacios','multas','morosos','caja','mantenciones','pagosAseo','insumos','lecturasAgua','postventa'];
-            var modData = modKeys.map(function(k){ return act[k] || 0; });
-            var hasAct = modData.some(function(v){ return v > 0; });
+            var modData = [];
+            var modLabelsChart = [];
+            modKeys.forEach(function(k, i) {
+                var v = act[k] || 0;
+                if (v > 0) { modData.push(v); modLabelsChart.push(modLabels[i]); }
+            });
+            var hasAct = modData.length > 0;
             var modDataChart = hasAct ? modData : [1];
-            var modLabelsChart = hasAct ? modLabels : ['Sin datos'];
+            if (!hasAct) modLabelsChart = ['Sin datos'];
             var canvasAct = document.getElementById('chartActividadModulos');
             if (canvasAct) {
                 // Destruir chart existente antes de crear uno nuevo
@@ -45754,20 +45789,21 @@ document.getElementById('chatForm').onsubmit = function (e) {
                             backgroundColor: hasAct ? colores.concat(['rgba(107, 114, 128, 0.88)', 'rgba(156, 163, 175, 0.88)', 'rgba(168, 85, 247, 0.88)', 'rgba(45, 212, 191, 0.88)']) : ['rgba(209, 213, 219, 0.7)'],
                             borderWidth: 2,
                             borderColor: '#ffffff',
-                            hoverOffset: hoverOffset
+                            hoverOffset: 6
                         }]
                     },
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
-                        cutout: '50%',
+                            cutout: '62%',
                         plugins: {
                             legend: {
-                                position: 'right',
+                                position: 'bottom',
                                 labels: {
-                                    font: { size: 10 },
+                                    font: { size: 8 },
                                     color: '#fff',
-                                    padding: 10,
+                                    padding: 4,
+                                    boxWidth: 8,
                                     usePointStyle: true
                                 }
                             },
@@ -45842,7 +45878,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                             maintainAspectRatio: false,
                             cutout: '55%',
                             plugins: {
-                                legend: { position: 'bottom', labels: { color: '#fff' } },
+                                legend: { position: 'bottom', labels: { color: '#fff', font: { size: 8 }, padding: 4, boxWidth: 8, usePointStyle: true } },
                                 datalabels: hasOcup ? {
                                     formatter: function(value, ctx) {
                                         var total = ctx.dataset.data.reduce(function(a, b) { return a + b; }, 0);
