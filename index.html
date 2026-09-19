@@ -463,6 +463,49 @@
             display: block;
         }
 
+        .modulo-cabecera-con-mes {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 0.75rem 1.25rem;
+        }
+        .modulo-mes-consulta {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.45rem 0.55rem;
+            max-width: 26rem;
+        }
+        .modulo-mes-consulta label {
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: var(--gray-700);
+            white-space: nowrap;
+        }
+        .modulo-mes-consulta select {
+            min-width: 12.5rem;
+            padding: 0.45rem 0.65rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 0.82rem;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            cursor: pointer;
+        }
+        .modulo-mes-consulta .btn {
+            padding: 0.4rem 0.7rem;
+            font-size: 0.78rem;
+        }
+        .modulo-mes-estado {
+            flex: 1 1 100%;
+            font-size: 0.75rem;
+            line-height: 1.4;
+            color: var(--gray-600);
+        }
+        .modulo-mes-estado.es-archivo { color: #fcd34d; }
+        .modulo-mes-estado.es-reabierto { color: #86efac; }
+
         /* Espaciado cómodo para módulos (excluyendo dashboard) */
         .tab-content:not(#dashboard) {
             padding: 2.5rem 3rem;
@@ -30730,6 +30773,8 @@
                 }
                 select.appendChild(option);
             });
+            window._mesesSelectorModuloExtra = mesesArray;
+            if (typeof rellenarOpcionesMesesModulo === 'function') rellenarOpcionesMesesModulo();
         }
         
         // Función para eliminar un mes archivado (disponible globalmente)
@@ -30918,6 +30963,8 @@
             if (document.querySelector('#dashboard.tab-content.active') && typeof iniciarEscuchaDashboardTiempoReal === 'function') {
                 iniciarEscuchaDashboardTiempoReal();
             }
+            if (typeof sincronizarBarrasMesModulo === 'function') sincronizarBarrasMesModulo();
+            if (typeof recargarExtrasTrasCambioMes === 'function') recargarExtrasTrasCambioMes();
         };
         
         function cargarMesConsulta() {
@@ -30966,10 +31013,196 @@
             if (document.querySelector('#dashboard.tab-content.active') && typeof iniciarEscuchaDashboardTiempoReal === 'function') {
                 iniciarEscuchaDashboardTiempoReal();
             }
+            if (typeof sincronizarBarrasMesModulo === 'function') sincronizarBarrasMesModulo();
+            if (typeof recargarExtrasTrasCambioMes === 'function') recargarExtrasTrasCambioMes();
         };
         
         function volverMesActual() {
             window.volverMesActual();
+        }
+
+        function mesesCalendarioParaSelector(cantidad) {
+            var out = [];
+            var actual = (typeof obtenerMesActual === 'function') ? obtenerMesActual() : '';
+            if (!actual) return out;
+            out.push(actual);
+            var m = actual;
+            var i;
+            var n = cantidad || 18;
+            for (i = 0; i < n - 1; i++) {
+                m = typeof obtenerMesAnterior === 'function' ? obtenerMesAnterior(m) : '';
+                if (!m) break;
+                out.push(m);
+            }
+            return out;
+        }
+
+        function listarMesesSelectorModulo() {
+            var set = {};
+            var lista = [];
+            var push = function (mes) {
+                if (!mes || !/^\d{4}-\d{2}$/.test(mes) || set[mes]) return;
+                set[mes] = true;
+                lista.push(mes);
+            };
+            mesesCalendarioParaSelector(18).forEach(push);
+            (window._mesesSelectorModuloExtra || []).forEach(push);
+            return lista.sort().reverse();
+        }
+
+        function textoEstadoMesModulo() {
+            var actual = (typeof obtenerMesActual === 'function') ? obtenerMesActual() : '';
+            var visto = window.mesEnConsulta || actual;
+            var nombre = (visto && typeof obtenerNombreMes === 'function') ? obtenerNombreMes(visto) : (visto || '');
+            if (!window.mesEnConsulta || window.mesEnConsulta === actual) {
+                return { cls: '', txt: 'Viendo el mes actual' + (nombre ? ': ' + nombre : '') + '.' };
+            }
+            if (window.mesReabierto) {
+                return { cls: 'es-reabierto', txt: 'Consultando ' + nombre + ' (reabierto, se puede editar).' };
+            }
+            return { cls: 'es-archivo', txt: 'Consultando ' + nombre + ' (archivado, solo lectura).' };
+        }
+
+        function rellenarOpcionesMesesModulo() {
+            var meses = listarMesesSelectorModulo();
+            var actual = (typeof obtenerMesActual === 'function') ? obtenerMesActual() : '';
+            var visto = window.mesEnConsulta || actual;
+            var html = meses.map(function (mes) {
+                var label = (typeof obtenerNombreMes === 'function') ? obtenerNombreMes(mes) : mes;
+                if (mes === actual) label += ' (actual)';
+                return '<option value="' + mes + '">' + label + '</option>';
+            }).join('');
+            document.querySelectorAll('.select-mes-modulo').forEach(function (sel) {
+                var prev = sel.value;
+                sel.innerHTML = html;
+                sel.value = meses.indexOf(visto) !== -1 ? visto : (prev || actual);
+            });
+            var dash = document.getElementById('mesConsulta');
+            if (dash) {
+                var keep = dash.querySelector('option[value=""]');
+                var extra = meses.filter(function (mes) { return mes !== actual; }).map(function (mes) {
+                    var label = (typeof obtenerNombreMes === 'function') ? obtenerNombreMes(mes) : mes;
+                    return '<option value="' + mes + '">' + label + '</option>';
+                }).join('');
+                dash.innerHTML = '<option value="">Mes actual</option>' + extra;
+                dash.value = (window.mesEnConsulta && window.mesEnConsulta !== actual) ? window.mesEnConsulta : '';
+            }
+            sincronizarBarrasMesModulo();
+        }
+
+        function sincronizarBarrasMesModulo() {
+            var actual = (typeof obtenerMesActual === 'function') ? obtenerMesActual() : '';
+            var visto = window.mesEnConsulta || actual;
+            var est = textoEstadoMesModulo();
+            window._sincronizandoMesModulo = true;
+            document.querySelectorAll('.select-mes-modulo').forEach(function (sel) {
+                if (sel.value !== visto && sel.querySelector('option[value="' + visto + '"]')) sel.value = visto;
+            });
+            document.querySelectorAll('.modulo-mes-consulta').forEach(function (bar) {
+                var btn = bar.querySelector('.btn-volver-mes-modulo');
+                var st = bar.querySelector('.modulo-mes-estado');
+                if (btn) btn.style.display = (window.mesEnConsulta && window.mesEnConsulta !== actual) ? '' : 'none';
+                if (st) {
+                    st.className = 'modulo-mes-estado' + (est.cls ? ' ' + est.cls : '');
+                    st.textContent = est.txt;
+                }
+            });
+            window._sincronizandoMesModulo = false;
+        }
+
+        async function recargarExtrasTrasCambioMes() {
+            try {
+                if (typeof window.cargarPostventa === 'function') window.cargarPostventa();
+            } catch (eP) {}
+            try {
+                if (typeof cargarUnidadesOcupacion === 'function') cargarUnidadesOcupacion();
+            } catch (eO) {}
+            try {
+                if (typeof window.cargarModuloConserjeriaGestion === 'function') {
+                    window.cargarModuloConserjeriaGestion({ forzar: true });
+                }
+            } catch (eC) {}
+            try {
+                var actual = (typeof obtenerMesActual === 'function') ? obtenerMesActual() : '';
+                window.mesNominaConsulta = (window.mesEnConsulta && window.mesEnConsulta !== actual) ? window.mesEnConsulta : 'actual';
+                if (typeof cargarNominaPorMes === 'function') {
+                    await cargarNominaPorMes(window.mesNominaConsulta);
+                }
+            } catch (eN) {}
+            sincronizarBarrasMesModulo();
+        }
+
+        async function aplicarMesConsultaDesdeModulo(mesAnio) {
+            if (window._sincronizandoMesModulo) return;
+            var actual = (typeof obtenerMesActual === 'function') ? obtenerMesActual() : '';
+            var mes = String(mesAnio || '').trim();
+            if (!mes || mes === actual) {
+                if (typeof window.volverMesActual === 'function') window.volverMesActual();
+                return;
+            }
+            var dash = document.getElementById('mesConsulta');
+            if (dash) {
+                if (!dash.querySelector('option[value="' + mes + '"]')) {
+                    var opt = document.createElement('option');
+                    opt.value = mes;
+                    opt.textContent = (typeof obtenerNombreMes === 'function') ? obtenerNombreMes(mes) : mes;
+                    dash.appendChild(opt);
+                }
+                dash.value = mes;
+            }
+            if (typeof window.cargarMesConsulta === 'function') {
+                await window.cargarMesConsulta();
+            }
+        }
+
+        function montarSelectoresMesEnModulos() {
+            var skip = { dashboard: true, personalizacion: true, notificaciones: true };
+            document.querySelectorAll('.tab-content').forEach(function (tab) {
+                if (!tab.id || skip[tab.id] || tab.querySelector('.modulo-mes-consulta')) return;
+                var bar = document.createElement('div');
+                bar.className = 'modulo-mes-consulta';
+                bar.innerHTML =
+                    '<label for="selectMesModulo-' + tab.id + '">Consultar mes</label>' +
+                    '<select id="selectMesModulo-' + tab.id + '" class="select-mes-modulo" aria-label="Consultar mes del módulo"></select>' +
+                    '<button type="button" class="btn btn-secondary btn-volver-mes-modulo" style="display:none;">Mes actual</button>' +
+                    '<span class="modulo-mes-estado"></span>';
+                var head = tab.firstElementChild;
+                if (head) {
+                    head.classList.add('modulo-cabecera-con-mes');
+                    head.appendChild(bar);
+                } else {
+                    tab.insertBefore(bar, tab.firstChild);
+                }
+                var sel = bar.querySelector('.select-mes-modulo');
+                var btn = bar.querySelector('.btn-volver-mes-modulo');
+                if (sel) {
+                    sel.addEventListener('change', function () {
+                        aplicarMesConsultaDesdeModulo(sel.value);
+                    });
+                }
+                if (btn) {
+                    btn.addEventListener('click', function () {
+                        aplicarMesConsultaDesdeModulo('');
+                    });
+                }
+            });
+            var legacyNom = document.getElementById('selectMesNomina');
+            if (legacyNom && legacyNom.parentElement) legacyNom.parentElement.style.display = 'none';
+            var infoNom = document.getElementById('infoMesNomina');
+            if (infoNom) infoNom.style.display = 'none';
+            rellenarOpcionesMesesModulo();
+            refrescarListaMesesSelectorModulo();
+        }
+
+        async function refrescarListaMesesSelectorModulo() {
+            try {
+                if (typeof obtenerMesesDisponibles === 'function') {
+                    window._mesesSelectorModuloExtra = await obtenerMesesDisponibles();
+                }
+            } catch (e) {
+                window._mesesSelectorModuloExtra = window._mesesSelectorModuloExtra || [];
+            }
+            rellenarOpcionesMesesModulo();
         }
 
         // Función para generar reportes del mes consultado
@@ -42222,6 +42455,7 @@
             requestAnimationFrame(function() {
             inicializarIconosMenu();
             inicializarIconosTitulosModulos();
+            if (typeof montarSelectoresMesEnModulos === 'function') montarSelectoresMesEnModulos();
             try {
                 const menuToggleBtn = document.getElementById('menuToggleBtn');
                 const tabsMenu = document.getElementById('tabsMenu');
