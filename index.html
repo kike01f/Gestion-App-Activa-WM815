@@ -2675,14 +2675,34 @@
             margin-bottom: 1rem;
         }
         .dashboard2-block-title {
-            margin: 0 0 0.5rem 0;
-            font-size: 0.85rem;
+            margin: 0 0 0.55rem 0;
+            font-size: 0.95rem;
             font-weight: 700;
-            color: var(--gray-800);
-            padding-bottom: 0.35rem;
-            border-bottom: 2px solid var(--border-color);
+            color: #f8fafc;
+            padding-bottom: 0.4rem;
+            border-bottom: 2px solid rgba(255,255,255,0.16);
         }
-        #dashboard .dashboard2-block-title { color: var(--gray-800); }
+        #dashboard .dashboard2-block-title { color: #f8fafc; }
+
+        .dashboard2-atencion {
+            display: flex;
+            flex-direction: column;
+            gap: 0.65rem;
+            margin-bottom: 1.15rem;
+        }
+        #dashboard .dashboard-resumen-aviso,
+        #dashboard .multas-alerta {
+            color: #f8fafc;
+        }
+        #dashboard .dashboard-resumen-aviso h3,
+        #dashboard .multas-alerta strong { color: #fff; }
+        #dashboard .dashboard-resumen-aviso .sub,
+        #dashboard .dashboard-resumen-aviso .chip,
+        #dashboard .multas-alerta p {
+            color: #e2e8f0;
+        }
+        #dashboard .dashboard-resumen-aviso .lead,
+        #dashboard .dashboard-resumen-aviso li { color: #f1f5f9; }
 
         /* Resumen KPIs */
         .dashboard2-kpi-row {
@@ -2702,17 +2722,17 @@
             border-color: rgba(117, 187, 33, 0.35);
         }
         .dashboard2-kpi-label {
-            font-size: 0.575rem;
+            font-size: 0.75rem;
             font-weight: 700;
-            color: var(--gray-600);
+            color: #cbd5e1;
             text-transform: uppercase;
             letter-spacing: 0.05em;
             margin-bottom: 0.25rem;
         }
-        .dashboard2-kpi-value { font-size: 1rem; font-weight: 800; color: var(--gray-900); font-variant-numeric: tabular-nums; }
+        .dashboard2-kpi-value { font-size: 1.35rem; font-weight: 800; color: #fff; font-variant-numeric: tabular-nums; }
         .dashboard2-kpi-icon { width: 1rem; height: 1rem; margin-bottom: 0.3rem; color: var(--primary); }
         .dashboard2-kpi-semaforo { position: absolute; top: 0.5rem; right: 0.5rem; width: 8px; height: 8px; border-radius: 50%; box-shadow: 0 0 6px currentColor; }
-        .dashboard2-kpi-tendencia { margin-top: 0.3rem; font-size: 0.575rem; font-weight: 600; color: var(--gray-600); display: flex; align-items: center; gap: 0.25rem; min-height: 1em; }
+        .dashboard2-kpi-tendencia { margin-top: 0.3rem; font-size: 0.72rem; font-weight: 600; color: #cbd5e1; display: flex; align-items: center; gap: 0.25rem; min-height: 1em; }
         .dashboard2-loading { margin: 0; padding: 0.5rem; font-size: 0.75rem; color: var(--gray-600); }
         .dashboard2-stats-loading {
             padding: 1.25rem 1rem;
@@ -2731,26 +2751,27 @@
             gap: 0.85rem;
         }
         .dashboard2-mod-grupo-title {
-            margin: 0 0 0.4rem 0;
-            font-size: 0.7rem;
+            margin: 0 0 0.45rem 0;
+            font-size: 0.78rem;
             font-weight: 700;
             letter-spacing: 0.06em;
             text-transform: uppercase;
-            color: var(--gray-600);
+            color: #e2e8f0;
         }
         [data-theme="dark"] .dashboard2-mod-grupo-title {
-            color: var(--gray-500);
+            color: #e2e8f0;
         }
         .dashboard2-stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-            gap: 0.5rem;
+            grid-template-columns: repeat(auto-fill, minmax(176px, 1fr));
+            gap: 0.65rem;
         }
         .dashboard2-card {
             background: linear-gradient(180deg, #1e293b 0%, #334155 100%);
-            border: 1px solid rgba(255,255,255,0.12);
-            border-radius: 8px;
-            padding: 0.6rem;
+            border: 1px solid rgba(255,255,255,0.18);
+            border-radius: 10px;
+            padding: 0.85rem;
+            min-height: 7.25rem;
             position: relative;
             transition: border-color 0.2s ease, box-shadow 0.2s ease;
         }
@@ -2771,18 +2792,18 @@
         }
         .dashboard2-card-icon-wrap svg { width: 100%; height: 100%; }
         .dashboard2-card-title {
-            font-size: 0.625rem;
-            font-weight: 600;
-            color: rgba(255,255,255,0.85);
-            margin-bottom: 0.2rem;
-        }
-        .dashboard2-card-value {
-            font-size: 1.05rem;
+            font-size: 0.8rem;
             font-weight: 700;
             color: #fff;
-            margin-bottom: 0.15rem;
+            margin-bottom: 0.25rem;
         }
-        .dashboard2-card-sub { font-size: 0.575rem; color: rgba(255,255,255,0.75); line-height: 1.3; }
+        .dashboard2-card-value {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: #fff;
+            margin-bottom: 0.2rem;
+        }
+        .dashboard2-card-sub { font-size: 0.75rem; color: #e2e8f0; line-height: 1.4; }
         .dashboard2-empty-msg { margin: 0; padding: 1rem; font-size: 0.8rem; color: var(--gray-600); }
 
         /* Módulo Ocupación: pulso + mapa alineado por eje 01–15 */
@@ -3194,13 +3215,13 @@
             border: 1px solid var(--border-color);
             background: var(--bg-secondary);
         }
-        .bienvenida-panel-kpi .lbl { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em; color: var(--gray-600); }
-        .bienvenida-panel-kpi .val { font-size: 1.25rem; font-weight: 800; font-variant-numeric: tabular-nums; }
-        .bienvenida-panel-kpi .hint { margin-top: 0.12rem; font-size: 0.68rem; color: var(--gray-500); line-height: 1.3; }
-        .bienvenida-panel-kpi.ok .val { color: #059669; }
-        .bienvenida-panel-kpi.cola .val { color: #2563eb; }
-        .bienvenida-panel-kpi.no .val { color: #d97706; }
-        .bienvenida-panel-kpi.na .val { color: #6b7280; }
+        .bienvenida-panel-kpi .lbl { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em; color: #cbd5e1; }
+        .bienvenida-panel-kpi .val { font-size: 1.45rem; font-weight: 800; font-variant-numeric: tabular-nums; color: #fff; }
+        .bienvenida-panel-kpi .hint { margin-top: 0.12rem; font-size: 0.75rem; color: #cbd5e1; line-height: 1.3; }
+        .bienvenida-panel-kpi.ok .val { color: #4ade80; }
+        .bienvenida-panel-kpi.cola .val { color: #93c5fd; }
+        .bienvenida-panel-kpi.no .val { color: #fbbf24; }
+        .bienvenida-panel-kpi.na .val { color: #e2e8f0; }
         .bienvenida-panel-toolbar {
             display: flex;
             flex-wrap: wrap;
@@ -3359,7 +3380,7 @@
         .unit-cell-bienvenida.no { color: #fbbf24; }
         .dashboard2-chart-title {
             margin: 0 0 0.5rem 0;
-            font-size: 0.75rem;
+            font-size: 0.88rem;
             font-weight: 700;
             color: #fff;
             padding-bottom: 0.35rem;
@@ -3387,14 +3408,19 @@
         }
         .dashboard2-extra-col > div {
             background: linear-gradient(180deg, #1e293b 0%, #334155 100%) !important;
-            border: 1px solid rgba(255,255,255,0.1) !important;
+            border: 1px solid rgba(255,255,255,0.16) !important;
             border-radius: var(--radius-lg) !important;
-            padding: 0.75rem !important;
-            color: #fff !important;
+            padding: 0.85rem !important;
+            color: #f8fafc !important;
         }
         .dashboard2-extra-col[style*="display: none"] { display: none !important; }
+        #dashboard .dashboard2-extra-col,
+        #dashboard .dashboard2-extra-col *:not(svg):not(path):not(circle):not(rect):not(line) {
+            color: #f1f5f9 !important;
+        }
+        #dashboard .dashboard2-extra-col h3,
         #dashboard .dashboard2-extra-col h4,
-        #dashboard .dashboard2-extra-col p { color: #fff !important; }
+        #dashboard .dashboard2-extra-col strong { color: #fff !important; }
 
         /* Acciones */
         .dashboard2-herramientas-card {
@@ -3573,7 +3599,7 @@
             background: linear-gradient(135deg, rgba(117, 187, 33, 0.15) 0%, rgba(117, 187, 33, 0.08) 100%);
             border-color: rgba(117, 187, 33, 0.35);
         }
-        .arturito-placeholder { margin: 0; font-size: 0.875rem; color: var(--gray-600); }
+        .arturito-placeholder { margin: 0; font-size: 0.875rem; color: #e2e8f0; }
         #dashboard .arturito-mensajes-box .arturito-dashboard { width: 40px; height: 40px; flex-shrink: 0; }
         #dashboard .arturito-mensajes-box .arturito-dashboard svg { width: 100%; height: 100%; }
 
@@ -6457,6 +6483,7 @@
                 </div>
             </header>
             <div class="dashboard2-body">
+                <div class="dashboard2-atencion">
                 <!-- Cinta regaño (oculta por defecto si no hay mensaje) - misma distribución que activa -->
                 <div id="cintaRegano" class="cinta-regano" role="status" aria-live="polite">
                     <div class="cinta-regano-inner">
@@ -6475,7 +6502,15 @@
                         <p class="arturito-placeholder">Cargando asistente…</p>
                     </div>
                 </section>
-                <!-- 1. Pulso financiero -->
+                </div>
+                <!-- 1. Tarjetas de módulos: contenedor estable, solo se rellena el grid interior -->
+                <section class="dashboard2-block dashboard2-block--modulos" aria-label="Actividad por área">
+                    <h2 class="dashboard2-block-title">Actividad por área</h2>
+                    <div class="dashboard2-stats-wrap" id="dashboard2Stats">
+                        <div class="dashboard2-stats-stack" id="dashboard2StatsGrid"></div>
+                    </div>
+                </section>
+                <!-- 2. Pulso financiero -->
                 <section class="dashboard2-block dashboard2-block--kpis" aria-label="Pulso financiero del mes">
                     <h2 class="dashboard2-block-title">Pulso financiero</h2>
                     <div class="dashboard2-kpi-row" id="dashboard2KpiRow">
@@ -6500,13 +6535,6 @@
                             <div class="dashboard2-kpi-value" id="balanceNeto">$0</div>
                             <div id="tendenciaBalance" class="dashboard2-kpi-tendencia"><!-- Se llena dinámicamente --></div>
                         </div>
-                    </div>
-                </section>
-                <!-- 2. Tarjetas de módulos: contenedor estable, solo se rellena el grid interior -->
-                <section class="dashboard2-block dashboard2-block--modulos" aria-label="Actividad por área">
-                    <h2 class="dashboard2-block-title">Actividad por área</h2>
-                    <div class="dashboard2-stats-wrap" id="dashboard2Stats">
-                        <div class="dashboard2-stats-stack" id="dashboard2StatsGrid"></div>
                     </div>
                 </section>
                 <!-- 3. Nómina y mantenciones (seguimiento operativo) -->
@@ -16319,77 +16347,113 @@
                 }
                 acc.push(n);
             });
-            var critRe = /incend|fuego|filtraci|inund|robo|gas\b|ascensor|alarma|emergencia|urgente|amenaza/i;
-            var pendRe = /pendiente|por revisar|falta\b|sin resolver|esperando|seguimiento/i;
-            var temas = [
-                { re: /incend|fuego/i, t: 'Incendio o fuego' },
-                { re: /filtraci|inund/i, t: 'Filtración o inundación' },
-                { re: /robo|hurto/i, t: 'Robo' },
-                { re: /gas\b/i, t: 'Gas' },
-                { re: /ascensor/i, t: 'Ascensor' },
-                { re: /alarma|emergencia|urgente/i, t: 'Emergencia' },
-                { re: /reclamo|queja/i, t: 'Reclamo' },
-                { re: /ruido|fiesta/i, t: 'Ruidos' },
-                { re: /da[nñ]o|falla|desperfecto/i, t: 'Falla o daño' }
-            ];
-            function deptoDe(n) {
-                var t = String((n && n.texto) || '');
-                var m = t.match(/(?:dpto\.?|depto\.?|departamento|unidad|#)\s*(\d{2,4})\b/i) || t.match(/\b(\d{3,4})\b/);
-                return m ? m[1] : '';
+            function normTxt(s) {
+                return String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, ' ').trim();
             }
-            function temaDe(n) {
-                var txt = String((n && n.texto) || '');
-                var i;
-                for (i = 0; i < temas.length; i++) if (temas[i].re.test(txt)) return temas[i].t;
-                var cat = String((n && n.categoria) || '').trim();
-                if (cat && !/^(general|otros)$/i.test(cat)) return cat;
-                return 'Situación';
+            function pal(norm, p) {
+                p = String(p || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+                return p ? new RegExp('(?:^|[^a-z0-9])' + p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '(?:[^a-z0-9]|$)').test(norm) : false;
+            }
+            function alguna(norm, arr) {
+                var i; for (i = 0; i < arr.length; i++) if (pal(norm, arr[i])) return true; return false;
+            }
+            function deptosDe(texto) {
+                var t = String(texto || '').replace(/\b\d{1,2}\.?\d{3}\.?\d{3}-[\dkK]\b/g, ' ').replace(/\+?569\d{8}/g, ' ').replace(/#\s*\d{2,5}/g, ' ');
+                var out = []; var re = /(?:dpto\.?|depto\.?|departamento|unidad)\s*(\d{2,4})\b/ig; var m;
+                while ((m = re.exec(t))) if (out.indexOf(m[1]) < 0) out.push(m[1]);
+                return out;
+            }
+            function interpretar(n) {
+                var texto = String((n && n.texto) || '').replace(/\s+/g, ' ').trim();
+                var norm = normTxt(texto);
+                var dest = !!(n && (n.relevante || n.destacada));
+                var cat = String((n && n.categoria) || 'general').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+                var corrigeM = texto.match(/reemplaza(?:\s+\w+){0,4}\s*#\s*(\d{2,5})/i);
+                var corrige = corrigeM ? Number(corrigeM[1]) : 0;
+                var esCorr = !!(corrige || /error de dedo|queda sin efecto/.test(norm));
+                var cuerpo = texto;
+                if (esCorr) {
+                    var cortado = texto.replace(/^.*?reemplaza(?:\s+la)?\s*#\s*\d+\s*/i, '').trim();
+                    if (cortado && cortado.length > 20) { cuerpo = cortado; norm = normTxt(cuerpo); }
+                }
+                var deptos = deptosDe(cuerpo); if (!deptos.length) deptos = deptosDe(texto);
+                var depto = deptos[0] || '';
+                var deptoTxt = depto ? (' — Depto. ' + (deptos.length > 1 ? deptos.join(', ') : depto)) : '';
+                var tipo = 'otro'; var titulo = 'Novedad'; var prio = 'general'; var estado = 'Informativo';
+                var pend = /pendiente|por revisar|falta\b|sin resolver|esperando|derivar|informar a gesti/.test(norm);
+                var ruido = false;
+                if (/(recibo|recibi|recibio|entrego|entrega de)\s+turno/.test(norm) && !alguna(norm, ['incendio', 'filtracion', 'ascensor', 'emergencia'])) {
+                    tipo = 'relevo'; ruido = true; titulo = /entreg/.test(norm) ? 'Entrega de turno' : 'Recepción de turno';
+                } else if (alguna(norm, ['incendio', 'fuego', 'humo', 'inundacion', 'filtracion', 'rebalse', 'asalto', 'robo', 'hurto', 'accidente', 'agresion', 'violencia'])) {
+                    tipo = 'emergencia'; prio = 'critica'; estado = 'Urgente';
+                    titulo = (pal(norm, 'incendio') || pal(norm, 'fuego') ? 'Incendio o humo' : (pal(norm, 'filtracion') || pal(norm, 'inundacion') ? 'Filtración o agua' : 'Emergencia')) + deptoTxt;
+                } else if ((pal(norm, 'gas') && (pal(norm, 'olor') || pal(norm, 'fuga') || /corte de gas/.test(norm))) || (pal(norm, 'fuga') && !/llave/.test(norm)) || /corte de (luz|agua|gas)/.test(norm)) {
+                    tipo = 'servicio'; titulo = 'Corte o fuga' + deptoTxt; prio = 'critica'; estado = 'Urgente';
+                } else if (alguna(norm, ['ascensor', 'elevador'])) {
+                    tipo = 'ascensor'; titulo = 'Ascensor' + deptoTxt; prio = (dest || /detenid|no funciona|fuera de servicio/.test(norm)) ? 'critica' : 'importante';
+                    estado = prio === 'critica' ? 'Urgente' : 'En seguimiento';
+                } else if (pal(norm, 'llave') && /casillero|retir|deja llave|llave de acceso/.test(norm)) {
+                    tipo = 'llave'; titulo = 'Llave en casillero' + deptoTxt; prio = dest ? 'importante' : 'general'; estado = /retir/.test(norm) ? 'Por retirar' : 'Informativo';
+                    pend = pend || /queda en casillero|sera retirada/.test(norm);
+                } else if (/autoriz/.test(norm) && /ingres|entrar|visitar/.test(norm)) {
+                    tipo = 'autorizacion'; titulo = 'Autorización de ingreso' + deptoTxt; prio = dest ? 'importante' : 'general';
+                } else if (/quincho|parrilla|salon/.test(norm) && /ocupad|uso|aseo|reserva/.test(norm)) {
+                    tipo = 'espacio'; titulo = 'Uso de espacio común' + deptoTxt;
+                } else if (alguna(norm, ['reclamo', 'queja'])) {
+                    tipo = 'reclamo'; titulo = 'Reclamo' + deptoTxt; prio = 'importante';
+                } else if (alguna(norm, ['multa', 'infraccion']) || cat === 'multa') {
+                    tipo = 'multa'; titulo = 'Multa o reglamento' + deptoTxt; prio = 'importante';
+                } else {
+                    tipo = (cat && cat !== 'general' && cat !== 'otros') ? cat : 'otro';
+                    titulo = ((cat && cat !== 'general' && cat !== 'otros') ? cat.charAt(0).toUpperCase() + cat.slice(1) : 'Novedad') + deptoTxt;
+                    if (dest) prio = 'importante';
+                }
+                if (esCorr) titulo += corrige ? (' (corrige #' + corrige + ')') : ' (corrección)';
+                if (pend && prio === 'general') prio = 'importante';
+                if (pend) estado = 'Pendiente';
+                var hecho = cuerpo.replace(/^por error de dedo[,:]?\s*/i, '').replace(/^(?:esta\s+)?novedad reemplaza(?:\s+la)?\s*#\s*\d+\s*/i, '');
+                return { tipo: tipo, titulo: titulo, depto: depto, prioridad: prio, pendiente: !!pend, estado: estado, ruido: ruido, hecho: hecho.slice(0, 180), texto: texto };
             }
             var map = {};
             items.forEach(function (n) {
-                var txt = String(n.texto || '').replace(/\s+/g, ' ').trim();
-                var depto = deptoDe(n);
-                var tema = temaDe(n);
-                var key = (tema !== 'Situación' ? tema + '|' + depto : (depto ? 'depto|' + depto : 'solo|' + (n.correlativo || '')));
-                var prio = critRe.test(txt) ? 'critica' : ((n.relevante || n.destacada || pendRe.test(txt) || /reclamo|multa|seguridad|incidente/i.test(String(n.categoria || ''))) ? 'importante' : 'general');
-                var pend = pendRe.test(txt);
+                var ix = interpretar(n);
+                var key = ix.ruido ? ('ruido|' + ix.tipo) : (ix.tipo !== 'otro' ? (ix.tipo + '|' + (ix.depto || '')) : (ix.depto ? ('depto|' + ix.depto) : ('solo|' + (n.correlativo || ''))));
                 if (!map[key]) {
-                    map[key] = {
-                        titulo: tema + (depto ? ' — Depto. ' + depto : ''),
-                        prioridad: prio,
-                        estado: pend ? 'Pendiente' : (prio === 'critica' ? 'Urgente' : 'Informativo'),
-                        cors: [],
-                        libros: [],
-                        bullets: [],
-                        pendiente: false
-                    };
+                    map[key] = { titulo: ix.titulo, prioridad: ix.prioridad, estado: ix.estado, cors: [], libros: [], bullets: [], pendiente: false, ruido: ix.ruido, tipo: ix.tipo };
                 }
                 var g = map[key];
                 g.cors.push(Number(n.correlativo) || 0);
                 g.libros.push('#' + (n.correlativo || '—'));
-                g.bullets.push((pcshResumenGestionFechaCorta(n.fecha) ? pcshResumenGestionFechaCorta(n.fecha) + ' ' : '') + (String(n.hora || '').slice(0, 5) || '—') + ' · ' + txt.slice(0, 180));
-                if (prio === 'critica') g.prioridad = 'critica';
-                else if (prio === 'importante' && g.prioridad !== 'critica') g.prioridad = 'importante';
-                if (pend) {
-                    g.pendiente = true;
-                    g.estado = 'Pendiente';
-                }
+                g.bullets.push((pcshResumenGestionFechaCorta(n.fecha) ? pcshResumenGestionFechaCorta(n.fecha) + ' ' : '') + (String(n.hora || '').slice(0, 5) || '—') + ' · ' + (ix.hecho || ix.texto).slice(0, 180));
+                n._tipoResumen = ix.tipo;
+                if (ix.prioridad === 'critica') g.prioridad = 'critica';
+                else if (ix.prioridad === 'importante' && g.prioridad !== 'critica') g.prioridad = 'importante';
+                if (ix.pendiente) { g.pendiente = true; g.estado = 'Pendiente'; }
+                if (ix.titulo && !g.ruido) g.titulo = ix.titulo;
             });
-            var grupos = Object.keys(map).map(function (k) { return map[k]; });
+            var gruposAll = Object.keys(map).map(function (k) { return map[k]; });
+            var grupos = gruposAll.filter(function (g) { return !g.ruido; });
             var criticas = grupos.filter(function (g) { return g.prioridad === 'critica'; });
             var importantes = grupos.filter(function (g) { return g.prioridad === 'importante' && !g.pendiente; });
             var pendientes = grupos.filter(function (g) { return g.pendiente; });
             var generales = grupos.filter(function (g) { return g.prioridad === 'general' && !g.pendiente; });
+            var nOp = items.filter(function (n) { return n._tipoResumen !== 'relevo'; }).length;
+            var nRuido = items.length - nOp;
             var resumen = '';
             if (!items.length) {
                 resumen = 'No se registraron novedades en turnos cerrados de los últimos dos días (' + ventanaTxt + ').';
+            } else if (!nOp) {
+                resumen = 'En los últimos dos días de turnos cerrados (' + ventanaTxt + ') solo hubo relevos de turno, sin novedades operativas.';
             } else {
                 var bits = [];
-                bits.push('En los últimos dos días de turnos cerrados (' + ventanaTxt + ') se registraron ' + items.length + (items.length === 1 ? ' novedad' : ' novedades') + '.');
-                if (criticas.length) bits.push((criticas.length === 1 ? 'Situación crítica: ' : 'Situaciones críticas: ') + criticas.slice(0, 3).map(function (g) { return g.titulo; }).join('; ') + '.');
-                else bits.push('No se identifican situaciones críticas.');
+                bits.push('En los últimos dos días de turnos cerrados (' + ventanaTxt + ') hay ' + nOp + (nOp === 1 ? ' novedad operativa' : ' novedades operativas') + (nRuido ? ' (se omiten ' + nRuido + ' relevos de turno)' : '') + '.');
+                if (criticas.length) bits.push((criticas.length === 1 ? 'Crítico: ' : 'Críticos: ') + criticas.slice(0, 3).map(function (g) { return g.titulo; }).join('; ') + '.');
+                else bits.push('No hay emergencias ni cortes de servicio.');
                 if (pendientes.length) bits.push((pendientes.length === 1 ? 'Pendiente: ' : 'Pendientes: ') + pendientes.slice(0, 3).map(function (g) { return g.titulo; }).join('; ') + '.');
-                if (importantes.length) bits.push('Lo más relevante: ' + importantes.slice(0, 2).map(function (g) { return g.titulo; }).join('; ') + '.');
+                var hechos = grupos.filter(function (g) {
+                    return g.prioridad !== 'critica' && !g.pendiente && (g.tipo === 'llave' || g.tipo === 'autorizacion' || g.tipo === 'espacio' || g.prioridad === 'importante');
+                }).slice(0, 4);
+                if (hechos.length) bits.push('Hechos: ' + hechos.map(function (g) { return g.titulo; }).join('; ') + '.');
                 resumen = bits.join(' ');
             }
             return {
@@ -16399,11 +16463,12 @@
                 generadoAt: new Date().toISOString(),
                 origen: 'gestion-wm',
                 motor: 'local',
-                huella: items.map(function (n) {
-                    return [n.correlativo, String(n.texto || '').length, n.relevante ? 1 : 0, n.destacada ? 1 : 0, (n.categoria || '')].join(':');
+                huella: 'v2|' + items.map(function (n) {
+                    return [n.correlativo, String(n.texto || '').length, n.relevante ? 1 : 0, n.destacada ? 1 : 0, (n.categoria || ''), n._tipoResumen || ''].join(':');
                 }).join('|'),
-                total: items.length,
-                vacio: !items.length,
+                total: nOp,
+                totalBruto: items.length,
+                vacio: !nOp,
                 conteos: { critica: criticas.length, importante: importantes.length, pendiente: pendientes.length, general: generales.length },
                 resumenGeneral: resumen,
                 criticas: criticas.slice(0, 8),
@@ -16421,7 +16486,7 @@
             var toneClass = dia.vacio ? ' is-vacio' : (c.critica ? ' is-crit' : '');
             var destacados = [].concat(dia.criticas || [], dia.importantes || [], dia.pendientes || []).slice(0, 6);
             var html = '<h3>Resumen de novedades</h3>';
-            html += '<p class="sub">' + esc(dia.ventana || pcshResumenGestionFechaVentanaLarga(dia.ymd)) + ' · ' + (dia.total || 0) + ' novedades de turnos cerrados · emitido automáticamente</p>';
+            html += '<p class="sub">' + esc(dia.ventana || pcshResumenGestionFechaVentanaLarga(dia.ymd)) + ' · ' + (dia.total || 0) + ' novedades operativas · emitido automáticamente</p>';
             html += '<div class="chips">';
             html += '<span class="chip">🔴 ' + (c.critica || 0) + ' críticas</span>';
             html += '<span class="chip">🟠 ' + (c.importante || 0) + ' importantes</span>';
@@ -16484,10 +16549,14 @@
                         return mem;
                     }
                     var cache = await pcshResumenGestionLeer(ymd);
-                    var dia = (cache && cache.huella && cache.huella === local.huella) ? cache : local;
-                    if (!cache || cache.huella !== local.huella) {
-                        try { await pcshResumenGestionGuardar(local); } catch (eG) {}
+                    var dia;
+                    if (cache && (cache.huella === local.huella || cache.origen === 'conserjeria-wm')) {
+                        dia = cache;
+                    } else {
                         dia = local;
+                        if (!cache || cache.huella !== local.huella) {
+                            try { await pcshResumenGestionGuardar(local); } catch (eG) {}
+                        }
                     }
                     window._pcshResumenDiaHoyGestion = dia;
                     pcshResumenGestionPintarAviso(dia);
@@ -46631,7 +46700,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 if (balanceNetoEl) {
                     balanceNetoEl.textContent = fmt(d.balanceNeto);
                     balanceNetoEl.setAttribute('data-valor', (d.balanceNeto || 0).toString());
-                    balanceNetoEl.style.color = ((d.balanceNeto || 0) >= 0 ? 'white' : '#fecaca');
+                    balanceNetoEl.style.color = ((d.balanceNeto || 0) >= 0 ? '#fff' : '#fca5a5');
                 }
 
                 var kpiRowEl = document.getElementById('dashboard2KpiRow');
