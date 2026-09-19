@@ -939,7 +939,8 @@
         .multas-filtro-estados { display: flex; flex-wrap: wrap; gap: 0.3rem; margin: 0 0 0.65rem; }
         .multas-filtro-estados button {
             border: 1px solid var(--border-color);
-            background: var(--bg-secondary);
+            background: var(--bg-primary);
+            color: var(--text-primary);
             border-radius: 999px;
             padding: 0.2rem 0.55rem;
             font-size: 0.7rem;
@@ -948,8 +949,65 @@
             font-family: inherit;
         }
         .multas-filtro-estados button.is-on {
-            background: rgba(117, 187, 33, 0.16);
-            border-color: rgba(117, 187, 33, 0.45);
+            background: var(--primary);
+            border-color: var(--primary);
+            color: #111827;
+        }
+        [data-theme="dark"] #multas .multas-filtro-estados button {
+            background: #374151;
+            color: #f9fafb;
+            border-color: #9ca3af;
+        }
+        [data-theme="dark"] #multas .multas-filtro-estados button.is-on {
+            background: #86c933;
+            border-color: #a3e635;
+            color: #111827;
+        }
+        [data-theme="dark"] #multas .btn-primary,
+        [data-theme="dark"] .multas-alerta .btn-primary,
+        [data-theme="dark"] #modalDetalleMulta .btn-primary {
+            background: #86c933;
+            color: #111827;
+            font-weight: 700;
+        }
+        [data-theme="dark"] #multas .btn-primary:hover,
+        [data-theme="dark"] .multas-alerta .btn-primary:hover,
+        [data-theme="dark"] #modalDetalleMulta .btn-primary:hover {
+            background: #a3e635;
+            color: #111827;
+        }
+        [data-theme="dark"] #multas .btn-secondary,
+        [data-theme="dark"] #modalDetalleMulta .btn-secondary {
+            background: #4b5563;
+            color: #f9fafb;
+            border: 1px solid #d1d5db;
+        }
+        [data-theme="dark"] #multas .btn-secondary:hover,
+        [data-theme="dark"] #modalDetalleMulta .btn-secondary:hover {
+            background: #6b7280;
+            color: #ffffff;
+        }
+        [data-theme="dark"] #multas .btn-warning {
+            background: #f59e0b;
+            color: #111827;
+            font-weight: 700;
+            border: none;
+        }
+        [data-theme="dark"] #multas input[type="file"] {
+            color: var(--text-primary);
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+        }
+        [data-theme="dark"] #multas input[type="file"]::file-selector-button {
+            background: #4b5563;
+            color: #f9fafb;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            padding: 0.35rem 0.7rem;
+            margin-right: 0.65rem;
+            font-weight: 700;
+            cursor: pointer;
         }
         #modalDetalleMulta .multa-detalle-sec { margin: 0 0 0.85rem; }
         #modalDetalleMulta .multa-detalle-sec h4 { margin: 0 0 0.35rem; font-size: 0.82rem; }
@@ -24649,7 +24707,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 const esAnul = multaEsRegistroAnulacion(m);
                 const tipoLabel = esAnul
                     ? '<span style="display:inline-block;padding:0.15rem 0.45rem;border-radius:6px;font-size:0.75rem;font-weight:600;background:#d1fae5;color:#065f46;">Anulación</span>'
-                    : '<span style="display:inline-block;padding:0.15rem 0.45rem;border-radius:6px;font-size:0.75rem;font-weight:600;background:var(--bg-tertiary);color:var(--text-secondary);">Multa</span>';
+                    : '<span style="display:inline-block;padding:0.15rem 0.45rem;border-radius:6px;font-size:0.75rem;font-weight:600;background:#374151;color:#f9fafb;border:1px solid #9ca3af;">Multa</span>';
                 const montoCell = esAnul ? '—' : `${(m.monto || 0).toFixed(2)} ${m.tipoUnidad || 'UF'}`;
                 const titComprob = esAnul ? '📄 Vista' : '📄 Comprobante';
                 const titEnviar = esAnul ? '📧 Anulación' : '📧 Enviar';
