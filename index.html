@@ -1015,6 +1015,43 @@
             min-width: 0;
             width: 6.6rem;
         }
+
+        /* Botones con texto largo: que no se salga del recuadro */
+        #mudanzas .tabla-acciones,
+        #aperturas .tabla-acciones,
+        #tarjetas .tabla-acciones,
+        #espacios .tabla-acciones,
+        #multas .tabla-acciones,
+        #morosos .tabla-acciones,
+        #morosos .moroso-acciones,
+        #conserjeria .tabla-acciones,
+        #caja .tabla-acciones,
+        #pagos-aseo .tabla-acciones,
+        #mantenciones .tabla-acciones {
+            min-width: 14.4rem;
+            gap: 0.18rem;
+        }
+        #mudanzas .tabla-acciones .btn,
+        #aperturas .tabla-acciones .btn,
+        #tarjetas .tabla-acciones .btn,
+        #espacios .tabla-acciones .btn,
+        #multas .tabla-acciones .btn,
+        #morosos .tabla-acciones .btn,
+        #morosos .moroso-acciones .btn,
+        #conserjeria .tabla-acciones .btn,
+        #caja .tabla-acciones .btn,
+        #pagos-aseo .tabla-acciones .btn,
+        #mantenciones .tabla-acciones .btn {
+            white-space: normal !important;
+            overflow: hidden;
+            overflow-wrap: anywhere;
+            word-break: break-word;
+            line-height: 1.2;
+            min-height: 1.7rem;
+            height: auto;
+            padding: 0.2rem 0.3rem !important;
+            font-size: 0.6rem !important;
+        }
         #nomina #tablaNomina th:last-child,
         #nomina #tablaNomina td:last-child {
             width: 6.9rem;
@@ -6347,7 +6384,7 @@
             </div>
             <div class="form-section" id="conserjeriaAnalisisWrap" style="margin-bottom: 1rem;">
                 <h3 style="margin: 0 0 0.35rem 0; font-size: 1rem; font-weight: 700;">Análisis de novedades</h3>
-                <p style="margin: 0 0 0.75rem 0; font-size: 0.8rem; color: var(--gray-600); line-height: 1.45;">Lee el mes por tipo, ordena los temas y propone mejoras con una solución. Puede editar esas propuestas: se guardan solas en el mes. Pulse un tipo del ranking para filtrar el listado.</p>
+                <p style="margin: 0 0 0.75rem 0; font-size: 0.8rem; color: var(--gray-600); line-height: 1.45;">Lee el mes por tipo, ordena los temas y propone mejoras con una solución. Puede editar esas propuestas: se guardan solas en el mes y se publican como aviso mensual en Conserjería WM. Pulse un tipo del ranking para filtrar el listado.</p>
                 <div id="conserjeriaAnalisis"><p style="margin: 0; color: var(--gray-500); font-size: 0.85rem;">Cargando análisis…</p></div>
             </div>
             <div class="form-section" style="margin-bottom: 1rem;">
@@ -12998,7 +13035,7 @@
             return { mejora: mejora, solucion: solucion };
         }
 
-        window._analisisNovedadesStore = window._analisisNovedadesStore || { mes: '', acciones: [], huella: '', loaded: false };
+        window._analisisNovedadesStore = window._analisisNovedadesStore || { mes: '', acciones: [], resumen: '', huella: '', loaded: false };
 
         function huellaAnalisisNovedades(novedades, visitas) {
             var nov = Array.isArray(novedades) ? novedades : [];
@@ -13067,6 +13104,49 @@
             }, 550);
         }
 
+        function payloadMejorasAnalisisParaConserjeria(mes, acciones, resumen) {
+            var nombre = (typeof obtenerNombreMes === 'function') ? obtenerNombreMes(mes) : String(mes || '');
+            var puntos = (Array.isArray(acciones) ? acciones : []).filter(function (a) {
+                return a && (String(a.mejora || '').trim() || String(a.solucion || '').trim());
+            }).slice(0, 10).map(function (a, i) {
+                return {
+                    id: String(a.id || ('p' + i)),
+                    prioridad: i + 1,
+                    tipo: String(a.tipo || ''),
+                    tema: String(a.tema || ''),
+                    mejora: String(a.mejora || '').trim().slice(0, 500),
+                    solucion: String(a.solucion || '').trim().slice(0, 500),
+                    estado: String(a.estado || 'pendiente'),
+                    n: Number(a.n) || 0
+                };
+            });
+            return {
+                mes: String(mes || ''),
+                nombreMes: nombre,
+                resumen: String(resumen || '').trim().slice(0, 700),
+                puntos: puntos,
+                publicadoAt: new Date().toISOString(),
+                origen: 'gestion-wm'
+            };
+        }
+
+        async function publicarMejorasAnalisisEnConserjeria() {
+            var store = window._analisisNovedadesStore || {};
+            var mes = store.mes || '';
+            var actual = (typeof obtenerMesActual === 'function') ? obtenerMesActual() : '';
+            if (!mes || !actual || mes !== actual) return;
+            if (!puedeEditarAnalisisNovedades()) return;
+            var payload = payloadMejorasAnalisisParaConserjeria(mes, store.acciones, store.resumen);
+            if (!payload.puntos.length) return;
+            try {
+                var sdb = await obtenerDbConserjeriaOperativa();
+                await sdb.collection('pcsh_settings').doc('mejorasGestion').set(payload);
+                await sdb.collection('mejoras_gestion').doc(mes).set(payload, { merge: true });
+            } catch (ePub) {
+                console.warn('[analisis-novedades] Aviso Conserjería:', ePub);
+            }
+        }
+
         async function guardarAnalisisNovedadesAhora() {
             if (!puedeEditarAnalisisNovedades()) return;
             var store = window._analisisNovedadesStore || {};
@@ -13075,6 +13155,7 @@
                 if (typeof guardarDatosMes === 'function') {
                     await guardarDatosMes('analisisNovedades', lista);
                 }
+                await publicarMejorasAnalisisEnConserjeria();
                 marcarAnalisisNovedadesGuardadoUi('Guardado');
             } catch (e) {
                 console.warn('[analisis-novedades] No se pudo guardar:', e);
@@ -13348,7 +13429,7 @@
                 '<h4 style="margin:0;font-size:0.84rem;">Mejoras y soluciones sugeridas</h4>' +
                 '<span id="conserjeriaAnalisisSaveHint" style="font-size:0.72rem;color:var(--gray-500);opacity:0.75;">Se guarda solo</span>' +
                 '</div>' +
-                '<p style="margin:0 0 0.55rem 0;font-size:0.75rem;color:var(--gray-600);line-height:1.4;">Se arman con las novedades del mes. Puede editar el texto; el cambio se guarda solo. Si no lo toca, se actualiza cuando cambie la bitácora.</p>' +
+                '<p style="margin:0 0 0.55rem 0;font-size:0.75rem;color:var(--gray-600);line-height:1.4;">Se arman con las novedades del mes. El texto se guarda solo y el aviso del mes se publica en el panel de Conserjería WM para el personal. Si no lo edita, se actualiza cuando cambie la bitácora.</p>' +
                 '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(16rem,1fr));gap:0.65rem;">' + cards + '</div>';
         }
 
@@ -13378,6 +13459,7 @@
             window._analisisNovedadesStore = {
                 mes: cache.mes || store.mes || '',
                 acciones: analisis.acciones,
+                resumen: analisis.resumen || '',
                 huella: huella,
                 loaded: !!mismoMes
             };
@@ -13963,7 +14045,7 @@
             bindUiModuloConserjeria();
             var mes = (typeof obtenerMesPeriodoVista === 'function') ? obtenerMesPeriodoVista() : '';
             if (window._analisisNovedadesStore && window._analisisNovedadesStore.mes !== mes) {
-                window._analisisNovedadesStore = { mes: mes, acciones: [], huella: '', loaded: false };
+                window._analisisNovedadesStore = { mes: mes, acciones: [], resumen: '', huella: '', loaded: false };
             }
             var cache = window._moduloConserjeriaCache || {};
             if (!opts.forzar && cache.mes === mes && (cache.novedades || cache.visitas) && !cache.error) {
