@@ -24805,11 +24805,14 @@ document.getElementById('chatForm').onsubmit = function (e) {
             });
         }
 
-        function filtrarMultasParaReporte(lista) {
+        function filtrarMultasParaReporte(lista, mesAnio) {
             const src = (Array.isArray(lista) ? lista : []).filter(Boolean);
             multaAplicarAnulacionesEnLista(src);
+            var mes = mesAnio || '';
             return src.filter(function (m) {
-                return !multaEstaAnulada(m);
+                if (multaEstaAnulada(m)) return false;
+                if (mes && typeof multaPerteneceAlPeriodo === 'function') return multaPerteneceAlPeriodo(m, mes);
+                return true;
             });
         }
 
@@ -24909,6 +24912,46 @@ document.getElementById('chatForm').onsubmit = function (e) {
             var m2 = s.match(/^(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})/);
             if (m2) return m2[1] + '-' + String(m2[2]).padStart(2, '0') + '-' + String(m2[3]).padStart(2, '0');
             return '';
+        }
+        function multaMesClaveDesdeFecha(fecha) {
+            if (fecha == null || fecha === '') return '';
+            if (typeof mesDesdeFechaNovedadGestion === 'function') {
+                var nm = mesDesdeFechaNovedadGestion(fecha);
+                if (nm) return nm;
+            }
+            var ymd = multaYmdDesdeNovedad(fecha);
+            if (ymd && ymd.length >= 7) return ymd.slice(0, 7);
+            var s = String(fecha).trim();
+            var iso = s.match(/^(\d{4}-\d{2})(?:-\d{2}|T|$)/);
+            if (iso) return iso[1];
+            var t = Date.parse(s);
+            if (!isNaN(t) && typeof mesDesdeMsSantiagoGestion === 'function') return mesDesdeMsSantiagoGestion(t);
+            return '';
+        }
+        function multaMesDelRegistro(m) {
+            if (!m) return '';
+            var fromFecha = multaMesClaveDesdeFecha(m.fecha);
+            if (fromFecha) return fromFecha;
+            var mesCampo = String(m.mes || '').trim();
+            if (/^\d{4}-\d{2}$/.test(mesCampo)) return mesCampo;
+            return '';
+        }
+        function multaPerteneceAlPeriodo(m, mes) {
+            if (!m) return false;
+            if (!mes) return true;
+            var rm = multaMesDelRegistro(m);
+            if (!rm) return false;
+            return rm === mes;
+        }
+        function multaFiltrarListaDelPeriodo(lista, mes) {
+            if (!Array.isArray(lista)) return [];
+            if (!mes) return lista.slice();
+            return lista.filter(function (m) { return multaPerteneceAlPeriodo(m, mes); });
+        }
+        function multaNovedadEsDelMes(n, mes) {
+            if (!n || !mes) return false;
+            var nm = multaMesClaveDesdeFecha(n.fecha);
+            return !!(nm && nm === mes);
         }
         function multaFormatoHoraNovedad(hora) {
             return String(hora || '').slice(0, 5) || '—';
@@ -25250,6 +25293,40 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 if (typeof lsKey === 'function') localStorage.setItem(lsKey(docKey), JSON.stringify(datos));
             } catch (eLs) {}
         }
+        async function multaReubicarRegistrosAjenos(lista, mesDoc) {
+            if (!mesDoc || !Array.isArray(lista) || typeof obtenerDatosMesEspecifico !== 'function') {
+                return Array.isArray(lista) ? lista : [];
+            }
+            var propias = [];
+            var ajenas = {};
+            lista.forEach(function (m) {
+                if (multaPerteneceAlPeriodo(m, mesDoc)) {
+                    propias.push(m);
+                    return;
+                }
+                var rm = multaMesDelRegistro(m);
+                if (!rm) return;
+                if (!ajenas[rm]) ajenas[rm] = [];
+                ajenas[rm].push(m);
+            });
+            var meses = Object.keys(ajenas);
+            for (var i = 0; i < meses.length; i++) {
+                var mk = meses[i];
+                var dest = await obtenerDatosMesEspecifico('multas', mk);
+                if (!Array.isArray(dest)) dest = [];
+                dest = typeof multaDeduplicarLista === 'function' ? multaDeduplicarLista(dest) : dest;
+                ajenas[mk].forEach(function (m) {
+                    var got = null;
+                    if (m && m.id) {
+                        got = dest.filter(function (x) { return x && x.id === m.id; })[0] || null;
+                    }
+                    if (!got && m && m.novedadCorrelativo != null) got = multaBuscarEnLista(dest, m.novedadCorrelativo);
+                    if (!got) dest.unshift(m);
+                });
+                await persistirListaMultasMes(mk, dest);
+            }
+            return propias;
+        }
         function multaFuenteNovedadesParaSync() {
             var cache = window._moduloConserjeriaCache || {};
             var raw = (cache.novedadesAll && cache.novedadesAll.length) ? cache.novedadesAll : (cache.novedades || []);
@@ -25257,9 +25334,8 @@ document.getElementById('chatForm').onsubmit = function (e) {
             return (raw || []).filter(function (n) {
                 if (!n || n.turnoSep || n.tipo === 'resumen_diario' || n.minimizada) return false;
                 if (!multaEsCategoriaNovedadMulta(n.categoria)) return false;
-                if (!mes) return true;
-                var nm = typeof mesDesdeFechaNovedadGestion === 'function' ? mesDesdeFechaNovedadGestion(n.fecha) : '';
-                return !nm || nm === mes;
+                if (!mes) return false;
+                return multaNovedadEsDelMes(n, mes);
             });
         }
         async function multaLeerColaConserjeria() {
@@ -25305,7 +25381,9 @@ document.getElementById('chatForm').onsubmit = function (e) {
             var texto = n.texto || '';
             var depto = String(n.depto || n.departamento || multaInferirDeptoTexto(texto) || '').trim();
             var nombre = String(n.nombre || multaResidenteDesdeDepto(depto) || '').trim() || 'Por confirmar';
-            var ymd = multaYmdIso(n.fecha) || (typeof obtenerFechaHoy === 'function' ? obtenerFechaHoy() : '');
+            var ymd = multaYmdIso(n.fecha);
+            if (!ymd) return null;
+            var mesReg = ymd.slice(0, 7);
             var num = libroNum != null ? libroNum : (n.numeroLibro != null ? n.numeroLibro : cor);
             var refHtml = '<p>Novedad <strong>#' + String(num).replace(/</g, '') + '</strong> · ' + (n.fecha || '') + (n.hora ? ' · ' + String(n.hora).slice(0, 5) + ' hrs.' : '') + '</p>';
             var cuerpo = String(texto || '').replace(/</g, '&lt;');
@@ -25336,7 +25414,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 tipoRegistro: 'multa',
                 evidencias: [],
                 archivos: [],
-                mes: (typeof obtenerMesActual === 'function' ? obtenerMesActual() : ''),
+                mes: mesReg,
                 estadoGestion: 'pendiente_tratamiento'
             };
         }
@@ -25348,15 +25426,17 @@ document.getElementById('chatForm').onsubmit = function (e) {
                         await multaAsegurarNovedadesConserjeria();
                     }
                     var cola = await multaLeerColaConserjeria();
+                    var mesActual = typeof obtenerMesActual === 'function' ? obtenerMesActual() : '';
                     var porCor = {};
                     cola.forEach(function (d) {
-                        if (d && d.activa !== false && isFinite(Number(d.correlativo))) porCor[Number(d.correlativo)] = d;
+                        if (!d || d.activa === false || !isFinite(Number(d.correlativo))) return;
+                        if (mesActual && !multaNovedadEsDelMes(d, mesActual)) return;
+                        porCor[Number(d.correlativo)] = d;
                     });
                     multaFuenteNovedadesParaSync().forEach(function (n) {
                         porCor[Number(n.correlativo)] = Object.assign({}, porCor[Number(n.correlativo)] || {}, n, { activa: true });
                     });
                     var keys = Object.keys(porCor);
-                    var mesActual = typeof obtenerMesActual === 'function' ? obtenerMesActual() : '';
                     var tomb = typeof multaCargarTombstones === 'function' ? await multaCargarTombstones() : (window._multasTombstones || []);
                     var lista = typeof obtenerDatosMesEspecifico === 'function'
                         ? await obtenerDatosMesEspecifico('multas', mesActual)
@@ -25365,7 +25445,10 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     var creadas = 0;
                     var cambiadas = false;
                     var listaAntes = lista.length;
-                    lista = lista.filter(function (m) { return !multaRegistroEstaEliminado(tomb, m); });
+                    lista = lista.filter(function (m) {
+                        if (multaRegistroEstaEliminado(tomb, m)) return false;
+                        return !mesActual || multaPerteneceAlPeriodo(m, mesActual);
+                    });
                     if (lista.length !== listaAntes) cambiadas = true;
                     if (!keys.length) {
                         if (cambiadas) await persistirListaMultasMes(mesActual, lista);
@@ -25380,12 +25463,13 @@ document.getElementById('chatForm').onsubmit = function (e) {
                         var n = porCor[k];
                         var cor = Number(n.correlativo);
                         if (!isFinite(cor)) return;
+                        if (mesActual && !multaNovedadEsDelMes(n, mesActual)) return;
                         var exist = multaBuscarEnLista(lista, cor);
                         var libro = nums[cor] != null ? nums[cor] : n.numeroLibro;
                         if (!exist) {
                             if (multaClaveEstaEliminada(tomb, multaIdDesdeNovedad(cor), cor)) return;
                             var neu = multaPayloadDesdeNovedad(n, libro);
-                            neu.mes = mesActual;
+                            if (!neu) return;
                             if (!neu.folio) neu.folio = getSiguienteFolioMulta(lista, mesActual);
                             multaHistorialPush(neu, 'creada_desde_novedad', { estado: 'pendiente_tratamiento' });
                             lista.unshift(neu);
@@ -25455,7 +25539,10 @@ document.getElementById('chatForm').onsubmit = function (e) {
                             }
                         });
                         latest = multaDeduplicarLista(latest);
-                        latest = latest.filter(function (m) { return !multaRegistroEstaEliminado(tomb, m); });
+                        latest = latest.filter(function (m) {
+                            if (multaRegistroEstaEliminado(tomb, m)) return false;
+                            return !mesActual || multaPerteneceAlPeriodo(m, mesActual);
+                        });
                         multaAplicarAnulacionesEnLista(latest);
                         await persistirListaMultasMes(mesActual, latest);
                     }
@@ -25472,6 +25559,10 @@ document.getElementById('chatForm').onsubmit = function (e) {
         }
         function pintarAlertasMultasPendientes(multas) {
             var list = Array.isArray(multas) ? multas : [];
+            var mesCal = typeof obtenerMesActual === 'function' ? obtenerMesActual() : '';
+            if (mesCal && typeof multaFiltrarListaDelPeriodo === 'function') {
+                list = multaFiltrarListaDelPeriodo(list, mesCal);
+            }
             var pend = list.filter(multaRequiereTratamiento);
             var n = pend.length;
             var html = '';
@@ -26282,7 +26373,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 monto: montoVal,
                 tipoUnidad: document.getElementById('multaTipoUnidad').value || 'UF', // UF por defecto para compatibilidad
                 evidencias: evidencias,
-                mes: obtenerMesActual(),
+                mes: (typeof multaMesClaveDesdeFecha === 'function' ? multaMesClaveDesdeFecha(fechaSeleccionada) : '') || (typeof obtenerMesPeriodoVista === 'function' ? obtenerMesPeriodoVista() : obtenerMesActual()),
                 tipoRegistro: tipoRegistro
             };
             if (tipoRegistro === 'anulacion') {
@@ -26573,10 +26664,18 @@ document.getElementById('chatForm').onsubmit = function (e) {
             var nAntesTomb = todas.length;
             todas = (todas || []).filter(function (m) { return !multaRegistroEstaEliminado(tombUi, m); });
             var stamped = multaAplicarAnulacionesEnLista(todas);
-            if (stamped || todas.length !== (todasRaw || []).length || todas.length !== nAntesTomb) {
+            var mesVista = typeof obtenerMesPeriodoVista === 'function' ? obtenerMesPeriodoVista() : (typeof obtenerMesActual === 'function' ? obtenerMesActual() : '');
+            var nAntesPeriodo = todas.length;
+            if (mesVista && typeof multaReubicarRegistrosAjenos === 'function') {
+                try { todas = await multaReubicarRegistrosAjenos(todas, mesVista); } catch (eReu) {
+                    if (typeof multaFiltrarListaDelPeriodo === 'function') todas = multaFiltrarListaDelPeriodo(todas, mesVista);
+                }
+            } else if (mesVista && typeof multaFiltrarListaDelPeriodo === 'function') {
+                todas = multaFiltrarListaDelPeriodo(todas, mesVista);
+            }
+            if (stamped || todas.length !== (todasRaw || []).length || todas.length !== nAntesTomb || todas.length !== nAntesPeriodo) {
                 try {
-                    var mesSave = typeof obtenerMesActual === 'function' ? obtenerMesActual() : '';
-                    if (window.mesEnConsulta) mesSave = window.mesEnConsulta;
+                    var mesSave = mesVista;
                     await persistirListaMultasMes(mesSave, todas);
                 } catch (ePers) {}
             }
@@ -26585,6 +26684,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 var mesCal = typeof obtenerMesActual === 'function' ? obtenerMesActual() : '';
                 if (window.mesEnConsulta && mesCal && window.mesEnConsulta !== mesCal && typeof obtenerDatosMesEspecifico === 'function') {
                     paraAlerta = await obtenerDatosMesEspecifico('multas', mesCal);
+                    if (typeof multaFiltrarListaDelPeriodo === 'function') paraAlerta = multaFiltrarListaDelPeriodo(paraAlerta || [], mesCal);
                 }
             } catch (eAl) {}
             if (typeof pintarAlertasMultasPendientes === 'function') pintarAlertasMultasPendientes(paraAlerta);
@@ -29904,7 +30004,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 
                 // Calcular ingresos
                 mudanzas = filtrarMudanzasParaReporte(mudanzas);
-                multas = filtrarMultasParaReporte(multas);
+                multas = filtrarMultasParaReporte(multas, mesAnio);
                 const ingresosMudanzas = Array.isArray(mudanzas) 
                     ? mudanzas.filter(mudanzaConCobroVigente).reduce((sum, m) => sum + (parseFloat(m.monto) || 0), 0)
                     : 0;
@@ -40509,7 +40609,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 }
                 tarjetas = filtrarTarjetasParaReporteSinProvisionales(tarjetas);
                 const espacios = resultados[3] || [];
-                const multas = filtrarMultasParaReporte(resultados[4] || []);
+                const multas = filtrarMultasParaReporte(resultados[4] || [], mesAnio);
                 const morosos = resultados[5] || [];
                 const lecturasAguaCaliente = resultados[6] || [];
                 
@@ -40588,7 +40688,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     const prevTarjetas = datosPrev[2] || [];
                     const prevTarjetasReporte = filtrarTarjetasParaReporteSinProvisionales(prevTarjetas);
                     const prevEspacios = datosPrev[3] || [];
-                    const prevMultas = filtrarMultasParaReporte(datosPrev[4] || []);
+                    const prevMultas = filtrarMultasParaReporte(datosPrev[4] || [], mesAnterior);
                     const prevMorosos = datosPrev[5] || [];
                     prevMorososLista = Array.isArray(prevMorosos) ? prevMorosos : [];
                     prevTotalMudanzas = Array.isArray(prevMudanzas) ? prevMudanzas.length : 0;
@@ -41878,7 +41978,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     ? filtrarTarjetasParaReporteSinProvisionales(tarjetas)
                     : tarjetas;
                 const espacios = resultados[3] || [];
-                const multas = filtrarMultasParaReporte(resultados[4] || []);
+                const multas = filtrarMultasParaReporte(resultados[4] || [], mesAnio);
                 const morosos = resultados[5] || [];
                 const lecturasAguaCaliente = resultados[6] || [];
                 
@@ -42403,7 +42503,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 }
                 
                 if (modulosVisibles.includes('multas') && multas.length > 0) {
-                    const datosMultas = generarDatosMultas(multas);
+                    const datosMultas = generarDatosMultas(multas, mesAnio);
                     excelContent += generarTablaHTML(datosMultas, 'REGISTRO DE MULTAS');
                 }
                 
@@ -42718,9 +42818,9 @@ document.getElementById('chatForm').onsubmit = function (e) {
             return datos;
         }
         
-        function generarDatosMultas(multas) {
+        function generarDatosMultas(multas, mesAnio) {
             const datos = [];
-            multas = filtrarMultasParaReporte(multas);
+            multas = filtrarMultasParaReporte(multas, mesAnio);
             
             datos.push(['REGISTRO DE MULTAS']);
             datos.push([]);
@@ -43084,9 +43184,9 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 }
             }
         }
-        function _generarDatosMultasConTotales(multas) {
-            var vigentes = filtrarMultasParaReporte(multas || []);
-            var base = generarDatosMultas(vigentes);
+        function _generarDatosMultasConTotales(multas, mesAnio) {
+            var vigentes = filtrarMultasParaReporte(multas || [], mesAnio);
+            var base = generarDatosMultas(vigentes, mesAnio);
             var u = 0, utm = 0;
             vigentes.forEach(function (m) {
                 if (!m) return;
@@ -43630,7 +43730,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     tarjetas = filtrarTarjetasParaReporteSinProvisionales(tarjetas);
                 }
                 var espacios = modulosVisibles.indexOf('espacios') !== -1 ? await cargarDatosModulo('espacios', mesAnio, esPrevisualizacion) : [];
-                var multas = filtrarMultasParaReporte(modulosVisibles.indexOf('multas') !== -1 ? await cargarDatosModulo('multas', mesAnio, esPrevisualizacion) : []);
+                var multas = filtrarMultasParaReporte(modulosVisibles.indexOf('multas') !== -1 ? await cargarDatosModulo('multas', mesAnio, esPrevisualizacion) : [], mesAnio);
                 var morosos = modulosVisibles.indexOf('morosos') !== -1 ? await cargarDatosModulo('morosos', mesAnio, esPrevisualizacion) : [];
                 var lecturasAguaCaliente = [];
                 if (modulosVisibles.indexOf('lecturas-agua') !== -1) {
@@ -43791,7 +43891,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                         rellenoCeldaArgb: _rellenoCeldaArgbTarjetaColumnaTipo
                     });
                     else if (clave === 'espacios') _escribirHojaDesdeAOA(ws, generarDatosEspacios(espacios || []), { rellenoCeldaArgb: _rellenoCeldaArgbEspacioColumnaNombre });
-                    else if (clave === 'multas') _escribirHojaDesdeAOA(ws, _generarDatosMultasConTotales(multas || []));
+                    else if (clave === 'multas') _escribirHojaDesdeAOA(ws, _generarDatosMultasConTotales(multas || [], mesAnio));
                     else if (clave === 'morosos') _escribirHojaDesdeAOA(ws, generarDatosMorosos(morosos || []));
                     else if (clave === 'lecturas-agua') _escribirHojaDesdeAOA(ws, generarDatosLecturasAgua(lecturasAguaCaliente || []));
                     else if (clave === 'caja') {
@@ -46865,7 +46965,12 @@ document.getElementById('chatForm').onsubmit = function (e) {
             }
             
             if (modulosVisibles.includes('multas')) {
-                promesas.push(obtenerDatosMes('multas').then(d => modulosData.multas = d));
+                promesas.push(obtenerDatosMes('multas').then(function (d) {
+                    var mesDash = typeof obtenerMesPeriodoVista === 'function' ? obtenerMesPeriodoVista() : '';
+                    modulosData.multas = (typeof multaFiltrarListaDelPeriodo === 'function')
+                        ? multaFiltrarListaDelPeriodo(d || [], mesDash)
+                        : (d || []);
+                }));
             } else {
                 modulosData.multas = [];
             }
