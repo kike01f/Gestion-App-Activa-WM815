@@ -16445,6 +16445,7 @@
             }
             var analisis = analizarNovedadesConserjeriaGestion(cache.novedades || [], cache.visitas || []);
             wrap.innerHTML = htmlRankingNovedadesConserjeria(analisis);
+            if (typeof bindAnalisisNovedadesUi === 'function') bindAnalisisNovedadesUi();
         }
 
         function mesDesdeFechaNovedadGestion(fecha) {
@@ -19674,11 +19675,16 @@ document.addEventListener('keydown', function (e) {
     setChatOpen(false);
   }
 });
-document.getElementById('chatForm').onsubmit = function (e) {
-  e.preventDefault();
+function pcshChatEnviarMensajeDesdeFormulario() {
   if (typeof pcshChatClearMyTyping === 'function') pcshChatClearMyTyping();
   var inp = document.getElementById('chatInput');
-  if (!inp || !chatCollection) return;
+  if (!inp) return;
+  if (!chatCollection) {
+    if (typeof mostrarAlerta === 'function') {
+      mostrarAlerta('El chat aún no está conectado con Conserjería. Espere un momento e intente de nuevo.', 'Chat interno');
+    }
+    return;
+  }
   var t = inp.value.trim();
   var cit = typeof pcshChatCitaNovedadPayloadFromTarget === 'function' ? pcshChatCitaNovedadPayloadFromTarget() : null;
   if (!t && !cit) return;
@@ -19715,19 +19721,28 @@ document.getElementById('chatForm').onsubmit = function (e) {
     } catch (eR) {}
     pcshChatClearReplyUi();
     if (typeof pcshChatClearCitaNovedadUi === 'function') pcshChatClearCitaNovedadUi();
+  }).catch(function (eSend) {
+    console.warn('[chat-gestion] envío', eSend);
+    if (typeof mostrarAlerta === 'function') mostrarAlerta('No se pudo enviar el mensaje. Revise la conexión e intente de nuevo.', 'Chat interno');
   });
+}
+
+document.getElementById('chatForm').onsubmit = function (e) {
+  e.preventDefault();
+  if (chatCollection) {
+    pcshChatEnviarMensajeDesdeFormulario();
+    return;
+  }
+  Promise.resolve(typeof window.iniciarChatInternoGestion === 'function' ? window.iniciarChatInternoGestion() : null)
+    .then(function () {
+      pcshChatEnviarMensajeDesdeFormulario();
+    })
+    .catch(function (eC) {
+      console.warn('[chat-gestion]', eC);
+      pcshChatEnviarMensajeDesdeFormulario();
+    });
 };
 
-
-        window.iniciarChatInternoGestion = function () {
-            if (typeof initChat === 'function') {
-                Promise.resolve(initChat()).then(function () {
-                    if (typeof initChatDrag === 'function') initChatDrag();
-                }).catch(function (eC) {
-                    console.warn('[chat-gestion]', eC);
-                });
-            }
-        };
         if (typeof auth !== 'undefined' && auth && auth.currentUser) {
             window.iniciarChatInternoGestion();
         }
@@ -21851,11 +21866,6 @@ document.getElementById('chatForm').onsubmit = function (e) {
         const URL_RESERVA_MUDANZA = 'https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ2NCdwJTRckw6AwajrvEGKBomNxxHzzkNQFZR963Pi541AsFz5ctFt0G2gvoNdKNsNC2FCD1G_H';
         window.URL_RESERVA_MUDANZA = URL_RESERVA_MUDANZA;
 
-        function esDocAgendaMudanza48(itemOLabel) {
-            if (itemOLabel && typeof itemOLabel === 'object') return itemOLabel.id === 'aviso48';
-            return /48 horas|agendada/i.test(String(itemOLabel || ''));
-        }
-
         function htmlBotonReservaMudanza48() {
             const url = URL_RESERVA_MUDANZA;
             return '<table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" style="margin:12px auto 0 auto;">'
@@ -21873,10 +21883,6 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 + '<p style="margin:0;">Resguardo de ascensores y espacios comunes: <strong>$20.000</strong> a GGCC. Consulte el Reglamento Interno.</p>'
                 + htmlBotonReservaMudanza48()
                 + '</td></tr></table>';
-        }
-
-        function htmlBloqueAgendaMudanza48() {
-            return htmlBloqueReservarMudanza();
         }
 
         function catalogoDocsMudanza(ctx) {
@@ -22063,24 +22069,6 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 }
             }
             return faltantes;
-        }
-
-        function textoPrefillCorreoMudanzaPendiente(mudanza, faltantes) {
-            const mov = mudanza && mudanza.movimiento === 'ingreso'
-                ? 'ingreso'
-                : (mudanza && mudanza.movimiento === 'salida' ? 'salida' : 'mudanza');
-            const docs = (Array.isArray(faltantes) && faltantes.length)
-                ? faltantes
-                : listarDocumentosFaltantesMudanza(mudanza);
-            const lista = docs.map(function (d, i) { return (i + 1) + '. ' + d; }).join('\n');
-            return 'Estimado/a ' + ((mudanza && mudanza.nombre) || 'residente') + ':\n\n'
-                + 'Su mudanza de ' + mov + ' del depto. ' + ((mudanza && mudanza.departamento) || '')
-                + ' quedó PENDIENTE DE AUTORIZACIÓN.\n\n'
-                + (mov === 'salida'
-                    ? 'Para autorizarla solo se requieren el salvoconducto o autorización del propietario/arrendador y el recibo de pago de gastos comunes. Falta:\n'
-                    : 'Para que la administración autorice, debe presentar:\n')
-                + lista + '\n\n'
-                + 'La mudanza no puede realizarse hasta regularizar estos antecedentes.';
         }
 
         window.bindMudanzaPendienteUi = function () {
