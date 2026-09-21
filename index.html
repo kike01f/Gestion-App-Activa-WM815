@@ -2200,23 +2200,13 @@
             animation-delay: 0.5s;
         }
 
-        /* Cuando Arturito está en rojo en el banner: corre por todos los lados */
-        @keyframes arturitoCorreBanner {
-            0% { left: 0; top: 50%; transform: translateY(-50%); }
-            25% { left: 50%; top: 0; transform: translate(-50%, 0); }
-            50% { left: 100%; top: 50%; transform: translate(-100%, -50%); }
-            75% { left: 50%; top: 100%; transform: translate(-50%, -100%); }
-            100% { left: 0; top: 50%; transform: translateY(-50%); }
-        }
-        #dashboard .dashboard2-banner {
-            overflow: hidden;
-        }
         #dashboard .dashboard2-banner .arturito-dashboard.estado-rojo {
-            position: absolute;
+            position: relative;
+            left: auto;
+            top: auto;
             margin: 0;
-            animation: arturitoCorreBanner 7s linear infinite;
-            z-index: 10;
-            /* Contenedor de la carrera = .dashboard2-banner-titulo-wrap (donde termina el texto Panel de Control) */
+            animation: none;
+            transform: none;
         }
 
         /* Animaciones de Arturito */
@@ -2677,10 +2667,9 @@
             flex-wrap: wrap;
             gap: 0.65rem 1rem;
         }
-        /* Zona del título "Panel de Control": Arturito en rojo solo corre aquí */
         .dashboard2-banner-titulo-wrap {
             position: relative;
-            overflow: hidden;
+            overflow: visible;
         }
         .dashboard2-titulo {
             margin: 0;
@@ -5599,7 +5588,8 @@
       transform: translateY(0) scale(1);
       opacity: 1; visibility: visible;
     }
-    .chat-dock.chat-menu-open .chat-flotante { overflow: visible; }
+    .chat-dock.chat-menu-open .chat-flotante,
+    .chat-dock.chat-emoji-open .chat-flotante { overflow: visible; }
     .chat-header {
       flex-shrink: 0;
       display: flex; align-items: flex-start; justify-content: space-between; gap: 0.5rem;
@@ -6291,52 +6281,50 @@
     .chat-emoji-toggle:hover { background: color-mix(in srgb, #fff 6%, transparent); color: var(--chat-text); border-color: var(--chat-border); }
     .chat-dock.chat-emoji-open .chat-emoji-toggle { background: var(--chat-accent-dim); color: var(--chat-text); border-color: color-mix(in srgb, var(--chat-accent) 35%, var(--chat-border)); }
     .chat-emoji-popover {
-      display: none; flex-direction: column; position: absolute; bottom: calc(100% + 10px); right: 6.2rem;
-      width: min(318px, calc(100vw - 2.5rem)); max-height: min(320px, 52vh);
+      display: none; flex-direction: column; position: absolute;
+      left: 0.45rem; right: 0.45rem; bottom: calc(100% + 8px); width: auto;
+      max-height: min(380px, 56vh);
       padding: 0; overflow: hidden;
       background: var(--chat-surface);
       border: 1px solid var(--chat-border);
-      border-radius: 10px;
-      box-shadow: 0 12px 32px rgba(0,0,0,0.4);
-      z-index: 20;
+      border-radius: 12px;
+      box-shadow: 0 14px 36px rgba(0,0,0,0.42);
+      z-index: 40;
     }
     .chat-dock.chat-emoji-open .chat-emoji-popover { display: flex; }
     .chat-emoji-popover-head {
       flex-shrink: 0;
       display: flex; align-items: center; gap: 0.45rem;
-      padding: 0.5rem 0.65rem 0.45rem;
-      font-size: 0.62rem; font-weight: 600;
-      text-transform: uppercase; letter-spacing: 0.06em;
+      padding: 0.5rem 0.7rem 0.42rem;
+      font-size: 0.68rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.05em;
       color: var(--chat-muted);
       border-bottom: 1px solid var(--chat-border);
       background: var(--chat-surface);
     }
     .chat-emoji-popover-head i { color: var(--chat-muted); font-size: 0.88rem; opacity: 0.85; }
     .chat-emoji-tabs {
-      display: flex; flex-wrap: nowrap; gap: 0.28rem;
-      padding: 0.35rem 0.5rem 0.45rem;
+      display: flex; flex-wrap: wrap; gap: 0.28rem;
+      padding: 0.4rem 0.5rem 0.45rem;
       border-bottom: 1px solid var(--chat-border);
       background: var(--chat-deep);
-      overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
-      scrollbar-width: none;
     }
-    .chat-emoji-tabs::-webkit-scrollbar { display: none; }
     .chat-emoji-tab {
-      flex: 1 1 0;
-      min-width: 4.2rem;
+      flex: 1 1 auto;
+      min-width: 0;
       text-align: center;
-      font-size: 0.58rem;
+      font-size: 0.68rem;
       font-weight: 800;
       text-transform: uppercase;
-      letter-spacing: 0.05em;
-      padding: 0.4rem 0.35rem;
+      letter-spacing: 0.03em;
+      padding: 0.38rem 0.4rem;
       border-radius: 8px;
       border: 1px solid transparent;
       background: transparent;
       color: var(--chat-muted);
       cursor: pointer;
       font-family: inherit;
+      white-space: nowrap;
       transition: background 0.15s, color 0.15s, border-color 0.15s;
     }
     .chat-emoji-tab:hover { color: var(--chat-text); background: color-mix(in srgb, var(--gray-800) 6%, transparent); }
@@ -6346,8 +6334,8 @@
       border-color: color-mix(in srgb, var(--chat-accent) 28%, var(--chat-border));
     }
     .chat-emoji-popover-scroll {
-      flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden;
-      padding: 0.5rem 0.55rem 0.65rem;
+      flex: 1; min-height: 148px; overflow-y: auto; overflow-x: hidden;
+      padding: 0.55rem 0.55rem 0.7rem;
       -webkit-overflow-scrolling: touch;
       scrollbar-width: thin;
       scrollbar-color: color-mix(in srgb, #fff 18%, var(--chat-border)) transparent;
@@ -6360,87 +6348,29 @@
     .chat-emoji-panel { display: none; }
     .chat-emoji-panel.is-active { display: block; }
     .chat-emoji-grid {
-      display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 0.22rem;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(2.2rem, 1fr));
+      gap: 0.18rem;
     }
     .chat-emoji-cell {
-      appearance: none; border: 1px solid transparent; background: color-mix(in srgb, var(--gray-800) 4%, transparent);
+      appearance: none; border: 1px solid transparent;
+      background: color-mix(in srgb, var(--gray-800) 4%, transparent);
       cursor: pointer;
-      font-size: 1.45rem; line-height: 1;
+      font-size: 1.55rem; line-height: 1;
+      font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Twemoji Mozilla", sans-serif;
       padding: 0; border-radius: 10px;
+      min-height: 2.2rem;
       aspect-ratio: 1;
       display: flex; align-items: center; justify-content: center;
+      overflow: visible;
       transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
     }
     .chat-emoji-cell:hover {
       background: color-mix(in srgb, #fff 8%, var(--gray-100));
       border-color: var(--chat-border);
-      transform: scale(1.04);
+      transform: scale(1.06);
     }
     .chat-emoji-cell:active { transform: scale(0.94); }
-    .chat-sticker-toggle {
-      flex-shrink: 0; width: 2.5rem; height: 2.5rem; border-radius: 8px;
-      border: 1px solid var(--chat-border); cursor: pointer; font-size: 1rem; line-height: 1;
-      display: flex; align-items: center; justify-content: center;
-      background: transparent; color: var(--chat-muted);
-      transition: background 0.15s, color 0.15s, transform 0.15s, border-color 0.15s;
-    }
-    .chat-sticker-toggle:hover { background: color-mix(in srgb, #fff 6%, transparent); color: var(--chat-text); border-color: var(--chat-border); }
-    .chat-dock.chat-sticker-open .chat-sticker-toggle { background: var(--chat-accent-dim); color: var(--chat-text); border-color: color-mix(in srgb, var(--chat-accent) 35%, var(--chat-border)); }
-    .chat-sticker-popover {
-      display: none; flex-direction: column; position: absolute; bottom: calc(100% + 10px); right: 9.3rem;
-      width: min(340px, calc(100vw - 2.5rem)); max-height: min(400px, 58vh);
-      padding: 0; overflow: hidden;
-      background: var(--chat-surface);
-      border: 1px solid var(--chat-border);
-      border-radius: 10px;
-      box-shadow: 0 12px 32px rgba(0,0,0,0.4);
-      z-index: 20;
-    }
-    .chat-dock.chat-sticker-open .chat-sticker-popover { display: flex; }
-    .chat-sticker-popover-head {
-      flex-shrink: 0;
-      display: flex; align-items: center; gap: 0.45rem;
-      padding: 0.5rem 0.65rem 0.45rem;
-      font-size: 0.62rem; font-weight: 600;
-      text-transform: uppercase; letter-spacing: 0.06em;
-      color: var(--chat-muted);
-      border-bottom: 1px solid var(--chat-border);
-      background: var(--chat-surface);
-    }
-    .chat-sticker-popover-head i { color: var(--chat-muted); font-size: 0.88rem; opacity: 0.85; }
-    .chat-sticker-popover-scroll {
-      flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden;
-      padding: 0.5rem 0.55rem 0.65rem;
-      -webkit-overflow-scrolling: touch;
-      scrollbar-width: thin;
-      scrollbar-color: color-mix(in srgb, #fff 18%, var(--chat-border)) transparent;
-    }
-    .chat-sticker-popover-scroll::-webkit-scrollbar { width: 5px; }
-    .chat-sticker-popover-scroll::-webkit-scrollbar-thumb {
-      background: color-mix(in srgb, #fff 22%, var(--chat-border));
-      border-radius: 999px;
-    }
-    .chat-sticker-grid {
-      display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0.35rem;
-    }
-    .chat-sticker-cell {
-      appearance: none; border: 1px solid transparent; background: color-mix(in srgb, var(--gray-800) 4%, transparent);
-      cursor: pointer;
-      padding: 0.35rem; border-radius: 10px;
-      display: flex; align-items: center; justify-content: center;
-      transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
-      min-height: 3.25rem;
-    }
-    .chat-sticker-cell img {
-      width: 100%; max-width: 56px; height: auto; aspect-ratio: 1; object-fit: contain;
-      pointer-events: none;
-    }
-    .chat-sticker-cell:hover {
-      background: color-mix(in srgb, #fff 8%, var(--gray-100));
-      border-color: var(--chat-border);
-      transform: scale(1.03);
-    }
-    .chat-sticker-cell:active { transform: scale(0.97); }
     .chat-msg-body--sticker { padding: 0.15rem 0 0; }
     .chat-msg-sticker-wrap {
       display: block; line-height: 0; max-width: min(200px, 72vw);
@@ -9651,13 +9581,11 @@
       </div>
       <form id="chatForm" class="chat-input-form" autocomplete="off">
         <div id="chatEmojiPopover" class="chat-emoji-popover" role="listbox" aria-label="Emojis frecuentes"></div>
-        <div id="chatStickerPopover" class="chat-sticker-popover" role="listbox" aria-label="Stickers"></div>
         <div class="chat-input-wrap">
           <textarea id="chatInput" class="chat-input" maxlength="2000" rows="1" placeholder="Escribe un mensaje…"></textarea>
         </div>
         <button type="button" id="chatCitaNovedadBtn" class="chat-cita-nov-toggle" title="Citar novedad del libro" aria-label="Citar novedad del libro" aria-expanded="false" aria-controls="chatCitaNovedadModal"><i class="fas fa-book" aria-hidden="true"></i></button>
         <button type="button" id="chatEmojiBtn" class="chat-emoji-toggle" title="Emojis" aria-label="Abrir emojis" aria-expanded="false" aria-controls="chatEmojiPopover"><i class="fa-regular fa-face-smile" aria-hidden="true"></i></button>
-        <button type="button" id="chatStickerBtn" class="chat-sticker-toggle" title="Stickers" aria-label="Abrir stickers" aria-expanded="false" aria-controls="chatStickerPopover"><i class="fa-regular fa-images" aria-hidden="true"></i></button>
         <button type="submit" class="chat-send" aria-label="Enviar mensaje"><i class="fa-solid fa-paper-plane" aria-hidden="true"></i></button>
       </form>
       <div id="chatCitaNovedadModal" class="chat-cita-nov-modal" aria-hidden="true">
@@ -17415,12 +17343,13 @@
             pintarDestacadasModuloConserjeria();
             pintarAnalisisNovedadesConserjeria();
             if (typeof pcshResumenBindUiGestion === 'function') pcshResumenBindUiGestion();
-            if (typeof sincronizarMultasDesdeConserjeria === 'function') {
-                sincronizarMultasDesdeConserjeria().then(function () {
-                    if (typeof obtenerDatosMes !== 'function' || typeof pintarAlertasMultasPendientes !== 'function') return;
-                    return obtenerDatosMes('multas').then(function (list) { pintarAlertasMultasPendientes(list); });
-                }).catch(function () {});
-            }
+                if (typeof sincronizarMultasDesdeConserjeria === 'function') {
+                    sincronizarMultasDesdeConserjeria().then(function () {
+                        if (typeof obtenerDatosMes !== 'function' || typeof pintarAlertasMultasPendientes !== 'function') return;
+                        return obtenerDatosMes('multas').then(function (list) { pintarAlertasMultasPendientes(list); });
+                    }).catch(function () {});
+                }
+                if (typeof multaEscucharColaConserjeria === 'function') multaEscucharColaConserjeria();
             if (typeof sincronizarReclamosDesdeConserjeria === 'function') {
                 sincronizarReclamosDesdeConserjeria().then(function () {
                     if (typeof reclamosEscucharColaConserjeria === 'function') reclamosEscucharColaConserjeria();
@@ -18008,7 +17937,7 @@ function pcshChatMsgTimestamp(m) {
   return 0;
 }
 
-/** Solo URLs https para mostrar stickers (evita javascript: y datos maliciosos). */
+/** Solo URLs https para mostrar stickers ya enviados (evita javascript: y datos maliciosos). */
 function pcshChatSanitizeStickerUrl(u) {
   try {
     var x = new URL(String(u || ''), window.location.href);
@@ -18017,65 +17946,6 @@ function pcshChatSanitizeStickerUrl(u) {
     return '';
   }
 }
-
-/**
- * Stickers estáticos (Twemoji / emoji-datasource-twitter vía jsDelivr). Firestore: stickerUrl + tipo.
- * Base: …/img/twitter/64/{code}.png (incluye secuencias con guiones, p. ej. 1f636-200d-1f32b-fe0f).
- */
-var PCSH_CHAT_STICKER_TW = 'https://cdn.jsdelivr.net/npm/emoji-datasource-twitter@15.0.1/img/twitter/64/';
-var PCSH_CHAT_STICKER_PACK = [
-  { alt: 'Yo', code: '1f464' },
-  { alt: 'Modo derretido', code: '1fae0' },
-  { alt: 'Modo fiesta', code: '1f973' },
-  { alt: 'Mente explotada', code: '1f92f' },
-  { alt: 'Modo fan', code: '1f929' },
-  { alt: 'Ojitos corazón', code: '1f970' },
-  { alt: 'Todo al revés', code: '1f643' },
-  { alt: 'Guiño caótico', code: '1f61c' },
-  { alt: 'En las nubes', code: '1f636-200d-1f32b-fe0f' },
-  { alt: 'Saludito', code: '1fae1' },
-  { alt: 'Aguantando', code: '1fae2' },
-  { alt: 'Ojitos', code: '1fae3' },
-  { alt: 'Hmm…', code: '1fae5' },
-  { alt: 'Uff', code: '1f625' },
-  { alt: 'Modo mareo', code: '1f635' },
-  { alt: 'Modo zombie', code: '1f9df' },
-  { alt: 'Cien / leyenda', code: '1f4af' },
-  { alt: 'Palmas', code: '1f44f' },
-  { alt: 'Pulgar arriba', code: '1f44d' },
-  { alt: 'Gracias', code: '1f64f' },
-  { alt: 'Fuego', code: '1f525' },
-  { alt: 'Brillitos', code: '2728' },
-  { alt: 'Impacto', code: '1f4a5' },
-  { alt: 'Rayo', code: '26a1' },
-  { alt: 'Confetti', code: '1f389' },
-  { alt: 'Globo', code: '1f388' },
-  { alt: 'Confeti', code: '1f38a' },
-  { alt: 'Cohete', code: '1f680' },
-  { alt: 'Arcoíris', code: '1f308' },
-  { alt: 'Videojuegos', code: '1f3ae' },
-  { alt: 'Joystick retro', code: '1f579-fe0f' },
-  { alt: 'Dado', code: '1f3b2' },
-  { alt: 'Playlist', code: '1f3a7' },
-  { alt: 'Disco', code: '1f4bf' },
-  { alt: 'Cash', code: '1f4b0' },
-  { alt: 'Brindis', code: '1f942' },
-  { alt: 'Bubble tea', code: '1f9cb' },
-  { alt: 'Café', code: '2615' },
-  { alt: 'Pizza', code: '1f355' },
-  { alt: 'Palta', code: '1f951' },
-  { alt: 'Sushi', code: '1f363' },
-  { alt: 'Robot', code: '1f916' },
-  { alt: 'Fantasma', code: '1f47b' },
-  { alt: 'Alien', code: '1f47d' },
-  { alt: 'OVNI', code: '1f6f8' },
-  { alt: 'Unicornio', code: '1f984' },
-  { alt: 'Michi', code: '1f431' },
-  { alt: 'Perrito', code: '1f436' },
-  { alt: 'Delfín', code: '1f42c' }
-].map(function (s) {
-  return { alt: s.alt, src: PCSH_CHAT_STICKER_TW + s.code + '.png' };
-});
 
 function pcshChatUpdateFabBadge(unread) {
   var n = Math.min(99, Math.max(0, unread | 0));
@@ -18968,11 +18838,9 @@ function setChatOpen(open) {
   if (!chatVisible) {
     if (typeof pcshChatClearMyTyping === 'function') pcshChatClearMyTyping();
     if (typeof pcshChatCloseMenu === 'function') pcshChatCloseMenu();
-    dock.classList.remove('chat-emoji-open', 'chat-sticker-open');
+    dock.classList.remove('chat-emoji-open');
     var ebClose = document.getElementById('chatEmojiBtn');
     if (ebClose) ebClose.setAttribute('aria-expanded', 'false');
-    var sbClose = document.getElementById('chatStickerBtn');
-    if (sbClose) sbClose.setAttribute('aria-expanded', 'false');
     if (typeof pcshChatCloseCitaNovedadModal === 'function') pcshChatCloseCitaNovedadModal();
     pcshChatResetStackAnchor();
   }
@@ -19173,19 +19041,19 @@ async function initChat() {
       ]
     },
     {
-      title: 'Manos y gestos',
+      title: 'Gestos',
       emojis: [
         '🙏', '👍', '👎', '👌', '🤌', '🤏', '✌️', '🤞', '🤟', '🤘', '🤙', '👈', '👉', '👆', '👇', '☝️', '👋', '🤚', '🖐️', '✋', '🖖', '👏', '🙌', '👐', '🤲', '🤝', '🙋', '🙋‍♂️', '🙋‍♀️', '💪', '🦾', '🖕', '✍️', '💅', '🤳', '💁', '💁‍♂️', '💁‍♀️', '🙆', '🙆‍♂️', '🙆‍♀️', '🙅', '🙅‍♂️', '🙅‍♀️', '🤷', '🤷‍♂️', '🤷‍♀️', '🙇', '🙇‍♂️', '🙇‍♀️', '🤦', '🤦‍♂️', '🤦‍♀️', '🫶', '🫡', '🫂'
       ]
     },
     {
-      title: 'Corazones y símbolos',
+      title: 'Símbolos',
       emojis: [
         '❤️', '🧡', '💛', '💚', '💙', '🩵', '🩷', '💜', '🖤', '🤍', '🤎', '💔', '❤️‍🔥', '❤️‍🩹', '💕', '💞', '💓', '💗', '💖', '💘', '💝', '💟', '♥️', '🔥', '✨', '🌟', '⭐', '🌈', '☀️', '🌙', '⚡', '💡', '💯', '✅', '☑️', '✔️', '❌', '❎', '⭕', '🚫', '⚠️', '‼️', '❓', '❔', '❗', '💬', '💭', '🗯️', '📢', '📣', '🔔', '🔕', '📌', '📍', '🔗', '⏰', '📅', '📆', '🕐', '⌛', '⏳'
       ]
     },
     {
-      title: 'Día a día',
+      title: 'Diario',
       emojis: [
         '🎉', '🎊', '🎈', '🎁', '🎂', '🍰', '🥳', '🏠', '🛋️', '🛏️', '🚪', '🪟', '🧹', '🧽', '🪣', '🧴', '☕', '🧉', '🍵', '🥤', '🍽️', '🥗', '🍕', '🍔', '🥐', '🍳', '✈️', '🚗', '🚙', '🚌', '🚲', '🛴', '🚶', '🚶‍♂️', '🚶‍♀️', '🏃', '🏃‍♂️', '🏃‍♀️', '⚽', '🏀', '🎾', '🎮', '📺', '📱', '💻', '🎧', '📷', '🎵', '🎶', '📚', '✏️', '📝', '📎', '🗂️', '📂', '🧳', '👶', '👧', '🧒', '👦', '👩', '👨', '👴', '👵', '🐕', '🐈', '🌷', '🌻', '🌲', '🌴', '☔', '❄️', '🌡️'
       ]
@@ -19211,7 +19079,6 @@ async function initChat() {
   }
 
   var emojiBtn = document.getElementById('chatEmojiBtn');
-  var stickerBtn = document.getElementById('chatStickerBtn');
   var emojiPop = document.getElementById('chatEmojiPopover');
   if (emojiPop && emojiBtn && dock) {
     var head = document.createElement('div');
@@ -19261,10 +19128,6 @@ async function initChat() {
           ev.preventDefault();
           ev.stopPropagation();
           pcshChatInsertAtCursor(inp, em);
-          dock.classList.remove('chat-emoji-open', 'chat-sticker-open');
-          emojiBtn.setAttribute('aria-expanded', 'false');
-          if (stickerBtn) stickerBtn.setAttribute('aria-expanded', 'false');
-          if (typeof pcshChatCloseCitaNovedadModal === 'function') pcshChatCloseCitaNovedadModal();
         });
         grid.appendChild(b);
       });
@@ -19279,95 +19142,9 @@ async function initChat() {
     emojiBtn.addEventListener('click', function (ev) {
       ev.preventDefault();
       ev.stopPropagation();
-      dock.classList.remove('chat-sticker-open');
-      if (stickerBtn) stickerBtn.setAttribute('aria-expanded', 'false');
       if (typeof pcshChatCloseCitaNovedadModal === 'function') pcshChatCloseCitaNovedadModal();
       var on = dock.classList.toggle('chat-emoji-open');
       emojiBtn.setAttribute('aria-expanded', on ? 'true' : 'false');
-    });
-  }
-
-  var stickerPop = document.getElementById('chatStickerPopover');
-  if (stickerPop && stickerBtn && dock) {
-    function pcshChatSendStickerMessage(alt, src) {
-      if (!chatCollection) return;
-      var url = pcshChatSanitizeStickerUrl(src);
-      if (!url) {
-        showMsg('No se pudo enviar el sticker.', 'error');
-        return;
-      }
-      var ident = typeof pcshChatIdentidadMensaje === 'function' ? pcshChatIdentidadMensaje() : { autor: pcshChatAutorActual() };
-      var pay = {
-        autor: ident.autor,
-        displayName: ident.displayName || '',
-        origen: ident.origen || 'gestion-wm',
-        estadoLabel: ident.estadoLabel || '',
-        texto: '🎫 ' + (alt || 'Sticker'),
-        tipo: 'sticker',
-        stickerUrl: url,
-        stickerAlt: alt || 'Sticker',
-        fecha: fechaActual(),
-        hora: horaActual(),
-        timestamp: Date.now()
-      };
-      if (chatReplyTarget) {
-        pay.replyTo = {
-          id: chatReplyTarget.id,
-          autor: chatReplyTarget.autor,
-          texto: (chatReplyTarget.texto || '').slice(0, 200)
-        };
-      }
-      var citSt = typeof pcshChatCitaNovedadPayloadFromTarget === 'function' ? pcshChatCitaNovedadPayloadFromTarget() : null;
-      if (citSt) pay.citaNovedad = citSt;
-      chatCollection
-        .add(pay)
-        .then(function () {
-          if (typeof pcshChatClearMyTyping === 'function') pcshChatClearMyTyping();
-          pcshChatClearReplyUi();
-          if (typeof pcshChatClearCitaNovedadUi === 'function') pcshChatClearCitaNovedadUi();
-        })
-        .catch(function () {
-          showMsg('No se pudo enviar el sticker.', 'error');
-        });
-    }
-    var shead = document.createElement('div');
-    shead.className = 'chat-sticker-popover-head';
-    shead.innerHTML = '<i class="fa-regular fa-images" aria-hidden="true"></i><span>Stickers</span>';
-    var sscroll = document.createElement('div');
-    sscroll.className = 'chat-sticker-popover-scroll';
-    var sgrid = document.createElement('div');
-    sgrid.className = 'chat-sticker-grid';
-    PCSH_CHAT_STICKER_PACK.forEach(function (st) {
-      var b = document.createElement('button');
-      b.type = 'button';
-      b.className = 'chat-sticker-cell';
-      b.setAttribute('aria-label', 'Enviar sticker: ' + st.alt);
-      var img = document.createElement('img');
-      img.src = st.src;
-      img.alt = '';
-      b.appendChild(img);
-      b.addEventListener('click', function (ev) {
-        ev.preventDefault();
-        ev.stopPropagation();
-        pcshChatSendStickerMessage(st.alt, st.src);
-        dock.classList.remove('chat-sticker-open');
-        stickerBtn.setAttribute('aria-expanded', 'false');
-        if (typeof pcshChatCloseCitaNovedadModal === 'function') pcshChatCloseCitaNovedadModal();
-        if (inp) inp.focus();
-      });
-      sgrid.appendChild(b);
-    });
-    sscroll.appendChild(sgrid);
-    stickerPop.appendChild(shead);
-    stickerPop.appendChild(sscroll);
-    stickerBtn.addEventListener('click', function (ev) {
-      ev.preventDefault();
-      ev.stopPropagation();
-      dock.classList.remove('chat-emoji-open');
-      if (emojiBtn) emojiBtn.setAttribute('aria-expanded', 'false');
-      if (typeof pcshChatCloseCitaNovedadModal === 'function') pcshChatCloseCitaNovedadModal();
-      var on = dock.classList.toggle('chat-sticker-open');
-      stickerBtn.setAttribute('aria-expanded', on ? 'true' : 'false');
     });
   }
 
@@ -19385,9 +19162,8 @@ async function initChat() {
     citaBtn.addEventListener('click', function (ev) {
       ev.preventDefault();
       ev.stopPropagation();
-      dock.classList.remove('chat-emoji-open', 'chat-sticker-open');
+      dock.classList.remove('chat-emoji-open');
       if (emojiBtn) emojiBtn.setAttribute('aria-expanded', 'false');
-      if (stickerBtn) stickerBtn.setAttribute('aria-expanded', 'false');
       var on = dock.classList.toggle('chat-cita-nov-open');
       citaBtn.setAttribute('aria-expanded', on ? 'true' : 'false');
       citaPop.setAttribute('aria-hidden', on ? 'false' : 'true');
@@ -19431,11 +19207,6 @@ async function initChat() {
         if (t && t.closest && (t.closest('#chatEmojiPopover') || t.closest('#chatEmojiBtn'))) return;
         dock.classList.remove('chat-emoji-open');
         if (emojiBtn) emojiBtn.setAttribute('aria-expanded', 'false');
-      }
-      if (dock.classList.contains('chat-sticker-open')) {
-        if (t && t.closest && (t.closest('#chatStickerPopover') || t.closest('#chatStickerBtn'))) return;
-        dock.classList.remove('chat-sticker-open');
-        if (stickerBtn) stickerBtn.setAttribute('aria-expanded', 'false');
       }
     },
     true
@@ -19646,13 +19417,6 @@ document.addEventListener('keydown', function (e) {
     var dock = document.getElementById('chatDock');
     if (dock && dock.classList.contains('chat-cita-nov-open')) {
       if (typeof pcshChatCloseCitaNovedadModal === 'function') pcshChatCloseCitaNovedadModal();
-      e.preventDefault();
-      return;
-    }
-    if (dock && dock.classList.contains('chat-sticker-open')) {
-      dock.classList.remove('chat-sticker-open');
-      var sb = document.getElementById('chatStickerBtn');
-      if (sb) sb.setAttribute('aria-expanded', 'false');
       e.preventDefault();
       return;
     }
@@ -25361,6 +25125,105 @@ document.getElementById('chatForm').onsubmit = function (e) {
         function multaIdDesdeNovedad(cor) {
             return 'nov-' + String(cor);
         }
+        function multaClaveEstaEliminada(tomb, id, cor) {
+            var list = Array.isArray(tomb) ? tomb : [];
+            var idS = id != null && String(id) !== '' ? String(id) : '';
+            var c = cor != null && isFinite(Number(cor)) ? Number(cor) : NaN;
+            for (var i = 0; i < list.length; i++) {
+                var t = list[i];
+                if (!t) continue;
+                if (idS && t.id && String(t.id) === idS) return true;
+                if (!isNaN(c) && t.novedadCorrelativo != null && Number(t.novedadCorrelativo) === c) return true;
+            }
+            return false;
+        }
+        function multaRegistroEstaEliminado(tomb, m) {
+            if (!m) return false;
+            return multaClaveEstaEliminada(tomb, m.id, m.novedadCorrelativo);
+        }
+        function multaMezclarTombstones(a, b) {
+            var out = [];
+            var seen = {};
+            function push(t) {
+                if (!t) return;
+                var key = (t.id ? 'id:' + String(t.id) : '') + '|' + (t.novedadCorrelativo != null && isFinite(Number(t.novedadCorrelativo)) ? 'c:' + Number(t.novedadCorrelativo) : '');
+                if (!key || key === '|' || seen[key]) return;
+                seen[key] = true;
+                out.push({
+                    id: t.id ? String(t.id) : '',
+                    novedadCorrelativo: t.novedadCorrelativo != null && isFinite(Number(t.novedadCorrelativo)) ? Number(t.novedadCorrelativo) : null,
+                    at: t.at || new Date().toISOString()
+                });
+            }
+            (a || []).forEach(push);
+            (b || []).forEach(push);
+            return out;
+        }
+        async function multaCargarTombstones() {
+            var local = [];
+            try {
+                var raw = localStorage.getItem(typeof lsKey === 'function' ? lsKey('multas_eliminadas') : 'multas_eliminadas');
+                local = raw ? JSON.parse(raw) : [];
+            } catch (eL) { local = []; }
+            if (!Array.isArray(local)) local = [];
+            if (typeof firebaseInitialized !== 'undefined' && firebaseInitialized && typeof db !== 'undefined' && db) {
+                try {
+                    var doc = await db.collection('comunidad').doc('multas_eliminadas').get();
+                    if (doc.exists) {
+                        var data = doc.data() || {};
+                        var remoto = Array.isArray(data.datos) ? data.datos : [];
+                        local = multaMezclarTombstones(local, remoto);
+                    }
+                } catch (eFs) {
+                    console.warn('[multas] tombstones:', eFs);
+                }
+            }
+            window._multasTombstones = local;
+            try {
+                localStorage.setItem(typeof lsKey === 'function' ? lsKey('multas_eliminadas') : 'multas_eliminadas', JSON.stringify(local));
+            } catch (eS) {}
+            return local;
+        }
+        async function multaRegistrarEliminacionUsuario(multa) {
+            var tomb = await multaCargarTombstones();
+            tomb = multaMezclarTombstones(tomb, [{
+                id: multa && multa.id ? String(multa.id) : '',
+                novedadCorrelativo: multa && multa.novedadCorrelativo != null && isFinite(Number(multa.novedadCorrelativo))
+                    ? Number(multa.novedadCorrelativo)
+                    : null,
+                at: new Date().toISOString()
+            }]);
+            window._multasTombstones = tomb;
+            try {
+                localStorage.setItem(typeof lsKey === 'function' ? lsKey('multas_eliminadas') : 'multas_eliminadas', JSON.stringify(tomb));
+            } catch (eLs) {}
+            if (typeof firebaseInitialized !== 'undefined' && firebaseInitialized && typeof db !== 'undefined' && db) {
+                try {
+                    await db.collection('comunidad').doc('multas_eliminadas').set({
+                        datos: tomb,
+                        modulo: 'multas_eliminadas',
+                        actualizado: firebase.firestore.FieldValue.serverTimestamp()
+                    }, { merge: true });
+                } catch (eFs) {
+                    console.warn('[multas] guardar eliminación:', eFs);
+                }
+            }
+            var cor = multa && multa.novedadCorrelativo != null ? Number(multa.novedadCorrelativo) : NaN;
+            if (isFinite(cor) && typeof obtenerDbConserjeriaOperativa === 'function') {
+                try {
+                    var sdb = await obtenerDbConserjeriaOperativa();
+                    if (sdb) {
+                        await sdb.collection('multas_desde_novedad').doc(String(cor)).set({
+                            activa: false,
+                            eliminadaEnGestion: true,
+                            eliminadaAt: Date.now()
+                        }, { merge: true });
+                    }
+                } catch (eCol) {}
+            }
+            return tomb;
+        }
+
         async function persistirListaMultasMes(mesAnio, lista) {
             var mes = mesAnio || (typeof obtenerMesActual === 'function' ? obtenerMesActual() : '');
             if (!mes) return;
@@ -25447,9 +25310,12 @@ document.getElementById('chatForm').onsubmit = function (e) {
             var refHtml = '<p>Novedad <strong>#' + String(num).replace(/</g, '') + '</strong> · ' + (n.fecha || '') + (n.hora ? ' · ' + String(n.hora).slice(0, 5) + ' hrs.' : '') + '</p>';
             var cuerpo = String(texto || '').replace(/</g, '&lt;');
             if (n.notaInterna) cuerpo += '<p><em>Nota interna:</em> ' + String(n.notaInterna).replace(/</g, '&lt;') + '</p>';
+            var esEstac = n.origen === 'visita_estacionamiento' || /estacionamiento de visitas/i.test(texto);
+            var motivo = esEstac ? 'Estacionamiento de visitas — exceso de tiempo' : multaMotivoDesdeTexto(texto);
             return {
                 id: multaIdDesdeNovedad(cor),
                 origen: 'conserjeria',
+                origenDetalle: n.origen || '',
                 novedadCorrelativo: cor,
                 novedadLibro: num,
                 novedadHora: n.hora || '',
@@ -25459,7 +25325,10 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 nombre: nombre,
                 fecha: ymd,
                 departamento: depto || '—',
-                motivo: multaMotivoDesdeTexto(texto),
+                motivo: motivo,
+                patente: n.patente || '',
+                parkingCode: n.parkingCode || '',
+                visitaId: n.visitaId || '',
                 contenido: String(texto || ''),
                 contenidoHtml: refHtml + '<p>' + cuerpo.replace(/\n/g, '<br>') + '</p>',
                 monto: 0,
@@ -25487,19 +25356,26 @@ document.getElementById('chatForm').onsubmit = function (e) {
                         porCor[Number(n.correlativo)] = Object.assign({}, porCor[Number(n.correlativo)] || {}, n, { activa: true });
                     });
                     var keys = Object.keys(porCor);
-                    if (!keys.length) return 0;
                     var mesActual = typeof obtenerMesActual === 'function' ? obtenerMesActual() : '';
+                    var tomb = typeof multaCargarTombstones === 'function' ? await multaCargarTombstones() : (window._multasTombstones || []);
                     var lista = typeof obtenerDatosMesEspecifico === 'function'
                         ? await obtenerDatosMesEspecifico('multas', mesActual)
                         : (typeof obtenerDatosMes === 'function' ? await obtenerDatosMes('multas') : []);
                     if (!Array.isArray(lista)) lista = [];
+                    var creadas = 0;
+                    var cambiadas = false;
+                    var listaAntes = lista.length;
+                    lista = lista.filter(function (m) { return !multaRegistroEstaEliminado(tomb, m); });
+                    if (lista.length !== listaAntes) cambiadas = true;
+                    if (!keys.length) {
+                        if (cambiadas) await persistirListaMultasMes(mesActual, lista);
+                        return 0;
+                    }
                     var nums = {};
                     var rawAll = (window._moduloConserjeriaCache && window._moduloConserjeriaCache.novedadesAll) || [];
                     if (typeof numerosLibroNovedadesGestion === 'function' && rawAll.length) {
                         nums = numerosLibroNovedadesGestion(rawAll);
                     }
-                    var creadas = 0;
-                    var cambiadas = false;
                     keys.forEach(function (k) {
                         var n = porCor[k];
                         var cor = Number(n.correlativo);
@@ -25507,6 +25383,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                         var exist = multaBuscarEnLista(lista, cor);
                         var libro = nums[cor] != null ? nums[cor] : n.numeroLibro;
                         if (!exist) {
+                            if (multaClaveEstaEliminada(tomb, multaIdDesdeNovedad(cor), cor)) return;
                             var neu = multaPayloadDesdeNovedad(n, libro);
                             neu.mes = mesActual;
                             if (!neu.folio) neu.folio = getSiguienteFolioMulta(lista, mesActual);
@@ -25552,8 +25429,9 @@ document.getElementById('chatForm').onsubmit = function (e) {
                             ? await obtenerDatosMesEspecifico('multas', mesActual)
                             : lista;
                         if (!Array.isArray(latest)) latest = [];
+                        latest = latest.filter(function (m) { return !multaRegistroEstaEliminado(tomb, m); });
                         lista.forEach(function (m) {
-                            if (!m) return;
+                            if (!m || multaRegistroEstaEliminado(tomb, m)) return;
                             var got = (m.novedadCorrelativo != null ? multaBuscarEnLista(latest, m.novedadCorrelativo) : null)
                                 || latest.filter(function (x) { return x && x.id === m.id; })[0];
                             if (!got) {
@@ -25577,6 +25455,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                             }
                         });
                         latest = multaDeduplicarLista(latest);
+                        latest = latest.filter(function (m) { return !multaRegistroEstaEliminado(tomb, m); });
                         multaAplicarAnulacionesEnLista(latest);
                         await persistirListaMultasMes(mesActual, latest);
                     }
@@ -25773,9 +25652,34 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     if (typeof cargarMultas === 'function') cargarMultas();
                 });
             }
+            if (typeof multaEscucharColaConserjeria === 'function') multaEscucharColaConserjeria();
+        }
+        async function multaEscucharColaConserjeria() {
+            if (window._multasColaUnsub) return;
+            try {
+                var sdb = typeof obtenerDbConserjeriaOperativa === 'function' ? await obtenerDbConserjeriaOperativa() : null;
+                if (!sdb || typeof sdb.collection !== 'function') return;
+                window._multasColaUnsub = sdb.collection('multas_desde_novedad').onSnapshot(function () {
+                    if (typeof sincronizarMultasDesdeConserjeria === 'function') {
+                        sincronizarMultasDesdeConserjeria().then(function () {
+                            if (typeof obtenerDatosMes !== 'function') return;
+                            return obtenerDatosMes('multas').then(function (list) {
+                                if (typeof pintarAlertasMultasPendientes === 'function') pintarAlertasMultasPendientes(list);
+                                var tab = document.getElementById('multas');
+                                if (tab && tab.classList.contains('active') && typeof cargarMultas === 'function') cargarMultas();
+                            });
+                        }).catch(function () {});
+                    }
+                }, function (err) {
+                    console.warn('[multas] listener cola:', err);
+                });
+            } catch (eLis) {
+                console.warn('[multas] no se pudo escuchar cola:', eLis);
+            }
         }
         window.abrirDetalleMulta = abrirDetalleMulta;
         window.sincronizarMultasDesdeConserjeria = sincronizarMultasDesdeConserjeria;
+        window.multaEscucharColaConserjeria = multaEscucharColaConserjeria;
 
         var RECLAMO_ESTADOS_GESTION = {
             pendiente: { label: 'Pendiente', emoji: '🟠' },
@@ -26662,8 +26566,14 @@ document.getElementById('chatForm').onsubmit = function (e) {
             } catch (eSyncC) {}
             const todasRaw = await obtenerDatosMes('multas');
             var todas = multaDeduplicarLista(todasRaw);
+            var tombUi = window._multasTombstones;
+            if ((!tombUi || !tombUi.length) && typeof multaCargarTombstones === 'function') {
+                try { tombUi = await multaCargarTombstones(); } catch (eT) { tombUi = tombUi || []; }
+            }
+            var nAntesTomb = todas.length;
+            todas = (todas || []).filter(function (m) { return !multaRegistroEstaEliminado(tombUi, m); });
             var stamped = multaAplicarAnulacionesEnLista(todas);
-            if (stamped || todas.length !== (todasRaw || []).length) {
+            if (stamped || todas.length !== (todasRaw || []).length || todas.length !== nAntesTomb) {
                 try {
                     var mesSave = typeof obtenerMesActual === 'function' ? obtenerMesActual() : '';
                     if (window.mesEnConsulta) mesSave = window.mesEnConsulta;
@@ -27172,7 +27082,18 @@ document.getElementById('chatForm').onsubmit = function (e) {
             if (confirmado) {
                 const multas = await obtenerDatosMes('multas');
                 const eliminada = multas.find(m => m.id === id);
-                const filtradas = multas.filter(m => m.id !== id);
+                if (eliminada && typeof multaRegistrarEliminacionUsuario === 'function') {
+                    try { await multaRegistrarEliminacionUsuario(eliminada); } catch (eTomb) {
+                        console.warn('[multas] registrar eliminación:', eTomb);
+                    }
+                }
+                const filtradas = (multas || []).filter(function (m) {
+                    if (!m) return false;
+                    if (m.id === id) return false;
+                    if (eliminada && eliminada.novedadCorrelativo != null && m.novedadCorrelativo != null
+                        && Number(m.novedadCorrelativo) === Number(eliminada.novedadCorrelativo)) return false;
+                    return true;
+                });
                 await guardarDatosMes('multas', filtradas);
                 if (eliminada && typeof window.registrarMovimiento === 'function') {
                     if (multaEsRegistroAnulacion(eliminada)) {
@@ -47839,6 +47760,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 } else if (window.dashboardData && window.dashboardData.multas && typeof pintarAlertasMultasPendientes === 'function') {
                     pintarAlertasMultasPendientes(window.dashboardData.multas);
                 }
+                if (typeof multaEscucharColaConserjeria === 'function') multaEscucharColaConserjeria();
                 if (typeof sincronizarReclamosDesdeConserjeria === 'function') {
                     sincronizarReclamosDesdeConserjeria().then(function () {
                         if (typeof reclamosEscucharColaConserjeria === 'function') reclamosEscucharColaConserjeria();
