@@ -6782,7 +6782,7 @@
                 <div id="alertasDashboard" style="display: none;"><!-- Gestionado por Arturito --></div>
                 <div id="dashboardMultasPendientesWrap" class="multas-alerta" role="status"></div>
                 <div id="dashboardReclamosPendientesWrap" class="reclamos-alerta" role="status"></div>
-                <div id="dashboardResumenNovedadesWrap" class="dashboard-resumen-aviso" role="status" aria-live="polite"></div>
+                <div id="dashboardResumenNovedadesWrap" class="dashboard-resumen-aviso" hidden></div>
                 </div>
 
                 <div class="dashboard2-hero">
@@ -16916,51 +16916,12 @@
                 recomendaciones: pendientes.slice(0, 6).map(function (g) { return 'Seguimiento: ' + g.titulo; })
             };
         }
-        function pcshResumenGestionAvisoHtml(dia) {
-            var esc = typeof escaparHtmlModuloConserjeria === 'function' ? escaparHtmlModuloConserjeria : function (s) { return String(s == null ? '' : s); };
-            if (!dia) {
-                return '<h3>Resumen de novedades</h3><p class="sub">Preparando el aviso automático de los últimos 2 días…</p>';
-            }
-            var c = dia.conteos || {};
-            var toneClass = dia.vacio ? ' is-vacio' : (c.critica ? ' is-crit' : '');
-            var destacados = [].concat(dia.criticas || [], dia.importantes || [], dia.pendientes || []).slice(0, 6);
-            var html = '<h3>Resumen de novedades</h3>';
-            html += '<p class="sub">' + esc(dia.ventana || pcshResumenGestionFechaVentanaLarga(dia.ymd)) + ' · ' + (dia.total || 0) + ' novedades operativas · emitido automáticamente</p>';
-            html += '<div class="chips">';
-            html += '<span class="chip">🔴 ' + (c.critica || 0) + ' críticas</span>';
-            html += '<span class="chip">🟠 ' + (c.importante || 0) + ' importantes</span>';
-            html += '<span class="chip">🟡 ' + (c.pendiente || 0) + ' pendientes</span>';
-            html += '<span class="chip">🟢 ' + (c.general || 0) + ' generales</span></div>';
-            html += '<p class="lead">' + esc(dia.resumenGeneral || (dia.vacio ? 'No se registraron novedades en turnos cerrados de los últimos dos días.' : '')) + '</p>';
-            if (destacados.length) {
-                html += '<ul>';
-                destacados.forEach(function (g) {
-                    var marca = g.prioridad === 'critica' ? '🔴' : (g.pendiente ? '🟡' : (g.prioridad === 'importante' ? '🟠' : '🟢'));
-                    html += '<li>' + marca + ' ' + esc(g.titulo || 'Situación') + (g.libros && g.libros.length ? ' (' + esc(g.libros.join(', ')) + ')' : '') + '</li>';
-                });
-                html += '</ul>';
-            }
-            html += '<button type="button" class="btn btn-primary" data-ir-conserjeria-resumen style="padding:0.35rem 0.75rem;font-size:0.78rem;">Abrir Conserjería</button>';
-            return { html: html, toneClass: toneClass };
-        }
-        function pcshResumenGestionPintarAviso(dia) {
+        function pcshResumenGestionPintarAviso() {
             var wrap = document.getElementById('dashboardResumenNovedadesWrap');
             if (!wrap) return;
-            var pack = pcshResumenGestionAvisoHtml(dia);
-            wrap.innerHTML = pack.html;
-            wrap.className = 'dashboard-resumen-aviso is-on' + (pack.toneClass || '');
-            if (!wrap.dataset.bound) {
-                wrap.dataset.bound = '1';
-                wrap.addEventListener('click', function (ev) {
-                    var b = ev.target && ev.target.closest ? ev.target.closest('[data-ir-conserjeria-resumen]') : null;
-                    if (!b) return;
-                    if (typeof window.showTab === 'function') window.showTab('conserjeria');
-                    setTimeout(function () {
-                        var dest = document.getElementById('conserjeriaResumenDiarioWrap');
-                        if (dest && dest.scrollIntoView) dest.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }, 80);
-                });
-            }
+            wrap.innerHTML = '';
+            wrap.className = 'dashboard-resumen-aviso';
+            wrap.hidden = true;
         }
         function pcshResumenGestionPintar(dia) {
             var body = document.getElementById('pcshResumenBodyGestion');
