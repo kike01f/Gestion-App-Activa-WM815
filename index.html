@@ -1057,8 +1057,15 @@
             border-radius: 999px; padding: 0.18rem 0.5rem; font-size: 0.68rem; font-weight: 700; cursor: pointer;
         }
         .bloc-filtros button.is-on { background: #86efac; color: #0f172a; border-color: #86efac; }
-        .bloc-quick { display: grid; grid-template-columns: 1fr 1fr auto; gap: 0.3rem; margin: 0 0 0.55rem; }
-        .bloc-quick input[type="text"] { grid-column: 1 / -1; }
+        .bloc-quick { display: grid; grid-template-columns: 1fr auto; gap: 0.3rem; margin: 0 0 0.25rem; }
+        .bloc-quick input[type="text"] { grid-column: auto; }
+        .bloc-hint { margin: 0 0 0.5rem; font-size: 0.68rem; color: #94a3b8; line-height: 1.35; }
+        .bloc-creada-txt { margin: 0; font-size: 0.82rem; font-weight: 650; color: var(--text-primary); }
+        .bloc-card.is-urgente { border-color: rgba(251,191,36,0.55); }
+        .bloc-plazo { font-weight: 800; }
+        .bloc-plazo.ok { color: #86efac; }
+        .bloc-plazo.warn { color: #fde68a; }
+        .bloc-plazo.bad { color: #fecaca; }
         .bloc-quick input, .bloc-quick button {
             width: 100%; box-sizing: border-box; border-radius: 8px; border: 1px solid rgba(255,255,255,0.16);
             background: #0f172a; color: #f8fafc; padding: 0.38rem 0.45rem; font-size: 0.75rem;
@@ -4529,10 +4536,7 @@
                 grid-template-columns: repeat(auto-fill, minmax(min(100%, 8.5rem), 1fr)) !important;
             }
             .bloc-quick {
-                grid-template-columns: 1fr 1fr;
-            }
-            .bloc-quick button {
-                grid-column: 1 / -1;
+                grid-template-columns: 1fr auto;
             }
             .chk-filtros .form-group {
                 min-width: 0;
@@ -7313,15 +7317,14 @@
                     <div class="bloc-filtros" id="blocNotasFiltros">
                         <button type="button" data-bloc-filtro="activas" class="is-on">Activas</button>
                         <button type="button" data-bloc-filtro="hoy">Hoy</button>
-                        <button type="button" data-bloc-filtro="agenda">Agenda</button>
+                        <button type="button" data-bloc-filtro="plazo">Por vencer</button>
                         <button type="button" data-bloc-filtro="hechas">Hechas</button>
                     </div>
                     <form id="blocNotaQuick" class="bloc-quick" autocomplete="off">
-                        <input type="text" id="blocQuickTitulo" maxlength="180" placeholder="Nueva nota o recordatorio…">
-                        <input type="date" id="blocQuickFecha" title="Fecha de agenda">
-                        <input type="time" id="blocQuickHora" title="Hora de recordatorio">
+                        <input type="text" id="blocQuickTitulo" maxlength="180" placeholder="Nueva nota… se registra ahora, plazo 3 días">
                         <button type="submit">Añadir</button>
                     </form>
+                    <p class="bloc-hint">Se guarda con día y hora actuales. Tiene 3 días para gestionarla.</p>
                     <div id="blocNotasLista" class="bloc-lista"></div>
                 </section>
                 <!-- 3. Nómina (seguimiento operativo) -->
@@ -10141,25 +10144,29 @@
                     </select>
                 </div>
             </div>
+            <div class="form-group">
+                <label>Registrada</label>
+                <p id="blocEditCreada" class="bloc-creada-txt">Se completará al guardar.</p>
+            </div>
             <div class="form-row">
                 <div class="form-group">
-                    <label for="blocEditFecha">Fecha de agenda</label>
-                    <input type="date" id="blocEditFecha">
+                    <label for="blocEditPlazoFecha">Gestionar hasta (3 días)</label>
+                    <input type="date" id="blocEditPlazoFecha">
                 </div>
                 <div class="form-group">
-                    <label for="blocEditHora">Hora de recordatorio</label>
-                    <input type="time" id="blocEditHora">
+                    <label for="blocEditPlazoHora">Hora límite</label>
+                    <input type="time" id="blocEditPlazoHora">
                 </div>
             </div>
             <div class="form-row">
                 <div class="form-group" style="flex:0 0 auto;">
-                    <label><input type="checkbox" id="blocEditRecordatorio"> Avisarme a esa hora</label>
+                    <label><input type="checkbox" id="blocEditRecordatorio" checked> Avisarme al vencer el plazo</label>
                 </div>
                 <div class="form-group" style="flex:0 0 auto;">
                     <label><input type="checkbox" id="blocEditFijada"> Fijar arriba</label>
                 </div>
                 <div class="form-group" style="flex:0 0 auto;">
-                    <label><input type="checkbox" id="blocEditHecha"> Marcar hecha</label>
+                    <label><input type="checkbox" id="blocEditHecha"> Marcar gestionada</label>
                 </div>
             </div>
             <div class="modal-buttons">
@@ -11592,6 +11599,9 @@
                 }
                 if (typeof window.inicializarFiltrosInteligentes === 'function') {
                     window.inicializarFiltrosInteligentes();
+                }
+                if (typeof programarFechaHoraActualRegistro === 'function') {
+                    programarFechaHoraActualRegistro(tabName);
                 }
             } catch (error) {
                 console.error('Error en showTab:', error);
@@ -18476,13 +18486,71 @@
             function uid() {
                 return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
             }
-            function hoyYmd() {
+            var PLAZO_DIAS = 3;
+            function ahoraChile() {
                 try {
-                    return new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Santiago', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
+                    var parts = new Intl.DateTimeFormat('en-GB', {
+                        timeZone: 'America/Santiago', year: 'numeric', month: '2-digit', day: '2-digit',
+                        hour: '2-digit', minute: '2-digit', hour12: false
+                    }).formatToParts(new Date());
+                    function val(t) {
+                        var p = parts.filter(function (x) { return x.type === t; })[0];
+                        return p ? p.value : '';
+                    }
+                    return { ymd: val('year') + '-' + val('month') + '-' + val('day'), hora: val('hour') + ':' + val('minute') };
                 } catch (e) {
                     var d = new Date();
+                    return {
+                        ymd: d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'),
+                        hora: String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0')
+                    };
+                }
+            }
+            function hoyYmd() { return ahoraChile().ymd; }
+            function ymdMasDias(ymd, dias) {
+                var p = String(ymd || '').split('-');
+                if (p.length !== 3) return ymd || '';
+                var d = new Date(Date.UTC(parseInt(p[0], 10), parseInt(p[1], 10) - 1, parseInt(p[2], 10)));
+                d.setUTCDate(d.getUTCDate() + Number(dias) || 0);
+                return d.getUTCFullYear() + '-' + String(d.getUTCMonth() + 1).padStart(2, '0') + '-' + String(d.getUTCDate()).padStart(2, '0');
+            }
+            function ymdDesdeIso(iso) {
+                if (!iso) return '';
+                try {
+                    return new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Santiago', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date(iso));
+                } catch (e) {
+                    var d = new Date(iso);
+                    if (!isFinite(d.getTime())) return '';
                     return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
                 }
+            }
+            function horaDesdeIso(iso) {
+                if (!iso) return '';
+                try {
+                    return new Intl.DateTimeFormat('en-GB', { timeZone: 'America/Santiago', hour: '2-digit', minute: '2-digit', hour12: false }).format(new Date(iso));
+                } catch (e) {
+                    var d = new Date(iso);
+                    if (!isFinite(d.getTime())) return '';
+                    return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+                }
+            }
+            function plazoMsDe(n) {
+                if (Number(n.plazoMs) > 0) return Number(n.plazoMs);
+                if (n.plazoFecha) return msFechaHora(n.plazoFecha, n.plazoHora || n.hora || '09:00');
+                return 0;
+            }
+            function textoPlazo(n) {
+                if (n.hecha) return { txt: 'Gestionada', cls: 'ok' };
+                var ms = plazoMsDe(n);
+                if (!ms) return { txt: 'Plazo 3 días', cls: 'ok' };
+                var rest = ms - Date.now();
+                if (rest <= 0) return { txt: 'Plazo vencido', cls: 'bad' };
+                var dias = Math.floor(rest / 86400000);
+                var horas = Math.floor((rest % 86400000) / 3600000);
+                if (dias >= 2) return { txt: 'Quedan ' + dias + ' días', cls: 'ok' };
+                if (dias === 1) return { txt: 'Queda 1 día', cls: 'warn' };
+                if (horas >= 1) return { txt: 'Quedan ' + horas + ' h', cls: 'warn' };
+                return { txt: 'Vence ahora', cls: 'bad' };
             }
             function msFechaHora(fecha, hora) {
                 if (!fecha) return 0;
@@ -18524,16 +18592,26 @@
             }
             function norm(n) {
                 n = n || {};
+                var ahora = ahoraChile();
+                var fecha = String(n.fecha || '').trim() || ymdDesdeIso(n.createdAt) || ahora.ymd;
+                var hora = String(n.hora || '').trim() || horaDesdeIso(n.createdAt) || ahora.hora;
+                var plazoFecha = String(n.plazoFecha || '').trim() || ymdMasDias(fecha, PLAZO_DIAS);
+                var plazoHora = String(n.plazoHora || '').trim() || hora;
+                var pMs = Number(n.plazoMs) || msFechaHora(plazoFecha, plazoHora);
+                var recMs = Number(n.recordatorioMs) || pMs;
                 return {
                     id: String(n.id || uid()),
                     titulo: String(n.titulo || '').trim(),
                     cuerpo: String(n.cuerpo || ''),
                     tipo: n.tipo === 'recordatorio' || n.tipo === 'tarea' ? n.tipo : 'nota',
                     color: n.color || 'sky',
-                    fecha: String(n.fecha || ''),
-                    hora: String(n.hora || ''),
-                    recordatorio: !!n.recordatorio,
-                    recordatorioMs: Number(n.recordatorioMs) || 0,
+                    fecha: fecha,
+                    hora: hora,
+                    plazoFecha: plazoFecha,
+                    plazoHora: plazoHora,
+                    plazoMs: pMs,
+                    recordatorio: n.recordatorio !== false,
+                    recordatorioMs: recMs,
                     notificado: !!n.notificado,
                     hecha: !!n.hecha,
                     fijada: !!n.fijada,
@@ -18545,12 +18623,12 @@
             function ordenar(a, b) {
                 if (!!a.fijada !== !!b.fijada) return a.fijada ? -1 : 1;
                 if (!!a.hecha !== !!b.hecha) return a.hecha ? 1 : -1;
-                var ma = a.recordatorioMs || (a.fecha ? msFechaHora(a.fecha, a.hora) : 0);
-                var mb = b.recordatorioMs || (b.fecha ? msFechaHora(b.fecha, b.hora) : 0);
+                var ma = plazoMsDe(a) || a.recordatorioMs || 0;
+                var mb = plazoMsDe(b) || b.recordatorioMs || 0;
                 if (ma && mb && ma !== mb) return ma - mb;
                 if (ma && !mb) return -1;
                 if (!ma && mb) return 1;
-                return String(b.updatedAt || '').localeCompare(String(a.updatedAt || ''));
+                return String(b.createdAt || '').localeCompare(String(a.createdAt || ''));
             }
             function filtrar() {
                 var hoy = hoyYmd();
@@ -18558,22 +18636,30 @@
                 return items.filter(function (n) {
                     if (filtro === 'hechas') return !!n.hecha;
                     if (n.hecha) return false;
-                    if (filtro === 'hoy') return n.fecha === hoy || (!n.fecha && n.recordatorioMs && new Date(n.recordatorioMs).toISOString().slice(0, 10) === hoy);
-                    if (filtro === 'agenda') return !!(n.fecha || n.recordatorio || n.tipo === 'recordatorio');
+                    if (filtro === 'hoy') return n.fecha === hoy;
+                    if (filtro === 'plazo' || filtro === 'agenda') {
+                        var ms = plazoMsDe(n);
+                        return !!(ms && ms - now <= 3 * 86400000);
+                    }
                     return true;
                 }).sort(ordenar);
             }
             function vencida(n) {
                 if (n.hecha) return false;
-                var ms = n.recordatorioMs || (n.fecha ? msFechaHora(n.fecha, n.hora || '23:59') : 0);
+                var ms = plazoMsDe(n);
                 return !!(ms && ms < Date.now());
+            }
+            function urgente(n) {
+                if (n.hecha || vencida(n)) return false;
+                var ms = plazoMsDe(n);
+                return !!(ms && ms - Date.now() <= 86400000);
             }
             function pintarAlerta() {
                 var wrap = document.getElementById('dashboardBlocNotasAlerta');
                 if (!wrap) return;
                 var due = items.filter(function (n) {
-                    if (n.hecha || !n.recordatorio) return false;
-                    var ms = n.recordatorioMs || msFechaHora(n.fecha, n.hora);
+                    if (n.hecha) return false;
+                    var ms = plazoMsDe(n);
                     return ms && ms <= Date.now();
                 });
                 if (!due.length) {
@@ -18582,11 +18668,10 @@
                     return;
                 }
                 wrap.className = 'bloc-dash-alerta is-on';
-                wrap.innerHTML = '<h3>Recordatorios del bloc de notas</h3><ul>' + due.slice(0, 6).map(function (n) {
-                    return '<li><span>' + esc(n.titulo) + (n.hora ? ' · ' + esc(n.hora) : '') + '</span>' +
-                        '<button type="button" class="btn btn-secondary btn-sm" data-bloc-snooze="' + esc(n.id) + '" data-min="60">+1 h</button>' +
+                wrap.innerHTML = '<h3>Notas con plazo vencido (3 días)</h3><ul>' + due.slice(0, 6).map(function (n) {
+                    return '<li><span>' + esc(n.titulo) + ' · ' + esc(fmtFecha(n.plazoFecha || n.fecha) + (n.plazoHora || n.hora ? ' ' + (n.plazoHora || n.hora) : '')) + '</span>' +
                         '<button type="button" class="btn btn-secondary btn-sm" data-bloc-snooze="' + esc(n.id) + '" data-min="1440">+1 día</button>' +
-                        '<button type="button" class="btn btn-primary btn-sm" data-bloc-done="' + esc(n.id) + '">Hecho</button></li>';
+                        '<button type="button" class="btn btn-primary btn-sm" data-bloc-done="' + esc(n.id) + '">Gestionada</button></li>';
                 }).join('') + '</ul>';
             }
             function pintarLista() {
@@ -18599,22 +18684,25 @@
                     return;
                 }
                 box.innerHTML = rows.map(function (n) {
+                    var pl = textoPlazo(n);
                     var meta = [];
-                    if (n.tipo === 'recordatorio') meta.push('Recordatorio');
-                    else if (n.tipo === 'tarea') meta.push('Tarea');
-                    if (n.fecha) meta.push(fmtFecha(n.fecha) + (n.hora ? ' ' + n.hora : ''));
-                    else if (n.hora) meta.push(n.hora);
+                    meta.push('Reg. ' + fmtFecha(n.fecha) + (n.hora ? ' ' + n.hora : ''));
+                    meta.push('Hasta ' + fmtFecha(n.plazoFecha || '') + (n.plazoHora ? ' ' + n.plazoHora : ''));
                     if (n.fijada) meta.push('Fijada');
-                    if (vencida(n)) meta.push('Vencida');
                     var body = String(n.cuerpo || '').trim();
                     if (body.length > 160) body = body.slice(0, 158) + '…';
-                    return '<article class="bloc-card c-' + esc(n.color || 'sky') + (n.hecha ? ' is-hecha' : '') + (vencida(n) ? ' is-vencida' : '') + '" data-bloc-id="' + esc(n.id) + '">' +
+                    var cls = 'bloc-card c-' + esc(n.color || 'sky');
+                    if (n.hecha) cls += ' is-hecha';
+                    if (vencida(n)) cls += ' is-vencida';
+                    else if (urgente(n)) cls += ' is-urgente';
+                    return '<article class="' + cls + '" data-bloc-id="' + esc(n.id) + '">' +
                         '<div class="bloc-card-bar"></div><div>' +
                         '<div class="bloc-card-top">' +
-                        '<input type="checkbox" class="bloc-check" data-bloc-toggle="' + esc(n.id) + '"' + (n.hecha ? ' checked' : '') + ' title="Marcar hecha">' +
+                        '<input type="checkbox" class="bloc-check" data-bloc-toggle="' + esc(n.id) + '"' + (n.hecha ? ' checked' : '') + ' title="Marcar gestionada">' +
                         '<h3 class="bloc-card-title">' + (n.fijada ? '<span class="bloc-pin">📌 </span>' : '') + esc(n.titulo || 'Sin título') + '</h3>' +
                         '</div>' +
-                        (meta.length ? '<p class="bloc-card-meta">' + esc(meta.join(' · ')) + '</p>' : '') +
+                        '<p class="bloc-card-meta">' + esc(meta.join(' · ')) +
+                        ' · <span class="bloc-plazo ' + pl.cls + '">' + esc(pl.txt) + '</span></p>' +
                         (body ? '<p class="bloc-card-body">' + esc(body) + '</p>' : '') +
                         '<div class="bloc-card-acts">' +
                         '<button type="button" data-bloc-edit="' + esc(n.id) + '">Editar</button>' +
@@ -18645,15 +18733,24 @@
             }
             function abrirModal(id) {
                 var n = id ? byId(id) : null;
+                var ahora = ahoraChile();
+                var fecha = n ? n.fecha : ahora.ymd;
+                var hora = n ? n.hora : ahora.hora;
+                var plazoF = n ? (n.plazoFecha || ymdMasDias(fecha, PLAZO_DIAS)) : ymdMasDias(ahora.ymd, PLAZO_DIAS);
+                var plazoH = n ? (n.plazoHora || hora) : ahora.hora;
                 document.getElementById('blocEditId').value = n ? n.id : '';
                 document.getElementById('blocModalTitulo').textContent = n ? 'Editar nota' : 'Nueva nota';
                 document.getElementById('blocEditTitulo').value = n ? n.titulo : '';
                 document.getElementById('blocEditCuerpo').value = n ? n.cuerpo : '';
                 document.getElementById('blocEditTipo').value = n ? n.tipo : 'nota';
                 document.getElementById('blocEditColor').value = n ? (n.color || 'sky') : 'sky';
-                document.getElementById('blocEditFecha').value = n ? (n.fecha || '') : '';
-                document.getElementById('blocEditHora').value = n ? (n.hora || '') : '';
-                document.getElementById('blocEditRecordatorio').checked = n ? !!n.recordatorio : false;
+                var creada = document.getElementById('blocEditCreada');
+                if (creada) creada.textContent = fmtFecha(fecha) + ' · ' + hora + (n ? '' : ' (se confirma al guardar)');
+                var pf = document.getElementById('blocEditPlazoFecha');
+                var ph = document.getElementById('blocEditPlazoHora');
+                if (pf) pf.value = plazoF;
+                if (ph) ph.value = plazoH;
+                document.getElementById('blocEditRecordatorio').checked = n ? n.recordatorio !== false : true;
                 document.getElementById('blocEditFijada').checked = n ? !!n.fijada : false;
                 document.getElementById('blocEditHecha').checked = n ? !!n.hecha : false;
                 document.getElementById('blocModalEliminar').hidden = !n;
@@ -18662,25 +18759,28 @@
             function leerFormulario() {
                 var id = document.getElementById('blocEditId').value || uid();
                 var prev = byId(id);
+                var ahora = ahoraChile();
                 var titulo = String(document.getElementById('blocEditTitulo').value || '').trim();
-                var fecha = document.getElementById('blocEditFecha').value || '';
-                var hora = document.getElementById('blocEditHora').value || '';
-                var rec = !!document.getElementById('blocEditRecordatorio').checked;
-                var tipo = document.getElementById('blocEditTipo').value || 'nota';
-                if (rec && !tipo) tipo = 'recordatorio';
-                if (rec && !fecha) fecha = hoyYmd();
-                var ms = rec ? msFechaHora(fecha, hora || '09:00') : (fecha ? msFechaHora(fecha, hora) : 0);
+                var fecha = prev ? (prev.fecha || ahora.ymd) : ahora.ymd;
+                var hora = prev ? (prev.hora || ahora.hora) : ahora.hora;
+                var plazoF = (document.getElementById('blocEditPlazoFecha') || {}).value || ymdMasDias(fecha, PLAZO_DIAS);
+                var plazoH = (document.getElementById('blocEditPlazoHora') || {}).value || hora;
+                var rec = document.getElementById('blocEditRecordatorio') ? !!document.getElementById('blocEditRecordatorio').checked : true;
+                var pMs = msFechaHora(plazoF, plazoH);
                 return norm({
                     id: id,
                     titulo: titulo,
                     cuerpo: document.getElementById('blocEditCuerpo').value || '',
-                    tipo: tipo,
+                    tipo: document.getElementById('blocEditTipo').value || 'nota',
                     color: document.getElementById('blocEditColor').value || 'sky',
                     fecha: fecha,
                     hora: hora,
+                    plazoFecha: plazoF,
+                    plazoHora: plazoH,
+                    plazoMs: pMs,
                     recordatorio: rec,
-                    recordatorioMs: ms,
-                    notificado: prev && prev.recordatorioMs === ms ? !!prev.notificado : false,
+                    recordatorioMs: rec ? pMs : 0,
+                    notificado: prev && Number(prev.plazoMs) === pMs ? !!prev.notificado : false,
                     hecha: !!document.getElementById('blocEditHecha').checked,
                     fijada: !!document.getElementById('blocEditFijada').checked,
                     createdAt: prev ? prev.createdAt : new Date().toISOString(),
@@ -18713,16 +18813,13 @@
             function snooze(id, min) {
                 var n = byId(id);
                 if (!n) return;
-                var base = Math.max(Date.now(), n.recordatorioMs || Date.now());
+                var base = Math.max(Date.now(), plazoMsDe(n) || Date.now());
                 var next = new Date(base + Number(min) * 60000);
-                var y = next.getFullYear();
-                var m = String(next.getMonth() + 1).padStart(2, '0');
-                var d = String(next.getDate()).padStart(2, '0');
-                n.fecha = y + '-' + m + '-' + d;
-                n.hora = String(next.getHours()).padStart(2, '0') + ':' + String(next.getMinutes()).padStart(2, '0');
+                n.plazoFecha = next.getFullYear() + '-' + String(next.getMonth() + 1).padStart(2, '0') + '-' + String(next.getDate()).padStart(2, '0');
+                n.plazoHora = String(next.getHours()).padStart(2, '0') + ':' + String(next.getMinutes()).padStart(2, '0');
+                n.plazoMs = next.getTime();
                 n.recordatorio = true;
-                n.tipo = n.tipo === 'nota' ? 'recordatorio' : n.tipo;
-                n.recordatorioMs = next.getTime();
+                n.recordatorioMs = n.plazoMs;
                 n.notificado = false;
                 n.hecha = false;
                 upsert(n);
@@ -18730,7 +18827,10 @@
             function avisar(n) {
                 try {
                     if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
-                        new Notification('Recordatorio · Gestión WM', { body: n.titulo, tag: 'bloc-' + n.id });
+                        new Notification('Plazo de nota · Gestión WM', {
+                            body: 'Han pasado 3 días para gestionar: ' + n.titulo,
+                            tag: 'bloc-' + n.id
+                        });
                     }
                 } catch (e) {}
                 n.notificado = true;
@@ -18739,8 +18839,8 @@
                 var changed = false;
                 var now = Date.now();
                 items.forEach(function (n) {
-                    if (n.hecha || !n.recordatorio || n.notificado) return;
-                    var ms = n.recordatorioMs || msFechaHora(n.fecha, n.hora);
+                    if (n.hecha || n.notificado || n.recordatorio === false) return;
+                    var ms = plazoMsDe(n);
                     if (ms && ms <= now) {
                         avisar(n);
                         changed = true;
@@ -18766,22 +18866,22 @@
                         abrirModal(null);
                         return;
                     }
-                    var fecha = (document.getElementById('blocQuickFecha') || {}).value || '';
-                    var hora = (document.getElementById('blocQuickHora') || {}).value || '';
-                    var rec = !!(fecha || hora);
-                    if (rec) pedirNotificacion();
+                    var ahora = ahoraChile();
+                    pedirNotificacion();
                     upsert(norm({
                         titulo: titulo,
-                        tipo: rec ? 'recordatorio' : 'nota',
-                        fecha: fecha,
-                        hora: hora,
-                        recordatorio: rec,
-                        recordatorioMs: rec ? msFechaHora(fecha || hoyYmd(), hora || '09:00') : 0,
+                        tipo: 'nota',
+                        fecha: ahora.ymd,
+                        hora: ahora.hora,
+                        plazoFecha: ymdMasDias(ahora.ymd, PLAZO_DIAS),
+                        plazoHora: ahora.hora,
+                        plazoMs: msFechaHora(ymdMasDias(ahora.ymd, PLAZO_DIAS), ahora.hora),
+                        recordatorio: true,
+                        recordatorioMs: msFechaHora(ymdMasDias(ahora.ymd, PLAZO_DIAS), ahora.hora),
+                        createdAt: new Date().toISOString(),
                         autor: typeof multaOperadorActual === 'function' ? multaOperadorActual() : ''
                     }));
                     document.getElementById('blocQuickTitulo').value = '';
-                    document.getElementById('blocQuickFecha').value = '';
-                    document.getElementById('blocQuickHora').value = '';
                 });
                 var filtros = document.getElementById('blocNotasFiltros');
                 if (filtros) filtros.addEventListener('click', function (ev) {
@@ -18840,12 +18940,8 @@
                     if (e.target === modal) cerrarOverlayGestion('modalBlocNota');
                 });
                 var rec = document.getElementById('blocEditRecordatorio');
-                var tipo = document.getElementById('blocEditTipo');
                 if (rec) rec.addEventListener('change', function () {
-                    if (rec.checked && tipo && tipo.value === 'nota') tipo.value = 'recordatorio';
-                    if (rec.checked && !(document.getElementById('blocEditFecha').value)) {
-                        document.getElementById('blocEditFecha').value = hoyYmd();
-                    }
+                    if (rec.checked) pedirNotificacion();
                 });
             }
             async function cargar() {
@@ -18855,9 +18951,11 @@
                 try {
                     var nube = await leerNube();
                     if (nube) {
+                        var migrar = nube.some(function (x) { return !x.plazoFecha; });
                         items = nube.map(norm);
                         escribirLocal();
                         pintarLista();
+                        if (migrar) persistir();
                     } else if (items.length) {
                         await escribirNube();
                     }
@@ -22532,6 +22630,85 @@ document.getElementById('chatForm').onsubmit = function (e) {
             return obtenerFechaSantiago();
         }
 
+        function obtenerHoraHoyInput() {
+            try {
+                return new Date().toLocaleTimeString('en-GB', {
+                    timeZone: 'America/Santiago',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: false
+                }).slice(0, 5);
+            } catch (eH) {
+                var d = new Date();
+                return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+            }
+        }
+
+        var CAMPOS_FECHA_HORA_REGISTRO = {
+            mudanzaFecha: { tipo: 'date', flag: 'editandoMudanza' },
+            aperturaFecha: { tipo: 'date', flag: 'editandoApertura' },
+            aperturaHora: { tipo: 'time', flag: 'editandoApertura' },
+            tarjetaFecha: { tipo: 'date', flag: 'editandoTarjeta' },
+            espacioFecha: { tipo: 'date', flag: 'editandoEspacio' },
+            multaFecha: { tipo: 'date', flag: 'editandoMulta' },
+            morosoFecha: { tipo: 'date', flag: 'editandoMoroso' },
+            abonoMorosoFecha: { tipo: 'date', flag: '' },
+            cajaFecha: { tipo: 'date', flag: 'editandoCaja' },
+            mantencionFecha: { tipo: 'date', flag: 'mantencionId' },
+            proveedorUltimaFecha: { tipo: 'date', flag: '', soloSiVacio: true },
+            postventaFecha: { tipo: 'date', flag: 'postventaEditId' },
+            pagoFechaAseo: { tipo: 'date', flag: '' },
+            reemplazoFechaDia: { tipo: 'date', flag: '' },
+            nominaFechaEmision: { tipo: 'date', flag: '' }
+        };
+        var CAMPOS_FECHA_POR_TAB = {
+            mudanzas: ['mudanzaFecha'],
+            aperturas: ['aperturaFecha', 'aperturaHora'],
+            tarjetas: ['tarjetaFecha'],
+            espacios: ['espacioFecha'],
+            multas: ['multaFecha'],
+            morosos: ['morosoFecha', 'abonoMorosoFecha'],
+            caja: ['cajaFecha'],
+            mantenciones: ['mantencionFecha', 'proveedorUltimaFecha'],
+            postventa: ['postventaFecha'],
+            'pagos-aseo': ['pagoFechaAseo'],
+            nomina: ['reemplazoFechaDia', 'nominaFechaEmision']
+        };
+
+        function campoRegistroEnEdicion(meta) {
+            if (!meta || !meta.flag) return false;
+            if (window[meta.flag]) return true;
+            var el = document.getElementById(meta.flag);
+            return !!(el && String(el.value || '').trim());
+        }
+
+        function aplicarFechaHoraActualRegistro(tabName) {
+            var hoy = obtenerFechaHoy();
+            var hora = obtenerHoraHoyInput();
+            var ids = tabName && CAMPOS_FECHA_POR_TAB[tabName]
+                ? CAMPOS_FECHA_POR_TAB[tabName]
+                : Object.keys(CAMPOS_FECHA_HORA_REGISTRO);
+            ids.forEach(function (id) {
+                var meta = CAMPOS_FECHA_HORA_REGISTRO[id];
+                if (!meta) return;
+                if (campoRegistroEnEdicion(meta)) return;
+                var el = document.getElementById(id);
+                if (!el) return;
+                el.autocomplete = 'off';
+                if (meta.soloSiVacio && el.value) return;
+                el.value = meta.tipo === 'time' ? hora : hoy;
+            });
+            if (typeof window.actualizarMontoApertura === 'function' && (!tabName || tabName === 'aperturas')) {
+                try { window.actualizarMontoApertura(); } catch (eA) {}
+            }
+        }
+
+        function programarFechaHoraActualRegistro(tabName) {
+            aplicarFechaHoraActualRegistro(tabName);
+            setTimeout(function () { aplicarFechaHoraActualRegistro(tabName); }, 80);
+            setTimeout(function () { aplicarFechaHoraActualRegistro(tabName); }, 450);
+        }
+
         // Función para convertir un objeto Date a formato YYYY-MM-DD (zona horaria de Santiago de Chile)
         function formatearFechaISO(fecha) {
             if (!fecha) return '';
@@ -24309,6 +24486,8 @@ document.getElementById('chatForm').onsubmit = function (e) {
             document.getElementById('formApertura').reset();
             const fechaHoy = obtenerFechaHoy();
             document.getElementById('aperturaFecha').value = fechaHoy;
+            var hApertura = document.getElementById('aperturaHora');
+            if (hApertura) hApertura.value = typeof obtenerHoraHoyInput === 'function' ? obtenerHoraHoyInput() : '';
             document.getElementById('aperturaMonto').value = '$0';
             
             // Limpiar archivos existentes
@@ -24397,6 +24576,8 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 document.getElementById('formApertura').reset();
                 const fechaHoy = obtenerFechaHoy();
                 document.getElementById('aperturaFecha').value = fechaHoy;
+                var hReg = document.getElementById('aperturaHora');
+                if (hReg) hReg.value = typeof obtenerHoraHoyInput === 'function' ? obtenerHoraHoyInput() : '';
                 document.getElementById('aperturaMonto').value = '$0';
                 document.getElementById('aperturaArchivosLista').style.display = 'none';
             }
@@ -35135,9 +35316,9 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     plazoInput.value = 'm3';
                 }
                 
-                // Sugerir fecha de última mantención del proveedor si existe
-                if (proveedor.ultimaFecha && !fechaInput.value) {
-                    fechaInput.value = proveedor.ultimaFecha;
+                // Usar siempre el día actual; no rellenar con la última mantención
+                if (fechaInput && !campoRegistroEnEdicion(CAMPOS_FECHA_HORA_REGISTRO.mantencionFecha)) {
+                    fechaInput.value = obtenerFechaHoy();
                 }
                 
                 // Sugerir servicios del proveedor
@@ -35614,6 +35795,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
             if (typeof togglePlazoField === 'function') {
                 togglePlazoField();
             }
+            if (typeof aplicarFechaHoraActualRegistro === 'function') aplicarFechaHoraActualRegistro('mantenciones');
         }
         window.cancelarEdicionMantencion = cancelarEdicionMantencion;
 
@@ -40412,7 +40594,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 var est = document.getElementById('postventaEstado');
                 var file = document.getElementById('postventaEvidencias');
                 if (eid) eid.value = '';
-                if (f) f.value = '';
+                if (f) f.value = typeof obtenerFechaHoy === 'function' ? obtenerFechaHoy() : '';
                 if (o) o.value = '';
                 if (est) est.value = 'pendiente';
                 if (file) file.value = '';
@@ -40505,7 +40687,9 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     }
                 }
                 var fechaInp = document.getElementById('postventaFecha');
-                if (fechaInp && !fechaInp.value) fechaInp.value = new Date().toISOString().slice(0, 10);
+                if (fechaInp && !(document.getElementById('postventaEditId') || {}).value) {
+                    fechaInp.value = typeof obtenerFechaHoy === 'function' ? obtenerFechaHoy() : fechaInp.value;
+                }
                 postventaResetFiltros();
                 renderTablaPostventa();
             };
@@ -52184,26 +52368,9 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 // No es necesario agregar otro event listener aquí para evitar duplicados
                 // Si se necesita agregar un listener, asegurarse de remover el atributo onsubmit del HTML primero
                 
-                // Establecer fecha actual por defecto en todos los campos de fecha
-                const fechaHoy = obtenerFechaHoy();
-                const camposFecha = document.querySelectorAll('input[type="date"]');
-                camposFecha.forEach(campo => {
-                    if (!campo.value) {
-                        campo.value = fechaHoy;
-                    }
-                });
-                
-                // Inicializar campo de hora de apertura con hora actual
-                const aperturaHora = document.getElementById('aperturaHora');
-                if (aperturaHora && !aperturaHora.value) {
-                    const ahora = new Date();
-                    const hora = String(ahora.getHours()).padStart(2, '0');
-                    const minutos = String(ahora.getMinutes()).padStart(2, '0');
-                    aperturaHora.value = `${hora}:${minutos}`;
-                    // Actualizar monto inicial si aplica cobro
-                    if (typeof window.actualizarMontoApertura === 'function') {
-                        window.actualizarMontoApertura();
-                    }
+                // Fecha y hora actuales (Chile) en formularios de registro
+                if (typeof programarFechaHoraActualRegistro === 'function') {
+                    programarFechaHoraActualRegistro();
                 }
                 
                 if (typeof window.inicializarFiltrosInteligentes === 'function') {
@@ -52405,7 +52572,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
             if (comunidadInput) comunidadInput.value = encabezado.comunidad;
             if (desdeInput) desdeInput.value = encabezado.desde;
             if (hastaInput) hastaInput.value = encabezado.hasta;
-            if (fechaEmisionInput) fechaEmisionInput.value = encabezado.fechaEmision;
+            if (fechaEmisionInput) fechaEmisionInput.value = (typeof obtenerFechaHoy === 'function' ? obtenerFechaHoy() : encabezado.fechaEmision);
             if (responsableInput) responsableInput.value = encabezado.responsable;
         }
 
@@ -54468,7 +54635,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
             document.getElementById('formReemplazo').reset();
             document.getElementById('reemplazoTurnos').value = 0;
             document.getElementById('reemplazoValorTurno').value = 0;
-            document.getElementById('reemplazoFechaDia').value = '';
+            document.getElementById('reemplazoFechaDia').value = typeof obtenerFechaHoy === 'function' ? obtenerFechaHoy() : '';
             fechasReemplazo = [];
             actualizarListaFechasReemplazo();
             document.getElementById('datosBancariosReemplazo').style.display = 'none';
