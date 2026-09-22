@@ -983,6 +983,32 @@
             border-color: var(--primary);
             color: #111827;
         }
+        .checklist-dash-alerta { display: none; margin: 0 0 1rem; padding: 0.8rem 1rem; border-radius: 12px; border: 1px solid rgba(239,68,68,0.4); background: rgba(239,68,68,0.1); }
+        .checklist-dash-alerta.is-on { display: block; }
+        .checklist-dash-alerta h3 { margin: 0 0 0.35rem; font-size: 0.9rem; font-weight: 800; }
+        .checklist-dash-alerta ul { margin: 0; padding-left: 1.1rem; font-size: 0.8rem; line-height: 1.45; }
+        .chk-turnos-kpis { display: grid; grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr)); gap: 0.55rem; margin: 0 0 1rem; }
+        .chk-turnos-kpi { border: 1px solid var(--border-color); border-radius: 12px; padding: 0.7rem 0.75rem; background: var(--bg-secondary, var(--bg-primary)); }
+        .chk-turnos-kpi .val { font-size: 1.35rem; font-weight: 800; line-height: 1.1; }
+        .chk-turnos-kpi .lbl { font-size: 0.72rem; color: var(--gray-600); margin-top: 0.25rem; font-weight: 700; }
+        .chk-turnos-kpi.ok { border-color: rgba(22,163,74,0.4); }
+        .chk-turnos-kpi.warn { border-color: rgba(202,138,4,0.45); }
+        .chk-turnos-kpi.bad { border-color: rgba(220,38,38,0.45); }
+        .chk-est { display: inline-block; padding: 0.12rem 0.45rem; border-radius: 999px; font-size: 0.7rem; font-weight: 700; }
+        .chk-est.ok { background: #dcfce7; color: #166534; }
+        .chk-est.observaciones { background: #fef9c3; color: #854d0e; }
+        .chk-est.incidencia { background: #fee2e2; color: #991b1b; }
+        .chk-diff-cell.warn { color: #b45309; font-weight: 800; }
+        .chk-filtros { display: flex; flex-wrap: wrap; gap: 0.45rem; margin: 0 0 0.85rem; align-items: flex-end; }
+        .chk-filtros .form-group { margin: 0; min-width: 9rem; }
+        .chk-filtros input, .chk-filtros select { padding: 0.4rem 0.5rem; font-size: 0.8rem; width: 100%; box-sizing: border-box; }
+        #checklistTurnos table { font-size: 0.78rem; }
+        .chk-detalle-sec { margin: 0 0 0.75rem; padding: 0.65rem 0.7rem; border: 1px solid var(--border-color); border-radius: 10px; }
+        .chk-detalle-sec h4 { margin: 0 0 0.35rem; font-size: 0.82rem; }
+        [data-theme="dark"] .chk-est.ok { background: rgba(22,163,74,0.22); color: #bbf7d0; }
+        [data-theme="dark"] .chk-est.observaciones { background: rgba(202,138,4,0.22); color: #fde68a; }
+        [data-theme="dark"] .chk-est.incidencia { background: rgba(220,38,38,0.22); color: #fecaca; }
+        [data-theme="dark"] .checklist-dash-alerta { color: #fecaca; }
         .dashboard-resumen-aviso {
             display: none;
             margin: 0 0 1rem;
@@ -6570,6 +6596,12 @@
                 </span>
                 <span>Conserjería</span>
             </button>
+            <button class="tab-button" data-tab="checklistTurnos">
+                <span>
+                    <svg class="menu-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M19 3h-4.18C14.4 1.84 13.3 1 12 1s-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm-2 14l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/></svg>
+                </span>
+                <span>Checklist de Turnos</span>
+            </button>
             <button class="tab-button" data-tab="ocupacion">
                 <span>
                     <svg class="menu-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/><path d="M9 9v.01"/><path d="M9 12v.01"/><path d="M9 15v.01"/><path d="M9 18v.01"/></svg>
@@ -6782,6 +6814,7 @@
                 <div id="alertasDashboard" style="display: none;"><!-- Gestionado por Arturito --></div>
                 <div id="dashboardMultasPendientesWrap" class="multas-alerta" role="status"></div>
                 <div id="dashboardReclamosPendientesWrap" class="reclamos-alerta" role="status"></div>
+                <div id="dashboardChecklistTurnosWrap" class="checklist-dash-alerta" role="status"></div>
                 <div id="dashboardResumenNovedadesWrap" class="dashboard-resumen-aviso" hidden></div>
                 </div>
 
@@ -8734,7 +8767,7 @@
                 </div>
                 <div class="form-group" style="margin-bottom:0.65rem;">
                     <label style="font-size:0.78rem;font-weight:700;">Mensaje</label>
-                    <textarea id="avisoGestionResumen" class="form-input" rows="3" maxlength="700" placeholder="Texto que verá el personal de portería…" style="width:100%;font-size:0.85rem;line-height:1.45;box-sizing:border-box;resize:vertical;"></textarea>
+                    <textarea id="avisoGestionResumen" class="form-input" rows="8" maxlength="4000" placeholder="Texto que verá el personal de portería. Los saltos de línea y el orden se muestran igual en Conserjería." style="width:100%;font-size:0.85rem;line-height:1.5;box-sizing:border-box;resize:vertical;white-space:pre-wrap;"></textarea>
                 </div>
                 <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:0.4rem;margin-bottom:0.45rem;">
                     <strong style="font-size:0.82rem;">Puntos del aviso</strong>
@@ -8766,6 +8799,69 @@
                     </div>
                 </div>
             </details>
+        </div>
+
+        <div id="checklistTurnos" class="tab-content">
+            <header style="margin-bottom: 1rem;">
+                <h2 style="margin: 0; font-size: 1.5rem; font-weight: 700; color: var(--gray-900);">Checklist de Turnos</h2>
+                <p style="margin: 0.45rem 0 0; color: var(--gray-600); font-size: 0.875rem; max-width: 42rem; line-height: 1.45;">Aperturas y cierres registrados en Conserjería WM. Revise incidencias, diferencias de encomiendas y variaciones entre turnos.</p>
+            </header>
+            <section class="form-section" style="margin-bottom: 1rem;">
+                <h3 style="margin: 0 0 0.65rem; font-size: 1rem;">Resumen de hoy</h3>
+                <div id="chkTurnosKpis" class="chk-turnos-kpis"></div>
+            </section>
+            <section class="form-section">
+                <h3 style="margin: 0 0 0.65rem; font-size: 1rem;">Historial</h3>
+                <div class="chk-filtros">
+                    <div class="form-group"><label>Desde</label><input type="date" id="chkFiltroDesde"></div>
+                    <div class="form-group"><label>Hasta</label><input type="date" id="chkFiltroHasta"></div>
+                    <div class="form-group" style="flex:1 1 12rem;"><label>Conserje</label><input type="text" id="chkFiltroConserje" placeholder="Buscar por nombre"></div>
+                    <div class="form-group"><label>Tipo</label>
+                        <select id="chkFiltroTipo">
+                            <option value="">Todos</option>
+                            <option value="apertura">Apertura</option>
+                            <option value="cierre">Cierre</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label>Estado</label>
+                        <select id="chkFiltroEstado">
+                            <option value="">Todos</option>
+                            <option value="incidencia">Incidencias</option>
+                            <option value="diff">Diferencias de encomiendas</option>
+                            <option value="observaciones">Con observaciones</option>
+                            <option value="ok">Todo correcto</option>
+                        </select>
+                    </div>
+                    <button type="button" class="btn btn-secondary" id="chkFiltroLimpiar" style="padding:0.4rem 0.7rem;font-size:0.78rem;">Limpiar</button>
+                </div>
+                <div class="table-section" style="padding:0; box-shadow:none; border:none;">
+                    <div style="overflow-x:auto;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Hora</th>
+                                    <th>Conserje</th>
+                                    <th>Turno</th>
+                                    <th>Tipo</th>
+                                    <th>Llaves</th>
+                                    <th>Mouse</th>
+                                    <th>Enc. CF</th>
+                                    <th>Enc. sistema</th>
+                                    <th>Diferencia</th>
+                                    <th>Radios</th>
+                                    <th>Observaciones</th>
+                                    <th>Estado</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody id="chkTurnosTbody">
+                                <tr><td colspan="14" class="empty-state"><p>Cargando checklists…</p></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
         </div>
 
         <!-- MÓDULO POSTVENTA: resumen → archivo → formulario → listado (misma API de IDs) -->
@@ -9645,6 +9741,34 @@
             </div>
             <div class="modal-buttons" id="modalAlertButtons">
                 <button class="btn btn-primary" onclick="cerrarModalAlert()" id="modalAlertButton">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modalChecklistTurnoGestion" class="modal-overlay">
+        <div class="modal-confirm" style="max-width: 640px; width: 100%; text-align: left; max-height: 90vh; overflow-y: auto;">
+            <h3 id="chkDetalleTitulo" style="margin: 0 0 0.35rem 0;">Checklist</h3>
+            <div id="chkDetalleBody"></div>
+            <div id="chkEditarWrap" hidden style="margin-top: 0.85rem; padding-top: 0.75rem; border-top: 1px solid var(--border-color);">
+                <h4 style="margin: 0 0 0.45rem; font-size: 0.88rem;">Modificar registro</h4>
+                <div class="form-row" style="gap: 0.5rem;">
+                    <div class="form-group" style="flex:1;"><label>Llaves</label>
+                        <select id="chkEditLlaves"><option value="si">Sí</option><option value="no">No</option></select>
+                    </div>
+                    <div class="form-group" style="flex:1;"><label>Mouse</label><input type="number" id="chkEditMouse" min="0" step="1"></div>
+                    <div class="form-group" style="flex:1;"><label>Radios</label><input type="number" id="chkEditRadios" min="0" step="1"></div>
+                </div>
+                <div class="form-row" style="gap: 0.5rem;">
+                    <div class="form-group" style="flex:1;"><label>Enc. Comunidad Feliz</label><input type="number" id="chkEditEncCf" min="0" step="1"></div>
+                    <div class="form-group" style="flex:1;"><label>Enc. sistema</label><input type="number" id="chkEditEncSis" min="0" step="1"></div>
+                </div>
+                <div class="form-group"><label>Observación llaves</label><textarea id="chkEditLlavesObs" rows="2" style="width:100%;box-sizing:border-box;"></textarea></div>
+                <div class="form-group"><label>Motivo de la modificación *</label><textarea id="chkEditMotivo" rows="2" style="width:100%;box-sizing:border-box;" placeholder="Obligatorio"></textarea></div>
+            </div>
+            <div class="modal-buttons">
+                <button type="button" class="btn btn-secondary" id="chkDetalleCerrar">Cerrar</button>
+                <button type="button" class="btn btn-secondary" id="chkDetalleEditar">Editar</button>
+                <button type="button" class="btn btn-primary" id="chkDetalleGuardar" hidden>Guardar cambios</button>
             </div>
         </div>
     </div>
@@ -10949,6 +11073,9 @@
 
                 // Inicializar módulos específicos
                 if (tabName === 'dashboard') {
+                    if (typeof window.cargarChecklistTurnosGestion === 'function') {
+                        window.cargarChecklistTurnosGestion().catch(function () {});
+                    }
                     if (typeof cargarMensajesArturito === 'function') cargarMensajesArturito();
                     function runPanel2() {
                         try {
@@ -11020,6 +11147,8 @@
                         if (typeof cargarUnidadesOcupacion === 'function') cargarUnidadesOcupacion();
                     } else if (tabName === 'conserjeria') {
                         if (typeof window.cargarModuloConserjeriaGestion === 'function') window.cargarModuloConserjeriaGestion();
+                    } else if (tabName === 'checklistTurnos') {
+                        if (typeof window.cargarChecklistTurnosGestion === 'function') window.cargarChecklistTurnosGestion();
                     } else if (tabName === 'postventa') {
                         if (typeof window.cargarPostventa === 'function') window.cargarPostventa();
                     } else if (tabName === 'personalizacion') {
@@ -15728,7 +15857,7 @@
                 });
             }
             draft.titulo = tit ? String(tit.value || '').trim().slice(0, 120) : draft.titulo;
-            draft.resumen = res ? String(res.value || '').trim().slice(0, 700) : '';
+            draft.resumen = res ? String(res.value || '').replace(/^\s+|\s+$/g, '').slice(0, 4000) : '';
             draft.activo = chk ? !!chk.checked : !!draft.activo;
             draft.puntos = puntos;
             window._avisoGestionConserjeria = draft;
@@ -15815,7 +15944,7 @@
                 mes: String(mes || ''),
                 nombreMes: nombre,
                 titulo: String(draft.titulo || '').trim().slice(0, 120),
-                resumen: String(draft.resumen || '').trim().slice(0, 700),
+                resumen: String(draft.resumen || '').replace(/^\s+|\s+$/g, '').slice(0, 4000),
                 puntos: Array.isArray(draft.puntos) ? draft.puntos.slice(0, 12) : [],
                 activo: draft.activo !== false,
                 publicadoAt: new Date().toISOString(),
@@ -17513,6 +17642,386 @@
                 window.cargarModuloConserjeriaGestion().catch(function () {});
             }
         };
+
+        window._chkTurnosLista = [];
+        window._chkTurnosTurnoAbierto = null;
+        window._chkTurnosSelId = '';
+        window._chkTurnosUiBound = false;
+
+        function chkEsc(s) {
+            return typeof escaparHtmlModuloConserjeria === 'function' ? escaparHtmlModuloConserjeria(s) : String(s == null ? '' : s);
+        }
+        function chkHoyYmd() {
+            return typeof pcshResumenGestionHoyYmd === 'function' ? pcshResumenGestionHoyYmd() : new Date().toISOString().slice(0, 10);
+        }
+        function chkEstadoHtml(est) {
+            var e = est === 'incidencia' ? 'incidencia' : (est === 'observaciones' ? 'observaciones' : 'ok');
+            var t = e === 'incidencia' ? '🔴 Incidencia' : (e === 'observaciones' ? '🟡 Observaciones' : '🟢 Todo correcto');
+            return '<span class="chk-est ' + e + '">' + t + '</span>';
+        }
+        function chkObsResumen(r) {
+            var parts = [];
+            if (r.llavesObs) parts.push('Llaves: ' + r.llavesObs);
+            if (r.mouseObs) parts.push('Mouse: ' + r.mouseObs);
+            if (r.encObs) parts.push('Encomiendas: ' + r.encObs);
+            if (r.radiosObs) parts.push('Radios: ' + r.radiosObs);
+            return parts.join(' · ') || '—';
+        }
+        async function chkTurnosLeerLista() {
+            var sdb = await obtenerDbConserjeriaOperativa();
+            var snap = await sdb.collection('pcsh_turno_checklists').get();
+            var list = [];
+            snap.forEach(function (doc) {
+                var d = doc.data() || {};
+                d.id = doc.id;
+                list.push(d);
+            });
+            list.sort(function (a, b) { return (Number(b.enviadoMs) || 0) - (Number(a.enviadoMs) || 0); });
+            window._chkTurnosLista = list;
+            try {
+                var st = await sdb.collection('pcsh_turno').doc('state').get();
+                window._chkTurnosTurnoAbierto = st.exists ? (st.data() || null) : null;
+            } catch (eSt) {
+                window._chkTurnosTurnoAbierto = null;
+            }
+            return list;
+        }
+        function chkTurnosFiltrar(list) {
+            var desde = (document.getElementById('chkFiltroDesde') || {}).value || '';
+            var hasta = (document.getElementById('chkFiltroHasta') || {}).value || '';
+            var cons = String((document.getElementById('chkFiltroConserje') || {}).value || '').trim().toLowerCase();
+            var tipo = (document.getElementById('chkFiltroTipo') || {}).value || '';
+            var est = (document.getElementById('chkFiltroEstado') || {}).value || '';
+            return (list || []).filter(function (r) {
+                if (desde && String(r.ymd || '') < desde) return false;
+                if (hasta && String(r.ymd || '') > hasta) return false;
+                if (cons && String(r.conserje || '').toLowerCase().indexOf(cons) < 0) return false;
+                if (tipo && r.tipo !== tipo) return false;
+                if (est === 'incidencia' && r.estado !== 'incidencia') return false;
+                if (est === 'observaciones' && r.estado !== 'observaciones') return false;
+                if (est === 'ok' && r.estado !== 'ok') return false;
+                if (est === 'diff' && Number(r.encDiff) === 0) return false;
+                return true;
+            });
+        }
+        function chkTurnosPintarKpis() {
+            var wrap = document.getElementById('chkTurnosKpis');
+            if (!wrap) return;
+            var hoy = chkHoyYmd();
+            var list = window._chkTurnosLista || [];
+            var hoyList = list.filter(function (r) { return r.ymd === hoy; });
+            var ap = hoyList.filter(function (r) { return r.tipo === 'apertura'; }).length;
+            var ci = hoyList.filter(function (r) { return r.tipo === 'cierre'; }).length;
+            var st = window._chkTurnosTurnoAbierto || {};
+            var pendientes = 0;
+            if (st.open && st.turnoId) {
+                var hasC = list.some(function (r) { return r.turnoId === st.turnoId && r.tipo === 'cierre'; });
+                var hasA = list.some(function (r) { return r.turnoId === st.turnoId && r.tipo === 'apertura'; });
+                if (!hasA) pendientes++;
+                if (!hasC) pendientes++;
+            }
+            var obs = hoyList.filter(function (r) { return r.estado === 'observaciones'; }).length;
+            var diffs = hoyList.filter(function (r) { return Number(r.encDiff) !== 0; }).length;
+            var llaves = hoyList.filter(function (r) { return r.llavesCompletas === 'no'; }).length;
+            var radios = hoyList.filter(function (r) {
+                return (r.alertas || []).some(function (a) { return a.codigo === 'radios_vs_anterior'; });
+            }).length;
+            var mouse = hoyList.filter(function (r) {
+                return (r.alertas || []).some(function (a) { return a.codigo === 'mouse_vs_anterior'; });
+            }).length;
+            function card(val, lbl, cls) {
+                return '<div class="chk-turnos-kpi ' + (cls || '') + '"><div class="val">' + val + '</div><div class="lbl">' + lbl + '</div></div>';
+            }
+            wrap.innerHTML =
+                card(ap, 'Aperturas de hoy', ap ? 'ok' : '') +
+                card(ci, 'Cierres de hoy', ci ? 'ok' : '') +
+                card(pendientes, 'Checklists pendientes', pendientes ? 'warn' : 'ok') +
+                card(obs, 'Con observaciones', obs ? 'warn' : 'ok') +
+                card(diffs, 'Diferencias de encomiendas', diffs ? 'bad' : 'ok') +
+                card(llaves, 'Incidencias con llaves', llaves ? 'bad' : 'ok') +
+                card(radios, 'Incidencias con radios', radios ? 'bad' : 'ok') +
+                card(mouse, 'Incidencias con mouse', mouse ? 'bad' : 'ok');
+        }
+        function chkTurnosPintarTabla() {
+            var tb = document.getElementById('chkTurnosTbody');
+            if (!tb) return;
+            var rows = chkTurnosFiltrar(window._chkTurnosLista || []);
+            if (!rows.length) {
+                tb.innerHTML = '<tr><td colspan="14" class="empty-state"><p>No hay checklists con esos filtros.</p></td></tr>';
+                return;
+            }
+            tb.innerHTML = rows.map(function (r) {
+                var diff = Number(r.encDiff) || 0;
+                var obs = chkObsResumen(r);
+                if (obs.length > 42) obs = obs.slice(0, 40) + '…';
+                return '<tr>' +
+                    '<td>' + chkEsc(r.fecha || r.ymd || '') + '</td>' +
+                    '<td>' + chkEsc(r.hora || '') + '</td>' +
+                    '<td>' + chkEsc(r.conserje || '') + '</td>' +
+                    '<td style="font-size:0.68rem;">' + chkEsc(String(r.turnoId || '').slice(-10)) + '</td>' +
+                    '<td>' + (r.tipo === 'cierre' ? 'Cierre' : 'Apertura') + '</td>' +
+                    '<td>' + (r.llavesCompletas === 'no' ? '🔴 No' : '✓ Sí') + '</td>' +
+                    '<td>' + chkEsc(r.mouseCant) + '</td>' +
+                    '<td>' + chkEsc(r.encCf) + '</td>' +
+                    '<td>' + chkEsc(r.encSistema) + '</td>' +
+                    '<td class="' + (diff ? 'chk-diff-cell warn' : '') + '">' + diff + '</td>' +
+                    '<td>' + chkEsc(r.radiosCant) + '</td>' +
+                    '<td style="max-width:12rem;">' + chkEsc(obs) + '</td>' +
+                    '<td>' + chkEstadoHtml(r.estado) + '</td>' +
+                    '<td><button type="button" class="btn btn-primary btn-sm" data-chk-id="' + chkEsc(r.id) + '">Ver</button></td>' +
+                    '</tr>';
+            }).join('');
+        }
+        function chkTurnosPintarAlertasDashboard() {
+            var wrap = document.getElementById('dashboardChecklistTurnosWrap');
+            if (!wrap) return;
+            var hoy = chkHoyYmd();
+            var alertas = [];
+            (window._chkTurnosLista || []).forEach(function (r) {
+                if (r.ymd !== hoy) return;
+                (r.alertas || []).forEach(function (a) {
+                    if (!a) return;
+                    alertas.push({
+                        msg: (r.tipo === 'cierre' ? 'Cierre' : 'Apertura') + ' · ' + (r.conserje || '') + ': ' + (a.mensaje || a.codigo),
+                        id: r.id
+                    });
+                });
+            });
+            if (!alertas.length) {
+                wrap.className = 'checklist-dash-alerta';
+                wrap.innerHTML = '';
+                return;
+            }
+            wrap.className = 'checklist-dash-alerta is-on';
+            wrap.innerHTML = '<h3>🔴 Alertas de checklist de turno</h3><ul>' +
+                alertas.slice(0, 8).map(function (a) {
+                    return '<li><button type="button" class="btn btn-secondary btn-sm" data-chk-dash="' + chkEsc(a.id) + '" style="padding:0.15rem 0.45rem;font-size:0.75rem;">Revisar</button> ' + chkEsc(a.msg) + '</li>';
+                }).join('') + '</ul>';
+        }
+        function chkTurnosHtmlDetalle(r) {
+            var v = r.variacionesAnterior;
+            var varHtml = '';
+            if (v) {
+                var bits = [
+                    'Radios: ' + (v.radios === 0 ? 'sin variación' : (v.radios > 0 ? '+' : '') + v.radios),
+                    'Mouse: ' + (v.mouse === 0 ? 'sin variación' : (v.mouse > 0 ? '+' : '') + v.mouse),
+                    'Encomiendas: ' + (v.encSistema === 0 ? 'sin variación' : (v.encSistema > 0 ? '+' : '') + v.encSistema)
+                ];
+                if (bits.some(function (b) { return b.indexOf('sin variación') < 0; })) {
+                    varHtml = '<div class="chk-detalle-sec"><h4>⚠️ Variaciones respecto al turno anterior</h4><ul style="margin:0;padding-left:1.1rem;">' +
+                        bits.map(function (b) { return '<li>' + chkEsc(b) + '</li>'; }).join('') + '</ul></div>';
+                }
+            }
+            var hist = (r.historialEdiciones || []).map(function (h) {
+                var cams = (h.cambios || []).map(function (c) {
+                    return chkEsc(c.campo) + ': ' + chkEsc(c.anterior) + ' → ' + chkEsc(c.nuevo);
+                }).join('; ');
+                return '<li>' + chkEsc(h.fecha) + ' ' + chkEsc(h.hora) + ' · ' + chkEsc(h.quien) + ' · ' + chkEsc(h.motivo) + (cams ? ' · ' + cams : '') + '</li>';
+            }).join('');
+            var coinciden = Number(r.encDiff) === 0;
+            return '<p style="margin:0 0 0.75rem;font-size:0.85rem;color:var(--gray-600);">Conserje: <strong>' + chkEsc(r.conserje) + '</strong><br>Fecha: ' + chkEsc(r.fecha) + ' · Hora: ' + chkEsc(r.hora) + '<br>Turno: ' + chkEsc(r.turnoId) + '</p>' +
+                '<div class="chk-detalle-sec"><h4>Llaves</h4><p style="margin:0;">' + (r.llavesCompletas === 'no' ? '🔴 Incompletas' : '✓ Completas') + '</p>' +
+                '<p style="margin:0.35rem 0 0;font-size:0.8rem;">Observación: ' + chkEsc(r.llavesObs || 'Sin observaciones.') + '</p></div>' +
+                '<div class="chk-detalle-sec"><h4>Mouse</h4><p style="margin:0;">Cantidad: ' + chkEsc(r.mouseCant) + '</p>' +
+                '<p style="margin:0.35rem 0 0;font-size:0.8rem;">Observación: ' + chkEsc(r.mouseObs || 'Sin observaciones.') + '</p></div>' +
+                '<div class="chk-detalle-sec"><h4>Encomiendas</h4><p style="margin:0;">Comunidad Feliz: ' + chkEsc(r.encCf) + '<br>Sistema Conserjería: ' + chkEsc(r.encSistema) + '<br>Diferencia: ' + chkEsc(r.encDiff) + '</p>' +
+                '<p style="margin:0.35rem 0 0;font-weight:700;">' + (coinciden ? '✓ Cantidades coinciden' : '⚠️ Diferencia detectada: ' + Math.abs(Number(r.encDiff) || 0) + ' encomiendas') + '</p>' +
+                '<p style="margin:0.35rem 0 0;font-size:0.8rem;">Observación: ' + chkEsc(r.encObs || 'Sin observaciones.') + '</p></div>' +
+                '<div class="chk-detalle-sec"><h4>Radios</h4><p style="margin:0;">Cantidad: ' + chkEsc(r.radiosCant) + '</p>' +
+                '<p style="margin:0.35rem 0 0;font-size:0.8rem;">Observación: ' + chkEsc(r.radiosObs || 'Sin observaciones.') + '</p></div>' +
+                varHtml +
+                '<p style="margin:0.5rem 0 0;">Estado: ' + chkEstadoHtml(r.estado) + '</p>' +
+                (hist ? '<div class="chk-detalle-sec"><h4>Historial de modificaciones</h4><ul style="margin:0;padding-left:1.1rem;font-size:0.78rem;">' + hist + '</ul></div>' : '');
+        }
+        function chkTurnosAbrirDetalle(id) {
+            var r = (window._chkTurnosLista || []).filter(function (x) { return x.id === id; })[0];
+            if (!r) return;
+            window._chkTurnosSelId = id;
+            document.getElementById('chkDetalleTitulo').textContent = r.tipo === 'cierre' ? 'Checklist de Cierre' : 'Checklist de Apertura';
+            document.getElementById('chkDetalleBody').innerHTML = chkTurnosHtmlDetalle(r);
+            var wrap = document.getElementById('chkEditarWrap');
+            if (wrap) wrap.hidden = true;
+            document.getElementById('chkDetalleGuardar').hidden = true;
+            document.getElementById('chkEditLlaves').value = r.llavesCompletas === 'no' ? 'no' : 'si';
+            document.getElementById('chkEditMouse').value = r.mouseCant;
+            document.getElementById('chkEditRadios').value = r.radiosCant;
+            document.getElementById('chkEditEncCf').value = r.encCf;
+            document.getElementById('chkEditEncSis').value = r.encSistema;
+            document.getElementById('chkEditLlavesObs').value = r.llavesObs || '';
+            document.getElementById('chkEditMotivo').value = '';
+            abrirOverlayGestion('modalChecklistTurnoGestion');
+        }
+        function chkEntero(v) {
+            var n = Number(v);
+            if (!isFinite(n) || n < 0 || Math.floor(n) !== n) return null;
+            return n;
+        }
+        async function chkTurnosGuardarEdicion() {
+            var id = window._chkTurnosSelId;
+            var r = (window._chkTurnosLista || []).filter(function (x) { return x.id === id; })[0];
+            if (!r) return;
+            var motivo = String((document.getElementById('chkEditMotivo') || {}).value || '').trim();
+            if (!motivo) {
+                if (typeof mostrarAlerta === 'function') mostrarAlerta('Indique el motivo de la modificación.', 'Checklist');
+                else alert('Indique el motivo de la modificación.');
+                return;
+            }
+            var llaves = document.getElementById('chkEditLlaves').value;
+            var mouse = chkEntero(document.getElementById('chkEditMouse').value);
+            var radios = chkEntero(document.getElementById('chkEditRadios').value);
+            var encCf = chkEntero(document.getElementById('chkEditEncCf').value);
+            var encSis = chkEntero(document.getElementById('chkEditEncSis').value);
+            var llavesObs = String(document.getElementById('chkEditLlavesObs').value || '').trim();
+            if (llaves === 'no' && !llavesObs) {
+                if (typeof mostrarAlerta === 'function') mostrarAlerta('Si las llaves no están completas, indique qué falta.', 'Checklist');
+                return;
+            }
+            if (mouse == null || radios == null || encCf == null || encSis == null) {
+                if (typeof mostrarAlerta === 'function') mostrarAlerta('Las cantidades deben ser números enteros ≥ 0.', 'Checklist');
+                return;
+            }
+            var cambios = [];
+            function push(campo, ant, neu) {
+                if (String(ant) !== String(neu)) cambios.push({ campo: campo, anterior: ant, nuevo: neu });
+            }
+            push('llavesCompletas', r.llavesCompletas, llaves);
+            push('llavesObs', r.llavesObs || '', llavesObs);
+            push('mouseCant', r.mouseCant, mouse);
+            push('radiosCant', r.radiosCant, radios);
+            push('encCf', r.encCf, encCf);
+            push('encSistema', r.encSistema, encSis);
+            if (!cambios.length) {
+                if (typeof mostrarAlerta === 'function') mostrarAlerta('No hay cambios.', 'Checklist');
+                return;
+            }
+            var now = new Date();
+            var hora = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0') + ':' + String(now.getSeconds()).padStart(2, '0');
+            var patch = {
+                llavesCompletas: llaves,
+                llavesObs: llavesObs,
+                mouseCant: mouse,
+                radiosCant: radios,
+                encCf: encCf,
+                encSistema: encSis,
+                encDiff: encCf - encSis
+            };
+            var tmp = Object.assign({}, r, patch);
+            var prev = r.variacionesAnterior ? {
+                radiosCant: Number(r.radiosCant) - Number(r.variacionesAnterior.radios || 0),
+                mouseCant: Number(r.mouseCant) - Number(r.variacionesAnterior.mouse || 0),
+                encSistema: Number(r.encSistema) - Number(r.variacionesAnterior.encSistema || 0),
+                encCf: Number(r.encCf) - Number(r.variacionesAnterior.encCf || 0),
+                id: r.variacionesAnterior.anteriorId
+            } : null;
+            tmp.alertas = [];
+            if (tmp.llavesCompletas === 'no') tmp.alertas.push({ codigo: 'llaves_incompletas', nivel: 'roja', mensaje: 'Llaves incompletas' });
+            if (Number(tmp.encDiff) !== 0) tmp.alertas.push({ codigo: 'diff_encomiendas', nivel: 'roja', mensaje: 'Diferencia de encomiendas: ' + tmp.encDiff });
+            if (prev) {
+                tmp.variacionesAnterior = {
+                    radios: tmp.radiosCant - Number(prev.radiosCant),
+                    mouse: tmp.mouseCant - Number(prev.mouseCant),
+                    encSistema: tmp.encSistema - Number(prev.encSistema),
+                    encCf: tmp.encCf - Number(prev.encCf),
+                    anteriorId: prev.id || '',
+                    anteriorTurnoId: r.variacionesAnterior.anteriorTurnoId || '',
+                    anteriorConserje: r.variacionesAnterior.anteriorConserje || '',
+                    anteriorTipo: r.variacionesAnterior.anteriorTipo || ''
+                };
+                if (tmp.variacionesAnterior.radios !== 0) tmp.alertas.push({ codigo: 'radios_vs_anterior', nivel: 'roja', mensaje: 'Cantidad de radios diferente al turno anterior' });
+                if (tmp.variacionesAnterior.mouse !== 0) tmp.alertas.push({ codigo: 'mouse_vs_anterior', nivel: 'roja', mensaje: 'Cantidad de mouse diferente al turno anterior' });
+                patch.variacionesAnterior = tmp.variacionesAnterior;
+            }
+            tmp.estado = (tmp.llavesCompletas === 'no' || Number(tmp.encDiff) !== 0 || tmp.alertas.some(function (a) { return a.nivel === 'roja'; }))
+                ? 'incidencia'
+                : ((tmp.llavesObs || r.mouseObs || r.encObs || r.radiosObs) ? 'observaciones' : 'ok');
+            patch.alertas = tmp.alertas;
+            patch.estado = tmp.estado;
+            var hist = Array.isArray(r.historialEdiciones) ? r.historialEdiciones.slice() : [];
+            hist.push({
+                quien: typeof multaOperadorActual === 'function' ? multaOperadorActual() : 'Administración',
+                fecha: r.fecha || chkHoyYmd(),
+                hora: hora,
+                motivo: motivo,
+                cambios: cambios,
+                at: now.toISOString()
+            });
+            patch.historialEdiciones = hist;
+            var sdb = await obtenerDbConserjeriaOperativa();
+            await sdb.collection('pcsh_turno_checklists').doc(id).set(patch, { merge: true });
+            await window.cargarChecklistTurnosGestion({ forzar: true });
+            chkTurnosAbrirDetalle(id);
+            if (typeof mostrarAlerta === 'function') mostrarAlerta('Checklist actualizado. Quedó el historial de la modificación.', 'Checklist');
+        }
+        function chkTurnosBindUi() {
+            if (window._chkTurnosUiBound) return;
+            window._chkTurnosUiBound = true;
+            ['chkFiltroDesde', 'chkFiltroHasta', 'chkFiltroTipo', 'chkFiltroEstado'].forEach(function (id) {
+                var el = document.getElementById(id);
+                if (el) el.addEventListener('change', chkTurnosPintarTabla);
+            });
+            var cons = document.getElementById('chkFiltroConserje');
+            if (cons) cons.addEventListener('input', chkTurnosPintarTabla);
+            var lim = document.getElementById('chkFiltroLimpiar');
+            if (lim) lim.addEventListener('click', function () {
+                ['chkFiltroDesde', 'chkFiltroHasta', 'chkFiltroConserje'].forEach(function (id) {
+                    var el = document.getElementById(id);
+                    if (el) el.value = '';
+                });
+                var t = document.getElementById('chkFiltroTipo');
+                var e = document.getElementById('chkFiltroEstado');
+                if (t) t.value = '';
+                if (e) e.value = '';
+                chkTurnosPintarTabla();
+            });
+            var tb = document.getElementById('chkTurnosTbody');
+            if (tb) tb.addEventListener('click', function (ev) {
+                var b = ev.target.closest('[data-chk-id]');
+                if (!b) return;
+                chkTurnosAbrirDetalle(b.getAttribute('data-chk-id'));
+            });
+            var dash = document.getElementById('dashboardChecklistTurnosWrap');
+            if (dash) dash.addEventListener('click', function (ev) {
+                var b = ev.target.closest('[data-chk-dash]');
+                if (!b) return;
+                if (typeof window.showTab === 'function') window.showTab('checklistTurnos');
+                setTimeout(function () { chkTurnosAbrirDetalle(b.getAttribute('data-chk-dash')); }, 80);
+            });
+            var c = document.getElementById('chkDetalleCerrar');
+            if (c) c.addEventListener('click', function () { cerrarOverlayGestion('modalChecklistTurnoGestion'); });
+            var ed = document.getElementById('chkDetalleEditar');
+            if (ed) ed.addEventListener('click', function () {
+                var w = document.getElementById('chkEditarWrap');
+                if (w) w.hidden = false;
+                document.getElementById('chkDetalleGuardar').hidden = false;
+            });
+            var g = document.getElementById('chkDetalleGuardar');
+            if (g) g.addEventListener('click', function () { chkTurnosGuardarEdicion(); });
+            var modal = document.getElementById('modalChecklistTurnoGestion');
+            if (modal) modal.addEventListener('click', function (e) {
+                if (e.target === modal) cerrarOverlayGestion('modalChecklistTurnoGestion');
+            });
+        }
+        window.cargarChecklistTurnosGestion = async function (opts) {
+            opts = opts || {};
+            chkTurnosBindUi();
+            var tb = document.getElementById('chkTurnosTbody');
+            if (tb && !(window._chkTurnosLista || []).length) {
+                tb.innerHTML = '<tr><td colspan="14" class="empty-state"><p>Cargando checklists…</p></td></tr>';
+            }
+            try {
+                await chkTurnosLeerLista();
+                chkTurnosPintarKpis();
+                chkTurnosPintarTabla();
+                chkTurnosPintarAlertasDashboard();
+            } catch (eL) {
+                if (tb) tb.innerHTML = '<tr><td colspan="14" class="empty-state"><p>No se pudieron leer los checklists de Conserjería WM.</p></td></tr>';
+            }
+        };
+        setTimeout(function () {
+            if (typeof window.cargarChecklistTurnosGestion === 'function') {
+                window.cargarChecklistTurnosGestion().catch(function () {});
+            }
+        }, 2500);
 
         window.enfocarNovedadConserjeriaGestion = function (cor) {
             var fila = document.getElementById('filaNovedadGestion-' + Number(cor));
