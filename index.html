@@ -81,6 +81,8 @@
 
         html {
             overflow-x: hidden;
+            -webkit-text-size-adjust: 100%;
+            text-size-adjust: 100%;
         }
 
         [data-theme="dark"] {
@@ -191,6 +193,7 @@
         #dashboard .dashboard2-workspace-side .dashboard2-block:nth-of-type(1) { animation-delay: 0.16s; }
         #dashboard .dashboard2-workspace-side .dashboard2-block:nth-of-type(2) { animation-delay: 0.20s; }
         #dashboard .dashboard2-workspace-side .dashboard2-block:nth-of-type(3) { animation-delay: 0.24s; }
+        #dashboard .dashboard2-workspace-side .dashboard2-block:nth-of-type(4) { animation-delay: 0.28s; }
         #dashboard .dashboard2-block--charts { animation-delay: 0.28s; }
         #dashboard .dashboard2-block--actions { animation-delay: 0.32s; }
         @keyframes dashboardBlockIn {
@@ -803,7 +806,7 @@
 
         .form-row {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
             gap: 1.5rem;
         }
 
@@ -987,8 +990,8 @@
         .checklist-dash-alerta.is-on { display: block; }
         .checklist-dash-alerta h3 { margin: 0 0 0.35rem; font-size: 0.9rem; font-weight: 800; }
         .checklist-dash-alerta ul { margin: 0; padding-left: 1.1rem; font-size: 0.8rem; line-height: 1.45; }
-        .chk-turnos-kpis { display: grid; grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr)); gap: 0.55rem; margin: 0 0 1rem; }
-        .chk-turnos-kpi { border: 1px solid var(--border-color); border-radius: 12px; padding: 0.7rem 0.75rem; background: var(--bg-secondary, var(--bg-primary)); }
+        .chk-turnos-kpis { display: grid; grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr)); gap: 0.4rem; margin: 0; }
+        .chk-turnos-kpi { border: 1px solid var(--border-color); border-radius: 10px; padding: 0.45rem 0.55rem; background: var(--bg-secondary, var(--bg-primary)); }
         .chk-turnos-kpi .val { font-size: 1.35rem; font-weight: 800; line-height: 1.1; }
         .chk-turnos-kpi .lbl { font-size: 0.72rem; color: var(--gray-600); margin-top: 0.25rem; font-weight: 700; }
         .chk-turnos-kpi.ok { border-color: rgba(22,163,74,0.4); }
@@ -999,10 +1002,101 @@
         .chk-est.observaciones { background: #fef9c3; color: #854d0e; }
         .chk-est.incidencia { background: #fee2e2; color: #991b1b; }
         .chk-diff-cell.warn { color: #b45309; font-weight: 800; }
-        .chk-filtros { display: flex; flex-wrap: wrap; gap: 0.45rem; margin: 0 0 0.85rem; align-items: flex-end; }
-        .chk-filtros .form-group { margin: 0; min-width: 9rem; }
-        .chk-filtros input, .chk-filtros select { padding: 0.4rem 0.5rem; font-size: 0.8rem; width: 100%; box-sizing: border-box; }
-        #checklistTurnos table { font-size: 0.78rem; }
+        .chk-filtros { display: flex; flex-wrap: wrap; gap: 0.45rem; margin: 0 0 0.55rem; align-items: flex-end; }
+        .chk-filtros .form-group { margin: 0; min-width: 8rem; }
+        .chk-filtros .form-group label { margin: 0 0 0.2rem; font-size: 0.68rem; }
+        .chk-filtros input, .chk-filtros select { padding: 0.35rem 0.45rem; font-size: 0.78rem; width: 100%; box-sizing: border-box; }
+        #checklistTurnos.tab-content .form-section { padding: 1rem 1.15rem; margin-bottom: 0.85rem; }
+        #checklistTurnos.tab-content .form-section h3 { margin: 0 0 0.5rem; font-size: 0.95rem; }
+        #checklistTurnos .table-section { margin: 0; }
+        #checklistTurnos table {
+            font-size: 0.75rem;
+            table-layout: auto;
+            width: 100%;
+        }
+        #checklistTurnos.tab-content th,
+        #checklistTurnos.tab-content td {
+            padding: 0.38rem 0.45rem;
+            font-size: 0.75rem;
+            vertical-align: middle;
+            white-space: nowrap;
+            line-height: 1.25;
+        }
+        #checklistTurnos th { letter-spacing: 0.03em; }
+        #checklistTurnos td.chk-obs {
+            white-space: normal;
+            max-width: 14rem;
+            min-width: 8rem;
+            line-height: 1.3;
+            color: var(--text-secondary);
+        }
+        #checklistTurnos .chk-fh { display: flex; flex-direction: column; gap: 0.05rem; line-height: 1.2; }
+        #checklistTurnos .chk-fh strong { font-weight: 700; color: var(--text-primary); }
+        #checklistTurnos .chk-fh span { font-size: 0.68rem; color: var(--gray-600); }
+        #checklistTurnos .chk-enc { display: grid; grid-template-columns: auto auto; gap: 0 0.55rem; line-height: 1.25; font-variant-numeric: tabular-nums; white-space: nowrap; }
+        #checklistTurnos .chk-enc .lbl { color: var(--gray-600); font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; }
+        #checklistTurnos .chk-num { text-align: center; font-variant-numeric: tabular-nums; }
+        #checklistTurnos .chk-act { width: 1%; padding-right: 0.4rem; }
+        #checklistTurnos .chk-act .btn { padding: 0.22rem 0.5rem; font-size: 0.7rem; }
+        #checklistTurnos .empty-state { padding: 0.7rem 0.4rem; }
+        #checklistTurnos .empty-state p { margin: 0; }
+        .bloc-dash-alerta { display: none; margin: 0 0 0.75rem; padding: 0.7rem 0.85rem; border-radius: 12px; border: 1px solid rgba(245,158,11,0.45); background: rgba(245,158,11,0.12); color: #fde68a; }
+        .bloc-dash-alerta.is-on { display: block; }
+        .bloc-dash-alerta h3 { margin: 0 0 0.35rem; font-size: 0.82rem; font-weight: 800; color: #fde68a; }
+        .bloc-dash-alerta ul { margin: 0; padding: 0; list-style: none; }
+        .bloc-dash-alerta li { display: flex; flex-wrap: wrap; gap: 0.35rem; align-items: center; font-size: 0.78rem; margin: 0 0 0.35rem; line-height: 1.35; }
+        .dashboard2-block--bloc .dashboard2-block-title { margin: 0; border: none; padding: 0; }
+        .bloc-head { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; margin: 0 0 0.55rem; padding: 0 0 0.4rem; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .bloc-btn-add {
+            border: 0; border-radius: 999px; padding: 0.28rem 0.7rem; font-size: 0.72rem; font-weight: 800;
+            background: #86efac; color: #0f172a; cursor: pointer;
+        }
+        .bloc-filtros { display: flex; flex-wrap: wrap; gap: 0.28rem; margin: 0 0 0.5rem; }
+        .bloc-filtros button {
+            border: 1px solid rgba(255,255,255,0.14); background: #334155; color: #e2e8f0;
+            border-radius: 999px; padding: 0.18rem 0.5rem; font-size: 0.68rem; font-weight: 700; cursor: pointer;
+        }
+        .bloc-filtros button.is-on { background: #86efac; color: #0f172a; border-color: #86efac; }
+        .bloc-quick { display: grid; grid-template-columns: 1fr 1fr auto; gap: 0.3rem; margin: 0 0 0.55rem; }
+        .bloc-quick input[type="text"] { grid-column: 1 / -1; }
+        .bloc-quick input, .bloc-quick button {
+            width: 100%; box-sizing: border-box; border-radius: 8px; border: 1px solid rgba(255,255,255,0.16);
+            background: #0f172a; color: #f8fafc; padding: 0.38rem 0.45rem; font-size: 0.75rem;
+        }
+        .bloc-quick button { background: #38bdf8; color: #0f172a; font-weight: 800; border: 0; cursor: pointer; width: auto; padding: 0.38rem 0.55rem; }
+        .bloc-lista { display: flex; flex-direction: column; gap: 0.4rem; max-height: 28rem; overflow: auto; padding-right: 0.1rem; }
+        .bloc-vacio { margin: 0; color: #94a3b8; font-size: 0.78rem; line-height: 1.4; }
+        .bloc-card {
+            display: grid; grid-template-columns: 4px 1fr; gap: 0.55rem; align-items: start;
+            background: rgba(15,23,42,0.72); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 0.5rem 0.55rem;
+        }
+        .bloc-card.is-hecha { opacity: 0.55; }
+        .bloc-card.is-hecha .bloc-card-title { text-decoration: line-through; }
+        .bloc-card.is-vencida { border-color: rgba(248,113,113,0.55); }
+        .bloc-card-bar { border-radius: 99px; min-height: 100%; background: #38bdf8; }
+        .bloc-card.c-amber .bloc-card-bar { background: #fbbf24; }
+        .bloc-card.c-rose .bloc-card-bar { background: #fb7185; }
+        .bloc-card.c-lime .bloc-card-bar { background: #a3e635; }
+        .bloc-card.c-violet .bloc-card-bar { background: #a78bfa; }
+        .bloc-card.c-teal .bloc-card-bar { background: #2dd4bf; }
+        .bloc-card-top { display: flex; align-items: flex-start; gap: 0.35rem; }
+        .bloc-card-title { margin: 0; font-size: 0.8rem; font-weight: 800; color: #f8fafc; line-height: 1.3; flex: 1; }
+        .bloc-card-meta { margin: 0.2rem 0 0; font-size: 0.68rem; color: #cbd5e1; }
+        .bloc-card-body { margin: 0.28rem 0 0; font-size: 0.74rem; color: #e2e8f0; white-space: pre-wrap; line-height: 1.35; }
+        .bloc-card-acts { display: flex; flex-wrap: wrap; gap: 0.25rem; margin-top: 0.4rem; }
+        .bloc-card-acts button {
+            border: 0; border-radius: 6px; padding: 0.16rem 0.4rem; font-size: 0.64rem; font-weight: 700; cursor: pointer;
+            background: #334155; color: #e2e8f0;
+        }
+        .bloc-card-acts button.danger { background: #7f1d1d; color: #fecaca; }
+        .bloc-check { width: 0.95rem; height: 0.95rem; margin-top: 0.12rem; flex-shrink: 0; accent-color: #86efac; }
+        .bloc-pin { font-size: 0.7rem; }
+        #modalBlocNota .form-row { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+        #modalBlocNota .form-group { margin: 0 0 0.55rem; flex: 1; min-width: 8rem; }
+        #modalBlocNota label { display: block; font-size: 0.75rem; font-weight: 700; margin: 0 0 0.2rem; }
+        #modalBlocNota input, #modalBlocNota select, #modalBlocNota textarea {
+            width: 100%; box-sizing: border-box; padding: 0.4rem 0.5rem; font-size: 0.82rem; border-radius: 8px;
+        }
         .chk-detalle-sec { margin: 0 0 0.75rem; padding: 0.65rem 0.7rem; border: 1px solid var(--border-color); border-radius: 10px; }
         .chk-detalle-sec h4 { margin: 0 0 0.35rem; font-size: 0.82rem; }
         [data-theme="dark"] .chk-est.ok { background: rgba(22,163,74,0.22); color: #bbf7d0; }
@@ -3929,7 +4023,7 @@
             }
         }
 
-        @media (max-width: 760px) {
+        @media (max-width: 1024px) {
             .dashboard2-hero,
             .dashboard2-workspace {
                 grid-template-columns: 1fr;
@@ -4099,10 +4193,7 @@
             }
 
             table {
-                display: block;
-                overflow-x: auto;
-                -webkit-overflow-scrolling: touch;
-                border-radius: var(--radius);
+                width: 100%;
             }
 
             th, td {
@@ -4118,7 +4209,9 @@
                 font-size: 1.75rem;
             }
 
-            .btn {
+            .form-section > .btn,
+            .form-section .form-group > .btn,
+            .modal-buttons .btn {
                 width: 100%;
                 margin-right: 0;
                 margin-bottom: 0.5rem;
@@ -4180,10 +4273,10 @@
                 margin-left: 0 !important;
                 max-width: 100vw !important;
                 width: 100%;
-                padding-top: 3.35rem;
+                padding-top: calc(3.35rem + env(safe-area-inset-top, 0px));
                 padding-left: max(0.6rem, env(safe-area-inset-left, 0px));
                 padding-right: max(0.6rem, env(safe-area-inset-right, 0px));
-                padding-bottom: max(1rem, env(safe-area-inset-bottom, 0px));
+                padding-bottom: max(5.5rem, env(safe-area-inset-bottom, 0px));
             }
             .main-content.menu-collapsed {
                 margin-left: 0 !important;
@@ -4194,6 +4287,9 @@
                 max-width: min(300px, 90vw);
                 z-index: 5100;
                 box-shadow: 6px 0 32px rgba(0, 0, 0, 0.2);
+                height: 100dvh;
+                padding-top: max(1rem, env(safe-area-inset-top, 0px));
+                padding-bottom: max(2rem, env(safe-area-inset-bottom, 0px));
             }
             [data-theme="dark"] .tabs {
                 box-shadow: 6px 0 36px rgba(0, 0, 0, 0.5);
@@ -4258,7 +4354,7 @@
         }
         @media (max-width: 640px) {
             .main-content {
-                padding-top: 3.1rem;
+                padding-top: calc(3.1rem + env(safe-area-inset-top, 0px));
                 padding-left: max(0.45rem, env(safe-area-inset-left, 0px));
                 padding-right: max(0.45rem, env(safe-area-inset-right, 0px));
             }
@@ -4285,7 +4381,213 @@
         }
         @media (max-width: 1024px) and (orientation: landscape) {
             .main-content {
-                padding-top: 2.85rem;
+                padding-top: calc(2.85rem + env(safe-area-inset-top, 0px));
+            }
+        }
+
+        /* Tablet + teléfono: contenido, tablas, formularios, overlays */
+        @media (max-width: 1024px) {
+            .container,
+            .main-content,
+            .tab-content {
+                min-width: 0;
+                max-width: 100%;
+            }
+            .tab-content:not(#dashboard) {
+                padding: 1rem 0.75rem 1.25rem !important;
+            }
+            .tab-content:not(#dashboard) .form-section {
+                padding: 1rem 0.9rem !important;
+                margin-bottom: 1rem !important;
+            }
+            .tab-content:not(#dashboard) .form-section h3 {
+                margin-bottom: 0.7rem;
+                font-size: 1.05rem;
+            }
+            .tab-content:not(#dashboard) th,
+            .tab-content:not(#dashboard) td {
+                padding: 0.5rem 0.55rem;
+                font-size: 0.78rem;
+            }
+            .modulo-cabecera-con-mes {
+                padding-right: 0 !important;
+            }
+            .modulo-mes-consulta {
+                max-width: 100%;
+                width: 100%;
+            }
+            .modulo-mes-consulta select {
+                min-width: 0;
+                flex: 1 1 12rem;
+            }
+            img, video, canvas, iframe {
+                max-width: 100%;
+                height: auto;
+            }
+            input, select, textarea, button {
+                max-width: 100%;
+            }
+            .form-group input,
+            .form-group select,
+            .form-group textarea,
+            .consulta-rapida input,
+            .filtro-inteligente input,
+            #checklistTurnos input,
+            #checklistTurnos select,
+            #checklistTurnos textarea {
+                font-size: 16px !important;
+            }
+            .table-section,
+            .form-section {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            .tab-content {
+                overflow-x: visible;
+            }
+            .table-section > div,
+            .tab-content [style*="overflow-x"],
+            .tab-content .table-section {
+                max-width: 100%;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            .tab-content table {
+                display: table;
+                width: max(100%, 36rem);
+                max-width: none;
+            }
+            #checklistTurnos table {
+                width: 100%;
+                min-width: 0;
+            }
+            .btn, button, a, .tab-button, select {
+                touch-action: manipulation;
+            }
+            .btn {
+                min-height: 2.5rem;
+            }
+            .tab-content table tbody td .btn.btn-sm,
+            .tabla-acciones .btn,
+            .moroso-acciones .btn {
+                min-height: 1.7rem;
+                width: auto !important;
+            }
+            .modal-overlay {
+                padding: max(0.75rem, env(safe-area-inset-top, 0px)) 0.65rem max(0.75rem, env(safe-area-inset-bottom, 0px));
+                align-items: flex-start;
+            }
+            .modal-confirm {
+                width: 100%;
+                max-width: 100%;
+                padding: 1.1rem 0.95rem;
+                max-height: calc(100dvh - 1.5rem);
+            }
+            .modal-buttons {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 0.45rem;
+            }
+            .modal-buttons .btn {
+                flex: 1 1 8rem;
+                width: auto;
+                margin: 0;
+            }
+            .toast-container {
+                left: 0.65rem;
+                right: 0.65rem;
+                top: max(0.65rem, env(safe-area-inset-top, 0px));
+                max-width: none;
+                width: auto;
+            }
+            .notif-bell-wrap {
+                top: max(0.55rem, env(safe-area-inset-top, 0px));
+                right: max(0.5rem, env(safe-area-inset-right, 0px));
+                left: auto;
+                gap: 0.35rem;
+                max-width: calc(100vw - 4.4rem);
+            }
+            .consulta-rapida input {
+                width: min(11.5rem, 42vw);
+                height: 2.5rem;
+            }
+            .notif-panel {
+                max-width: 100%;
+                height: 100dvh;
+                padding-top: env(safe-area-inset-top, 0px);
+            }
+            .dashboard2-banner {
+                padding-right: 0.65rem;
+            }
+            .dashboard2-banner-inner {
+                padding-left: 3.1rem !important;
+            }
+            .dashboard2-herramientas-grid,
+            .dashboard2-stats-grid,
+            .dashboard2-mail-grid,
+            .chk-turnos-kpis {
+                grid-template-columns: repeat(auto-fill, minmax(min(100%, 8.5rem), 1fr)) !important;
+            }
+            .bloc-quick {
+                grid-template-columns: 1fr 1fr;
+            }
+            .bloc-quick button {
+                grid-column: 1 / -1;
+            }
+            .chk-filtros .form-group {
+                min-width: 0;
+                flex: 1 1 8.5rem;
+            }
+            #conserjeria .conserjeria-modulo__nav {
+                top: 0.25rem;
+                max-width: 100%;
+            }
+            .tab-content:not(#dashboard) [style*="grid-template-columns"] {
+                grid-template-columns: 1fr !important;
+            }
+        }
+        @media (max-width: 768px) {
+            .dashboard2-banner-inner {
+                padding-left: 0.35rem !important;
+                padding-right: 0.35rem !important;
+            }
+            .dashboard2-banner-titulo-wrap {
+                padding-left: 2.7rem;
+            }
+            .consulta-rapida input {
+                width: min(8.2rem, 34vw);
+            }
+            .tab-content table {
+                width: max(100%, 32rem);
+            }
+            .header h1 {
+                font-size: 1.15rem;
+            }
+            .form-row {
+                grid-template-columns: 1fr;
+                gap: 0.85rem;
+            }
+            .multa-tipo-registro-card {
+                max-width: none;
+                min-width: 0;
+            }
+        }
+        @media (max-width: 480px) {
+            .consulta-rapida input {
+                width: 6.6rem;
+                padding-right: 0.45rem;
+            }
+            .dashboard2-titulo {
+                font-size: 1rem;
+            }
+            .dashboard2-kpi-value {
+                font-size: 1.15rem;
+            }
+            .tab-content table {
+                width: max(100%, 28rem);
+            }
+            .bloc-lista {
+                max-height: 22rem;
             }
         }
 
@@ -6475,6 +6777,51 @@
       text-align: center;
     }
     .chat-fab-badge[data-count]:not([data-count="0"]) { display: inline-block; }
+    @media (max-width: 768px) {
+      .chat-stack {
+        right: max(0.65rem, env(safe-area-inset-right, 0px)) !important;
+        bottom: max(0.65rem, env(safe-area-inset-bottom, 0px)) !important;
+        left: auto !important;
+        top: auto !important;
+        max-width: calc(100vw - 1.3rem);
+      }
+      .chat-flotante {
+        width: min(100vw - 1.3rem, 400px) !important;
+        max-height: min(78dvh, calc(100dvh - 5.5rem)) !important;
+        border-radius: 14px;
+      }
+      .chat-fab-label { display: none; }
+      .chat-fab {
+        width: 3.15rem;
+        height: 3.15rem;
+        padding: 0;
+        justify-content: center;
+        border-radius: 50%;
+      }
+    }
+    @media (max-width: 480px) {
+      body.chat-activo #chatDock.chat-open .chat-stack,
+      .chat-dock.chat-open .chat-stack {
+        inset: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        top: 0 !important;
+        bottom: 0 !important;
+        max-width: none;
+        width: 100%;
+        height: 100%;
+        align-items: stretch;
+      }
+      .chat-dock.chat-open .chat-flotante {
+        position: fixed !important;
+        inset: 0 !important;
+        width: 100% !important;
+        max-height: none !important;
+        height: 100dvh !important;
+        border-radius: 0 !important;
+        transform: none !important;
+      }
+    }
 
         .tab-button.chat-sidebar {
             position: relative;
@@ -6815,6 +7162,7 @@
                 <div id="dashboardMultasPendientesWrap" class="multas-alerta" role="status"></div>
                 <div id="dashboardReclamosPendientesWrap" class="reclamos-alerta" role="status"></div>
                 <div id="dashboardChecklistTurnosWrap" class="checklist-dash-alerta" role="status"></div>
+                <div id="dashboardBlocNotasAlerta" class="bloc-dash-alerta" role="status"></div>
                 <div id="dashboardResumenNovedadesWrap" class="dashboard-resumen-aviso" hidden></div>
                 </div>
 
@@ -6957,6 +7305,25 @@
                     </div>
                     <aside class="dashboard2-workspace-side" aria-label="Operación del mes">
                         <p class="dashboard2-col-kicker">Operación del mes</p>
+                <section class="dashboard2-block dashboard2-block--bloc" id="dashboardBlocNotas" aria-label="Bloc de notas">
+                    <div class="bloc-head">
+                        <h2 class="dashboard2-block-title">Bloc de notas</h2>
+                        <button type="button" class="bloc-btn-add" id="blocNotaNueva">+ Nota</button>
+                    </div>
+                    <div class="bloc-filtros" id="blocNotasFiltros">
+                        <button type="button" data-bloc-filtro="activas" class="is-on">Activas</button>
+                        <button type="button" data-bloc-filtro="hoy">Hoy</button>
+                        <button type="button" data-bloc-filtro="agenda">Agenda</button>
+                        <button type="button" data-bloc-filtro="hechas">Hechas</button>
+                    </div>
+                    <form id="blocNotaQuick" class="bloc-quick" autocomplete="off">
+                        <input type="text" id="blocQuickTitulo" maxlength="180" placeholder="Nueva nota o recordatorio…">
+                        <input type="date" id="blocQuickFecha" title="Fecha de agenda">
+                        <input type="time" id="blocQuickHora" title="Hora de recordatorio">
+                        <button type="submit">Añadir</button>
+                    </form>
+                    <div id="blocNotasLista" class="bloc-lista"></div>
+                </section>
                 <!-- 3. Nómina (seguimiento operativo) -->
                 <section class="dashboard2-block dashboard2-block--extra" aria-label="Nómina y seguimiento">
                     <h2 class="dashboard2-block-title">Seguimiento operativo</h2>
@@ -8802,16 +9169,16 @@
         </div>
 
         <div id="checklistTurnos" class="tab-content">
-            <header style="margin-bottom: 1rem;">
-                <h2 style="margin: 0; font-size: 1.5rem; font-weight: 700; color: var(--gray-900);">Checklist de Turnos</h2>
-                <p style="margin: 0.45rem 0 0; color: var(--gray-600); font-size: 0.875rem; max-width: 42rem; line-height: 1.45;">Aperturas y cierres registrados en Conserjería WM. Revise incidencias, diferencias de encomiendas y variaciones entre turnos.</p>
+            <header style="margin-bottom: 0.7rem;">
+                <h2 style="margin: 0; font-size: 1.35rem; font-weight: 700; color: var(--gray-900);">Checklist de Turnos</h2>
+                <p style="margin: 0.25rem 0 0; color: var(--gray-600); font-size: 0.82rem; max-width: 42rem; line-height: 1.4;">Aperturas y cierres registrados en Conserjería WM. Revise incidencias, diferencias de encomiendas y variaciones entre turnos.</p>
             </header>
-            <section class="form-section" style="margin-bottom: 1rem;">
-                <h3 style="margin: 0 0 0.65rem; font-size: 1rem;">Resumen de hoy</h3>
+            <section class="form-section">
+                <h3>Resumen de hoy</h3>
                 <div id="chkTurnosKpis" class="chk-turnos-kpis"></div>
             </section>
             <section class="form-section">
-                <h3 style="margin: 0 0 0.65rem; font-size: 1rem;">Historial</h3>
+                <h3>Historial</h3>
                 <div class="chk-filtros">
                     <div class="form-group"><label>Desde</label><input type="date" id="chkFiltroDesde"></div>
                     <div class="form-group"><label>Hasta</label><input type="date" id="chkFiltroHasta"></div>
@@ -8840,23 +9207,19 @@
                             <thead>
                                 <tr>
                                     <th>Fecha</th>
-                                    <th>Hora</th>
                                     <th>Conserje</th>
-                                    <th>Turno</th>
                                     <th>Tipo</th>
                                     <th>Llaves</th>
-                                    <th>Mouse</th>
-                                    <th>Enc. CF</th>
-                                    <th>Enc. sistema</th>
-                                    <th>Diferencia</th>
-                                    <th>Radios</th>
+                                    <th class="chk-num">Mouse</th>
+                                    <th class="chk-num">Radios</th>
+                                    <th>Encomiendas</th>
                                     <th>Observaciones</th>
                                     <th>Estado</th>
-                                    <th></th>
+                                    <th class="chk-act"></th>
                                 </tr>
                             </thead>
                             <tbody id="chkTurnosTbody">
-                                <tr><td colspan="14" class="empty-state"><p>Cargando checklists…</p></td></tr>
+                                <tr><td colspan="10" class="empty-state"><p>Cargando checklists…</p></td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -9741,6 +10104,68 @@
             </div>
             <div class="modal-buttons" id="modalAlertButtons">
                 <button class="btn btn-primary" onclick="cerrarModalAlert()" id="modalAlertButton">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modalBlocNota" class="modal-overlay">
+        <div class="modal-confirm" style="max-width: 560px; width: 100%; text-align: left; max-height: 90vh; overflow-y: auto;">
+            <h3 id="blocModalTitulo" style="margin: 0 0 0.65rem 0;">Nota</h3>
+            <input type="hidden" id="blocEditId" value="">
+            <div class="form-group">
+                <label for="blocEditTitulo">Título *</label>
+                <input type="text" id="blocEditTitulo" maxlength="180" placeholder="Ej. Llamar a mantención de ascensores">
+            </div>
+            <div class="form-group">
+                <label for="blocEditCuerpo">Detalle</label>
+                <textarea id="blocEditCuerpo" rows="5" maxlength="4000" placeholder="Texto libre, tareas, acuerdos…"></textarea>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="blocEditTipo">Tipo</label>
+                    <select id="blocEditTipo">
+                        <option value="nota">Nota</option>
+                        <option value="recordatorio">Recordatorio</option>
+                        <option value="tarea">Tarea</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="blocEditColor">Color</label>
+                    <select id="blocEditColor">
+                        <option value="sky">Azul</option>
+                        <option value="amber">Ámbar</option>
+                        <option value="lime">Verde</option>
+                        <option value="rose">Rojo</option>
+                        <option value="violet">Violeta</option>
+                        <option value="teal">Teal</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="blocEditFecha">Fecha de agenda</label>
+                    <input type="date" id="blocEditFecha">
+                </div>
+                <div class="form-group">
+                    <label for="blocEditHora">Hora de recordatorio</label>
+                    <input type="time" id="blocEditHora">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group" style="flex:0 0 auto;">
+                    <label><input type="checkbox" id="blocEditRecordatorio"> Avisarme a esa hora</label>
+                </div>
+                <div class="form-group" style="flex:0 0 auto;">
+                    <label><input type="checkbox" id="blocEditFijada"> Fijar arriba</label>
+                </div>
+                <div class="form-group" style="flex:0 0 auto;">
+                    <label><input type="checkbox" id="blocEditHecha"> Marcar hecha</label>
+                </div>
+            </div>
+            <div class="modal-buttons">
+                <button type="button" class="btn btn-secondary" id="blocModalCerrar">Cancelar</button>
+                <button type="button" class="btn btn-danger" id="blocModalEliminar" hidden>Eliminar</button>
+                <button type="button" class="btn btn-primary" id="blocModalGuardar">Guardar</button>
             </div>
         </div>
     </div>
@@ -11075,6 +11500,9 @@
                 if (tabName === 'dashboard') {
                     if (typeof window.cargarChecklistTurnosGestion === 'function') {
                         window.cargarChecklistTurnosGestion().catch(function () {});
+                    }
+                    if (typeof window.cargarBlocNotasGestion === 'function') {
+                        window.cargarBlocNotasGestion().catch(function () {});
                     }
                     if (typeof cargarMensajesArturito === 'function') cargarMensajesArturito();
                     function runPanel2() {
@@ -17747,28 +18175,30 @@
             if (!tb) return;
             var rows = chkTurnosFiltrar(window._chkTurnosLista || []);
             if (!rows.length) {
-                tb.innerHTML = '<tr><td colspan="14" class="empty-state"><p>No hay checklists con esos filtros.</p></td></tr>';
+                tb.innerHTML = '<tr><td colspan="10" class="empty-state"><p>No hay checklists con esos filtros.</p></td></tr>';
                 return;
             }
             tb.innerHTML = rows.map(function (r) {
                 var diff = Number(r.encDiff) || 0;
                 var obs = chkObsResumen(r);
-                if (obs.length > 42) obs = obs.slice(0, 40) + '…';
+                if (obs.length > 72) obs = obs.slice(0, 70) + '…';
+                var hora = String(r.hora || '').replace(/:\d{2}$/, '');
+                var encHtml = '<div class="chk-enc">' +
+                    '<span class="lbl">CF</span><span>' + chkEsc(r.encCf) + '</span>' +
+                    '<span class="lbl">Sis</span><span>' + chkEsc(r.encSistema) + '</span>' +
+                    '<span class="lbl">Dif</span><span class="' + (diff ? 'chk-diff-cell warn' : '') + '">' + (diff > 0 ? '+' : '') + diff + '</span>' +
+                    '</div>';
                 return '<tr>' +
-                    '<td>' + chkEsc(r.fecha || r.ymd || '') + '</td>' +
-                    '<td>' + chkEsc(r.hora || '') + '</td>' +
+                    '<td><div class="chk-fh"><strong>' + chkEsc(r.fecha || r.ymd || '') + '</strong><span>' + chkEsc(hora) + '</span></div></td>' +
                     '<td>' + chkEsc(r.conserje || '') + '</td>' +
-                    '<td style="font-size:0.68rem;">' + chkEsc(String(r.turnoId || '').slice(-10)) + '</td>' +
                     '<td>' + (r.tipo === 'cierre' ? 'Cierre' : 'Apertura') + '</td>' +
                     '<td>' + (r.llavesCompletas === 'no' ? '🔴 No' : '✓ Sí') + '</td>' +
-                    '<td>' + chkEsc(r.mouseCant) + '</td>' +
-                    '<td>' + chkEsc(r.encCf) + '</td>' +
-                    '<td>' + chkEsc(r.encSistema) + '</td>' +
-                    '<td class="' + (diff ? 'chk-diff-cell warn' : '') + '">' + diff + '</td>' +
-                    '<td>' + chkEsc(r.radiosCant) + '</td>' +
-                    '<td style="max-width:12rem;">' + chkEsc(obs) + '</td>' +
+                    '<td class="chk-num">' + chkEsc(r.mouseCant) + '</td>' +
+                    '<td class="chk-num">' + chkEsc(r.radiosCant) + '</td>' +
+                    '<td>' + encHtml + '</td>' +
+                    '<td class="chk-obs">' + chkEsc(obs) + '</td>' +
                     '<td>' + chkEstadoHtml(r.estado) + '</td>' +
-                    '<td><button type="button" class="btn btn-primary btn-sm" data-chk-id="' + chkEsc(r.id) + '">Ver</button></td>' +
+                    '<td class="chk-act"><button type="button" class="btn btn-primary btn-sm" data-chk-id="' + chkEsc(r.id) + '">Ver</button></td>' +
                     '</tr>';
             }).join('');
         }
@@ -18006,7 +18436,7 @@
             chkTurnosBindUi();
             var tb = document.getElementById('chkTurnosTbody');
             if (tb && !(window._chkTurnosLista || []).length) {
-                tb.innerHTML = '<tr><td colspan="14" class="empty-state"><p>Cargando checklists…</p></td></tr>';
+                tb.innerHTML = '<tr><td colspan="10" class="empty-state"><p>Cargando checklists…</p></td></tr>';
             }
             try {
                 await chkTurnosLeerLista();
@@ -18014,7 +18444,7 @@
                 chkTurnosPintarTabla();
                 chkTurnosPintarAlertasDashboard();
             } catch (eL) {
-                if (tb) tb.innerHTML = '<tr><td colspan="14" class="empty-state"><p>No se pudieron leer los checklists de Conserjería WM.</p></td></tr>';
+                if (tb) tb.innerHTML = '<tr><td colspan="10" class="empty-state"><p>No se pudieron leer los checklists de Conserjería WM.</p></td></tr>';
             }
         };
         setTimeout(function () {
@@ -18022,6 +18452,426 @@
                 window.cargarChecklistTurnosGestion().catch(function () {});
             }
         }, 2500);
+
+        (function iniciarBlocNotasGestion() {
+            var LS = 'blocNotas';
+            var DOC = 'blocNotas';
+            var items = [];
+            var filtro = 'activas';
+            var saveTimer = null;
+            var tickTimer = null;
+            async function persistir() {
+                escribirLocal();
+                if (saveTimer) clearTimeout(saveTimer);
+                saveTimer = setTimeout(function () {
+                    escribirNube().catch(function () {});
+                }, 250);
+            }
+
+            function esc(s) {
+                return String(s == null ? '' : s)
+                    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+            }
+            function uid() {
+                return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+            }
+            function hoyYmd() {
+                try {
+                    return new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Santiago', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
+                } catch (e) {
+                    var d = new Date();
+                    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+                }
+            }
+            function msFechaHora(fecha, hora) {
+                if (!fecha) return 0;
+                var t = String(hora || '09:00');
+                if (t.length === 5) t += ':00';
+                var d = new Date(fecha + 'T' + t);
+                var n = d.getTime();
+                return isFinite(n) ? n : 0;
+            }
+            function fmtFecha(ymd) {
+                var p = String(ymd || '').split('-');
+                if (p.length !== 3) return ymd || '';
+                return p[2] + '/' + p[1];
+            }
+            function leerLocal() {
+                try {
+                    var raw = localStorage.getItem(lsKey(LS));
+                    var arr = raw ? JSON.parse(raw) : [];
+                    return Array.isArray(arr) ? arr : [];
+                } catch (e) { return []; }
+            }
+            function escribirLocal() {
+                try { localStorage.setItem(lsKey(LS), JSON.stringify(items)); } catch (e) {}
+            }
+            async function leerNube() {
+                if (typeof db === 'undefined' || !db) return null;
+                var snap = await db.collection('comunidad').doc(DOC).get();
+                if (!snap.exists) return null;
+                var arr = (snap.data() || {}).items;
+                return Array.isArray(arr) ? arr : null;
+            }
+            async function escribirNube() {
+                if (typeof db === 'undefined' || !db) return;
+                await db.collection('comunidad').doc(DOC).set({
+                    items: items,
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    updatedBy: typeof multaOperadorActual === 'function' ? multaOperadorActual() : 'Administración'
+                }, { merge: true });
+            }
+            function norm(n) {
+                n = n || {};
+                return {
+                    id: String(n.id || uid()),
+                    titulo: String(n.titulo || '').trim(),
+                    cuerpo: String(n.cuerpo || ''),
+                    tipo: n.tipo === 'recordatorio' || n.tipo === 'tarea' ? n.tipo : 'nota',
+                    color: n.color || 'sky',
+                    fecha: String(n.fecha || ''),
+                    hora: String(n.hora || ''),
+                    recordatorio: !!n.recordatorio,
+                    recordatorioMs: Number(n.recordatorioMs) || 0,
+                    notificado: !!n.notificado,
+                    hecha: !!n.hecha,
+                    fijada: !!n.fijada,
+                    createdAt: n.createdAt || new Date().toISOString(),
+                    updatedAt: n.updatedAt || new Date().toISOString(),
+                    autor: n.autor || ''
+                };
+            }
+            function ordenar(a, b) {
+                if (!!a.fijada !== !!b.fijada) return a.fijada ? -1 : 1;
+                if (!!a.hecha !== !!b.hecha) return a.hecha ? 1 : -1;
+                var ma = a.recordatorioMs || (a.fecha ? msFechaHora(a.fecha, a.hora) : 0);
+                var mb = b.recordatorioMs || (b.fecha ? msFechaHora(b.fecha, b.hora) : 0);
+                if (ma && mb && ma !== mb) return ma - mb;
+                if (ma && !mb) return -1;
+                if (!ma && mb) return 1;
+                return String(b.updatedAt || '').localeCompare(String(a.updatedAt || ''));
+            }
+            function filtrar() {
+                var hoy = hoyYmd();
+                var now = Date.now();
+                return items.filter(function (n) {
+                    if (filtro === 'hechas') return !!n.hecha;
+                    if (n.hecha) return false;
+                    if (filtro === 'hoy') return n.fecha === hoy || (!n.fecha && n.recordatorioMs && new Date(n.recordatorioMs).toISOString().slice(0, 10) === hoy);
+                    if (filtro === 'agenda') return !!(n.fecha || n.recordatorio || n.tipo === 'recordatorio');
+                    return true;
+                }).sort(ordenar);
+            }
+            function vencida(n) {
+                if (n.hecha) return false;
+                var ms = n.recordatorioMs || (n.fecha ? msFechaHora(n.fecha, n.hora || '23:59') : 0);
+                return !!(ms && ms < Date.now());
+            }
+            function pintarAlerta() {
+                var wrap = document.getElementById('dashboardBlocNotasAlerta');
+                if (!wrap) return;
+                var due = items.filter(function (n) {
+                    if (n.hecha || !n.recordatorio) return false;
+                    var ms = n.recordatorioMs || msFechaHora(n.fecha, n.hora);
+                    return ms && ms <= Date.now();
+                });
+                if (!due.length) {
+                    wrap.className = 'bloc-dash-alerta';
+                    wrap.innerHTML = '';
+                    return;
+                }
+                wrap.className = 'bloc-dash-alerta is-on';
+                wrap.innerHTML = '<h3>Recordatorios del bloc de notas</h3><ul>' + due.slice(0, 6).map(function (n) {
+                    return '<li><span>' + esc(n.titulo) + (n.hora ? ' · ' + esc(n.hora) : '') + '</span>' +
+                        '<button type="button" class="btn btn-secondary btn-sm" data-bloc-snooze="' + esc(n.id) + '" data-min="60">+1 h</button>' +
+                        '<button type="button" class="btn btn-secondary btn-sm" data-bloc-snooze="' + esc(n.id) + '" data-min="1440">+1 día</button>' +
+                        '<button type="button" class="btn btn-primary btn-sm" data-bloc-done="' + esc(n.id) + '">Hecho</button></li>';
+                }).join('') + '</ul>';
+            }
+            function pintarLista() {
+                var box = document.getElementById('blocNotasLista');
+                if (!box) return;
+                var rows = filtrar();
+                if (!rows.length) {
+                    box.innerHTML = '<p class="bloc-vacio">Sin notas en este filtro. Escriba arriba o pulse + Nota.</p>';
+                    pintarAlerta();
+                    return;
+                }
+                box.innerHTML = rows.map(function (n) {
+                    var meta = [];
+                    if (n.tipo === 'recordatorio') meta.push('Recordatorio');
+                    else if (n.tipo === 'tarea') meta.push('Tarea');
+                    if (n.fecha) meta.push(fmtFecha(n.fecha) + (n.hora ? ' ' + n.hora : ''));
+                    else if (n.hora) meta.push(n.hora);
+                    if (n.fijada) meta.push('Fijada');
+                    if (vencida(n)) meta.push('Vencida');
+                    var body = String(n.cuerpo || '').trim();
+                    if (body.length > 160) body = body.slice(0, 158) + '…';
+                    return '<article class="bloc-card c-' + esc(n.color || 'sky') + (n.hecha ? ' is-hecha' : '') + (vencida(n) ? ' is-vencida' : '') + '" data-bloc-id="' + esc(n.id) + '">' +
+                        '<div class="bloc-card-bar"></div><div>' +
+                        '<div class="bloc-card-top">' +
+                        '<input type="checkbox" class="bloc-check" data-bloc-toggle="' + esc(n.id) + '"' + (n.hecha ? ' checked' : '') + ' title="Marcar hecha">' +
+                        '<h3 class="bloc-card-title">' + (n.fijada ? '<span class="bloc-pin">📌 </span>' : '') + esc(n.titulo || 'Sin título') + '</h3>' +
+                        '</div>' +
+                        (meta.length ? '<p class="bloc-card-meta">' + esc(meta.join(' · ')) + '</p>' : '') +
+                        (body ? '<p class="bloc-card-body">' + esc(body) + '</p>' : '') +
+                        '<div class="bloc-card-acts">' +
+                        '<button type="button" data-bloc-edit="' + esc(n.id) + '">Editar</button>' +
+                        '<button type="button" data-bloc-pin="' + esc(n.id) + '">' + (n.fijada ? 'Quitar fijo' : 'Fijar') + '</button>' +
+                        '<button type="button" class="danger" data-bloc-del="' + esc(n.id) + '">Eliminar</button>' +
+                        '</div></div></article>';
+                }).join('');
+                pintarAlerta();
+            }
+            function byId(id) {
+                return items.filter(function (n) { return n.id === id; })[0] || null;
+            }
+            function upsert(nota) {
+                var i = -1;
+                items.forEach(function (n, idx) { if (n.id === nota.id) i = idx; });
+                nota.updatedAt = new Date().toISOString();
+                if (i >= 0) items[i] = nota;
+                else items.unshift(nota);
+                pintarLista();
+                persistir();
+            }
+            function pedirNotificacion() {
+                try {
+                    if (typeof Notification !== 'undefined' && Notification.permission === 'default') {
+                        Notification.requestPermission();
+                    }
+                } catch (e) {}
+            }
+            function abrirModal(id) {
+                var n = id ? byId(id) : null;
+                document.getElementById('blocEditId').value = n ? n.id : '';
+                document.getElementById('blocModalTitulo').textContent = n ? 'Editar nota' : 'Nueva nota';
+                document.getElementById('blocEditTitulo').value = n ? n.titulo : '';
+                document.getElementById('blocEditCuerpo').value = n ? n.cuerpo : '';
+                document.getElementById('blocEditTipo').value = n ? n.tipo : 'nota';
+                document.getElementById('blocEditColor').value = n ? (n.color || 'sky') : 'sky';
+                document.getElementById('blocEditFecha').value = n ? (n.fecha || '') : '';
+                document.getElementById('blocEditHora').value = n ? (n.hora || '') : '';
+                document.getElementById('blocEditRecordatorio').checked = n ? !!n.recordatorio : false;
+                document.getElementById('blocEditFijada').checked = n ? !!n.fijada : false;
+                document.getElementById('blocEditHecha').checked = n ? !!n.hecha : false;
+                document.getElementById('blocModalEliminar').hidden = !n;
+                if (typeof abrirOverlayGestion === 'function') abrirOverlayGestion('modalBlocNota');
+            }
+            function leerFormulario() {
+                var id = document.getElementById('blocEditId').value || uid();
+                var prev = byId(id);
+                var titulo = String(document.getElementById('blocEditTitulo').value || '').trim();
+                var fecha = document.getElementById('blocEditFecha').value || '';
+                var hora = document.getElementById('blocEditHora').value || '';
+                var rec = !!document.getElementById('blocEditRecordatorio').checked;
+                var tipo = document.getElementById('blocEditTipo').value || 'nota';
+                if (rec && !tipo) tipo = 'recordatorio';
+                if (rec && !fecha) fecha = hoyYmd();
+                var ms = rec ? msFechaHora(fecha, hora || '09:00') : (fecha ? msFechaHora(fecha, hora) : 0);
+                return norm({
+                    id: id,
+                    titulo: titulo,
+                    cuerpo: document.getElementById('blocEditCuerpo').value || '',
+                    tipo: tipo,
+                    color: document.getElementById('blocEditColor').value || 'sky',
+                    fecha: fecha,
+                    hora: hora,
+                    recordatorio: rec,
+                    recordatorioMs: ms,
+                    notificado: prev && prev.recordatorioMs === ms ? !!prev.notificado : false,
+                    hecha: !!document.getElementById('blocEditHecha').checked,
+                    fijada: !!document.getElementById('blocEditFijada').checked,
+                    createdAt: prev ? prev.createdAt : new Date().toISOString(),
+                    autor: prev && prev.autor ? prev.autor : (typeof multaOperadorActual === 'function' ? multaOperadorActual() : '')
+                });
+            }
+            function guardarModal() {
+                var n = leerFormulario();
+                if (!n.titulo) {
+                    if (typeof mostrarAlerta === 'function') mostrarAlerta('Indique un título para la nota.', 'Bloc de notas');
+                    return;
+                }
+                if (n.recordatorio) pedirNotificacion();
+                upsert(n);
+                if (typeof cerrarOverlayGestion === 'function') cerrarOverlayGestion('modalBlocNota');
+            }
+            async function eliminar(id) {
+                var n = byId(id);
+                if (!n) return;
+                var ok = true;
+                if (typeof confirmarAccion === 'function') {
+                    ok = await confirmarAccion('¿Eliminar «' + n.titulo + '»?', 'Bloc de notas');
+                }
+                if (!ok) return;
+                items = items.filter(function (x) { return x.id !== id; });
+                pintarLista();
+                persistir();
+                if (typeof cerrarOverlayGestion === 'function') cerrarOverlayGestion('modalBlocNota');
+            }
+            function snooze(id, min) {
+                var n = byId(id);
+                if (!n) return;
+                var base = Math.max(Date.now(), n.recordatorioMs || Date.now());
+                var next = new Date(base + Number(min) * 60000);
+                var y = next.getFullYear();
+                var m = String(next.getMonth() + 1).padStart(2, '0');
+                var d = String(next.getDate()).padStart(2, '0');
+                n.fecha = y + '-' + m + '-' + d;
+                n.hora = String(next.getHours()).padStart(2, '0') + ':' + String(next.getMinutes()).padStart(2, '0');
+                n.recordatorio = true;
+                n.tipo = n.tipo === 'nota' ? 'recordatorio' : n.tipo;
+                n.recordatorioMs = next.getTime();
+                n.notificado = false;
+                n.hecha = false;
+                upsert(n);
+            }
+            function avisar(n) {
+                try {
+                    if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+                        new Notification('Recordatorio · Gestión WM', { body: n.titulo, tag: 'bloc-' + n.id });
+                    }
+                } catch (e) {}
+                n.notificado = true;
+            }
+            function tick() {
+                var changed = false;
+                var now = Date.now();
+                items.forEach(function (n) {
+                    if (n.hecha || !n.recordatorio || n.notificado) return;
+                    var ms = n.recordatorioMs || msFechaHora(n.fecha, n.hora);
+                    if (ms && ms <= now) {
+                        avisar(n);
+                        changed = true;
+                    }
+                });
+                if (changed) {
+                    pintarLista();
+                    persistir();
+                } else {
+                    pintarAlerta();
+                }
+            }
+            function bind() {
+                if (window._blocNotasBound) return;
+                window._blocNotasBound = true;
+                var nueva = document.getElementById('blocNotaNueva');
+                if (nueva) nueva.addEventListener('click', function () { abrirModal(null); });
+                var form = document.getElementById('blocNotaQuick');
+                if (form) form.addEventListener('submit', function (ev) {
+                    ev.preventDefault();
+                    var titulo = String((document.getElementById('blocQuickTitulo') || {}).value || '').trim();
+                    if (!titulo) {
+                        abrirModal(null);
+                        return;
+                    }
+                    var fecha = (document.getElementById('blocQuickFecha') || {}).value || '';
+                    var hora = (document.getElementById('blocQuickHora') || {}).value || '';
+                    var rec = !!(fecha || hora);
+                    if (rec) pedirNotificacion();
+                    upsert(norm({
+                        titulo: titulo,
+                        tipo: rec ? 'recordatorio' : 'nota',
+                        fecha: fecha,
+                        hora: hora,
+                        recordatorio: rec,
+                        recordatorioMs: rec ? msFechaHora(fecha || hoyYmd(), hora || '09:00') : 0,
+                        autor: typeof multaOperadorActual === 'function' ? multaOperadorActual() : ''
+                    }));
+                    document.getElementById('blocQuickTitulo').value = '';
+                    document.getElementById('blocQuickFecha').value = '';
+                    document.getElementById('blocQuickHora').value = '';
+                });
+                var filtros = document.getElementById('blocNotasFiltros');
+                if (filtros) filtros.addEventListener('click', function (ev) {
+                    var b = ev.target.closest('[data-bloc-filtro]');
+                    if (!b) return;
+                    filtro = b.getAttribute('data-bloc-filtro') || 'activas';
+                    Array.prototype.forEach.call(filtros.querySelectorAll('[data-bloc-filtro]'), function (el) {
+                        el.classList.toggle('is-on', el === b);
+                    });
+                    pintarLista();
+                });
+                var lista = document.getElementById('blocNotasLista');
+                if (lista) lista.addEventListener('click', function (ev) {
+                    var t = ev.target.closest('[data-bloc-edit], [data-bloc-pin], [data-bloc-del], [data-bloc-toggle]');
+                    if (!t) {
+                        var card = ev.target.closest('[data-bloc-id]');
+                        if (card && !ev.target.closest('button, input')) abrirModal(card.getAttribute('data-bloc-id'));
+                        return;
+                    }
+                    var id = t.getAttribute('data-bloc-edit') || t.getAttribute('data-bloc-pin') || t.getAttribute('data-bloc-del') || t.getAttribute('data-bloc-toggle');
+                    if (t.hasAttribute('data-bloc-edit')) abrirModal(id);
+                    else if (t.hasAttribute('data-bloc-pin')) {
+                        var n = byId(id);
+                        if (!n) return;
+                        n.fijada = !n.fijada;
+                        upsert(n);
+                    } else if (t.hasAttribute('data-bloc-del')) eliminar(id);
+                    else if (t.hasAttribute('data-bloc-toggle')) {
+                        var n2 = byId(id);
+                        if (!n2) return;
+                        n2.hecha = !n2.hecha;
+                        upsert(n2);
+                    }
+                });
+                var alerta = document.getElementById('dashboardBlocNotasAlerta');
+                if (alerta) alerta.addEventListener('click', function (ev) {
+                    var done = ev.target.closest('[data-bloc-done]');
+                    if (done) {
+                        var n = byId(done.getAttribute('data-bloc-done'));
+                        if (!n) return;
+                        n.hecha = true;
+                        upsert(n);
+                        return;
+                    }
+                    var sn = ev.target.closest('[data-bloc-snooze]');
+                    if (sn) snooze(sn.getAttribute('data-bloc-snooze'), Number(sn.getAttribute('data-min') || 60));
+                });
+                var g = document.getElementById('blocModalGuardar');
+                if (g) g.addEventListener('click', guardarModal);
+                var c = document.getElementById('blocModalCerrar');
+                if (c) c.addEventListener('click', function () { cerrarOverlayGestion('modalBlocNota'); });
+                var d = document.getElementById('blocModalEliminar');
+                if (d) d.addEventListener('click', function () { eliminar(document.getElementById('blocEditId').value); });
+                var modal = document.getElementById('modalBlocNota');
+                if (modal) modal.addEventListener('click', function (e) {
+                    if (e.target === modal) cerrarOverlayGestion('modalBlocNota');
+                });
+                var rec = document.getElementById('blocEditRecordatorio');
+                var tipo = document.getElementById('blocEditTipo');
+                if (rec) rec.addEventListener('change', function () {
+                    if (rec.checked && tipo && tipo.value === 'nota') tipo.value = 'recordatorio';
+                    if (rec.checked && !(document.getElementById('blocEditFecha').value)) {
+                        document.getElementById('blocEditFecha').value = hoyYmd();
+                    }
+                });
+            }
+            async function cargar() {
+                bind();
+                items = leerLocal().map(norm);
+                pintarLista();
+                try {
+                    var nube = await leerNube();
+                    if (nube) {
+                        items = nube.map(norm);
+                        escribirLocal();
+                        pintarLista();
+                    } else if (items.length) {
+                        await escribirNube();
+                    }
+                } catch (e) {
+                    pintarLista();
+                }
+                if (tickTimer) clearInterval(tickTimer);
+                tickTimer = setInterval(tick, 30000);
+                tick();
+            }
+            window.cargarBlocNotasGestion = cargar;
+            if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', cargar);
+            else setTimeout(cargar, 400);
+        })();
 
         window.enfocarNovedadConserjeriaGestion = function (cor) {
             var fila = document.getElementById('filaNovedadGestion-' + Number(cor));
@@ -50515,7 +51365,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 function updateToggleButtonPosition() {
                     if (!menuToggleBtn || !tabsMenu) return;
                     if (mqMobileMenu.matches) {
-                        menuToggleBtn.style.left = '1rem';
+                        menuToggleBtn.style.left = '';
                         menuToggleBtn.innerHTML = tabsMenu.classList.contains('collapsed') ? '☰' : '✕';
                     } else if (tabsMenu.classList.contains('collapsed')) {
                         menuToggleBtn.style.left = '1rem';
