@@ -25911,8 +25911,11 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     estadoGestion: reclamoEstadoRegistro(r),
                     observacionAdmin: r.observacionAdmin || '',
                     revisadoAt: r.revisadoAt || '',
-                    revisadoPor: r.revisadoPor || '',
-                    historialEstados: Array.isArray(r.historialEstados) ? r.historialEstados.slice(0, 20) : [],
+                    revisadoPor: 'Admin',
+                    historialEstados: (Array.isArray(r.historialEstados) ? r.historialEstados.slice(0, 20) : []).map(function (h) {
+                        if (!h || typeof h !== 'object') return h;
+                        return Object.assign({}, h, { por: 'Admin' });
+                    }),
                     novedadLibro: r.novedadLibro != null ? r.novedadLibro : null,
                     alertaConserjeria: true,
                     alertaConserjeriaAt: r.revisadoAt || new Date().toISOString(),
