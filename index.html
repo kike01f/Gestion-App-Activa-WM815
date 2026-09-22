@@ -9174,7 +9174,7 @@
         <div id="checklistTurnos" class="tab-content">
             <header style="margin-bottom: 0.7rem;">
                 <h2 style="margin: 0; font-size: 1.35rem; font-weight: 700; color: var(--gray-900);">Checklist de Turnos</h2>
-                <p style="margin: 0.25rem 0 0; color: var(--gray-600); font-size: 0.82rem; max-width: 42rem; line-height: 1.4;">Aperturas y cierres registrados en Conserjería WM. Revise incidencias, diferencias de encomiendas y variaciones entre turnos.</p>
+                <p style="margin: 0.25rem 0 0; color: var(--gray-600); font-size: 0.82rem; max-width: 42rem; line-height: 1.4;">Aperturas y cierres registrados en Conserjería WM. Revise incidencias de llaves, radios y mouse. Las encomiendas se registran como dato y no generan incidencia.</p>
             </header>
             <section class="form-section">
                 <h3>Resumen de hoy</h3>
@@ -18097,6 +18097,24 @@
             var t = e === 'incidencia' ? '🔴 Incidencia' : (e === 'observaciones' ? '🟡 Observaciones' : '🟢 Todo correcto');
             return '<span class="chk-est ' + e + '">' + t + '</span>';
         }
+        function chkAlertaEsEncomiendas(a) {
+            return !!(a && a.codigo === 'diff_encomiendas');
+        }
+        function chkEstadoOperativo(r) {
+            if (!r) return 'ok';
+            if (r.llavesCompletas === 'no') return 'incidencia';
+            var alertas = r.alertas || [];
+            var i;
+            for (i = 0; i < alertas.length; i++) {
+                if (chkAlertaEsEncomiendas(alertas[i])) continue;
+                if (alertas[i] && alertas[i].nivel === 'roja') return 'incidencia';
+            }
+            var obs = [r.llavesObs, r.mouseObs, r.encObs, r.radiosObs];
+            for (i = 0; i < obs.length; i++) {
+                if (String(obs[i] || '').trim()) return 'observaciones';
+            }
+            return 'ok';
+        }
         function chkObsResumen(r) {
             var parts = [];
             if (r.llavesObs) parts.push('Llaves: ' + r.llavesObs);
@@ -18135,9 +18153,9 @@
                 if (hasta && String(r.ymd || '') > hasta) return false;
                 if (cons && String(r.conserje || '').toLowerCase().indexOf(cons) < 0) return false;
                 if (tipo && r.tipo !== tipo) return false;
-                if (est === 'incidencia' && r.estado !== 'incidencia') return false;
-                if (est === 'observaciones' && r.estado !== 'observaciones') return false;
-                if (est === 'ok' && r.estado !== 'ok') return false;
+                if (est === 'incidencia' && chkEstadoOperativo(r) !== 'incidencia') return false;
+                if (est === 'observaciones' && chkEstadoOperativo(r) !== 'observaciones') return false;
+                if (est === 'ok' && chkEstadoOperativo(r) !== 'ok') return false;
                 if (est === 'diff' && Number(r.encDiff) === 0) return false;
                 return true;
             });
@@ -18158,8 +18176,7 @@
                 if (!hasA) pendientes++;
                 if (!hasC) pendientes++;
             }
-            var obs = hoyList.filter(function (r) { return r.estado === 'observaciones'; }).length;
-            var diffs = hoyList.filter(function (r) { return Number(r.encDiff) !== 0; }).length;
+            var obs = hoyList.filter(function (r) { return chkEstadoOperativo(r) === 'observaciones'; }).length;
             var llaves = hoyList.filter(function (r) { return r.llavesCompletas === 'no'; }).length;
             var radios = hoyList.filter(function (r) {
                 return (r.alertas || []).some(function (a) { return a.codigo === 'radios_vs_anterior'; });
@@ -18175,7 +18192,6 @@
                 card(ci, 'Cierres de hoy', ci ? 'ok' : '') +
                 card(pendientes, 'Checklists pendientes', pendientes ? 'warn' : 'ok') +
                 card(obs, 'Con observaciones', obs ? 'warn' : 'ok') +
-                card(diffs, 'Diferencias de encomiendas', diffs ? 'bad' : 'ok') +
                 card(llaves, 'Incidencias con llaves', llaves ? 'bad' : 'ok') +
                 card(radios, 'Incidencias con radios', radios ? 'bad' : 'ok') +
                 card(mouse, 'Incidencias con mouse', mouse ? 'bad' : 'ok');
@@ -18196,7 +18212,7 @@
                 var encHtml = '<div class="chk-enc">' +
                     '<span class="lbl">CF</span><span>' + chkEsc(r.encCf) + '</span>' +
                     '<span class="lbl">Sis</span><span>' + chkEsc(r.encSistema) + '</span>' +
-                    '<span class="lbl">Dif</span><span class="' + (diff ? 'chk-diff-cell warn' : '') + '">' + (diff > 0 ? '+' : '') + diff + '</span>' +
+                    '<span class="lbl">Dif</span><span>' + (diff > 0 ? '+' : '') + diff + '</span>' +
                     '</div>';
                 return '<tr>' +
                     '<td><div class="chk-fh"><strong>' + chkEsc(r.fecha || r.ymd || '') + '</strong><span>' + chkEsc(hora) + '</span></div></td>' +
@@ -18207,7 +18223,7 @@
                     '<td class="chk-num">' + chkEsc(r.radiosCant) + '</td>' +
                     '<td>' + encHtml + '</td>' +
                     '<td class="chk-obs">' + chkEsc(obs) + '</td>' +
-                    '<td>' + chkEstadoHtml(r.estado) + '</td>' +
+                    '<td>' + chkEstadoHtml(chkEstadoOperativo(r)) + '</td>' +
                     '<td class="chk-act"><button type="button" class="btn btn-primary btn-sm" data-chk-id="' + chkEsc(r.id) + '">Ver</button></td>' +
                     '</tr>';
             }).join('');
@@ -18220,7 +18236,8 @@
             (window._chkTurnosLista || []).forEach(function (r) {
                 if (r.ymd !== hoy) return;
                 (r.alertas || []).forEach(function (a) {
-                    if (!a) return;
+                    if (!a || chkAlertaEsEncomiendas(a)) return;
+                    if (a.nivel !== 'roja') return;
                     alertas.push({
                         msg: (r.tipo === 'cierre' ? 'Cierre' : 'Apertura') + ' · ' + (r.conserje || '') + ': ' + (a.mensaje || a.codigo),
                         id: r.id
@@ -18244,8 +18261,7 @@
             if (v) {
                 var bits = [
                     'Radios: ' + (v.radios === 0 ? 'sin variación' : (v.radios > 0 ? '+' : '') + v.radios),
-                    'Mouse: ' + (v.mouse === 0 ? 'sin variación' : (v.mouse > 0 ? '+' : '') + v.mouse),
-                    'Encomiendas: ' + (v.encSistema === 0 ? 'sin variación' : (v.encSistema > 0 ? '+' : '') + v.encSistema)
+                    'Mouse: ' + (v.mouse === 0 ? 'sin variación' : (v.mouse > 0 ? '+' : '') + v.mouse)
                 ];
                 if (bits.some(function (b) { return b.indexOf('sin variación') < 0; })) {
                     varHtml = '<div class="chk-detalle-sec"><h4>⚠️ Variaciones respecto al turno anterior</h4><ul style="margin:0;padding-left:1.1rem;">' +
@@ -18258,19 +18274,18 @@
                 }).join('; ');
                 return '<li>' + chkEsc(h.fecha) + ' ' + chkEsc(h.hora) + ' · ' + chkEsc(h.quien) + ' · ' + chkEsc(h.motivo) + (cams ? ' · ' + cams : '') + '</li>';
             }).join('');
-            var coinciden = Number(r.encDiff) === 0;
             return '<p style="margin:0 0 0.75rem;font-size:0.85rem;color:var(--gray-600);">Conserje: <strong>' + chkEsc(r.conserje) + '</strong><br>Fecha: ' + chkEsc(r.fecha) + ' · Hora: ' + chkEsc(r.hora) + '<br>Turno: ' + chkEsc(r.turnoId) + '</p>' +
                 '<div class="chk-detalle-sec"><h4>Llaves</h4><p style="margin:0;">' + (r.llavesCompletas === 'no' ? '🔴 Incompletas' : '✓ Completas') + '</p>' +
                 '<p style="margin:0.35rem 0 0;font-size:0.8rem;">Observación: ' + chkEsc(r.llavesObs || 'Sin observaciones.') + '</p></div>' +
                 '<div class="chk-detalle-sec"><h4>Mouse</h4><p style="margin:0;">Cantidad: ' + chkEsc(r.mouseCant) + '</p>' +
                 '<p style="margin:0.35rem 0 0;font-size:0.8rem;">Observación: ' + chkEsc(r.mouseObs || 'Sin observaciones.') + '</p></div>' +
-                '<div class="chk-detalle-sec"><h4>Encomiendas</h4><p style="margin:0;">Comunidad Feliz: ' + chkEsc(r.encCf) + '<br>Sistema Conserjería: ' + chkEsc(r.encSistema) + '<br>Diferencia: ' + chkEsc(r.encDiff) + '</p>' +
-                '<p style="margin:0.35rem 0 0;font-weight:700;">' + (coinciden ? '✓ Cantidades coinciden' : '⚠️ Diferencia detectada: ' + Math.abs(Number(r.encDiff) || 0) + ' encomiendas') + '</p>' +
+                '<div class="chk-detalle-sec"><h4>Encomiendas</h4><p style="margin:0;">Comunidad Feliz: ' + chkEsc(r.encCf) + '<br>Sistema Conserjería: ' + chkEsc(r.encSistema) + '<br>Diferencia (informativa): ' + chkEsc(r.encDiff) + '</p>' +
+                '<p style="margin:0.35rem 0 0;font-size:0.8rem;">No genera incidencia: cada turno puede entregar distintas cantidades.</p>' +
                 '<p style="margin:0.35rem 0 0;font-size:0.8rem;">Observación: ' + chkEsc(r.encObs || 'Sin observaciones.') + '</p></div>' +
                 '<div class="chk-detalle-sec"><h4>Radios</h4><p style="margin:0;">Cantidad: ' + chkEsc(r.radiosCant) + '</p>' +
                 '<p style="margin:0.35rem 0 0;font-size:0.8rem;">Observación: ' + chkEsc(r.radiosObs || 'Sin observaciones.') + '</p></div>' +
                 varHtml +
-                '<p style="margin:0.5rem 0 0;">Estado: ' + chkEstadoHtml(r.estado) + '</p>' +
+                '<p style="margin:0.5rem 0 0;">Estado: ' + chkEstadoHtml(chkEstadoOperativo(r)) + '</p>' +
                 (hist ? '<div class="chk-detalle-sec"><h4>Historial de modificaciones</h4><ul style="margin:0;padding-left:1.1rem;font-size:0.78rem;">' + hist + '</ul></div>' : '');
         }
         function chkTurnosAbrirDetalle(id) {
@@ -18355,7 +18370,6 @@
             } : null;
             tmp.alertas = [];
             if (tmp.llavesCompletas === 'no') tmp.alertas.push({ codigo: 'llaves_incompletas', nivel: 'roja', mensaje: 'Llaves incompletas' });
-            if (Number(tmp.encDiff) !== 0) tmp.alertas.push({ codigo: 'diff_encomiendas', nivel: 'roja', mensaje: 'Diferencia de encomiendas: ' + tmp.encDiff });
             if (prev) {
                 tmp.variacionesAnterior = {
                     radios: tmp.radiosCant - Number(prev.radiosCant),
@@ -18371,7 +18385,7 @@
                 if (tmp.variacionesAnterior.mouse !== 0) tmp.alertas.push({ codigo: 'mouse_vs_anterior', nivel: 'roja', mensaje: 'Cantidad de mouse diferente al turno anterior' });
                 patch.variacionesAnterior = tmp.variacionesAnterior;
             }
-            tmp.estado = (tmp.llavesCompletas === 'no' || Number(tmp.encDiff) !== 0 || tmp.alertas.some(function (a) { return a.nivel === 'roja'; }))
+            tmp.estado = (tmp.llavesCompletas === 'no' || tmp.alertas.some(function (a) { return a && a.codigo !== 'diff_encomiendas' && a.nivel === 'roja'; }))
                 ? 'incidencia'
                 : ((tmp.llavesObs || r.mouseObs || r.encObs || r.radiosObs) ? 'observaciones' : 'ok');
             patch.alertas = tmp.alertas;
