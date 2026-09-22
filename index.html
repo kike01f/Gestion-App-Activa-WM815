@@ -10182,7 +10182,7 @@
             <h3 id="chkDetalleTitulo" style="margin: 0 0 0.35rem 0;">Checklist</h3>
             <div id="chkDetalleBody"></div>
             <div id="chkEditarWrap" hidden style="margin-top: 0.85rem; padding-top: 0.75rem; border-top: 1px solid var(--border-color);">
-                <h4 style="margin: 0 0 0.45rem; font-size: 0.88rem;">Modificar registro</h4>
+                <h4 style="margin: 0 0 0.45rem; font-size: 0.88rem;">Gestionar checklist</h4>
                 <div class="form-row" style="gap: 0.5rem;">
                     <div class="form-group" style="flex:1;"><label>Llaves</label>
                         <select id="chkEditLlaves"><option value="si">Sí</option><option value="no">No</option></select>
@@ -10193,13 +10193,21 @@
                 <div class="form-row" style="gap: 0.5rem;">
                     <div class="form-group" style="flex:1;"><label>Enc. Comunidad Feliz</label><input type="number" id="chkEditEncCf" min="0" step="1"></div>
                     <div class="form-group" style="flex:1;"><label>Enc. sistema</label><input type="number" id="chkEditEncSis" min="0" step="1"></div>
+                    <div class="form-group" style="flex:1;"><label>Estado *</label>
+                        <select id="chkEditEstado">
+                            <option value="ok">Todo correcto (sin incidencia)</option>
+                            <option value="observaciones">Con observaciones</option>
+                            <option value="incidencia">Incidencia</option>
+                        </select>
+                    </div>
                 </div>
                 <div class="form-group"><label>Observación llaves</label><textarea id="chkEditLlavesObs" rows="2" style="width:100%;box-sizing:border-box;"></textarea></div>
-                <div class="form-group"><label>Motivo de la modificación *</label><textarea id="chkEditMotivo" rows="2" style="width:100%;box-sizing:border-box;" placeholder="Obligatorio"></textarea></div>
+                <div class="form-group"><label>Motivo de la gestión *</label><textarea id="chkEditMotivo" rows="2" style="width:100%;box-sizing:border-box;" placeholder="Obligatorio. Indique cómo se gestionó o por qué se quita la incidencia."></textarea></div>
             </div>
             <div class="modal-buttons">
                 <button type="button" class="btn btn-secondary" id="chkDetalleCerrar">Cerrar</button>
-                <button type="button" class="btn btn-secondary" id="chkDetalleEditar">Editar</button>
+                <button type="button" class="btn btn-secondary" id="chkDetalleEditar">Gestionar</button>
+                <button type="button" class="btn btn-primary" id="chkDetalleQuitarIncidencia" hidden>Quitar incidencia</button>
                 <button type="button" class="btn btn-primary" id="chkDetalleGuardar" hidden>Guardar cambios</button>
             </div>
         </div>
@@ -18102,11 +18110,15 @@
         }
         function chkEstadoOperativo(r) {
             if (!r) return 'ok';
+            if (r.estadoGestion === 'ok' || r.estadoGestion === 'observaciones' || r.estadoGestion === 'incidencia') {
+                return r.estadoGestion;
+            }
             if (r.llavesCompletas === 'no') return 'incidencia';
             var alertas = r.alertas || [];
             var i;
             for (i = 0; i < alertas.length; i++) {
                 if (chkAlertaEsEncomiendas(alertas[i])) continue;
+                if (alertas[i] && alertas[i].resuelta) continue;
                 if (alertas[i] && alertas[i].nivel === 'roja') return 'incidencia';
             }
             var obs = [r.llavesObs, r.mouseObs, r.encObs, r.radiosObs];
@@ -18177,12 +18189,16 @@
                 if (!hasC) pendientes++;
             }
             var obs = hoyList.filter(function (r) { return chkEstadoOperativo(r) === 'observaciones'; }).length;
-            var llaves = hoyList.filter(function (r) { return r.llavesCompletas === 'no'; }).length;
+            var llaves = hoyList.filter(function (r) {
+                return r.llavesCompletas === 'no' && chkEstadoOperativo(r) === 'incidencia';
+            }).length;
             var radios = hoyList.filter(function (r) {
-                return (r.alertas || []).some(function (a) { return a.codigo === 'radios_vs_anterior'; });
+                if (chkEstadoOperativo(r) !== 'incidencia') return false;
+                return (r.alertas || []).some(function (a) { return a && a.codigo === 'radios_vs_anterior' && !a.resuelta; });
             }).length;
             var mouse = hoyList.filter(function (r) {
-                return (r.alertas || []).some(function (a) { return a.codigo === 'mouse_vs_anterior'; });
+                if (chkEstadoOperativo(r) !== 'incidencia') return false;
+                return (r.alertas || []).some(function (a) { return a && a.codigo === 'mouse_vs_anterior' && !a.resuelta; });
             }).length;
             function card(val, lbl, cls) {
                 return '<div class="chk-turnos-kpi ' + (cls || '') + '"><div class="val">' + val + '</div><div class="lbl">' + lbl + '</div></div>';
@@ -18235,8 +18251,9 @@
             var alertas = [];
             (window._chkTurnosLista || []).forEach(function (r) {
                 if (r.ymd !== hoy) return;
+                if (chkEstadoOperativo(r) !== 'incidencia') return;
                 (r.alertas || []).forEach(function (a) {
-                    if (!a || chkAlertaEsEncomiendas(a)) return;
+                    if (!a || chkAlertaEsEncomiendas(a) || a.resuelta) return;
                     if (a.nivel !== 'roja') return;
                     alertas.push({
                         msg: (r.tipo === 'cierre' ? 'Cierre' : 'Apertura') + ' · ' + (r.conserje || '') + ': ' + (a.mensaje || a.codigo),
@@ -18285,7 +18302,10 @@
                 '<div class="chk-detalle-sec"><h4>Radios</h4><p style="margin:0;">Cantidad: ' + chkEsc(r.radiosCant) + '</p>' +
                 '<p style="margin:0.35rem 0 0;font-size:0.8rem;">Observación: ' + chkEsc(r.radiosObs || 'Sin observaciones.') + '</p></div>' +
                 varHtml +
-                '<p style="margin:0.5rem 0 0;">Estado: ' + chkEstadoHtml(chkEstadoOperativo(r)) + '</p>' +
+                '<p style="margin:0.5rem 0 0;">Estado: ' + chkEstadoHtml(chkEstadoOperativo(r)) +
+                (r.estadoGestion ? ' <span style="font-size:0.75rem;color:var(--gray-600);">(gestionado desde Administración)</span>' : '') +
+                '</p>' +
+                (r.estadoGestionMotivo ? '<p style="margin:0.3rem 0 0;font-size:0.78rem;color:var(--gray-600);">Gestión: ' + chkEsc(r.estadoGestionMotivo) + '</p>' : '') +
                 (hist ? '<div class="chk-detalle-sec"><h4>Historial de modificaciones</h4><ul style="margin:0;padding-left:1.1rem;font-size:0.78rem;">' + hist + '</ul></div>' : '');
         }
         function chkTurnosAbrirDetalle(id) {
@@ -18304,6 +18324,10 @@
             document.getElementById('chkEditEncSis').value = r.encSistema;
             document.getElementById('chkEditLlavesObs').value = r.llavesObs || '';
             document.getElementById('chkEditMotivo').value = '';
+            var estSel = document.getElementById('chkEditEstado');
+            if (estSel) estSel.value = r.estadoGestion || chkEstadoOperativo(r) || 'ok';
+            var btnQuitar = document.getElementById('chkDetalleQuitarIncidencia');
+            if (btnQuitar) btnQuitar.hidden = chkEstadoOperativo(r) !== 'incidencia';
             abrirOverlayGestion('modalChecklistTurnoGestion');
         }
         function chkEntero(v) {
@@ -18317,8 +18341,8 @@
             if (!r) return;
             var motivo = String((document.getElementById('chkEditMotivo') || {}).value || '').trim();
             if (!motivo) {
-                if (typeof mostrarAlerta === 'function') mostrarAlerta('Indique el motivo de la modificación.', 'Checklist');
-                else alert('Indique el motivo de la modificación.');
+                if (typeof mostrarAlerta === 'function') mostrarAlerta('Indique el motivo de la gestión.', 'Checklist');
+                else alert('Indique el motivo de la gestión.');
                 return;
             }
             var llaves = document.getElementById('chkEditLlaves').value;
@@ -18327,6 +18351,11 @@
             var encCf = chkEntero(document.getElementById('chkEditEncCf').value);
             var encSis = chkEntero(document.getElementById('chkEditEncSis').value);
             var llavesObs = String(document.getElementById('chkEditLlavesObs').value || '').trim();
+            var estadoSel = String((document.getElementById('chkEditEstado') || {}).value || '').trim();
+            if (estadoSel !== 'ok' && estadoSel !== 'observaciones' && estadoSel !== 'incidencia') {
+                if (typeof mostrarAlerta === 'function') mostrarAlerta('Seleccione el estado del checklist.', 'Checklist');
+                return;
+            }
             if (llaves === 'no' && !llavesObs) {
                 if (typeof mostrarAlerta === 'function') mostrarAlerta('Si las llaves no están completas, indique qué falta.', 'Checklist');
                 return;
@@ -18345,6 +18374,7 @@
             push('radiosCant', r.radiosCant, radios);
             push('encCf', r.encCf, encCf);
             push('encSistema', r.encSistema, encSis);
+            push('estadoGestion', r.estadoGestion || chkEstadoOperativo(r), estadoSel);
             if (!cambios.length) {
                 if (typeof mostrarAlerta === 'function') mostrarAlerta('No hay cambios.', 'Checklist');
                 return;
@@ -18385,11 +18415,20 @@
                 if (tmp.variacionesAnterior.mouse !== 0) tmp.alertas.push({ codigo: 'mouse_vs_anterior', nivel: 'roja', mensaje: 'Cantidad de mouse diferente al turno anterior' });
                 patch.variacionesAnterior = tmp.variacionesAnterior;
             }
-            tmp.estado = (tmp.llavesCompletas === 'no' || tmp.alertas.some(function (a) { return a && a.codigo !== 'diff_encomiendas' && a.nivel === 'roja'; }))
-                ? 'incidencia'
-                : ((tmp.llavesObs || r.mouseObs || r.encObs || r.radiosObs) ? 'observaciones' : 'ok');
+            if (estadoSel === 'ok' || estadoSel === 'observaciones') {
+                tmp.alertas = tmp.alertas.map(function (a) {
+                    if (!a || a.nivel !== 'roja') return a;
+                    return Object.assign({}, a, { resuelta: true, resueltaMotivo: motivo });
+                });
+            }
+            tmp.estadoGestion = estadoSel;
+            tmp.estado = estadoSel;
             patch.alertas = tmp.alertas;
-            patch.estado = tmp.estado;
+            patch.estado = estadoSel;
+            patch.estadoGestion = estadoSel;
+            patch.estadoGestionMotivo = motivo;
+            patch.estadoGestionQuien = typeof multaOperadorActual === 'function' ? multaOperadorActual() : 'Administración';
+            patch.estadoGestionAt = now.toISOString();
             var hist = Array.isArray(r.historialEdiciones) ? r.historialEdiciones.slice() : [];
             hist.push({
                 quien: typeof multaOperadorActual === 'function' ? multaOperadorActual() : 'Administración',
@@ -18404,7 +18443,18 @@
             await sdb.collection('pcsh_turno_checklists').doc(id).set(patch, { merge: true });
             await window.cargarChecklistTurnosGestion({ forzar: true });
             chkTurnosAbrirDetalle(id);
-            if (typeof mostrarAlerta === 'function') mostrarAlerta('Checklist actualizado. Quedó el historial de la modificación.', 'Checklist');
+            if (typeof mostrarAlerta === 'function') mostrarAlerta('Checklist gestionado. El estado quedó actualizado y se registró el historial.', 'Checklist');
+        }
+        function chkTurnosMostrarFormularioGestion(quitarIncidencia) {
+            var w = document.getElementById('chkEditarWrap');
+            if (w) w.hidden = false;
+            document.getElementById('chkDetalleGuardar').hidden = false;
+            if (quitarIncidencia) {
+                var estSel = document.getElementById('chkEditEstado');
+                if (estSel) estSel.value = 'ok';
+                var mot = document.getElementById('chkEditMotivo');
+                if (mot) mot.focus();
+            }
         }
         function chkTurnosBindUi() {
             if (window._chkTurnosUiBound) return;
@@ -18443,11 +18493,9 @@
             var c = document.getElementById('chkDetalleCerrar');
             if (c) c.addEventListener('click', function () { cerrarOverlayGestion('modalChecklistTurnoGestion'); });
             var ed = document.getElementById('chkDetalleEditar');
-            if (ed) ed.addEventListener('click', function () {
-                var w = document.getElementById('chkEditarWrap');
-                if (w) w.hidden = false;
-                document.getElementById('chkDetalleGuardar').hidden = false;
-            });
+            if (ed) ed.addEventListener('click', function () { chkTurnosMostrarFormularioGestion(false); });
+            var qi = document.getElementById('chkDetalleQuitarIncidencia');
+            if (qi) qi.addEventListener('click', function () { chkTurnosMostrarFormularioGestion(true); });
             var g = document.getElementById('chkDetalleGuardar');
             if (g) g.addEventListener('click', function () { chkTurnosGuardarEdicion(); });
             var modal = document.getElementById('modalChecklistTurnoGestion');
