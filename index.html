@@ -42162,6 +42162,38 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     }
                     return [map[1], map[2], map[3]];
                 }
+                /** Incluye valor/link de propuestas sin aprobación como Presupuesto 1 si falta. */
+                function comiteCotsParaExcel(p) {
+                    var cots = comiteCotsOrdenadas(p);
+                    if (!p || p.requiereAprobacion) return cots;
+                    var tieneValor = (p.valor != null && p.valor !== '') || p.valorProveedor || p.valorLink;
+                    if (!tieneValor) return cots;
+                    var base = cots[0] ? Object.assign({}, cots[0]) : { n: 1, proveedor: '', monto: null, detalle: '', link: '', documento: null };
+                    if (!base.proveedor && p.valorProveedor) base.proveedor = p.valorProveedor;
+                    if ((base.monto == null || base.monto === '') && p.valor != null && p.valor !== '') base.monto = Number(p.valor);
+                    if (!base.link && p.valorLink) base.link = p.valorLink;
+                    if (!base.detalle) base.detalle = 'Presupuesto sin aprobación del comité';
+                    base.n = 1;
+                    return [base, cots[1], cots[2]];
+                }
+                function comiteLinkFinalPropuesta(p, cots) {
+                    if (!p) return '';
+                    if (p.valorLink) return String(p.valorLink).trim();
+                    var lista = cots || comiteCotsParaExcel(p);
+                    if (p.cotizacionElegida) {
+                        var eleg = lista[Number(p.cotizacionElegida) - 1];
+                        if (eleg && eleg.link) return String(eleg.link).trim();
+                    }
+                    for (var i = 0; i < lista.length; i++) {
+                        if (lista[i] && lista[i].link) return String(lista[i].link).trim();
+                    }
+                    if (Array.isArray(p.links)) {
+                        for (var j = 0; j < p.links.length; j++) {
+                            if (p.links[j] && p.links[j].url) return String(p.links[j].url).trim();
+                        }
+                    }
+                    return '';
+                }
                 function comiteLinkCell(cell, url, label) {
                     var u = String(url || '').trim();
                     if (!u) {
@@ -42266,9 +42298,10 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 widthsP.forEach(function (w, i) { wsP.getColumn(i + 1).width = w; });
 
                 regsOrdenados.forEach(function (p, idx) {
-                    var cots = comiteCotsOrdenadas(p);
+                    var cots = comiteCotsParaExcel(p);
                     var row = idx + 3;
                     var elegN = p.cotizacionElegida ? Number(p.cotizacionElegida) : null;
+                    if (!p.requiereAprobacion && (p.valor != null || p.valorLink || p.valorProveedor)) elegN = 1;
                     var baseVals = [
                         idx + 1,
                         comiteFechaDMY(p.fecha),
@@ -42332,7 +42365,11 @@ document.getElementById('chatForm').onsubmit = function (e) {
                                 mon.alignment = { vertical: 'middle', horizontal: 'center' };
                             }
                             comiteLinkCell(link, c.link, c.link ? 'Ver presupuesto' : '—');
-                            if (!c.link) link.value = '—';
+                            if (!c.link) {
+                                link.value = '—';
+                                link.font = { name: 'Calibri', size: 10, color: { argb: 'FF9CA3AF' } };
+                                link.alignment = { vertical: 'middle', horizontal: 'center' };
+                            }
                             det.value = c.detalle || '—';
                             det.font = { name: 'Calibri', size: 9, color: { argb: c.detalle ? 'FF374151' : 'FF9CA3AF' } };
                         }
@@ -42373,9 +42410,10 @@ document.getElementById('chatForm').onsubmit = function (e) {
 
                     var cellValLink = wsP.getCell(row, 24);
                     cellValLink.border = borderThin();
-                    if (!p.requiereAprobacion && p.valorLink) {
-                        comiteLinkCell(cellValLink, p.valorLink, 'Abrir link');
-                        cellValLink.fill = fillSolid('FFD1FAE5');
+                    var linkFinalP = comiteLinkFinalPropuesta(p, cots);
+                    if (linkFinalP) {
+                        comiteLinkCell(cellValLink, linkFinalP, 'Abrir link');
+                        if (!p.requiereAprobacion) cellValLink.fill = fillSolid('FFD1FAE5');
                     } else {
                         cellValLink.value = '—';
                         cellValLink.font = { name: 'Calibri', size: 10, color: { argb: 'FF9CA3AF' } };
@@ -42424,12 +42462,13 @@ document.getElementById('chatForm').onsubmit = function (e) {
                         wsC.getCell(1, cc).border = borderThin('FF1E3A8A');
                     }
                 }
-                wsC.mergeCells(1, 20, 1, 21);
+                wsC.mergeCells(1, 20, 1, 22);
                 wsC.getCell(1, 20).value = 'Resultado';
                 wsC.getCell(1, 20).font = { name: 'Calibri', bold: true, color: { argb: 'FFFFFFFF' }, size: 11 };
                 wsC.getCell(1, 20).fill = fillSolid('FF065F46');
                 wsC.getCell(1, 20).alignment = { vertical: 'middle', horizontal: 'center' };
                 wsC.getCell(1, 21).fill = fillSolid('FF065F46');
+                wsC.getCell(1, 22).fill = fillSolid('FF065F46');
                 wsC.getRow(1).height = 22;
 
                 var headersC = [
@@ -42437,14 +42476,14 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     'Proveedor', 'Monto', 'Link', 'Documento', 'Detalle',
                     'Proveedor', 'Monto', 'Link', 'Documento', 'Detalle',
                     'Proveedor', 'Monto', 'Link', 'Documento', 'Detalle',
-                    'Elegida / tipo', 'Monto / valor'
+                    'Elegida / tipo', 'Monto / valor', 'Link cotización'
                 ];
                 var fillsC2 = [
                     'FF374151', 'FF374151', 'FF374151', 'FF374151',
                     'FF3B82F6', 'FF3B82F6', 'FF3B82F6', 'FF3B82F6', 'FF3B82F6',
                     'FF6366F1', 'FF6366F1', 'FF6366F1', 'FF6366F1', 'FF6366F1',
                     'FF2563EB', 'FF2563EB', 'FF2563EB', 'FF2563EB', 'FF2563EB',
-                    'FF059669', 'FF059669'
+                    'FF059669', 'FF059669', 'FF059669'
                 ];
                 headersC.forEach(function (h, i) {
                     var cell = wsC.getCell(2, i + 1);
@@ -42455,14 +42494,15 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     cell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
                 });
                 wsC.getRow(2).height = 20;
-                [5, 11, 28, 13, 15, 12, 14, 16, 20, 15, 12, 14, 16, 20, 15, 12, 14, 16, 20, 10, 13].forEach(function (w, i) {
+                [5, 11, 28, 13, 15, 12, 14, 16, 20, 15, 12, 14, 16, 20, 15, 12, 14, 16, 20, 12, 13, 14].forEach(function (w, i) {
                     wsC.getColumn(i + 1).width = w;
                 });
 
                 regsOrdenados.forEach(function (p, idx) {
-                    var cots = comiteCotsOrdenadas(p);
+                    var cots = comiteCotsParaExcel(p);
                     var row = idx + 3;
                     var elegN = p.cotizacionElegida ? Number(p.cotizacionElegida) : null;
+                    if (!p.requiereAprobacion && (p.valor != null || p.valorLink || p.valorProveedor)) elegN = 1;
                     var elegCot = (elegN >= 1 && elegN <= 3) ? cots[elegN - 1] : null;
                     var base = [
                         idx + 1,
@@ -42565,11 +42605,24 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     }
                     cellMonEl.border = borderThin();
                     cellMonEl.alignment = { vertical: 'middle', horizontal: 'center' };
+
+                    var cellLinkEl = wsC.getCell(row, 22);
+                    cellLinkEl.border = borderThin();
+                    var linkFinal = comiteLinkFinalPropuesta(p, cots);
+                    if (linkFinal) {
+                        comiteLinkCell(cellLinkEl, linkFinal, 'Abrir link');
+                        cellLinkEl.fill = fillSolid(!p.requiereAprobacion || elegN ? 'FFD1FAE5' : 'FFEFF6FF');
+                    } else {
+                        cellLinkEl.value = '—';
+                        cellLinkEl.font = { name: 'Calibri', size: 10, color: { argb: 'FF9CA3AF' } };
+                        cellLinkEl.fill = fillSolid('FFF3F4F6');
+                        cellLinkEl.alignment = { vertical: 'middle', horizontal: 'center' };
+                    }
                     wsC.getRow(row).height = 32;
                 });
 
                 if (!regsOrdenados.length) {
-                    wsC.mergeCells('A3:U3');
+                    wsC.mergeCells('A3:V3');
                     wsC.getCell('A3').value = 'Sin propuestas con presupuestos para mostrar.';
                     wsC.getCell('A3').font = { name: 'Calibri', size: 10, italic: true, color: { argb: 'FF6B7280' } };
                 }
@@ -42604,6 +42657,34 @@ document.getElementById('chatForm').onsubmit = function (e) {
                             try { wsA.getCell(rAdj, 4).value = { text: l.url, hyperlink: l.url }; } catch (e) { wsA.getCell(rAdj, 4).value = l.url; }
                         }
                         for (var c2 = 1; c2 <= 4; c2++) { wsA.getCell(rAdj, c2).border = borderThin(); wsA.getCell(rAdj, c2).font = { name: 'Calibri', size: 10 }; }
+                        rAdj++;
+                    });
+                    // Link de cotización/valor sin aprobación
+                    if (!p.requiereAprobacion && p.valorLink) {
+                        var yaEnLinks = (p.links || []).some(function (l) { return String(l.url || '') === String(p.valorLink); });
+                        if (!yaEnLinks) {
+                            wsA.getCell(rAdj, 1).value = p.titulo || '';
+                            wsA.getCell(rAdj, 2).value = 'Cotización';
+                            wsA.getCell(rAdj, 3).value = 'Link presupuesto (sin aprobación)' + (p.valor != null ? ' · $' + Number(p.valor).toLocaleString('es-CL') : '');
+                            try { wsA.getCell(rAdj, 4).value = { text: String(p.valorLink), hyperlink: String(p.valorLink) }; }
+                            catch (e3) { wsA.getCell(rAdj, 4).value = String(p.valorLink); }
+                            for (var c3 = 1; c3 <= 4; c3++) {
+                                wsA.getCell(rAdj, c3).border = borderThin();
+                                wsA.getCell(rAdj, c3).font = { name: 'Calibri', size: 10 };
+                                wsA.getCell(rAdj, c3).fill = fillSolid('FFD1FAE5');
+                            }
+                            rAdj++;
+                        }
+                    }
+                    // Links de cada cotización
+                    (p.cotizaciones || []).forEach(function (cot) {
+                        if (!cot || !cot.link) return;
+                        wsA.getCell(rAdj, 1).value = p.titulo || '';
+                        wsA.getCell(rAdj, 2).value = 'Cotización';
+                        wsA.getCell(rAdj, 3).value = 'Presupuesto #' + (cot.n || '') + (cot.proveedor ? ' · ' + cot.proveedor : '');
+                        try { wsA.getCell(rAdj, 4).value = { text: String(cot.link), hyperlink: String(cot.link) }; }
+                        catch (e4) { wsA.getCell(rAdj, 4).value = String(cot.link); }
+                        for (var c4 = 1; c4 <= 4; c4++) { wsA.getCell(rAdj, c4).border = borderThin(); wsA.getCell(rAdj, c4).font = { name: 'Calibri', size: 10 }; }
                         rAdj++;
                     });
                 });
@@ -42666,7 +42747,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     var nombreMes = (typeof obtenerNombreMes === 'function' && typeof obtenerMesPeriodoVista === 'function')
                         ? obtenerNombreMes(obtenerMesPeriodoVista())
                         : xlsxRes.fechaEmision;
-                    var html = await generarCorreoNotificacionComite(nombreComunidad, nombreMes, '', xlsxRes.stats, registros.length);
+                    var html = await generarCorreoNotificacionComite(nombreComunidad, nombreMes, '', xlsxRes.stats, registros.length, registros);
                     var asunto = 'Reporte Comité (propuestas) — ' + nombreComunidad + ' — ' + nombreMes;
                     var mapPlant = await obtenerPlantillasCorreoModulosMap();
                     var bloqueTpl = obtenerBloquePlantillaModulo(mapPlant, 'reporteComite');
@@ -42688,10 +42769,90 @@ document.getElementById('chatForm').onsubmit = function (e) {
             }
         })();
 
-        async function generarCorreoNotificacionComite(nombreComunidad, nombreMes, mensajeAdicional, stats, total) {
-            const linkEsc = (v) => String(v || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        async function generarCorreoNotificacionComite(nombreComunidad, nombreMes, mensajeAdicional, stats, total, registros) {
+            const linkEsc = (v) => String(v == null ? '' : v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+            const fmtMonto = (n) => {
+                if (n == null || n === '' || isNaN(Number(n))) return '—';
+                if (typeof formatearMoneda === 'function') return formatearMoneda(Number(n));
+                return '$' + Math.round(Number(n)).toLocaleString('es-CL');
+            };
+            const fechaDMY = (f) => {
+                if (!f) return '—';
+                const m = String(f).match(/^(\d{4})-(\d{2})-(\d{2})/);
+                if (m) return m[3] + '-' + m[2] + '-' + m[1];
+                return String(f);
+            };
+            const cats = { mantencion: 'Mantención', mejora: 'Mejora', servicio: 'Servicio', compra: 'Compra', otro: 'Otro' };
+            const resolverMontoLink = (p) => {
+                let monto = null;
+                let proveedor = '';
+                let link = '';
+                let detalle = '';
+                if (!p.requiereAprobacion) {
+                    if (p.valor != null && p.valor !== '') monto = Number(p.valor);
+                    proveedor = p.valorProveedor || '';
+                    link = p.valorLink || '';
+                }
+                const cots = Array.isArray(p.cotizaciones) ? p.cotizaciones : [];
+                let eleg = null;
+                if (p.cotizacionElegida) {
+                    eleg = cots.find((c) => Number(c && c.n) === Number(p.cotizacionElegida)) || null;
+                }
+                if (!eleg && cots.length) eleg = cots.find((c) => c && (c.proveedor || c.monto != null || c.link)) || cots[0];
+                if (eleg) {
+                    if (monto == null && eleg.monto != null && eleg.monto !== '') monto = Number(eleg.monto);
+                    if (!proveedor && eleg.proveedor) proveedor = eleg.proveedor;
+                    if (!link && eleg.link) link = eleg.link;
+                    if (eleg.detalle) detalle = eleg.detalle;
+                }
+                if (!link && Array.isArray(p.links) && p.links[0] && p.links[0].url) link = p.links[0].url;
+                return { monto, proveedor, link, detalle };
+            };
+
             stats = stats || { borrador: 0, en_revision: 0, aprobada: 0, rechazada: 0 };
             total = total != null ? total : 0;
+            const lista = Array.isArray(registros) ? registros : [];
+            const aprobadas = lista
+                .filter((p) => p && p.estado === 'aprobada')
+                .slice()
+                .sort((a, b) => String(b.fechaDecision || b.fecha || '').localeCompare(String(a.fechaDecision || a.fecha || '')));
+
+            let filasAprobadas = '';
+            if (!aprobadas.length) {
+                filasAprobadas = `
+                    <tr>
+                        <td colspan="7" style="padding: 14px 12px; text-align: center; font-size: 13px; color: #6b7280; background: #f9fafb; border: 1px solid #e5e7eb;">
+                            No hay propuestas aprobadas para mostrar en este reporte.
+                        </td>
+                    </tr>`;
+            } else {
+                aprobadas.forEach((p, i) => {
+                    const info = resolverMontoLink(p);
+                    const bg = i % 2 === 0 ? '#ffffff' : '#f0fdf4';
+                    const linkHtml = info.link
+                        ? `<a href="${linkEsc(info.link)}" target="_blank" rel="noopener" style="color: #1d4ed8; font-weight: 600; text-decoration: underline;">Abrir cotización</a>`
+                        : '<span style="color:#9ca3af;">—</span>';
+                    filasAprobadas += `
+                        <tr>
+                            <td style="padding: 10px 8px; border: 1px solid #d1fae5; font-size: 12px; color: #374151; white-space: nowrap; background: ${bg}; vertical-align: top;">${linkEsc(fechaDMY(p.fechaDecision || p.fecha))}</td>
+                            <td style="padding: 10px 8px; border: 1px solid #d1fae5; font-size: 12px; color: #111827; background: ${bg}; vertical-align: top;">
+                                <div style="font-weight: 700; margin: 0 0 2px 0;">${linkEsc(p.titulo || 'Sin título')}</div>
+                                <div style="font-size: 11px; color: #6b7280;">${linkEsc(cats[p.categoria] || p.categoria || '')}</div>
+                            </td>
+                            <td style="padding: 10px 8px; border: 1px solid #d1fae5; font-size: 12px; color: #374151; background: ${bg}; vertical-align: top;">${linkEsc(info.proveedor || '—')}</td>
+                            <td style="padding: 10px 8px; border: 1px solid #d1fae5; font-size: 12px; color: #047857; font-weight: 700; text-align: right; white-space: nowrap; background: ${bg}; vertical-align: top;">${linkEsc(fmtMonto(info.monto))}</td>
+                            <td style="padding: 10px 8px; border: 1px solid #d1fae5; font-size: 12px; background: ${bg}; vertical-align: top; text-align: center;">${linkHtml}</td>
+                            <td style="padding: 10px 8px; border: 1px solid #d1fae5; font-size: 11px; color: #4b5563; background: ${bg}; vertical-align: top;">${linkEsc(info.detalle || p.observaciones || '—')}</td>
+                            <td style="padding: 10px 8px; border: 1px solid #d1fae5; font-size: 11px; color: #065f46; font-weight: 700; text-align: center; background: ${bg}; vertical-align: top;">✅ Aprobada</td>
+                        </tr>`;
+                });
+            }
+
+            const totalAprobadoMonto = aprobadas.reduce((sum, p) => {
+                const m = resolverMontoLink(p).monto;
+                return sum + (m != null && !isNaN(m) ? Number(m) : 0);
+            }, 0);
+
             let contenido = `
                 <p style="margin: 0 0 8px 0; font-size: 14px; color: #333333; line-height: 1.55;">
                     Se adjunta el reporte profesional de <strong>Comité</strong> con las propuestas registradas
@@ -42699,29 +42860,59 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 </p>
                 <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin: 12px 0; border-collapse: collapse;">
                     <tr>
-                        <td style="padding: 10px 12px; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 8px; width: 25%; text-align: center;">
+                        <td style="padding: 10px 12px; background: #ecfdf5; border: 1px solid #a7f3d0; width: 25%; text-align: center;">
                             <div style="font-size: 11px; color: #065f46;">Aprobadas</div>
                             <div style="font-size: 18px; font-weight: 700; color: #047857;">${stats.aprobada || 0}</div>
                         </td>
                         <td style="width: 8px;"></td>
-                        <td style="padding: 10px 12px; background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; width: 25%; text-align: center;">
+                        <td style="padding: 10px 12px; background: #fef2f2; border: 1px solid #fecaca; width: 25%; text-align: center;">
                             <div style="font-size: 11px; color: #991b1b;">Rechazadas</div>
                             <div style="font-size: 18px; font-weight: 700; color: #b91c1c;">${stats.rechazada || 0}</div>
                         </td>
                         <td style="width: 8px;"></td>
-                        <td style="padding: 10px 12px; background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; width: 25%; text-align: center;">
+                        <td style="padding: 10px 12px; background: #fffbeb; border: 1px solid #fde68a; width: 25%; text-align: center;">
                             <div style="font-size: 11px; color: #92400e;">En revisión</div>
                             <div style="font-size: 18px; font-weight: 700; color: #b45309;">${stats.en_revision || 0}</div>
                         </td>
                         <td style="width: 8px;"></td>
-                        <td style="padding: 10px 12px; background: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 8px; width: 25%; text-align: center;">
+                        <td style="padding: 10px 12px; background: #f3f4f6; border: 1px solid #e5e7eb; width: 25%; text-align: center;">
                             <div style="font-size: 11px; color: #374151;">Borradores</div>
                             <div style="font-size: 18px; font-weight: 700; color: #4b5563;">${stats.borrador || 0}</div>
                         </td>
                     </tr>
                 </table>
-                <p style="margin: 8px 0 0 0; font-size: 13px; color: #555; line-height: 1.5;">
-                    El archivo Excel incluye hojas de <strong>Resumen</strong>, <strong>Propuestas</strong>, <strong>Cotizaciones</strong> y <strong>Adjuntos y enlaces</strong>.
+
+                <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin: 16px 0 8px 0; border-collapse: collapse;">
+                    <tr>
+                        <td style="padding: 0 0 8px 0;">
+                            <div style="font-size: 15px; font-weight: 700; color: #065f46;">✅ Propuestas aprobadas por el comité</div>
+                            <div style="font-size: 12px; color: #6b7280; margin-top: 2px;">
+                                ${aprobadas.length} registro${aprobadas.length !== 1 ? 's' : ''}
+                                ${totalAprobadoMonto > 0 ? ' · Total aprobado: <strong style="color:#047857;">' + linkEsc(fmtMonto(totalAprobadoMonto)) + '</strong>' : ''}
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+
+                <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse: collapse; width: 100%;">
+                    <thead>
+                        <tr>
+                            <th style="padding: 10px 8px; background: #047857; color: #ffffff; font-size: 11px; font-weight: 700; text-align: left; border: 1px solid #065f46;">Fecha</th>
+                            <th style="padding: 10px 8px; background: #047857; color: #ffffff; font-size: 11px; font-weight: 700; text-align: left; border: 1px solid #065f46;">Propuesta</th>
+                            <th style="padding: 10px 8px; background: #047857; color: #ffffff; font-size: 11px; font-weight: 700; text-align: left; border: 1px solid #065f46;">Proveedor</th>
+                            <th style="padding: 10px 8px; background: #047857; color: #ffffff; font-size: 11px; font-weight: 700; text-align: right; border: 1px solid #065f46;">Monto</th>
+                            <th style="padding: 10px 8px; background: #047857; color: #ffffff; font-size: 11px; font-weight: 700; text-align: center; border: 1px solid #065f46;">Link</th>
+                            <th style="padding: 10px 8px; background: #047857; color: #ffffff; font-size: 11px; font-weight: 700; text-align: left; border: 1px solid #065f46;">Detalle</th>
+                            <th style="padding: 10px 8px; background: #047857; color: #ffffff; font-size: 11px; font-weight: 700; text-align: center; border: 1px solid #065f46;">Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${filasAprobadas}
+                    </tbody>
+                </table>
+
+                <p style="margin: 12px 0 0 0; font-size: 13px; color: #555; line-height: 1.5;">
+                    El archivo Excel adjunto incluye el detalle completo: <strong>Resumen</strong>, <strong>Propuestas</strong>, <strong>Cotizaciones</strong> y <strong>Adjuntos y enlaces</strong>.
                 </p>
             `;
             if (mensajeAdicional) {
