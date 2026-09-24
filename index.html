@@ -7014,6 +7014,12 @@
                 </span>
                 <span>Postventa</span>
             </button>
+            <button class="tab-button" data-tab="comite">
+                <span>
+                    <svg class="menu-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+                </span>
+                <span>Comité</span>
+            </button>
             <div class="tabs-group-label" data-menu-group="finanzas">Finanzas y servicios</div>
             <button class="tab-button" data-tab="caja">
                 <span>
@@ -9366,6 +9372,207 @@
         </div>
 
 
+        <!-- MÓDULO COMITÉ: propuestas, cotizaciones, aprobaciones -->
+        <div id="comite" class="tab-content comite-modulo">
+            <header style="margin-bottom: 1.25rem;">
+                <h2 id="tituloComite" style="margin: 0; color: var(--gray-900); font-size: 1.5rem; font-weight: 700; display: flex; align-items: center; gap: 0.75rem;">
+                    <span style="display: inline-flex; align-items: center; width: 1.75rem; height: 1.75rem;"></span> Comité
+                </h2>
+                <p style="color: var(--gray-600); font-size: 0.875rem; margin: 0.5rem 0 0 0; max-width: 44rem; line-height: 1.5;">
+                    Gestione propuestas del comité: cotizaciones (hasta 3), documentos, enlaces, y decisión de aprobación o rechazo. Exporte a Excel profesional o envíe por correo.
+                </p>
+            </header>
+
+            <section class="form-section" style="margin-bottom: 1rem; padding: 1rem 1.15rem; border-radius: 12px; border: 1px solid var(--border-color); background: linear-gradient(135deg, rgba(117, 187, 33, 0.1) 0%, rgba(117, 187, 33, 0.03) 100%);">
+                <div style="display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 1rem 1.25rem;">
+                    <div style="flex: 1; min-width: 200px;">
+                        <h3 style="margin: 0 0 0.5rem 0; font-size: 0.9375rem; font-weight: 700; color: var(--text-primary);">Resumen de propuestas</h3>
+                        <div id="comiteStatsWrap" style="font-size: 0.8125rem; line-height: 1.5; color: var(--text-secondary);"></div>
+                    </div>
+                    <div style="display: flex; flex-direction: column; align-items: stretch; gap: 0.5rem; min-width: min(100%, 220px);">
+                        <span style="font-size: 0.6875rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-tertiary);">Archivo y envío</span>
+                        <div style="display: flex; flex-wrap: wrap; gap: 0.45rem;">
+                            <button type="button" class="btn btn-primary" id="btnExportarExcelComite" style="padding: 0.45rem 0.8rem; font-size: 0.8125rem;">📊 Excel</button>
+                            <button type="button" class="btn btn-success" id="btnEnviarCorreoComite" style="padding: 0.45rem 0.8rem; font-size: 0.8125rem; background: #10b981; border-color: #10b981;">📧 Enviar por correo</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="form-section" style="margin-bottom: 1rem; padding: 1rem 1.15rem; border-radius: 12px; border: 1px solid var(--border-color); background: var(--bg-primary);">
+                <h3 style="margin: 0 0 0.35rem 0; font-size: 1rem; font-weight: 700; color: var(--text-primary);">Registrar o editar propuesta</h3>
+                <p style="margin: 0 0 0.85rem 0; font-size: 0.8125rem; color: var(--gray-600);">Defina si requiere cotización y/o aprobación del comité. Si pide cotización, complete hasta 3 ofertas.</p>
+                <form id="formComite">
+                    <input type="hidden" id="comiteEditId" value="">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 0.65rem 0.75rem; align-items: end;">
+                        <div class="form-group" style="margin: 0; grid-column: 1 / -1;">
+                            <label for="comiteTitulo" style="font-size: 0.75rem; margin-bottom: 0.2rem; display: block;">Título de la propuesta *</label>
+                            <input type="text" id="comiteTitulo" required class="form-input" placeholder="Ej: Reparación de bomba de agua piso -1" style="padding: 0.45rem 0.55rem; font-size: 0.8125rem; width: 100%;">
+                        </div>
+                        <div class="form-group" style="margin: 0;">
+                            <label for="comiteFecha" style="font-size: 0.75rem; margin-bottom: 0.2rem; display: block;">Fecha *</label>
+                            <input type="date" id="comiteFecha" required class="form-input" style="padding: 0.45rem 0.55rem; font-size: 0.8125rem; width: 100%;">
+                        </div>
+                        <div class="form-group" style="margin: 0;">
+                            <label for="comiteCategoria" style="font-size: 0.75rem; margin-bottom: 0.2rem; display: block;">Categoría</label>
+                            <select id="comiteCategoria" class="form-input" style="padding: 0.45rem 0.55rem; font-size: 0.8125rem; width: 100%;">
+                                <option value="mantencion">Mantención</option>
+                                <option value="mejora">Mejora</option>
+                                <option value="servicio">Servicio</option>
+                                <option value="compra">Compra</option>
+                                <option value="otro">Otro</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="margin: 0;">
+                            <label for="comiteEstado" style="font-size: 0.75rem; margin-bottom: 0.2rem; display: block;">Estado *</label>
+                            <select id="comiteEstado" required class="form-input" style="padding: 0.45rem 0.55rem; font-size: 0.8125rem; width: 100%;">
+                                <option value="borrador">📝 Borrador</option>
+                                <option value="en_revision">🔄 En revisión</option>
+                                <option value="aprobada">✅ Aprobada</option>
+                                <option value="rechazada">❌ Rechazada</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="margin: 0; grid-column: 1 / -1;">
+                            <label for="comiteDescripcion" style="font-size: 0.75rem; margin-bottom: 0.2rem; display: block;">Descripción *</label>
+                            <textarea id="comiteDescripcion" rows="3" required class="form-input" placeholder="Detalle de la propuesta, alcance y justificación…" style="width: 100%; padding: 0.5rem 0.6rem; font-size: 0.8125rem; line-height: 1.4; min-height: 4rem; resize: vertical;"></textarea>
+                        </div>
+                        <div class="form-group" style="margin: 0; grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 1rem 1.5rem; padding: 0.65rem 0.75rem; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-secondary);">
+                            <label style="display: flex; align-items: center; gap: 0.45rem; font-size: 0.8125rem; cursor: pointer; margin: 0;">
+                                <input type="checkbox" id="comiteRequiereCotizacion" checked style="width: 1.05rem; height: 1.05rem;">
+                                Requiere cotización (hasta 3)
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 0.45rem; font-size: 0.8125rem; cursor: pointer; margin: 0;">
+                                <input type="checkbox" id="comiteRequiereAprobacion" checked style="width: 1.05rem; height: 1.05rem;">
+                                Requiere aprobación del comité
+                            </label>
+                        </div>
+                    </div>
+
+                    <div id="comiteCotizacionesWrap" style="margin-top: 1rem;">
+                        <h4 style="margin: 0 0 0.65rem 0; font-size: 0.875rem; font-weight: 700; color: var(--text-primary);">Cotizaciones (máx. 3)</h4>
+                        <div style="display: grid; gap: 0.75rem;">
+                            <div class="comite-cotizacion-card" data-cot="1" style="padding: 0.75rem; border-radius: 10px; border: 1px solid var(--border-color); background: var(--bg-secondary);">
+                                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem;">
+                                    <strong style="font-size: 0.8125rem;">Cotización 1</strong>
+                                    <label style="font-size: 0.75rem; display: flex; align-items: center; gap: 0.3rem; cursor: pointer; margin: 0;">
+                                        <input type="radio" name="comiteCotElegida" value="1"> Elegida
+                                    </label>
+                                </div>
+                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0.5rem;">
+                                    <div class="form-group" style="margin: 0;"><label style="font-size: 0.7rem;">Proveedor</label><input type="text" id="comiteCot1Proveedor" class="form-input" placeholder="Nombre proveedor" style="padding: 0.4rem 0.5rem; font-size: 0.8125rem; width: 100%;"></div>
+                                    <div class="form-group" style="margin: 0;"><label style="font-size: 0.7rem;">Monto ($)</label><input type="number" id="comiteCot1Monto" class="form-input" min="0" step="1" placeholder="0" style="padding: 0.4rem 0.5rem; font-size: 0.8125rem; width: 100%;"></div>
+                                    <div class="form-group" style="margin: 0; grid-column: 1 / -1;"><label style="font-size: 0.7rem;">Detalle</label><input type="text" id="comiteCot1Detalle" class="form-input" placeholder="Alcance, plazo, condiciones…" style="padding: 0.4rem 0.5rem; font-size: 0.8125rem; width: 100%;"></div>
+                                    <div class="form-group" style="margin: 0;"><label style="font-size: 0.7rem;">Link</label><input type="url" id="comiteCot1Link" class="form-input" placeholder="https://…" style="padding: 0.4rem 0.5rem; font-size: 0.8125rem; width: 100%;"></div>
+                                    <div class="form-group" style="margin: 0;"><label style="font-size: 0.7rem;">Documento</label><input type="file" id="comiteCot1Archivo" accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg,.webp" style="padding: 0.25rem 0; font-size: 0.75rem; width: 100%;"><div id="comiteCot1ArchivoActual" style="font-size: 0.7rem; color: var(--gray-600); margin-top: 0.2rem;"></div></div>
+                                </div>
+                            </div>
+                            <div class="comite-cotizacion-card" data-cot="2" style="padding: 0.75rem; border-radius: 10px; border: 1px solid var(--border-color); background: var(--bg-secondary);">
+                                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem;">
+                                    <strong style="font-size: 0.8125rem;">Cotización 2</strong>
+                                    <label style="font-size: 0.75rem; display: flex; align-items: center; gap: 0.3rem; cursor: pointer; margin: 0;">
+                                        <input type="radio" name="comiteCotElegida" value="2"> Elegida
+                                    </label>
+                                </div>
+                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0.5rem;">
+                                    <div class="form-group" style="margin: 0;"><label style="font-size: 0.7rem;">Proveedor</label><input type="text" id="comiteCot2Proveedor" class="form-input" placeholder="Nombre proveedor" style="padding: 0.4rem 0.5rem; font-size: 0.8125rem; width: 100%;"></div>
+                                    <div class="form-group" style="margin: 0;"><label style="font-size: 0.7rem;">Monto ($)</label><input type="number" id="comiteCot2Monto" class="form-input" min="0" step="1" placeholder="0" style="padding: 0.4rem 0.5rem; font-size: 0.8125rem; width: 100%;"></div>
+                                    <div class="form-group" style="margin: 0; grid-column: 1 / -1;"><label style="font-size: 0.7rem;">Detalle</label><input type="text" id="comiteCot2Detalle" class="form-input" placeholder="Alcance, plazo, condiciones…" style="padding: 0.4rem 0.5rem; font-size: 0.8125rem; width: 100%;"></div>
+                                    <div class="form-group" style="margin: 0;"><label style="font-size: 0.7rem;">Link</label><input type="url" id="comiteCot2Link" class="form-input" placeholder="https://…" style="padding: 0.4rem 0.5rem; font-size: 0.8125rem; width: 100%;"></div>
+                                    <div class="form-group" style="margin: 0;"><label style="font-size: 0.7rem;">Documento</label><input type="file" id="comiteCot2Archivo" accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg,.webp" style="padding: 0.25rem 0; font-size: 0.75rem; width: 100%;"><div id="comiteCot2ArchivoActual" style="font-size: 0.7rem; color: var(--gray-600); margin-top: 0.2rem;"></div></div>
+                                </div>
+                            </div>
+                            <div class="comite-cotizacion-card" data-cot="3" style="padding: 0.75rem; border-radius: 10px; border: 1px solid var(--border-color); background: var(--bg-secondary);">
+                                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem;">
+                                    <strong style="font-size: 0.8125rem;">Cotización 3</strong>
+                                    <label style="font-size: 0.75rem; display: flex; align-items: center; gap: 0.3rem; cursor: pointer; margin: 0;">
+                                        <input type="radio" name="comiteCotElegida" value="3"> Elegida
+                                    </label>
+                                </div>
+                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0.5rem;">
+                                    <div class="form-group" style="margin: 0;"><label style="font-size: 0.7rem;">Proveedor</label><input type="text" id="comiteCot3Proveedor" class="form-input" placeholder="Nombre proveedor" style="padding: 0.4rem 0.5rem; font-size: 0.8125rem; width: 100%;"></div>
+                                    <div class="form-group" style="margin: 0;"><label style="font-size: 0.7rem;">Monto ($)</label><input type="number" id="comiteCot3Monto" class="form-input" min="0" step="1" placeholder="0" style="padding: 0.4rem 0.5rem; font-size: 0.8125rem; width: 100%;"></div>
+                                    <div class="form-group" style="margin: 0; grid-column: 1 / -1;"><label style="font-size: 0.7rem;">Detalle</label><input type="text" id="comiteCot3Detalle" class="form-input" placeholder="Alcance, plazo, condiciones…" style="padding: 0.4rem 0.5rem; font-size: 0.8125rem; width: 100%;"></div>
+                                    <div class="form-group" style="margin: 0;"><label style="font-size: 0.7rem;">Link</label><input type="url" id="comiteCot3Link" class="form-input" placeholder="https://…" style="padding: 0.4rem 0.5rem; font-size: 0.8125rem; width: 100%;"></div>
+                                    <div class="form-group" style="margin: 0;"><label style="font-size: 0.7rem;">Documento</label><input type="file" id="comiteCot3Archivo" accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg,.webp" style="padding: 0.25rem 0; font-size: 0.75rem; width: 100%;"><div id="comiteCot3ArchivoActual" style="font-size: 0.7rem; color: var(--gray-600); margin-top: 0.2rem;"></div></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 1rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0.75rem;">
+                        <div class="form-group" style="margin: 0;">
+                            <label for="comiteDocumentos" style="font-size: 0.75rem; margin-bottom: 0.2rem; display: block;">Documentos adjuntos</label>
+                            <input type="file" id="comiteDocumentos" multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg,.webp,.txt" style="padding: 0.3rem 0; font-size: 0.8125rem; max-width: 100%;">
+                            <div id="comiteDocumentosActuales" style="font-size: 0.75rem; color: var(--gray-600); margin-top: 0.35rem;"></div>
+                        </div>
+                        <div class="form-group" style="margin: 0;">
+                            <label style="font-size: 0.75rem; margin-bottom: 0.2rem; display: block;">Enlaces (título + URL)</label>
+                            <div style="display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 0.4rem;">
+                                <input type="text" id="comiteLinkTitulo" class="form-input" placeholder="Título del enlace" style="padding: 0.4rem 0.5rem; font-size: 0.8125rem; flex: 1; min-width: 100px;">
+                                <input type="url" id="comiteLinkUrl" class="form-input" placeholder="https://…" style="padding: 0.4rem 0.5rem; font-size: 0.8125rem; flex: 1.4; min-width: 140px;">
+                                <button type="button" class="btn btn-secondary" id="btnComiteAgregarLink" style="padding: 0.4rem 0.65rem; font-size: 0.75rem;">+ Link</button>
+                            </div>
+                            <div id="comiteLinksLista" style="font-size: 0.75rem;"></div>
+                        </div>
+                    </div>
+
+                    <div class="form-group" style="margin: 0.85rem 0 0 0;">
+                        <label for="comiteObservaciones" style="font-size: 0.75rem; margin-bottom: 0.2rem; display: block;">Observaciones / motivo de decisión</label>
+                        <textarea id="comiteObservaciones" rows="2" class="form-input" placeholder="Notas del comité, fundamento de aprobación o rechazo…" style="width: 100%; padding: 0.5rem 0.6rem; font-size: 0.8125rem; resize: vertical;"></textarea>
+                    </div>
+
+                    <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.85rem;">
+                        <button type="submit" class="btn btn-primary" id="btnGuardarComite" style="padding: 0.45rem 1rem; font-size: 0.8125rem;">Guardar propuesta</button>
+                        <button type="button" class="btn btn-secondary" id="btnCancelarEdicionComite" style="padding: 0.45rem 0.85rem; font-size: 0.8125rem;">Limpiar formulario</button>
+                    </div>
+                </form>
+            </section>
+
+            <section class="table-section" style="margin-top: 0;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.65rem;">
+                    <h3 style="margin: 0; font-size: 1.0625rem; font-weight: 700; color: var(--text-primary);">Listado de propuestas</h3>
+                    <span id="comiteFiltroContador" style="font-size: 0.8125rem; color: var(--gray-600); align-self: center;"></span>
+                </div>
+                <div class="form-section" style="margin-bottom: 0.65rem; padding: 0.65rem 0.85rem; border-radius: 10px; border: 1px solid var(--border-color); background: var(--bg-secondary);">
+                    <div style="display: flex; flex-wrap: wrap; align-items: flex-end; gap: 0.45rem 0.55rem;">
+                        <input type="search" id="comiteFiltroBuscar" class="form-input" placeholder="🔍 Buscar título, proveedor, descripción…" style="padding: 0.4rem 0.55rem; font-size: 0.8125rem; flex: 1; min-width: 140px; max-width: 280px;">
+                        <select id="comiteFiltroEstado" class="form-input" style="padding: 0.4rem 0.5rem; font-size: 0.8125rem; min-width: 140px;">
+                            <option value="todos">Todos los estados</option>
+                            <option value="borrador">📝 Borrador</option>
+                            <option value="en_revision">🔄 En revisión</option>
+                            <option value="aprobada">✅ Aprobadas</option>
+                            <option value="rechazada">❌ Rechazadas</option>
+                        </select>
+                        <select id="comiteFiltroReq" class="form-input" style="padding: 0.4rem 0.5rem; font-size: 0.8125rem; min-width: 150px;">
+                            <option value="todos">Todos los requisitos</option>
+                            <option value="cotizacion">Con cotización</option>
+                            <option value="aprobacion">Con aprobación</option>
+                            <option value="ambos">Cotización + aprobación</option>
+                            <option value="ninguno">Sin requisitos</option>
+                        </select>
+                        <button type="button" class="btn btn-secondary" id="btnComiteLimpiarFiltros" style="padding: 0.4rem 0.65rem; font-size: 0.75rem;">Limpiar filtros</button>
+                    </div>
+                </div>
+                <div style="overflow-x: auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);">
+                    <table id="tablaComite" style="width: 100%; border-collapse: collapse; background: var(--bg-primary);">
+                        <thead>
+                            <tr style="background: linear-gradient(135deg, #75bb21 0%, #5a9219 100%); color: white;">
+                                <th style="padding: 0.75rem; text-align: left; font-weight: 600;">Fecha</th>
+                                <th style="padding: 0.75rem; text-align: left; font-weight: 600;">Propuesta</th>
+                                <th style="padding: 0.75rem; text-align: center; font-weight: 600;">Estado</th>
+                                <th style="padding: 0.75rem; text-align: center; font-weight: 600;">Requisitos</th>
+                                <th style="padding: 0.75rem; text-align: center; font-weight: 600;">Cotizaciones</th>
+                                <th style="padding: 0.75rem; text-align: center; font-weight: 600;">Adjuntos</th>
+                                <th style="padding: 0.75rem; text-align: center; font-weight: 600; width: 200px;">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyComite"></tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+
+
         <!-- MÓDULO 11: PERSONALIZACIÓN -->
         <div id="personalizacion" class="tab-content">
             <div style="margin-bottom: 1.5rem;">
@@ -10668,7 +10875,7 @@
             lecturasAguaCaliente: 'Lecturas Agua', caja: 'Caja Chica', mantenciones: 'Mantenciones',
             'visitas-extraordinarias': 'Visitas Extraordinarias', pagosAseo: 'Pagos Aseo', 'pagos-aseo': 'Pagos Aseo',
             nomina: 'Nómina', 'nomina-reemplazos': 'Reemplazos Nómina', insumos: 'Insumos',
-            postventa: 'Postventa'
+            postventa: 'Postventa', comite: 'Comité'
         };
         const NOTIF_ICONOS = {
             mudanzas: '\uD83D\uDCE6',
@@ -10685,7 +10892,8 @@
             nomina: '\uD83D\uDC77',
             'nomina-reemplazos': '\uD83D\uDD04',
             insumos: '\uD83D\uDCCB',
-            postventa: '\uD83D\uDCCB'
+            postventa: '\uD83D\uDCCB',
+            comite: '\uD83D\uDC65'
         };
         const NOTIF_LIMIT = 80;
 
@@ -11594,6 +11802,8 @@
                         if (typeof window.cargarChecklistTurnosGestion === 'function') window.cargarChecklistTurnosGestion();
                     } else if (tabName === 'postventa') {
                         if (typeof window.cargarPostventa === 'function') window.cargarPostventa();
+                    } else if (tabName === 'comite') {
+                        if (typeof window.cargarComite === 'function') window.cargarComite();
                     } else if (tabName === 'personalizacion') {
                         if (typeof cargarPersonalizacion === 'function') {
                             cargarPersonalizacion();
@@ -13503,6 +13713,7 @@
             { id: 'reporteNomina', label: 'Reporte Nómina mensual' },
             { id: 'reportePostventa', label: 'Reporte Postventa (tabla completa)' },
             { id: 'reportePostventaPendientes', label: 'Postventa — correo con selección de registros' },
+            { id: 'reporteComite', label: 'Reporte Comité (propuestas)' },
             { id: 'comprobanteApertura', label: 'Comprobante — Apertura de puerta' },
             { id: 'confirmacionMudanza', label: 'Mudanzas — Confirmación de mudanza' },
             { id: 'mudanzaPendienteDocs', label: 'Mudanzas — Pendiente: documentos faltantes' },
@@ -26408,6 +26619,71 @@ document.getElementById('chatForm').onsubmit = function (e) {
             });
         }
 
+        function claveNumeroUnidadReporte(valor) {
+            return String(valor == null ? '' : valor).replace(/\D/g, '');
+        }
+
+        function unidadEstaEntregadaEnOcupacion(unit) {
+            if (!unit || !Array.isArray(unit.residents)) return false;
+            return unit.residents.some(function (r) {
+                return r && String(r.type || r.tipo || '') === 'Propietario';
+            });
+        }
+
+        function planoOcupacionContieneUnidad(numero) {
+            var key = claveNumeroUnidadReporte(numero);
+            if (!key || typeof BUILDING_STRUCTURE_OCUPACION === 'undefined' || !BUILDING_STRUCTURE_OCUPACION) return false;
+            var pisos = Object.keys(BUILDING_STRUCTURE_OCUPACION);
+            for (var i = 0; i < pisos.length; i++) {
+                var lista = BUILDING_STRUCTURE_OCUPACION[pisos[i]] || [];
+                for (var j = 0; j < lista.length; j++) {
+                    if (claveNumeroUnidadReporte(lista[j]) === key) return true;
+                }
+            }
+            return false;
+        }
+
+        async function mapaUnidadesEntregadasParaReporte() {
+            try {
+                if (typeof obtenerMetricasVinculacion === 'function') await obtenerMetricasVinculacion();
+            } catch (eMapa) {
+                console.warn('No se pudo leer el plano de ocupación para el reporte de comité:', eMapa);
+            }
+            var units = (typeof window !== 'undefined' && Array.isArray(window.vinculacionUnits)) ? window.vinculacionUnits : [];
+            if (!units.length) return null;
+            var mapa = Object.create(null);
+            units.forEach(function (unit) {
+                if (!unidadEstaEntregadaEnOcupacion(unit)) return;
+                var n = claveNumeroUnidadReporte(unit.unitNumber || unit.departamento || unit.unidad || '');
+                if (n) mapa[n] = true;
+            });
+            return mapa;
+        }
+
+        function registroCorrespondeAUnidadNoEntregada(item, mapaEntregadas) {
+            if (!mapaEntregadas || !item) return false;
+            var crudo = item.departamento || item.unidad || item.depto || item.deptId || item.unitNumber || '';
+            var key = claveNumeroUnidadReporte(crudo);
+            if (!key || !planoOcupacionContieneUnidad(key)) return false;
+            return !mapaEntregadas[key];
+        }
+
+        function filtrarRegistrosUnidadEntregadaEnPlano(lista, mapaEntregadas) {
+            var src = Array.isArray(lista) ? lista : [];
+            if (!mapaEntregadas) return src;
+            var omitidas = [];
+            var out = src.filter(function (item) {
+                if (!registroCorrespondeAUnidadNoEntregada(item, mapaEntregadas)) return true;
+                var key = claveNumeroUnidadReporte(item.departamento || item.unidad || item.depto || item.deptId || item.unitNumber || '');
+                if (key && omitidas.indexOf(key) === -1) omitidas.push(key);
+                return false;
+            });
+            if (omitidas.length) {
+                console.info('[reporte comité] Se omitieron unidades no entregadas en el plano de ocupación:', omitidas.join(', '));
+            }
+            return out;
+        }
+
         function escaparHtmlContenidoMulta(valor) {
             return String(valor == null ? '' : valor)
                 .replace(/&/g, '&amp;')
@@ -31602,6 +31878,14 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 // Calcular ingresos
                 mudanzas = filtrarMudanzasParaReporte(mudanzas);
                 multas = filtrarMultasParaReporte(multas, mesAnio);
+                const mapaUnidadesEntregadasCierre = await mapaUnidadesEntregadasParaReporte();
+                mudanzas = filtrarRegistrosUnidadEntregadaEnPlano(mudanzas, mapaUnidadesEntregadasCierre);
+                aperturas = filtrarRegistrosUnidadEntregadaEnPlano(aperturas, mapaUnidadesEntregadasCierre);
+                tarjetas = filtrarRegistrosUnidadEntregadaEnPlano(tarjetas, mapaUnidadesEntregadasCierre);
+                espacios = filtrarRegistrosUnidadEntregadaEnPlano(espacios, mapaUnidadesEntregadasCierre);
+                multas = filtrarRegistrosUnidadEntregadaEnPlano(multas, mapaUnidadesEntregadasCierre);
+                morosos = filtrarRegistrosUnidadEntregadaEnPlano(morosos, mapaUnidadesEntregadasCierre);
+                lecturasAguaCaliente = filtrarRegistrosUnidadEntregadaEnPlano(lecturasAguaCaliente, mapaUnidadesEntregadasCierre);
                 const ingresosMudanzas = Array.isArray(mudanzas) 
                     ? mudanzas.filter(mudanzaConCobroVigente).reduce((sum, m) => sum + (parseFloat(m.monto) || 0), 0)
                     : 0;
@@ -38305,7 +38589,8 @@ document.getElementById('chatForm').onsubmit = function (e) {
             'lecturas-agua': { nombre: 'Lecturas Agua Caliente', icono: '💧', tab: 'lecturasAgua' },
                 'ocupacion': { nombre: 'Ocupación', icono: '🏢', tab: 'ocupacion' },
                 'conserjeria': { nombre: 'Conserjería', icono: '🛡️', tab: 'conserjeria' },
-                'postventa': { nombre: 'Postventa', icono: '📋', tab: 'postventa' }
+                'postventa': { nombre: 'Postventa', icono: '📋', tab: 'postventa' },
+                'comite': { nombre: 'Comité', icono: '👥', tab: 'comite' }
         };
 
         /** Pestaña asociada a cada tarjeta del panel de control (clic → ir al módulo). */
@@ -38326,6 +38611,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 'Lecturas Agua Caliente': 'lecturasAgua',
                 'Última Nómina': 'nomina',
                 'Postventa': 'postventa',
+                'Comité': 'comite',
                 'Conserjería': 'conserjeria',
                 'Ocupación': 'ocupacion',
                 'Balance Neto': 'dashboard'
@@ -38336,7 +38622,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
 
         var DASHBOARD_GRUPOS_TARJETAS = [
             { id: 'edificio', titulo: 'Edificio y residentes', tabs: ['conserjeria', 'ocupacion', 'mudanzas', 'aperturas', 'tarjetas', 'espacios'] },
-            { id: 'convivencia', titulo: 'Convivencia y cobranza', tabs: ['multas', 'morosos', 'postventa'] },
+            { id: 'convivencia', titulo: 'Convivencia y cobranza', tabs: ['multas', 'morosos', 'postventa', 'comite'] },
             { id: 'finanzas', titulo: 'Finanzas y servicios', tabs: ['caja', 'lecturasAgua', 'pagos-aseo', 'nomina', 'insumos', 'mantenciones'] }
         ];
 
@@ -38450,6 +38736,17 @@ document.getElementById('chatForm').onsubmit = function (e) {
                         }
                     }
                 } catch (eAlta) {}
+                try {
+                    if (modulosVisibles && !modulosVisibles.includes('comite')) {
+                        var marcaComite = '';
+                        try { marcaComite = localStorage.getItem(lsKey('modulo_comite_alta')) || ''; } catch (eMc) {}
+                        if (marcaComite !== '1') {
+                            modulosVisibles.push('comite');
+                            try { localStorage.setItem(lsKey('modulo_comite_alta'), '1'); } catch (eSc) {}
+                            await guardarModulosVisibles(modulosVisibles, configuracionExplicita);
+                        }
+                    }
+                } catch (eAltaComite) {}
                 
                 return modulosVisibles;
             } catch (error) {
@@ -39768,6 +40065,9 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 if (typeof window.cargarPostventa === 'function') window.cargarPostventa();
             } catch (eP) {}
             try {
+                if (typeof window.cargarComite === 'function') window.cargarComite();
+            } catch (eC) {}
+            try {
                 if (typeof cargarUnidadesOcupacion === 'function') cargarUnidadesOcupacion();
             } catch (eO) {}
             try {
@@ -41080,6 +41380,953 @@ document.getElementById('chatForm').onsubmit = function (e) {
             };
         })();
 
+        // ========== MÓDULO COMITÉ ==========
+        (function () {
+            var COMITE_DOC = 'comite';
+            var COMITE_LS = 'comite-propuestas';
+            var COMITE_ESTADOS = {
+                borrador: { label: 'Borrador', emoji: '📝' },
+                en_revision: { label: 'En revisión', emoji: '🔄' },
+                aprobada: { label: 'Aprobada', emoji: '✅' },
+                rechazada: { label: 'Rechazada', emoji: '❌' }
+            };
+            var COMITE_CATEGORIAS = {
+                mantencion: 'Mantención',
+                mejora: 'Mejora',
+                servicio: 'Servicio',
+                compra: 'Compra',
+                otro: 'Otro'
+            };
+            var propuestasComite = [];
+            var comiteLinksTemp = [];
+            var comiteDocsExistentes = [];
+            var comiteCotDocsExistentes = { 1: null, 2: null, 3: null };
+            var comiteListenersBound = false;
+
+            function escHtml(s) {
+                return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+            }
+            function comiteEstadoLabel(codigo) {
+                var e = COMITE_ESTADOS[codigo] || COMITE_ESTADOS.borrador;
+                return e.emoji + ' ' + e.label;
+            }
+            function comiteNormEstado(k) {
+                if (k === 'borrador' || k === 'en_revision' || k === 'aprobada' || k === 'rechazada') return k;
+                return 'borrador';
+            }
+            function comiteIdNuevo() {
+                return 'com_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 8);
+            }
+            function comiteHoyISO() {
+                var d = new Date();
+                return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+            }
+            function comiteFmtMonto(n) {
+                var v = Number(n) || 0;
+                if (typeof formatearMoneda === 'function') return formatearMoneda(v);
+                return '$' + Math.round(v).toLocaleString('es-CL');
+            }
+            function comiteFechaDMY(f) {
+                if (!f) return '';
+                var m = String(f).match(/^(\d{4})-(\d{2})-(\d{2})/);
+                if (m) return m[3] + '-' + m[2] + '-' + m[1];
+                return String(f);
+            }
+            function comiteSafeName(name) {
+                return String(name || 'archivo').replace(/[^a-zA-Z0-9._-]/g, '_').slice(0, 80);
+            }
+
+            async function guardarComiteFirestore() {
+                if (firebaseInitialized && db) {
+                    try {
+                        await db.collection('comunidad').doc(COMITE_DOC).set({
+                            propuestas: propuestasComite,
+                            actualizado: firebase.firestore.FieldValue.serverTimestamp()
+                        }, { merge: true });
+                    } catch (e) {
+                        console.error('Comité Firestore:', e);
+                    }
+                }
+                try {
+                    localStorage.setItem(lsKey(COMITE_LS), JSON.stringify(propuestasComite));
+                } catch (e) { /* ignore */ }
+            }
+
+            function leerCotizacionForm(n) {
+                var prov = document.getElementById('comiteCot' + n + 'Proveedor');
+                var mon = document.getElementById('comiteCot' + n + 'Monto');
+                var det = document.getElementById('comiteCot' + n + 'Detalle');
+                var link = document.getElementById('comiteCot' + n + 'Link');
+                return {
+                    n: n,
+                    proveedor: prov ? String(prov.value || '').trim() : '',
+                    monto: mon && mon.value !== '' ? (parseFloat(mon.value) || 0) : null,
+                    detalle: det ? String(det.value || '').trim() : '',
+                    link: link ? String(link.value || '').trim() : '',
+                    documento: comiteCotDocsExistentes[n] || null
+                };
+            }
+
+            function cotizacionTieneDatos(c) {
+                if (!c) return false;
+                return !!(c.proveedor || c.detalle || c.link || (c.monto != null && c.monto !== '') || (c.documento && c.documento.url));
+            }
+
+            function toggleCotizacionesUI() {
+                var wrap = document.getElementById('comiteCotizacionesWrap');
+                var cb = document.getElementById('comiteRequiereCotizacion');
+                if (!wrap || !cb) return;
+                wrap.style.display = cb.checked ? '' : 'none';
+            }
+
+            function renderLinksTemp() {
+                var el = document.getElementById('comiteLinksLista');
+                if (!el) return;
+                if (!comiteLinksTemp.length) {
+                    el.innerHTML = '<span style="color:var(--gray-500)">Sin enlaces agregados.</span>';
+                    return;
+                }
+                el.innerHTML = comiteLinksTemp.map(function (lk, i) {
+                    return '<div style="display:flex;align-items:center;gap:0.4rem;margin:0.2rem 0;">' +
+                        '<a href="' + escHtml(lk.url) + '" target="_blank" rel="noopener" style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">🔗 ' + escHtml(lk.titulo || lk.url) + '</a>' +
+                        '<button type="button" class="btn btn-danger btn-sm" data-comite-link-del="' + i + '" style="padding:0.15rem 0.4rem;font-size:0.7rem;">Quitar</button></div>';
+                }).join('');
+            }
+
+            function renderDocsExistentes() {
+                var el = document.getElementById('comiteDocumentosActuales');
+                if (!el) return;
+                if (!comiteDocsExistentes.length) {
+                    el.innerHTML = '';
+                    return;
+                }
+                el.innerHTML = '<div style="margin-bottom:0.25rem;">Adjuntos actuales:</div>' + comiteDocsExistentes.map(function (d, i) {
+                    return '<div style="display:flex;gap:0.4rem;align-items:center;margin:0.15rem 0;">' +
+                        '<a href="' + escHtml(d.url) + '" target="_blank" rel="noopener">📄 ' + escHtml(d.nombre || 'documento') + '</a>' +
+                        '<button type="button" class="btn btn-danger btn-sm" data-comite-doc-del="' + i + '" style="padding:0.1rem 0.35rem;font-size:0.65rem;">Quitar</button></div>';
+                }).join('');
+            }
+
+            function renderCotDocActual(n) {
+                var el = document.getElementById('comiteCot' + n + 'ArchivoActual');
+                if (!el) return;
+                var d = comiteCotDocsExistentes[n];
+                if (!d || !d.url) {
+                    el.innerHTML = '';
+                    return;
+                }
+                el.innerHTML = '<a href="' + escHtml(d.url) + '" target="_blank" rel="noopener">📎 ' + escHtml(d.nombre || 'archivo') + '</a> ' +
+                    '<button type="button" class="btn btn-danger btn-sm" data-comite-cotdoc-del="' + n + '" style="padding:0.1rem 0.35rem;font-size:0.65rem;">Quitar</button>';
+            }
+
+            function limpiarFormComite() {
+                var eid = document.getElementById('comiteEditId');
+                if (eid) eid.value = '';
+                var t = document.getElementById('comiteTitulo');
+                if (t) t.value = '';
+                var f = document.getElementById('comiteFecha');
+                if (f) f.value = comiteHoyISO();
+                var cat = document.getElementById('comiteCategoria');
+                if (cat) cat.value = 'mantencion';
+                var est = document.getElementById('comiteEstado');
+                if (est) est.value = 'borrador';
+                var des = document.getElementById('comiteDescripcion');
+                if (des) des.value = '';
+                var rc = document.getElementById('comiteRequiereCotizacion');
+                if (rc) rc.checked = true;
+                var ra = document.getElementById('comiteRequiereAprobacion');
+                if (ra) ra.checked = true;
+                var obs = document.getElementById('comiteObservaciones');
+                if (obs) obs.value = '';
+                [1, 2, 3].forEach(function (n) {
+                    var p = document.getElementById('comiteCot' + n + 'Proveedor');
+                    var m = document.getElementById('comiteCot' + n + 'Monto');
+                    var d = document.getElementById('comiteCot' + n + 'Detalle');
+                    var l = document.getElementById('comiteCot' + n + 'Link');
+                    var a = document.getElementById('comiteCot' + n + 'Archivo');
+                    if (p) p.value = '';
+                    if (m) m.value = '';
+                    if (d) d.value = '';
+                    if (l) l.value = '';
+                    if (a) a.value = '';
+                    comiteCotDocsExistentes[n] = null;
+                    renderCotDocActual(n);
+                });
+                document.querySelectorAll('input[name="comiteCotElegida"]').forEach(function (r) { r.checked = false; });
+                var docs = document.getElementById('comiteDocumentos');
+                if (docs) docs.value = '';
+                comiteLinksTemp = [];
+                comiteDocsExistentes = [];
+                renderLinksTemp();
+                renderDocsExistentes();
+                toggleCotizacionesUI();
+                var gb = document.getElementById('btnGuardarComite');
+                if (gb) gb.textContent = 'Guardar propuesta';
+            }
+
+            function actualizarEstadisticasComite() {
+                var wrap = document.getElementById('comiteStatsWrap');
+                if (!wrap) return;
+                var st = { borrador: 0, en_revision: 0, aprobada: 0, rechazada: 0 };
+                propuestasComite.forEach(function (p) { st[comiteNormEstado(p.estado)]++; });
+                var total = propuestasComite.length;
+                if (!total) {
+                    wrap.innerHTML = '<span style="color:var(--gray-600)">Sin propuestas — registre la primera abajo.</span>';
+                    return;
+                }
+                wrap.innerHTML = '<strong style="font-size:0.9rem">' + total + '</strong> total · 📝 ' + st.borrador +
+                    ' · 🔄 ' + st.en_revision + ' · ✅ ' + st.aprobada + ' · ❌ ' + st.rechazada;
+            }
+
+            function comiteListaFiltrada() {
+                var qEl = document.getElementById('comiteFiltroBuscar');
+                var estEl = document.getElementById('comiteFiltroEstado');
+                var reqEl = document.getElementById('comiteFiltroReq');
+                var q = qEl ? String(qEl.value || '').trim().toLowerCase() : '';
+                var est = estEl ? (estEl.value || 'todos') : 'todos';
+                var req = reqEl ? (reqEl.value || 'todos') : 'todos';
+                return propuestasComite.filter(function (p) {
+                    var k = comiteNormEstado(p.estado);
+                    if (est !== 'todos' && k !== est) return false;
+                    var cot = !!p.requiereCotizacion;
+                    var apr = !!p.requiereAprobacion;
+                    if (req === 'cotizacion' && !cot) return false;
+                    if (req === 'aprobacion' && !apr) return false;
+                    if (req === 'ambos' && !(cot && apr)) return false;
+                    if (req === 'ninguno' && (cot || apr)) return false;
+                    if (q) {
+                        var blob = [
+                            p.titulo, p.descripcion, p.observaciones, p.categoria, p.estado,
+                            (p.cotizaciones || []).map(function (c) { return [c.proveedor, c.detalle, c.link].join(' '); }).join(' '),
+                            (p.links || []).map(function (l) { return [l.titulo, l.url].join(' '); }).join(' ')
+                        ].join(' ').toLowerCase();
+                        if (typeof coincidirFiltroInteligente === 'function') {
+                            if (!coincidirFiltroInteligente(blob, q)) return false;
+                        } else if (blob.indexOf(q) === -1) return false;
+                    }
+                    return true;
+                });
+            }
+
+            function renderTablaComite() {
+                var tbody = document.getElementById('tbodyComite');
+                if (!tbody) return;
+                var sorted = propuestasComite.slice().sort(function (a, b) {
+                    return String(b.fecha || '').localeCompare(String(a.fecha || '')) || String(b.id || '').localeCompare(String(a.id || ''));
+                });
+                var list = comiteListaFiltrada().slice().sort(function (a, b) {
+                    return String(b.fecha || '').localeCompare(String(a.fecha || '')) || String(b.id || '').localeCompare(String(a.id || ''));
+                });
+                var cnt = document.getElementById('comiteFiltroContador');
+                if (cnt) {
+                    if (!sorted.length) cnt.textContent = '';
+                    else if (list.length === sorted.length) cnt.textContent = sorted.length + ' propuesta' + (sorted.length !== 1 ? 's' : '');
+                    else cnt.textContent = 'Mostrando ' + list.length + ' de ' + sorted.length;
+                }
+                actualizarEstadisticasComite();
+                if (!list.length) {
+                    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:1.25rem;color:var(--gray-600);font-size:0.875rem;">' +
+                        (sorted.length ? 'Ninguna propuesta coincide con los filtros.' : 'Aún no hay propuestas registradas.') + '</td></tr>';
+                    return;
+                }
+                tbody.innerHTML = list.map(function (p) {
+                    var cots = (p.cotizaciones || []).filter(cotizacionTieneDatos);
+                    var cotTxt = p.requiereCotizacion
+                        ? (cots.length + '/3' + (p.cotizacionElegida ? ' · #' + p.cotizacionElegida + ' elegida' : ''))
+                        : 'No requiere';
+                    var reqs = [];
+                    if (p.requiereCotizacion) reqs.push('Cotiz.');
+                    if (p.requiereAprobacion) reqs.push('Aprob.');
+                    var reqTxt = reqs.length ? reqs.join(' + ') : '—';
+                    var nDocs = (p.documentos || []).length;
+                    var nLinks = (p.links || []).length;
+                    var adj = [];
+                    if (nDocs) adj.push(nDocs + ' doc' + (nDocs !== 1 ? 's' : ''));
+                    if (nLinks) adj.push(nLinks + ' link' + (nLinks !== 1 ? 's' : ''));
+                    var adjTxt = adj.length ? adj.join(', ') : '—';
+                    var rid = escHtml(p.id);
+                    var btns = '<div class="tabla-acciones" style="display:flex;flex-wrap:wrap;gap:0.25rem;justify-content:center;">' +
+                        '<button type="button" class="btn btn-secondary btn-sm" data-comite-edit="' + rid + '">Editar</button>';
+                    if (p.requiereAprobacion && p.estado !== 'aprobada') {
+                        btns += '<button type="button" class="btn btn-success btn-sm" data-comite-aprobar="' + rid + '" style="background:#10b981;border-color:#10b981;">Aprobar</button>';
+                    }
+                    if (p.requiereAprobacion && p.estado !== 'rechazada') {
+                        btns += '<button type="button" class="btn btn-danger btn-sm" data-comite-rechazar="' + rid + '">Rechazar</button>';
+                    }
+                    btns += '<button type="button" class="btn btn-danger btn-sm" data-comite-del="' + rid + '">Borrar</button></div>';
+                    return '<tr data-comite-id="' + rid + '">' +
+                        '<td style="white-space:nowrap;vertical-align:middle;">' + escHtml(comiteFechaDMY(p.fecha)) + '</td>' +
+                        '<td style="max-width:280px;vertical-align:middle;"><strong style="display:block;font-size:0.8125rem;">' + escHtml(p.titulo) + '</strong>' +
+                        '<span style="font-size:0.72rem;color:var(--gray-600);">' + escHtml(COMITE_CATEGORIAS[p.categoria] || p.categoria || '') + '</span></td>' +
+                        '<td style="text-align:center;white-space:nowrap;vertical-align:middle;font-size:0.8125rem;">' + escHtml(comiteEstadoLabel(p.estado)) + '</td>' +
+                        '<td style="text-align:center;vertical-align:middle;font-size:0.75rem;">' + escHtml(reqTxt) + '</td>' +
+                        '<td style="text-align:center;vertical-align:middle;font-size:0.75rem;">' + escHtml(cotTxt) + '</td>' +
+                        '<td style="text-align:center;vertical-align:middle;font-size:0.75rem;">' + escHtml(adjTxt) + '</td>' +
+                        '<td style="text-align:center;vertical-align:middle;">' + btns + '</td></tr>';
+                }).join('');
+            }
+
+            window.cargarComite = async function () {
+                propuestasComite = [];
+                if (firebaseInitialized && db) {
+                    try {
+                        var snap = await db.collection('comunidad').doc(COMITE_DOC).get();
+                        if (snap.exists) {
+                            var d = snap.data() || {};
+                            if (Array.isArray(d.propuestas)) propuestasComite = d.propuestas;
+                        }
+                    } catch (e) {
+                        console.error('Comité leer Firestore:', e);
+                    }
+                }
+                if (!propuestasComite.length) {
+                    try {
+                        var raw = localStorage.getItem(lsKey(COMITE_LS));
+                        if (raw) propuestasComite = JSON.parse(raw) || [];
+                    } catch (e2) { /* ignore */ }
+                }
+                if (!Array.isArray(propuestasComite)) propuestasComite = [];
+                bindComiteListeners();
+                var f = document.getElementById('comiteFecha');
+                if (f && !f.value) f.value = comiteHoyISO();
+                toggleCotizacionesUI();
+                renderTablaComite();
+            };
+
+            window.editarComite = function (rid) {
+                var p = propuestasComite.find(function (x) { return x.id === rid; });
+                if (!p) return;
+                limpiarFormComite();
+                var eid = document.getElementById('comiteEditId');
+                if (eid) eid.value = p.id;
+                var t = document.getElementById('comiteTitulo');
+                if (t) t.value = p.titulo || '';
+                var f = document.getElementById('comiteFecha');
+                if (f) f.value = p.fecha || '';
+                var cat = document.getElementById('comiteCategoria');
+                if (cat) cat.value = COMITE_CATEGORIAS[p.categoria] ? p.categoria : 'otro';
+                var est = document.getElementById('comiteEstado');
+                if (est) est.value = comiteNormEstado(p.estado);
+                var des = document.getElementById('comiteDescripcion');
+                if (des) des.value = p.descripcion || '';
+                var rc = document.getElementById('comiteRequiereCotizacion');
+                if (rc) rc.checked = !!p.requiereCotizacion;
+                var ra = document.getElementById('comiteRequiereAprobacion');
+                if (ra) ra.checked = !!p.requiereAprobacion;
+                var obs = document.getElementById('comiteObservaciones');
+                if (obs) obs.value = p.observaciones || '';
+                comiteLinksTemp = Array.isArray(p.links) ? p.links.map(function (l) { return { titulo: l.titulo || '', url: l.url || '' }; }) : [];
+                comiteDocsExistentes = Array.isArray(p.documentos) ? p.documentos.slice() : [];
+                renderLinksTemp();
+                renderDocsExistentes();
+                var cots = Array.isArray(p.cotizaciones) ? p.cotizaciones : [];
+                [1, 2, 3].forEach(function (n) {
+                    var c = cots.find(function (x) { return Number(x.n) === n; }) || cots[n - 1] || {};
+                    var pr = document.getElementById('comiteCot' + n + 'Proveedor');
+                    var mo = document.getElementById('comiteCot' + n + 'Monto');
+                    var de = document.getElementById('comiteCot' + n + 'Detalle');
+                    var li = document.getElementById('comiteCot' + n + 'Link');
+                    if (pr) pr.value = c.proveedor || '';
+                    if (mo) mo.value = (c.monto != null && c.monto !== '') ? c.monto : '';
+                    if (de) de.value = c.detalle || '';
+                    if (li) li.value = c.link || '';
+                    comiteCotDocsExistentes[n] = c.documento || null;
+                    renderCotDocActual(n);
+                });
+                if (p.cotizacionElegida) {
+                    var rad = document.querySelector('input[name="comiteCotElegida"][value="' + p.cotizacionElegida + '"]');
+                    if (rad) rad.checked = true;
+                }
+                toggleCotizacionesUI();
+                var gb = document.getElementById('btnGuardarComite');
+                if (gb) gb.textContent = 'Actualizar propuesta';
+                var root = document.getElementById('comite');
+                if (root) window.scrollTo({ top: root.offsetTop - 20, behavior: 'smooth' });
+            };
+
+            window.eliminarComite = async function (rid) {
+                var ok = await confirmarAccion('¿Eliminar esta propuesta del comité y sus archivos en Storage (si aplica)?', 'Eliminar');
+                if (!ok) return;
+                var p = propuestasComite.find(function (x) { return x.id === rid; });
+                if (p && storage && firebaseInitialized) {
+                    var paths = [];
+                    (p.documentos || []).forEach(function (d) { if (d.storagePath) paths.push(d.storagePath); });
+                    (p.cotizaciones || []).forEach(function (c) {
+                        if (c.documento && c.documento.storagePath) paths.push(c.documento.storagePath);
+                    });
+                    for (var i = 0; i < paths.length; i++) {
+                        try { await eliminarArchivoStorage(paths[i]); } catch (e) { /* ignore */ }
+                    }
+                }
+                propuestasComite = propuestasComite.filter(function (x) { return x.id !== rid; });
+                await guardarComiteFirestore();
+                renderTablaComite();
+                limpiarFormComite();
+                mostrarAlerta('Propuesta eliminada.', 'Comité');
+            };
+
+            window.decidirComite = async function (rid, estado) {
+                var p = propuestasComite.find(function (x) { return x.id === rid; });
+                if (!p) return;
+                if (!p.requiereAprobacion) {
+                    mostrarAlerta('Esta propuesta no requiere aprobación del comité.', 'Comité');
+                    return;
+                }
+                var label = estado === 'aprobada' ? 'aprobar' : 'rechazar';
+                var ok = await confirmarAccion('¿Confirma ' + label + ' la propuesta «' + (p.titulo || '') + '»?', 'Decisión del comité');
+                if (!ok) return;
+                p.estado = estado;
+                p.fechaDecision = comiteHoyISO();
+                p.actualizadoEn = new Date().toISOString();
+                await guardarComiteFirestore();
+                renderTablaComite();
+                mostrarAlerta('Propuesta marcada como ' + (estado === 'aprobada' ? 'aprobada' : 'rechazada') + '.', 'Comité');
+            };
+
+            async function subirDocComite(file, subruta) {
+                if (!file || typeof subirArchivoStorage !== 'function') return null;
+                var ruta = 'comite/' + subruta + '/' + Date.now() + '_' + comiteSafeName(file.name);
+                var url = await subirArchivoStorage(file, ruta);
+                if (!url) return null;
+                return { nombre: file.name, url: url, storagePath: ruta, tipo: file.type || '', size: file.size || 0 };
+            }
+
+            window.guardarPropuestaComite = async function (ev) {
+                if (ev && ev.preventDefault) ev.preventDefault();
+                var titulo = (document.getElementById('comiteTitulo') || {}).value;
+                var fecha = (document.getElementById('comiteFecha') || {}).value;
+                var descripcion = (document.getElementById('comiteDescripcion') || {}).value;
+                titulo = String(titulo || '').trim();
+                fecha = String(fecha || '').trim();
+                descripcion = String(descripcion || '').trim();
+                if (!titulo || !fecha || !descripcion) {
+                    mostrarAlerta('Complete título, fecha y descripción.', 'Comité');
+                    return;
+                }
+                var eid = document.getElementById('comiteEditId');
+                var id = eid && eid.value ? eid.value : comiteIdNuevo();
+                var requiereCotizacion = !!(document.getElementById('comiteRequiereCotizacion') || {}).checked;
+                var requiereAprobacion = !!(document.getElementById('comiteRequiereAprobacion') || {}).checked;
+                var estado = comiteNormEstado((document.getElementById('comiteEstado') || {}).value);
+                var categoria = (document.getElementById('comiteCategoria') || {}).value || 'otro';
+                var observaciones = String((document.getElementById('comiteObservaciones') || {}).value || '').trim();
+                var elegidaRad = document.querySelector('input[name="comiteCotElegida"]:checked');
+                var cotizacionElegida = elegidaRad ? parseInt(elegidaRad.value, 10) : null;
+
+                if (typeof mostrarProgreso === 'function') mostrarProgreso('Guardando propuesta…');
+
+                var cotizaciones = [];
+                if (requiereCotizacion) {
+                    for (var n = 1; n <= 3; n++) {
+                        var cot = leerCotizacionForm(n);
+                        var fileInp = document.getElementById('comiteCot' + n + 'Archivo');
+                        if (fileInp && fileInp.files && fileInp.files[0]) {
+                            var up = await subirDocComite(fileInp.files[0], id + '/cot' + n);
+                            if (up) cot.documento = up;
+                        }
+                        if (cotizacionTieneDatos(cot) || cot.documento) cotizaciones.push(cot);
+                    }
+                }
+
+                var documentos = comiteDocsExistentes.slice();
+                var docsInp = document.getElementById('comiteDocumentos');
+                if (docsInp && docsInp.files && docsInp.files.length) {
+                    for (var i = 0; i < docsInp.files.length; i++) {
+                        var du = await subirDocComite(docsInp.files[i], id + '/docs');
+                        if (du) documentos.push(du);
+                    }
+                }
+
+                var prev = propuestasComite.find(function (x) { return x.id === id; });
+                var rec = {
+                    id: id,
+                    titulo: titulo,
+                    descripcion: descripcion,
+                    fecha: fecha,
+                    categoria: categoria,
+                    estado: estado,
+                    requiereCotizacion: requiereCotizacion,
+                    requiereAprobacion: requiereAprobacion,
+                    cotizaciones: cotizaciones,
+                    cotizacionElegida: (requiereCotizacion && cotizacionElegida) ? cotizacionElegida : null,
+                    documentos: documentos,
+                    links: comiteLinksTemp.slice(),
+                    observaciones: observaciones,
+                    fechaDecision: (estado === 'aprobada' || estado === 'rechazada')
+                        ? ((prev && prev.fechaDecision) || comiteHoyISO())
+                        : (prev && prev.fechaDecision) || null,
+                    creadoEn: (prev && prev.creadoEn) || new Date().toISOString(),
+                    actualizadoEn: new Date().toISOString()
+                };
+
+                var idx = propuestasComite.findIndex(function (x) { return x.id === id; });
+                if (idx >= 0) propuestasComite[idx] = rec;
+                else propuestasComite.unshift(rec);
+
+                await guardarComiteFirestore();
+                if (typeof ocultarProgreso === 'function') ocultarProgreso();
+                renderTablaComite();
+                limpiarFormComite();
+                mostrarAlerta('Propuesta guardada.', 'Comité');
+            };
+
+            function bindComiteListeners() {
+                if (comiteListenersBound) return;
+                comiteListenersBound = true;
+                var form = document.getElementById('formComite');
+                if (form) form.addEventListener('submit', function (e) { window.guardarPropuestaComite(e); });
+                var btnCancel = document.getElementById('btnCancelarEdicionComite');
+                if (btnCancel) btnCancel.addEventListener('click', function () { limpiarFormComite(); });
+                var rc = document.getElementById('comiteRequiereCotizacion');
+                if (rc) rc.addEventListener('change', toggleCotizacionesUI);
+                var btnLink = document.getElementById('btnComiteAgregarLink');
+                if (btnLink) {
+                    btnLink.addEventListener('click', function () {
+                        var tit = document.getElementById('comiteLinkTitulo');
+                        var url = document.getElementById('comiteLinkUrl');
+                        var u = url ? String(url.value || '').trim() : '';
+                        var t = tit ? String(tit.value || '').trim() : '';
+                        if (!u) {
+                            mostrarAlerta('Ingrese una URL válida.', 'Comité');
+                            return;
+                        }
+                        if (!/^https?:\/\//i.test(u)) u = 'https://' + u;
+                        comiteLinksTemp.push({ titulo: t || u, url: u });
+                        if (tit) tit.value = '';
+                        if (url) url.value = '';
+                        renderLinksTemp();
+                    });
+                }
+                var root = document.getElementById('comite');
+                if (root) {
+                    root.addEventListener('click', function (e) {
+                        var t = e.target;
+                        if (!t) return;
+                        var btn = t.closest ? t.closest('[data-comite-edit],[data-comite-del],[data-comite-aprobar],[data-comite-rechazar],[data-comite-link-del],[data-comite-doc-del],[data-comite-cotdoc-del]') : null;
+                        if (!btn) return;
+                        if (btn.hasAttribute('data-comite-edit')) window.editarComite(btn.getAttribute('data-comite-edit'));
+                        else if (btn.hasAttribute('data-comite-del')) window.eliminarComite(btn.getAttribute('data-comite-del'));
+                        else if (btn.hasAttribute('data-comite-aprobar')) window.decidirComite(btn.getAttribute('data-comite-aprobar'), 'aprobada');
+                        else if (btn.hasAttribute('data-comite-rechazar')) window.decidirComite(btn.getAttribute('data-comite-rechazar'), 'rechazada');
+                        else if (btn.hasAttribute('data-comite-link-del')) {
+                            var li = parseInt(btn.getAttribute('data-comite-link-del'), 10);
+                            if (!isNaN(li)) { comiteLinksTemp.splice(li, 1); renderLinksTemp(); }
+                        } else if (btn.hasAttribute('data-comite-doc-del')) {
+                            var di = parseInt(btn.getAttribute('data-comite-doc-del'), 10);
+                            if (!isNaN(di)) { comiteDocsExistentes.splice(di, 1); renderDocsExistentes(); }
+                        } else if (btn.hasAttribute('data-comite-cotdoc-del')) {
+                            var cn = parseInt(btn.getAttribute('data-comite-cotdoc-del'), 10);
+                            if (!isNaN(cn)) { comiteCotDocsExistentes[cn] = null; renderCotDocActual(cn); }
+                        }
+                    });
+                }
+                ['comiteFiltroBuscar', 'comiteFiltroEstado', 'comiteFiltroReq'].forEach(function (id) {
+                    var el = document.getElementById(id);
+                    if (el) el.addEventListener('input', renderTablaComite);
+                    if (el) el.addEventListener('change', renderTablaComite);
+                });
+                var btnLimpiar = document.getElementById('btnComiteLimpiarFiltros');
+                if (btnLimpiar) {
+                    btnLimpiar.addEventListener('click', function () {
+                        var a = document.getElementById('comiteFiltroBuscar');
+                        var b = document.getElementById('comiteFiltroEstado');
+                        var c = document.getElementById('comiteFiltroReq');
+                        if (a) a.value = '';
+                        if (b) b.value = 'todos';
+                        if (c) c.value = 'todos';
+                        renderTablaComite();
+                    });
+                }
+                var btnXls = document.getElementById('btnExportarExcelComite');
+                if (btnXls) {
+                    btnXls.addEventListener('click', async function () {
+                        try {
+                            if (typeof window.exportarExcelComite === 'function') await window.exportarExcelComite({ descargar: true });
+                        } catch (err) {
+                            console.error(err);
+                            mostrarAlerta('No se pudo generar el Excel.', 'Error');
+                        }
+                    });
+                }
+            }
+
+            window.obtenerDatosComite = async function () {
+                var regs = [];
+                if (firebaseInitialized && db) {
+                    try {
+                        var snap = await db.collection('comunidad').doc(COMITE_DOC).get();
+                        if (snap.exists && Array.isArray(snap.data().propuestas)) regs = snap.data().propuestas;
+                    } catch (e) { console.error(e); }
+                }
+                if (!regs.length) {
+                    try {
+                        var raw = localStorage.getItem(lsKey(COMITE_LS));
+                        if (raw) regs = JSON.parse(raw) || [];
+                    } catch (e2) { /* ignore */ }
+                }
+                return Array.isArray(regs) ? regs : [];
+            };
+
+            window.generarExcelComiteComoAdjunto = async function (registros, opciones) {
+                opciones = opciones || {};
+                var ExcelJSLib = typeof ExcelJS !== 'undefined' ? ExcelJS : (typeof window !== 'undefined' ? window.ExcelJS : null);
+                if (!ExcelJSLib) {
+                    console.error('Comité .xlsx: ExcelJS no disponible');
+                    return null;
+                }
+                if (!Array.isArray(registros)) registros = [];
+
+                var comunidad = 'Comunidad';
+                try {
+                    if (typeof obtenerPersonalizacion === 'function') {
+                        var pers = await obtenerPersonalizacion();
+                        if (pers && pers.comunidad) comunidad = pers.comunidad;
+                    }
+                } catch (e1) {}
+                if (!comunidad || comunidad === 'Comunidad') {
+                    try { comunidad = localStorage.getItem(lsKey('nombreComunidad')) || comunidad; } catch (e2) {}
+                }
+
+                var hoy = new Date();
+                var fechaEmision = String(hoy.getDate()).padStart(2, '0') + '-' + String(hoy.getMonth() + 1).padStart(2, '0') + '-' + hoy.getFullYear();
+                var fechaArchivo = hoy.getFullYear() + '-' + String(hoy.getMonth() + 1).padStart(2, '0') + '-' + String(hoy.getDate()).padStart(2, '0');
+
+                var st = { borrador: 0, en_revision: 0, aprobada: 0, rechazada: 0 };
+                registros.forEach(function (r) { st[comiteNormEstado(r && r.estado)]++; });
+
+                function borderThin(c) {
+                    var col = c || 'FFD1D5DB';
+                    return {
+                        top: { style: 'thin', color: { argb: col } },
+                        left: { style: 'thin', color: { argb: col } },
+                        bottom: { style: 'thin', color: { argb: col } },
+                        right: { style: 'thin', color: { argb: col } }
+                    };
+                }
+                function fillSolid(argb) {
+                    return { type: 'pattern', pattern: 'solid', fgColor: { argb: argb } };
+                }
+
+                var wb = new ExcelJSLib.Workbook();
+                wb.creator = 'Gestión de Comunidad';
+                wb.created = hoy;
+                wb.title = 'Comité — ' + comunidad;
+
+                // ---- Resumen ----
+                var wsR = wb.addWorksheet('Resumen', { views: [{ showGridLines: false }] });
+                wsR.getColumn(1).width = 28;
+                wsR.getColumn(2).width = 22;
+                wsR.getColumn(3).width = 36;
+                wsR.mergeCells('A1:C1');
+                var t1 = wsR.getCell('A1');
+                t1.value = 'COMITÉ DE ADMINISTRACIÓN';
+                t1.font = { name: 'Calibri', size: 16, bold: true, color: { argb: 'FFFFFFFF' } };
+                t1.fill = fillSolid('FF5A9219');
+                t1.alignment = { vertical: 'middle', horizontal: 'left' };
+                wsR.getRow(1).height = 28;
+                wsR.mergeCells('A2:C2');
+                wsR.getCell('A2').value = comunidad;
+                wsR.getCell('A2').font = { name: 'Calibri', size: 12, bold: true, color: { argb: 'FF1F2937' } };
+                wsR.getCell('A3').value = 'Fecha de emisión';
+                wsR.getCell('B3').value = fechaEmision;
+                wsR.getCell('A4').value = 'Total propuestas';
+                wsR.getCell('B4').value = registros.length;
+                wsR.getCell('A5').value = 'Aprobadas';
+                wsR.getCell('B5').value = st.aprobada;
+                wsR.getCell('B5').font = { bold: true, color: { argb: 'FF059669' } };
+                wsR.getCell('A6').value = 'Rechazadas';
+                wsR.getCell('B6').value = st.rechazada;
+                wsR.getCell('B6').font = { bold: true, color: { argb: 'FFDC2626' } };
+                wsR.getCell('A7').value = 'En revisión';
+                wsR.getCell('B7').value = st.en_revision;
+                wsR.getCell('A8').value = 'Borradores';
+                wsR.getCell('B8').value = st.borrador;
+                wsR.getCell('A10').value = 'Notas';
+                wsR.getCell('A10').font = { bold: true };
+                wsR.mergeCells('A11:C12');
+                wsR.getCell('A11').value = 'Este reporte consolida las propuestas del comité, incluyendo requisitos de cotización/aprobación, hasta 3 cotizaciones por propuesta, documentos y enlaces de respaldo.';
+                wsR.getCell('A11').alignment = { wrapText: true, vertical: 'top' };
+
+                // ---- Propuestas ----
+                var wsP = wb.addWorksheet('Propuestas', { views: [{ state: 'frozen', ySplit: 1 }] });
+                var headersP = ['N°', 'Fecha', 'Título', 'Categoría', 'Estado', 'Req. cotización', 'Req. aprobación', 'Cotizaciones', 'Cot. elegida', 'Monto elegida', 'Documentos', 'Enlaces', 'Descripción', 'Observaciones', 'Fecha decisión'];
+                headersP.forEach(function (h, i) {
+                    var cell = wsP.getCell(1, i + 1);
+                    cell.value = h;
+                    cell.font = { name: 'Calibri', bold: true, color: { argb: 'FFFFFFFF' }, size: 11 };
+                    cell.fill = fillSolid('FF75BB21');
+                    cell.border = borderThin('FF4B7A12');
+                    cell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
+                });
+                wsP.getRow(1).height = 22;
+                var widthsP = [6, 12, 32, 12, 14, 14, 14, 12, 12, 14, 12, 10, 40, 28, 14];
+                widthsP.forEach(function (w, i) { wsP.getColumn(i + 1).width = w; });
+
+                registros.slice().sort(function (a, b) {
+                    return String(b.fecha || '').localeCompare(String(a.fecha || ''));
+                }).forEach(function (p, idx) {
+                    var cots = (p.cotizaciones || []).filter(cotizacionTieneDatos);
+                    var elegida = null;
+                    if (p.cotizacionElegida) {
+                        elegida = cots.find(function (c) { return Number(c.n) === Number(p.cotizacionElegida); }) || null;
+                    }
+                    var row = idx + 2;
+                    var vals = [
+                        idx + 1,
+                        comiteFechaDMY(p.fecha),
+                        p.titulo || '',
+                        COMITE_CATEGORIAS[p.categoria] || p.categoria || '',
+                        comiteEstadoLabel(p.estado),
+                        p.requiereCotizacion ? 'Sí' : 'No',
+                        p.requiereAprobacion ? 'Sí' : 'No',
+                        cots.length,
+                        p.cotizacionElegida ? ('#' + p.cotizacionElegida) : '',
+                        elegida && elegida.monto != null ? Number(elegida.monto) : '',
+                        (p.documentos || []).length,
+                        (p.links || []).length,
+                        p.descripcion || '',
+                        p.observaciones || '',
+                        comiteFechaDMY(p.fechaDecision)
+                    ];
+                    vals.forEach(function (v, i) {
+                        var cell = wsP.getCell(row, i + 1);
+                        cell.value = v;
+                        cell.font = { name: 'Calibri', size: 10 };
+                        cell.border = borderThin();
+                        cell.alignment = { vertical: 'top', wrapText: true };
+                        if (i === 9 && typeof v === 'number') {
+                            cell.numFmt = '"$"#,##0';
+                        }
+                        if (i === 4) {
+                            var est = comiteNormEstado(p.estado);
+                            if (est === 'aprobada') cell.fill = fillSolid('FFD1FAE5');
+                            else if (est === 'rechazada') cell.fill = fillSolid('FFFEE2E2');
+                            else if (est === 'en_revision') cell.fill = fillSolid('FFFEF3C7');
+                        }
+                        if (idx % 2 === 1 && i !== 4) cell.fill = fillSolid('FFF9FAFB');
+                    });
+                });
+
+                // ---- Cotizaciones ----
+                var wsC = wb.addWorksheet('Cotizaciones', { views: [{ state: 'frozen', ySplit: 1 }] });
+                var headersC = ['Propuesta', 'Fecha', 'Estado', '# Cot.', 'Proveedor', 'Monto', 'Detalle', 'Link', 'Documento', 'Elegida'];
+                headersC.forEach(function (h, i) {
+                    var cell = wsC.getCell(1, i + 1);
+                    cell.value = h;
+                    cell.font = { name: 'Calibri', bold: true, color: { argb: 'FFFFFFFF' }, size: 11 };
+                    cell.fill = fillSolid('FF374151');
+                    cell.border = borderThin('FF111827');
+                    cell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
+                });
+                [28, 12, 14, 8, 22, 14, 36, 28, 24, 10].forEach(function (w, i) { wsC.getColumn(i + 1).width = w; });
+                var rCot = 2;
+                registros.forEach(function (p) {
+                    var cots = (p.cotizaciones || []).filter(cotizacionTieneDatos);
+                    if (!cots.length && p.requiereCotizacion) {
+                        var cellEmpty = [
+                            p.titulo || '', comiteFechaDMY(p.fecha), comiteEstadoLabel(p.estado),
+                            '', '(sin cotizaciones)', '', '', '', '', ''
+                        ];
+                        cellEmpty.forEach(function (v, i) {
+                            var cell = wsC.getCell(rCot, i + 1);
+                            cell.value = v;
+                            cell.font = { name: 'Calibri', size: 10, italic: true, color: { argb: 'FF6B7280' } };
+                            cell.border = borderThin();
+                        });
+                        rCot++;
+                        return;
+                    }
+                    cots.forEach(function (c) {
+                        var eleg = Number(p.cotizacionElegida) === Number(c.n);
+                        var vals = [
+                            p.titulo || '',
+                            comiteFechaDMY(p.fecha),
+                            comiteEstadoLabel(p.estado),
+                            c.n || '',
+                            c.proveedor || '',
+                            c.monto != null ? Number(c.monto) : '',
+                            c.detalle || '',
+                            c.link || '',
+                            (c.documento && (c.documento.nombre || c.documento.url)) || '',
+                            eleg ? 'Sí' : ''
+                        ];
+                        vals.forEach(function (v, i) {
+                            var cell = wsC.getCell(rCot, i + 1);
+                            cell.value = v;
+                            cell.font = { name: 'Calibri', size: 10, bold: eleg };
+                            cell.border = borderThin();
+                            cell.alignment = { vertical: 'top', wrapText: true };
+                            if (i === 5 && typeof v === 'number') cell.numFmt = '"$"#,##0';
+                            if (eleg) cell.fill = fillSolid('FFDCFCE7');
+                            if (i === 7 && c.link) {
+                                try { cell.value = { text: String(c.link), hyperlink: String(c.link) }; cell.font = { name: 'Calibri', size: 10, color: { argb: 'FF2563EB' }, underline: true }; } catch (eh) {}
+                            }
+                        });
+                        rCot++;
+                    });
+                });
+
+                // ---- Adjuntos / links ----
+                var wsA = wb.addWorksheet('Adjuntos y enlaces', { views: [{ state: 'frozen', ySplit: 1 }] });
+                ['Propuesta', 'Tipo', 'Nombre / título', 'URL'].forEach(function (h, i) {
+                    var cell = wsA.getCell(1, i + 1);
+                    cell.value = h;
+                    cell.font = { name: 'Calibri', bold: true, color: { argb: 'FFFFFFFF' } };
+                    cell.fill = fillSolid('FF0EA5E9');
+                    cell.border = borderThin();
+                });
+                [28, 12, 28, 50].forEach(function (w, i) { wsA.getColumn(i + 1).width = w; });
+                var rAdj = 2;
+                registros.forEach(function (p) {
+                    (p.documentos || []).forEach(function (d) {
+                        wsA.getCell(rAdj, 1).value = p.titulo || '';
+                        wsA.getCell(rAdj, 2).value = 'Documento';
+                        wsA.getCell(rAdj, 3).value = d.nombre || '';
+                        if (d.url) {
+                            try { wsA.getCell(rAdj, 4).value = { text: d.url, hyperlink: d.url }; } catch (e) { wsA.getCell(rAdj, 4).value = d.url; }
+                        }
+                        for (var c = 1; c <= 4; c++) { wsA.getCell(rAdj, c).border = borderThin(); wsA.getCell(rAdj, c).font = { name: 'Calibri', size: 10 }; }
+                        rAdj++;
+                    });
+                    (p.links || []).forEach(function (l) {
+                        wsA.getCell(rAdj, 1).value = p.titulo || '';
+                        wsA.getCell(rAdj, 2).value = 'Enlace';
+                        wsA.getCell(rAdj, 3).value = l.titulo || '';
+                        if (l.url) {
+                            try { wsA.getCell(rAdj, 4).value = { text: l.url, hyperlink: l.url }; } catch (e) { wsA.getCell(rAdj, 4).value = l.url; }
+                        }
+                        for (var c2 = 1; c2 <= 4; c2++) { wsA.getCell(rAdj, c2).border = borderThin(); wsA.getCell(rAdj, c2).font = { name: 'Calibri', size: 10 }; }
+                        rAdj++;
+                    });
+                });
+                if (rAdj === 2) {
+                    wsA.getCell(2, 1).value = 'Sin documentos ni enlaces registrados.';
+                    wsA.mergeCells('A2:D2');
+                }
+
+                var buffer = await wb.xlsx.writeBuffer();
+                var nombreSafe = String(comunidad || 'Comunidad').replace(/[^a-zA-Z0-9_-]/g, '_').replace(/_+/g, '_');
+                var nombreArchivo = 'Comite_Propuestas_' + nombreSafe + '_' + fechaArchivo + '.xlsx';
+                if (opciones.descargar) {
+                    var blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+                    var a = document.createElement('a');
+                    a.href = URL.createObjectURL(blob);
+                    a.download = nombreArchivo;
+                    document.body.appendChild(a);
+                    a.click();
+                    setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1500);
+                }
+                var adjunto = typeof adjuntoXlsxBufferComoMail === 'function'
+                    ? adjuntoXlsxBufferComoMail(buffer, nombreArchivo)
+                    : null;
+                return { buffer: buffer, nombreArchivo: nombreArchivo, adjunto: adjunto, comunidad: comunidad, fechaEmision: fechaEmision, stats: st };
+            };
+
+            window.exportarExcelComite = async function (opciones) {
+                opciones = opciones || { descargar: true };
+                var regs = propuestasComite.length ? propuestasComite : await window.obtenerDatosComite();
+                if (!regs.length) {
+                    mostrarAlerta('No hay propuestas para exportar.', 'Comité');
+                    return null;
+                }
+                if (typeof mostrarProgreso === 'function') mostrarProgreso('Generando Excel profesional…');
+                try {
+                    var res = await window.generarExcelComiteComoAdjunto(regs, opciones);
+                    if (!res) mostrarAlerta('No se pudo generar el archivo Excel.', 'Error');
+                    else if (opciones.descargar) mostrarAlerta('Excel descargado correctamente.', 'Comité');
+                    return res;
+                } finally {
+                    if (typeof ocultarProgreso === 'function') ocultarProgreso();
+                }
+            };
+
+            window.enviarCorreoConReporteComite = async function () {
+                try {
+                    if (typeof mostrarProgreso === 'function') mostrarProgreso('Obteniendo propuestas del comité…');
+                    var registros = await window.obtenerDatosComite();
+                    if (!registros.length) {
+                        mostrarAlerta('No hay propuestas de comité para generar el reporte.', 'Sin Datos');
+                        return;
+                    }
+                    if (typeof mostrarProgreso === 'function') mostrarProgreso('Generando Excel profesional…');
+                    var xlsxRes = await window.generarExcelComiteComoAdjunto(registros, { descargar: false });
+                    if (!xlsxRes || !xlsxRes.adjunto) {
+                        mostrarAlerta('Error al preparar el adjunto Excel.', 'Error');
+                        return;
+                    }
+                    var nombreComunidad = xlsxRes.comunidad || 'Comunidad';
+                    var nombreMes = (typeof obtenerNombreMes === 'function' && typeof obtenerMesPeriodoVista === 'function')
+                        ? obtenerNombreMes(obtenerMesPeriodoVista())
+                        : xlsxRes.fechaEmision;
+                    var html = await generarCorreoNotificacionComite(nombreComunidad, nombreMes, '', xlsxRes.stats, registros.length);
+                    var asunto = 'Reporte Comité (propuestas) — ' + nombreComunidad + ' — ' + nombreMes;
+                    var mapPlant = await obtenerPlantillasCorreoModulosMap();
+                    var bloqueTpl = obtenerBloquePlantillaModulo(mapPlant, 'reporteComite');
+                    var ctxTpl = { nombreComunidad: nombreComunidad, nombreMes: nombreMes, fechaEmision: fechaEmisionCorreoHoy() };
+                    var asuntoEnv = resolverAsuntoPlantillaCorreo(bloqueTpl, asunto, ctxTpl);
+                    var cuerpoIni = resolverCuerpoInicioPlantillaCorreo(bloqueTpl, ctxTpl);
+                    await mostrarModalSeleccionDestinatarios(asuntoEnv, html, [xlsxRes.adjunto], { mensajeInicialPrefill: cuerpoIni });
+                } catch (error) {
+                    console.error('Error al enviar correo de comité:', error);
+                    mostrarAlerta('Ocurrió un error al preparar el correo. Intente nuevamente.', 'Error');
+                } finally {
+                    if (typeof ocultarProgreso === 'function') ocultarProgreso();
+                }
+            };
+
+            // Precarga silenciosa si el DOM ya está listo
+            if (document.getElementById('formComite')) {
+                bindComiteListeners();
+            }
+        })();
+
+        async function generarCorreoNotificacionComite(nombreComunidad, nombreMes, mensajeAdicional, stats, total) {
+            const linkEsc = (v) => String(v || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+            stats = stats || { borrador: 0, en_revision: 0, aprobada: 0, rechazada: 0 };
+            total = total != null ? total : 0;
+            let contenido = `
+                <p style="margin: 0 0 8px 0; font-size: 14px; color: #333333; line-height: 1.55;">
+                    Se adjunta el reporte profesional de <strong>Comité</strong> con las propuestas registradas
+                    (${linkEsc(total)} en total) para <strong>${linkEsc(nombreComunidad)}</strong>.
+                </p>
+                <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin: 12px 0; border-collapse: collapse;">
+                    <tr>
+                        <td style="padding: 10px 12px; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 8px; width: 25%; text-align: center;">
+                            <div style="font-size: 11px; color: #065f46;">Aprobadas</div>
+                            <div style="font-size: 18px; font-weight: 700; color: #047857;">${stats.aprobada || 0}</div>
+                        </td>
+                        <td style="width: 8px;"></td>
+                        <td style="padding: 10px 12px; background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; width: 25%; text-align: center;">
+                            <div style="font-size: 11px; color: #991b1b;">Rechazadas</div>
+                            <div style="font-size: 18px; font-weight: 700; color: #b91c1c;">${stats.rechazada || 0}</div>
+                        </td>
+                        <td style="width: 8px;"></td>
+                        <td style="padding: 10px 12px; background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; width: 25%; text-align: center;">
+                            <div style="font-size: 11px; color: #92400e;">En revisión</div>
+                            <div style="font-size: 18px; font-weight: 700; color: #b45309;">${stats.en_revision || 0}</div>
+                        </td>
+                        <td style="width: 8px;"></td>
+                        <td style="padding: 10px 12px; background: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 8px; width: 25%; text-align: center;">
+                            <div style="font-size: 11px; color: #374151;">Borradores</div>
+                            <div style="font-size: 18px; font-weight: 700; color: #4b5563;">${stats.borrador || 0}</div>
+                        </td>
+                    </tr>
+                </table>
+                <p style="margin: 8px 0 0 0; font-size: 13px; color: #555; line-height: 1.5;">
+                    El archivo Excel incluye hojas de <strong>Resumen</strong>, <strong>Propuestas</strong>, <strong>Cotizaciones</strong> y <strong>Adjuntos y enlaces</strong>.
+                </p>
+            `;
+            if (mensajeAdicional) {
+                contenido += `
+                    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color: #fff8e1; border-radius: 8px; border: 1px solid #ffecb3; margin: 12px 0;">
+                        <tr><td style="padding: 12px 14px;"><p style="margin: 0; font-size: 14px; color: #333333; line-height: 1.5;">${linkEsc(mensajeAdicional)}</p></td></tr>
+                    </table>`;
+            }
+            return generarPlantillaCorreoNotificacion('Comité — Propuestas', nombreComunidad, nombreMes, contenido, true);
+        }
+        window.generarCorreoNotificacionComite = generarCorreoNotificacionComite;
+
+
         async function cargarUnidadesOcupacion() {
             try {
                 var metricas = await obtenerMetricasVinculacion();
@@ -42200,18 +43447,19 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 }
                 
                 const resultados = await Promise.all(datosPromesas);
+                const mapaUnidadesEntregadasReporte = await mapaUnidadesEntregadasParaReporte();
                 
-                const mudanzas = filtrarMudanzasParaReporte(resultados[0] || []);
-                const aperturas = resultados[1] || [];
-                let tarjetas = resultados[2] || [];
+                const mudanzas = filtrarRegistrosUnidadEntregadaEnPlano(filtrarMudanzasParaReporte(resultados[0] || []), mapaUnidadesEntregadasReporte);
+                const aperturas = filtrarRegistrosUnidadEntregadaEnPlano(resultados[1] || [], mapaUnidadesEntregadasReporte);
+                let tarjetas = filtrarRegistrosUnidadEntregadaEnPlano(resultados[2] || [], mapaUnidadesEntregadasReporte);
                 if (datosReporteOverride && Array.isArray(datosReporteOverride.tarjetas)) {
-                    tarjetas = datosReporteOverride.tarjetas;
+                    tarjetas = filtrarRegistrosUnidadEntregadaEnPlano(datosReporteOverride.tarjetas, mapaUnidadesEntregadasReporte);
                 }
                 tarjetas = filtrarTarjetasParaReporteSinProvisionales(tarjetas);
-                const espacios = resultados[3] || [];
-                const multas = filtrarMultasParaReporte(resultados[4] || [], mesAnio);
-                const morosos = resultados[5] || [];
-                const lecturasAguaCaliente = resultados[6] || [];
+                const espacios = filtrarRegistrosUnidadEntregadaEnPlano(resultados[3] || [], mapaUnidadesEntregadasReporte);
+                const multas = filtrarRegistrosUnidadEntregadaEnPlano(filtrarMultasParaReporte(resultados[4] || [], mesAnio), mapaUnidadesEntregadasReporte);
+                const morosos = filtrarRegistrosUnidadEntregadaEnPlano(resultados[5] || [], mapaUnidadesEntregadasReporte);
+                const lecturasAguaCaliente = filtrarRegistrosUnidadEntregadaEnPlano(resultados[6] || [], mapaUnidadesEntregadasReporte);
                 
                 
                 // Calcular estadísticas con validación robusta
@@ -42283,13 +43531,13 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     const modulosPrev = ['mudanzas', 'aperturas', 'tarjetas', 'espacios', 'multas', 'morosos'];
                     const promesasPrev = modulosPrev.map(m => modulosVisibles.includes(m) ? obtenerDatosMesEspecifico(m, mesAnterior) : Promise.resolve([]));
                     const datosPrev = await Promise.all(promesasPrev).catch(() => []);
-                    const prevMudanzas = filtrarMudanzasParaReporte(datosPrev[0] || []);
-                    const prevAperturas = datosPrev[1] || [];
-                    const prevTarjetas = datosPrev[2] || [];
+                    const prevMudanzas = filtrarRegistrosUnidadEntregadaEnPlano(filtrarMudanzasParaReporte(datosPrev[0] || []), mapaUnidadesEntregadasReporte);
+                    const prevAperturas = filtrarRegistrosUnidadEntregadaEnPlano(datosPrev[1] || [], mapaUnidadesEntregadasReporte);
+                    const prevTarjetas = filtrarRegistrosUnidadEntregadaEnPlano(datosPrev[2] || [], mapaUnidadesEntregadasReporte);
                     const prevTarjetasReporte = filtrarTarjetasParaReporteSinProvisionales(prevTarjetas);
-                    const prevEspacios = datosPrev[3] || [];
-                    const prevMultas = filtrarMultasParaReporte(datosPrev[4] || [], mesAnterior);
-                    const prevMorosos = datosPrev[5] || [];
+                    const prevEspacios = filtrarRegistrosUnidadEntregadaEnPlano(datosPrev[3] || [], mapaUnidadesEntregadasReporte);
+                    const prevMultas = filtrarRegistrosUnidadEntregadaEnPlano(filtrarMultasParaReporte(datosPrev[4] || [], mesAnterior), mapaUnidadesEntregadasReporte);
+                    const prevMorosos = filtrarRegistrosUnidadEntregadaEnPlano(datosPrev[5] || [], mapaUnidadesEntregadasReporte);
                     prevMorososLista = Array.isArray(prevMorosos) ? prevMorosos : [];
                     prevTotalMudanzas = Array.isArray(prevMudanzas) ? prevMudanzas.length : 0;
                     prevMudanzasConCobro = Array.isArray(prevMudanzas) ? prevMudanzas.filter(mudanzaConCobroVigente).length : 0;
@@ -45340,6 +46588,14 @@ document.getElementById('chatForm').onsubmit = function (e) {
                             ? await obtenerDatosMes('lecturasAguaCaliente').catch(function () { return []; })
                             : await obtenerDatosArchivados('lecturasAguaCaliente', mesAnio).catch(function () { return []; });
                 }
+                var mapaUnidadesEntregadasXlsx = await mapaUnidadesEntregadasParaReporte();
+                mudanzas = filtrarRegistrosUnidadEntregadaEnPlano(mudanzas, mapaUnidadesEntregadasXlsx);
+                aperturas = filtrarRegistrosUnidadEntregadaEnPlano(aperturas, mapaUnidadesEntregadasXlsx);
+                tarjetas = filtrarRegistrosUnidadEntregadaEnPlano(tarjetas, mapaUnidadesEntregadasXlsx);
+                espacios = filtrarRegistrosUnidadEntregadaEnPlano(espacios, mapaUnidadesEntregadasXlsx);
+                multas = filtrarRegistrosUnidadEntregadaEnPlano(multas, mapaUnidadesEntregadasXlsx);
+                morosos = filtrarRegistrosUnidadEntregadaEnPlano(morosos, mapaUnidadesEntregadasXlsx);
+                lecturasAguaCaliente = filtrarRegistrosUnidadEntregadaEnPlano(lecturasAguaCaliente, mapaUnidadesEntregadasXlsx);
 
                 var ingresosMudanzas = (mudanzas || []).filter(mudanzaConCobroVigente).reduce(function (s, m) { return s + (parseFloat(m.monto) || 0); }, 0);
                 var ingresosAperturas = (aperturas || []).filter(function (a) { return a && a.aplicaCobro === 'si'; }).reduce(function (s, a) { return s + (parseFloat(a.monto) || 0); }, 0);
@@ -45372,6 +46628,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 try {
                     ocupMovXls = await cargarDatosModulo('ocupacion-movimientos', mesAnio, esPrevisualizacion);
                     if (!Array.isArray(ocupMovXls)) ocupMovXls = [];
+                    ocupMovXls = filtrarRegistrosUnidadEntregadaEnPlano(ocupMovXls, mapaUnidadesEntregadasXlsx);
                 } catch (eOcX) { ocupMovXls = []; }
                 if (ocupMovXls.length) {
                     var nIngX = ocupMovXls.filter(function (m) { return m && m.tipo === 'ingreso'; }).length;
@@ -45512,10 +46769,11 @@ document.getElementById('chatForm').onsubmit = function (e) {
                         var rep = await cargarDatosModulo('nomina-reemplazos', mesAnio, esPrevisualizacion);
                         _escribirHojaNomina(ws, nom || [], rep || []);
                     } else if (clave === 'ocupacion') {
-                        var occ = await cargarDatosModulo('ocupacion-residentes', mesAnio, esPrevisualizacion);
+                        var occ = filtrarRegistrosUnidadEntregadaEnPlano(await cargarDatosModulo('ocupacion-residentes', mesAnio, esPrevisualizacion), mapaUnidadesEntregadasXlsx);
                         var occMov = ocupMovXls;
                         if (!occMov || !occMov.length) {
                             try { occMov = await cargarDatosModulo('ocupacion-movimientos', mesAnio, esPrevisualizacion); } catch (eOccM) { occMov = []; }
+                            occMov = filtrarRegistrosUnidadEntregadaEnPlano(occMov, mapaUnidadesEntregadasXlsx);
                         }
                         _escribirHojaDesdeAOA(ws, _construirAOAOcupacion(occ || [], occMov || []));
                     } else if (clave === 'postventa') {
@@ -48324,7 +49582,8 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 'personalizacion': '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>',
                 'ocupacion': '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8h5z"/></svg>',
                 'conserjeria': '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/></svg>',
-                'postventa': '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M19 3H5c-1.1 0-2 .9-2 2v14l4-4h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 10H6.17L5 14.17V5h14v8z"/><path fill="currentColor" d="M7 9h10v2H7zm0-3h7v2H7z" opacity="0.7"/></svg>'
+                'postventa': '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M19 3H5c-1.1 0-2 .9-2 2v14l4-4h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 10H6.17L5 14.17V5h14v8z"/><path fill="currentColor" d="M7 9h10v2H7zm0-3h7v2H7z" opacity="0.7"/></svg>',
+                'comite': '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>'
             };
             
             // Mapeo de emojis a tipos
@@ -48631,6 +49890,34 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     if (!r) return;
                     if (r.estado === 'pendiente') postventaPend++;
                     else if (r.estado === 'en_proceso') postventaProc++;
+                });
+            }
+
+            let comiteRevision = 0;
+            let comiteAprobadas = 0;
+            let comiteTotal = 0;
+            if (modulosVisibles.includes('comite')) {
+                let comRegs = [];
+                if (firebaseInitialized && db) {
+                    try {
+                        const comSnap = await db.collection('comunidad').doc('comite').get();
+                        if (comSnap.exists) {
+                            const cd = comSnap.data();
+                            if (Array.isArray(cd.propuestas)) comRegs = cd.propuestas;
+                        }
+                    } catch (comE) { console.warn('Dashboard comité:', comE); }
+                }
+                if (!comRegs.length) {
+                    try {
+                        const raw = localStorage.getItem(lsKey('comite-propuestas'));
+                        if (raw) comRegs = JSON.parse(raw) || [];
+                    } catch (eLs) {}
+                }
+                comiteTotal = comRegs.length;
+                comRegs.forEach(function (p) {
+                    if (!p) return;
+                    if (p.estado === 'en_revision' || p.estado === 'borrador') comiteRevision++;
+                    else if (p.estado === 'aprobada') comiteAprobadas++;
                 });
             }
             
@@ -49294,6 +50581,34 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 }
             }
 
+            if (modulosVisibles.includes('comite')) {
+                if (comiteRevision > 0) {
+                    stats.push({
+                        title: 'Comité',
+                        value: comiteRevision,
+                        subtitle: comiteRevision === 1
+                            ? '1 propuesta pendiente de decisión'
+                            : comiteRevision + ' propuestas pendientes de decisión',
+                        icon: 'comite',
+                        iconClass: 'warning',
+                        gradient: 'linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(245, 158, 11, 0.05) 100%)',
+                        semaforo: 'amarillo'
+                    });
+                } else {
+                    stats.push({
+                        title: 'Comité',
+                        value: comiteTotal,
+                        subtitle: comiteAprobadas > 0
+                            ? (comiteAprobadas + ' aprobada' + (comiteAprobadas !== 1 ? 's' : '') + (comiteTotal ? ' · ' + comiteTotal + ' total' : ''))
+                            : (comiteTotal ? comiteTotal + ' propuesta' + (comiteTotal !== 1 ? 's' : '') : 'Sin propuestas registradas'),
+                        icon: 'comite',
+                        iconClass: 'success',
+                        gradient: 'linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(16, 185, 129, 0.05) 100%)',
+                        semaforo: 'verde'
+                    });
+                }
+            }
+
             if (modulosVisibles.includes('conserjeria')) {
                 const rCons = (typeof resumenModuloConserjeriaDesdeCache === 'function') ? resumenModuloConserjeriaDesdeCache() : {};
                 const totalNov = (rCons && rCons.totalNovedades != null) ? rCons.totalNovedades : null;
@@ -49551,7 +50866,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                                 semaforoHTML = '<div class="dashboard2-card-semaforo" style="background:' + colorSemaforo + '"></div>';
                             }
                             var iconTipo = stat.icon || 'dashboard';
-                            if (stat.title === 'Mudanzas') iconTipo = 'mudanzas'; else if (stat.title === 'Aperturas') iconTipo = 'aperturas'; else if (stat.title === 'Tarjetas/TAG') iconTipo = 'tarjetas'; else if (stat.title === 'Espacios') iconTipo = 'espacios'; else if (stat.title === 'Multas') iconTipo = 'multas'; else if (stat.title === 'Morosos') iconTipo = 'morosos'; else if (stat.title === 'Caja Chica') iconTipo = 'caja'; else if (stat.title === 'Mantenciones') iconTipo = 'mantenciones'; else if (stat.title === 'Aseos Pendientes') iconTipo = 'aseo'; else if (stat.title === 'Última Nómina') iconTipo = 'nomina'; else if (stat.title === 'Proveedores') iconTipo = 'proveedores'; else if (stat.title === 'Postventa') iconTipo = 'postventa'; else if (stat.title === 'Lecturas Agua Caliente') iconTipo = 'agua'; else if (stat.title === 'Pedido de Insumos') iconTipo = 'insumos';
+                            if (stat.title === 'Mudanzas') iconTipo = 'mudanzas'; else if (stat.title === 'Aperturas') iconTipo = 'aperturas'; else if (stat.title === 'Tarjetas/TAG') iconTipo = 'tarjetas'; else if (stat.title === 'Espacios') iconTipo = 'espacios'; else if (stat.title === 'Multas') iconTipo = 'multas'; else if (stat.title === 'Morosos') iconTipo = 'morosos'; else if (stat.title === 'Caja Chica') iconTipo = 'caja'; else if (stat.title === 'Mantenciones') iconTipo = 'mantenciones'; else if (stat.title === 'Aseos Pendientes') iconTipo = 'aseo'; else if (stat.title === 'Última Nómina') iconTipo = 'nomina'; else if (stat.title === 'Proveedores') iconTipo = 'proveedores'; else if (stat.title === 'Postventa') iconTipo = 'postventa'; else if (stat.title === 'Comité') iconTipo = 'comite'; else if (stat.title === 'Lecturas Agua Caliente') iconTipo = 'agua'; else if (stat.title === 'Pedido de Insumos') iconTipo = 'insumos';
                             var iconoSVG = typeof obtenerIconoSVG === 'function' ? obtenerIconoSVG(iconTipo) : '';
                             var sub = stat.subtitle ? '<div class="dashboard2-card-sub">' + stat.subtitle + '</div>' : '';
                             var tabId = (stat.onClickTab && String(stat.onClickTab).replace(/\\/g, '').replace(/'/g, '')) || '';
@@ -51209,6 +52524,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 'ocupacion': 'ocupacion',
                 'conserjeria': 'conserjeria',
                 'postventa': 'postventa',
+                'comite': 'comite',
                 'personalizacion': 'personalizacion'
             };
             
@@ -51247,7 +52563,8 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 'tituloNomina': 'nomina',
                 'tituloInsumos': 'insumos',
                 'tituloConserjeria': 'conserjeria',
-                'tituloPostventa': 'postventa'
+                'tituloPostventa': 'postventa',
+                'tituloComite': 'comite'
             };
             
             Object.entries(titulosModulos).forEach(([idTitulo, iconoTipo]) => {
@@ -52313,6 +53630,20 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     });
                 } else {
                     console.warn('El botón btnEnviarCorreoPostventa no se encontró en el DOM');
+                }
+
+                const btnEnviarCorreoComite = document.getElementById('btnEnviarCorreoComite');
+                if (btnEnviarCorreoComite) {
+                    btnEnviarCorreoComite.addEventListener('click', async function() {
+                        try {
+                            const fn = window.enviarCorreoConReporteComite || enviarCorreoConReporteComite;
+                            if (typeof fn === 'function') await fn();
+                            else mostrarAlerta('La función de envío de correo de Comité no está disponible. Recargue la página.', 'Error');
+                        } catch (error) {
+                            console.error('Error al enviar correo de comité:', error);
+                            mostrarAlerta('Ocurrió un error al enviar el correo: ' + (error.message || 'Error desconocido'), 'Error');
+                        }
+                    });
                 }
                 
                 const btnCorreoPostventaPendientesNuevos = document.getElementById('btnCorreoPostventaPendientesNuevos');
