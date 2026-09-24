@@ -9446,6 +9446,24 @@
                                 Requiere aprobación del comité
                             </label>
                         </div>
+                        <div id="comiteValorSinAprobacionWrap" class="form-group" style="margin: 0; grid-column: 1 / -1; display: none; padding: 0.75rem; border-radius: 10px; border: 1px solid rgba(117, 187, 33, 0.35); background: rgba(117, 187, 33, 0.08);">
+                            <label for="comiteValor" style="font-size: 0.8125rem; font-weight: 700; margin-bottom: 0.35rem; display: block; color: var(--text-primary);">Valor del presupuesto ($) *</label>
+                            <p style="margin: 0 0 0.5rem 0; font-size: 0.75rem; color: var(--gray-600);">Esta propuesta no requiere aprobación del comité. Indique el valor del presupuesto.</p>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 0.5rem;">
+                                <div class="form-group" style="margin: 0;">
+                                    <label for="comiteValor" style="font-size: 0.7rem; margin-bottom: 0.2rem; display: block;">Monto / valor</label>
+                                    <input type="number" id="comiteValor" class="form-input" min="0" step="1" placeholder="Ej: 250000" style="padding: 0.45rem 0.55rem; font-size: 0.875rem; width: 100%; font-weight: 600;">
+                                </div>
+                                <div class="form-group" style="margin: 0;">
+                                    <label for="comiteValorProveedor" style="font-size: 0.7rem; margin-bottom: 0.2rem; display: block;">Proveedor (opcional)</label>
+                                    <input type="text" id="comiteValorProveedor" class="form-input" placeholder="Nombre del proveedor" style="padding: 0.45rem 0.55rem; font-size: 0.8125rem; width: 100%;">
+                                </div>
+                                <div class="form-group" style="margin: 0;">
+                                    <label for="comiteValorLink" style="font-size: 0.7rem; margin-bottom: 0.2rem; display: block;">Link del presupuesto (opcional)</label>
+                                    <input type="url" id="comiteValorLink" class="form-input" placeholder="https://…" style="padding: 0.45rem 0.55rem; font-size: 0.8125rem; width: 100%;">
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <div id="comiteCotizacionesWrap" style="margin-top: 1rem;">
@@ -9561,7 +9579,7 @@
                                 <th style="padding: 0.75rem; text-align: left; font-weight: 600;">Propuesta</th>
                                 <th style="padding: 0.75rem; text-align: center; font-weight: 600;">Estado</th>
                                 <th style="padding: 0.75rem; text-align: center; font-weight: 600;">Requisitos</th>
-                                <th style="padding: 0.75rem; text-align: center; font-weight: 600;">Cotizaciones</th>
+                                <th style="padding: 0.75rem; text-align: center; font-weight: 600;">Valor / Cotiz.</th>
                                 <th style="padding: 0.75rem; text-align: center; font-weight: 600;">Adjuntos</th>
                                 <th style="padding: 0.75rem; text-align: center; font-weight: 600; width: 200px;">Acciones</th>
                             </tr>
@@ -41475,8 +41493,43 @@ document.getElementById('chatForm').onsubmit = function (e) {
             function toggleCotizacionesUI() {
                 var wrap = document.getElementById('comiteCotizacionesWrap');
                 var cb = document.getElementById('comiteRequiereCotizacion');
-                if (!wrap || !cb) return;
-                wrap.style.display = cb.checked ? '' : 'none';
+                if (wrap && cb) wrap.style.display = cb.checked ? '' : 'none';
+                toggleValorSinAprobacionUI();
+            }
+
+            function toggleValorSinAprobacionUI() {
+                var wrap = document.getElementById('comiteValorSinAprobacionWrap');
+                var ra = document.getElementById('comiteRequiereAprobacion');
+                var valorInp = document.getElementById('comiteValor');
+                if (!wrap || !ra) return;
+                var mostrar = !ra.checked;
+                wrap.style.display = mostrar ? '' : 'none';
+                if (valorInp) {
+                    if (mostrar) valorInp.setAttribute('required', 'required');
+                    else valorInp.removeAttribute('required');
+                }
+            }
+
+            function leerValorSinAprobacion() {
+                var mon = document.getElementById('comiteValor');
+                var prov = document.getElementById('comiteValorProveedor');
+                var link = document.getElementById('comiteValorLink');
+                var montoRaw = mon && mon.value !== '' ? mon.value : '';
+                return {
+                    monto: montoRaw !== '' ? (parseFloat(montoRaw) || 0) : null,
+                    proveedor: prov ? String(prov.value || '').trim() : '',
+                    link: link ? String(link.value || '').trim() : ''
+                };
+            }
+
+            function comiteValorMostrar(p) {
+                if (!p) return null;
+                if (!p.requiereAprobacion && p.valor != null && p.valor !== '') return Number(p.valor);
+                if (p.cotizacionElegida && Array.isArray(p.cotizaciones)) {
+                    var eleg = p.cotizaciones.find(function (c) { return Number(c.n) === Number(p.cotizacionElegida); });
+                    if (eleg && eleg.monto != null) return Number(eleg.monto);
+                }
+                return null;
             }
 
             function renderLinksTemp() {
@@ -41538,6 +41591,12 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 if (ra) ra.checked = true;
                 var obs = document.getElementById('comiteObservaciones');
                 if (obs) obs.value = '';
+                var val = document.getElementById('comiteValor');
+                if (val) val.value = '';
+                var valProv = document.getElementById('comiteValorProveedor');
+                if (valProv) valProv.value = '';
+                var valLink = document.getElementById('comiteValorLink');
+                if (valLink) valLink.value = '';
                 [1, 2, 3].forEach(function (n) {
                     var p = document.getElementById('comiteCot' + n + 'Proveedor');
                     var m = document.getElementById('comiteCot' + n + 'Monto');
@@ -41631,12 +41690,21 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 }
                 tbody.innerHTML = list.map(function (p) {
                     var cots = (p.cotizaciones || []).filter(cotizacionTieneDatos);
-                    var cotTxt = p.requiereCotizacion
-                        ? (cots.length + '/3' + (p.cotizacionElegida ? ' · #' + p.cotizacionElegida + ' elegida' : ''))
-                        : 'No requiere';
+                    var cotTxt;
+                    if (!p.requiereAprobacion) {
+                        cotTxt = (p.valor != null && p.valor !== '')
+                            ? comiteFmtMonto(p.valor)
+                            : 'Sin valor';
+                        if (p.valorProveedor) cotTxt += ' · ' + p.valorProveedor;
+                    } else if (p.requiereCotizacion) {
+                        cotTxt = cots.length + '/3' + (p.cotizacionElegida ? ' · #' + p.cotizacionElegida + ' elegida' : '');
+                    } else {
+                        cotTxt = 'No requiere';
+                    }
                     var reqs = [];
                     if (p.requiereCotizacion) reqs.push('Cotiz.');
                     if (p.requiereAprobacion) reqs.push('Aprob.');
+                    else reqs.push('Sin aprob.');
                     var reqTxt = reqs.length ? reqs.join(' + ') : '—';
                     var nDocs = (p.documentos || []).length;
                     var nLinks = (p.links || []).length;
@@ -41715,6 +41783,12 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 if (ra) ra.checked = !!p.requiereAprobacion;
                 var obs = document.getElementById('comiteObservaciones');
                 if (obs) obs.value = p.observaciones || '';
+                var val = document.getElementById('comiteValor');
+                if (val) val.value = (p.valor != null && p.valor !== '') ? p.valor : '';
+                var valProv = document.getElementById('comiteValorProveedor');
+                if (valProv) valProv.value = p.valorProveedor || '';
+                var valLink = document.getElementById('comiteValorLink');
+                if (valLink) valLink.value = p.valorLink || '';
                 comiteLinksTemp = Array.isArray(p.links) ? p.links.map(function (l) { return { titulo: l.titulo || '', url: l.url || '' }; }) : [];
                 comiteDocsExistentes = Array.isArray(p.documentos) ? p.documentos.slice() : [];
                 renderLinksTemp();
@@ -41812,6 +41886,16 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 var observaciones = String((document.getElementById('comiteObservaciones') || {}).value || '').trim();
                 var elegidaRad = document.querySelector('input[name="comiteCotElegida"]:checked');
                 var cotizacionElegida = elegidaRad ? parseInt(elegidaRad.value, 10) : null;
+                var valorData = leerValorSinAprobacion();
+
+                if (!requiereAprobacion) {
+                    if (valorData.monto == null || isNaN(valorData.monto)) {
+                        mostrarAlerta('Indique el valor del presupuesto (obligatorio cuando no requiere aprobación).', 'Comité');
+                        var valorInp = document.getElementById('comiteValor');
+                        if (valorInp) valorInp.focus();
+                        return;
+                    }
+                }
 
                 if (typeof mostrarProgreso === 'function') mostrarProgreso('Guardando propuesta…');
 
@@ -41837,6 +41921,15 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     }
                 }
 
+                // Si no requiere aprobación y dejó un link de valor, agregarlo a links si no existe
+                var linksFinal = comiteLinksTemp.slice();
+                if (!requiereAprobacion && valorData.link) {
+                    var linkNorm = valorData.link;
+                    if (!/^https?:\/\//i.test(linkNorm)) linkNorm = 'https://' + linkNorm;
+                    var ya = linksFinal.some(function (l) { return String(l.url || '') === linkNorm; });
+                    if (!ya) linksFinal.push({ titulo: 'Presupuesto / valor', url: linkNorm });
+                }
+
                 var prev = propuestasComite.find(function (x) { return x.id === id; });
                 var rec = {
                     id: id,
@@ -41847,10 +41940,13 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     estado: estado,
                     requiereCotizacion: requiereCotizacion,
                     requiereAprobacion: requiereAprobacion,
+                    valor: !requiereAprobacion ? valorData.monto : null,
+                    valorProveedor: !requiereAprobacion ? (valorData.proveedor || '') : '',
+                    valorLink: !requiereAprobacion ? (valorData.link || '') : '',
                     cotizaciones: cotizaciones,
                     cotizacionElegida: (requiereCotizacion && cotizacionElegida) ? cotizacionElegida : null,
                     documentos: documentos,
-                    links: comiteLinksTemp.slice(),
+                    links: linksFinal,
                     observaciones: observaciones,
                     fechaDecision: (estado === 'aprobada' || estado === 'rechazada')
                         ? ((prev && prev.fechaDecision) || comiteHoyISO())
@@ -41879,6 +41975,8 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 if (btnCancel) btnCancel.addEventListener('click', function () { limpiarFormComite(); });
                 var rc = document.getElementById('comiteRequiereCotizacion');
                 if (rc) rc.addEventListener('change', toggleCotizacionesUI);
+                var raCb = document.getElementById('comiteRequiereAprobacion');
+                if (raCb) raCb.addEventListener('change', toggleValorSinAprobacionUI);
                 var btnLink = document.getElementById('btnComiteAgregarLink');
                 if (btnLink) {
                     btnLink.addEventListener('click', function () {
@@ -42130,12 +42228,12 @@ document.getElementById('chatForm').onsubmit = function (e) {
                         wsP.getCell(1, gc).border = borderThin('FF1E3A8A');
                     }
                 });
-                wsP.mergeCells(1, 21, 1, 23);
-                wsP.getCell(1, 21).value = 'Decisión';
+                wsP.mergeCells(1, 21, 1, 26);
+                wsP.getCell(1, 21).value = 'Valor / Decisión';
                 wsP.getCell(1, 21).font = { name: 'Calibri', bold: true, color: { argb: 'FFFFFFFF' }, size: 11 };
                 wsP.getCell(1, 21).fill = fillSolid('FF374151');
                 wsP.getCell(1, 21).alignment = { vertical: 'middle', horizontal: 'center' };
-                for (var dc = 21; dc <= 23; dc++) {
+                for (var dc = 21; dc <= 26; dc++) {
                     wsP.getCell(1, dc).fill = fillSolid('FF374151');
                     wsP.getCell(1, dc).border = borderThin('FF111827');
                 }
@@ -42146,14 +42244,14 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     'Proveedor', 'Monto', 'Link', 'Detalle',
                     'Proveedor', 'Monto', 'Link', 'Detalle',
                     'Proveedor', 'Monto', 'Link', 'Detalle',
-                    'Elegida', 'Observaciones', 'Fecha decisión'
+                    'Elegida', 'Valor (sin aprob.)', 'Proveedor valor', 'Link valor', 'Observaciones', 'Fecha decisión'
                 ];
                 var fillsP2 = [
                     'FF75BB21', 'FF75BB21', 'FF75BB21', 'FF75BB21', 'FF75BB21', 'FF75BB21', 'FF75BB21', 'FF75BB21',
                     'FF3B82F6', 'FF3B82F6', 'FF3B82F6', 'FF3B82F6',
                     'FF60A5FA', 'FF60A5FA', 'FF60A5FA', 'FF60A5FA',
                     'FF93C5FD', 'FF93C5FD', 'FF93C5FD', 'FF93C5FD',
-                    'FF6B7280', 'FF6B7280', 'FF6B7280'
+                    'FF6B7280', 'FF059669', 'FF059669', 'FF059669', 'FF6B7280', 'FF6B7280'
                 ];
                 headersP.forEach(function (h, i) {
                     var cell = wsP.getCell(2, i + 1);
@@ -42164,7 +42262,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     cell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
                 });
                 wsP.getRow(2).height = 22;
-                var widthsP = [5, 11, 28, 12, 13, 10, 10, 34, 16, 12, 12, 22, 16, 12, 12, 22, 16, 12, 12, 22, 10, 26, 12];
+                var widthsP = [5, 11, 28, 12, 13, 10, 10, 34, 16, 12, 12, 22, 16, 12, 12, 22, 16, 12, 12, 22, 10, 14, 16, 14, 26, 12];
                 widthsP.forEach(function (w, i) { wsP.getColumn(i + 1).width = w; });
 
                 regsOrdenados.forEach(function (p, idx) {
@@ -42240,17 +42338,56 @@ document.getElementById('chatForm').onsubmit = function (e) {
                         }
                     }
                     var cellEleg = wsP.getCell(row, 21);
-                    cellEleg.value = elegN ? ('#' + elegN) : '—';
+                    cellEleg.value = elegN ? ('#' + elegN) : (!p.requiereAprobacion ? 'N/A' : '—');
                     cellEleg.font = { name: 'Calibri', size: 10, bold: !!elegN };
                     cellEleg.alignment = { vertical: 'middle', horizontal: 'center' };
                     cellEleg.border = borderThin();
                     if (elegN) cellEleg.fill = fillSolid('FFDCFCE7');
-                    var cellObs = wsP.getCell(row, 22);
+
+                    var cellValor = wsP.getCell(row, 22);
+                    cellValor.border = borderThin();
+                    cellValor.alignment = { vertical: 'middle', horizontal: 'right' };
+                    if (!p.requiereAprobacion && p.valor != null && p.valor !== '') {
+                        cellValor.value = Number(p.valor);
+                        cellValor.numFmt = '"$"#,##0';
+                        cellValor.font = { name: 'Calibri', size: 10, bold: true, color: { argb: 'FF065F46' } };
+                        cellValor.fill = fillSolid('FFD1FAE5');
+                    } else {
+                        cellValor.value = '—';
+                        cellValor.font = { name: 'Calibri', size: 10, color: { argb: 'FF9CA3AF' } };
+                        cellValor.alignment = { vertical: 'middle', horizontal: 'center' };
+                    }
+
+                    var cellValProv = wsP.getCell(row, 23);
+                    cellValProv.border = borderThin();
+                    cellValProv.alignment = { vertical: 'middle', wrapText: true };
+                    if (!p.requiereAprobacion && p.valorProveedor) {
+                        cellValProv.value = p.valorProveedor;
+                        cellValProv.font = { name: 'Calibri', size: 10 };
+                        cellValProv.fill = fillSolid('FFD1FAE5');
+                    } else {
+                        cellValProv.value = '—';
+                        cellValProv.font = { name: 'Calibri', size: 10, color: { argb: 'FF9CA3AF' } };
+                        cellValProv.alignment = { vertical: 'middle', horizontal: 'center' };
+                    }
+
+                    var cellValLink = wsP.getCell(row, 24);
+                    cellValLink.border = borderThin();
+                    if (!p.requiereAprobacion && p.valorLink) {
+                        comiteLinkCell(cellValLink, p.valorLink, 'Abrir link');
+                        cellValLink.fill = fillSolid('FFD1FAE5');
+                    } else {
+                        cellValLink.value = '—';
+                        cellValLink.font = { name: 'Calibri', size: 10, color: { argb: 'FF9CA3AF' } };
+                        cellValLink.alignment = { vertical: 'middle', horizontal: 'center' };
+                    }
+
+                    var cellObs = wsP.getCell(row, 25);
                     cellObs.value = p.observaciones || '';
                     cellObs.font = { name: 'Calibri', size: 10 };
                     cellObs.border = borderThin();
                     cellObs.alignment = { vertical: 'middle', wrapText: true };
-                    var cellFd = wsP.getCell(row, 23);
+                    var cellFd = wsP.getCell(row, 26);
                     cellFd.value = comiteFechaDMY(p.fechaDecision);
                     cellFd.font = { name: 'Calibri', size: 10 };
                     cellFd.border = borderThin();
@@ -42300,7 +42437,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     'Proveedor', 'Monto', 'Link', 'Documento', 'Detalle',
                     'Proveedor', 'Monto', 'Link', 'Documento', 'Detalle',
                     'Proveedor', 'Monto', 'Link', 'Documento', 'Detalle',
-                    'Elegida', 'Monto elegido'
+                    'Elegida / tipo', 'Monto / valor'
                 ];
                 var fillsC2 = [
                     'FF374151', 'FF374151', 'FF374151', 'FF374151',
@@ -42400,22 +42537,32 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     }
 
                     var cellEl = wsC.getCell(row, 20);
-                    cellEl.value = elegN ? ('Presupuesto #' + elegN) : 'Sin elegir';
-                    cellEl.font = { name: 'Calibri', size: 10, bold: !!elegN, color: { argb: elegN ? 'FF065F46' : 'FF6B7280' } };
-                    cellEl.fill = fillSolid(elegN ? 'FFD1FAE5' : 'FFF3F4F6');
+                    if (!p.requiereAprobacion) {
+                        cellEl.value = 'Sin aprobación';
+                        cellEl.font = { name: 'Calibri', size: 10, bold: true, color: { argb: 'FF065F46' } };
+                        cellEl.fill = fillSolid('FFD1FAE5');
+                    } else {
+                        cellEl.value = elegN ? ('Presupuesto #' + elegN) : 'Sin elegir';
+                        cellEl.font = { name: 'Calibri', size: 10, bold: !!elegN, color: { argb: elegN ? 'FF065F46' : 'FF6B7280' } };
+                        cellEl.fill = fillSolid(elegN ? 'FFD1FAE5' : 'FFF3F4F6');
+                    }
                     cellEl.border = borderThin();
                     cellEl.alignment = { vertical: 'middle', horizontal: 'center' };
 
                     var cellMonEl = wsC.getCell(row, 21);
-                    if (elegCot && elegCot.monto != null && elegCot.monto !== '') {
-                        cellMonEl.value = Number(elegCot.monto);
+                    var montoFinal = null;
+                    if (!p.requiereAprobacion && p.valor != null && p.valor !== '') montoFinal = Number(p.valor);
+                    else if (elegCot && elegCot.monto != null && elegCot.monto !== '') montoFinal = Number(elegCot.monto);
+                    if (montoFinal != null && !isNaN(montoFinal)) {
+                        cellMonEl.value = montoFinal;
                         cellMonEl.numFmt = '"$"#,##0';
                         cellMonEl.font = { name: 'Calibri', size: 10, bold: true, color: { argb: 'FF065F46' } };
+                        cellMonEl.fill = fillSolid('FFD1FAE5');
                     } else {
                         cellMonEl.value = '—';
                         cellMonEl.font = { name: 'Calibri', size: 10, color: { argb: 'FF9CA3AF' } };
+                        cellMonEl.fill = fillSolid('FFF3F4F6');
                     }
-                    cellMonEl.fill = fillSolid(elegN ? 'FFD1FAE5' : 'FFF3F4F6');
                     cellMonEl.border = borderThin();
                     cellMonEl.alignment = { vertical: 'middle', horizontal: 'center' };
                     wsC.getRow(row).height = 32;
