@@ -42782,12 +42782,19 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 if (m) return m[3] + '-' + m[2] + '-' + m[1];
                 return String(f);
             };
+            const normUrl = (u) => {
+                let s = String(u || '').trim();
+                if (!s) return '';
+                if (!/^https?:\/\//i.test(s)) s = 'https://' + s;
+                return s;
+            };
             const cats = { mantencion: 'Mantención', mejora: 'Mejora', servicio: 'Servicio', compra: 'Compra', otro: 'Otro' };
             const resolverMontoLink = (p) => {
                 let monto = null;
                 let proveedor = '';
                 let link = '';
                 let detalle = '';
+                const linksExtra = [];
                 if (!p.requiereAprobacion) {
                     if (p.valor != null && p.valor !== '') monto = Number(p.valor);
                     proveedor = p.valorProveedor || '';
@@ -42805,58 +42812,151 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     if (!link && eleg.link) link = eleg.link;
                     if (eleg.detalle) detalle = eleg.detalle;
                 }
-                if (!link && Array.isArray(p.links) && p.links[0] && p.links[0].url) link = p.links[0].url;
-                return { monto, proveedor, link, detalle };
+                cots.forEach((c) => {
+                    if (c && c.link) {
+                        const u = normUrl(c.link);
+                        if (u && linksExtra.indexOf(u) === -1) linksExtra.push(u);
+                    }
+                    if (c && c.documento && c.documento.url) {
+                        const u = normUrl(c.documento.url);
+                        if (u && linksExtra.indexOf(u) === -1) linksExtra.push(u);
+                    }
+                });
+                if (link) {
+                    const u = normUrl(link);
+                    if (u && linksExtra.indexOf(u) === -1) linksExtra.unshift(u);
+                    link = u;
+                }
+                if (!link && Array.isArray(p.links) && p.links[0] && p.links[0].url) {
+                    link = normUrl(p.links[0].url);
+                    if (link && linksExtra.indexOf(link) === -1) linksExtra.unshift(link);
+                }
+                (p.documentos || []).forEach((d) => {
+                    if (d && d.url) {
+                        const u = normUrl(d.url);
+                        if (u && linksExtra.indexOf(u) === -1) linksExtra.push(u);
+                    }
+                });
+                return { monto, proveedor, link, detalle, linksExtra };
+            };
+
+            const renderLinksPresupuesto = (info) => {
+                const urls = (info.linksExtra && info.linksExtra.length)
+                    ? info.linksExtra
+                    : (info.link ? [info.link] : []);
+                if (!urls.length) return '<span style="color:#9ca3af;">Sin enlace</span>';
+                return urls.map((u, idx) => {
+                    const label = urls.length === 1 ? 'Ver presupuesto' : ('Presupuesto ' + (idx + 1));
+                    return `<a href="${linkEsc(u)}" target="_blank" rel="noopener noreferrer" style="display:inline-block;margin:2px 0;padding:4px 10px;background:#eff6ff;border:1px solid #93c5fd;border-radius:4px;color:#1d4ed8;font-size:11px;font-weight:700;text-decoration:none;">📎 ${linkEsc(label)}</a>`;
+                }).join('<br>');
+            };
+
+            const metaEstado = {
+                aprobada: {
+                    titulo: '✅ Propuestas y avances aprobados',
+                    color: '#047857',
+                    headerBg: '#047857',
+                    border: '#d1fae5',
+                    emptyBg: '#f0fdf4',
+                    rowAlt: '#f0fdf4',
+                    label: '✅ Aprobada'
+                },
+                en_revision: {
+                    titulo: '🔄 Propuestas y avances en revisión',
+                    color: '#b45309',
+                    headerBg: '#d97706',
+                    border: '#fde68a',
+                    emptyBg: '#fffbeb',
+                    rowAlt: '#fffbeb',
+                    label: '🔄 En revisión'
+                },
+                rechazada: {
+                    titulo: '❌ Propuestas y avances rechazados',
+                    color: '#b91c1c',
+                    headerBg: '#dc2626',
+                    border: '#fecaca',
+                    emptyBg: '#fef2f2',
+                    rowAlt: '#fef2f2',
+                    label: '❌ Rechazada'
+                }
+            };
+
+            const construirTablaEstado = (estadoKey, items) => {
+                const meta = metaEstado[estadoKey];
+                let filas = '';
+                if (!items.length) {
+                    filas = `
+                        <tr>
+                            <td colspan="7" style="padding: 14px 12px; text-align: center; font-size: 13px; color: #6b7280; background: ${meta.emptyBg}; border: 1px solid ${meta.border};">
+                                No hay registros en este estado.
+                            </td>
+                        </tr>`;
+                } else {
+                    items.forEach((p, i) => {
+                        const info = resolverMontoLink(p);
+                        const bg = i % 2 === 0 ? '#ffffff' : meta.rowAlt;
+                        const fechaShow = fechaDMY(p.fechaDecision || p.fecha);
+                        filas += `
+                            <tr>
+                                <td style="padding: 10px 8px; border: 1px solid ${meta.border}; font-size: 12px; color: #374151; white-space: nowrap; background: ${bg}; vertical-align: top;">${linkEsc(fechaShow)}</td>
+                                <td style="padding: 10px 8px; border: 1px solid ${meta.border}; font-size: 12px; color: #111827; background: ${bg}; vertical-align: top;">
+                                    <div style="font-weight: 700; margin: 0 0 2px 0;">${linkEsc(p.titulo || 'Sin título')}</div>
+                                    <div style="font-size: 11px; color: #6b7280;">${linkEsc(cats[p.categoria] || p.categoria || '')}</div>
+                                </td>
+                                <td style="padding: 10px 8px; border: 1px solid ${meta.border}; font-size: 12px; color: #374151; background: ${bg}; vertical-align: top;">${linkEsc(info.proveedor || '—')}</td>
+                                <td style="padding: 10px 8px; border: 1px solid ${meta.border}; font-size: 12px; color: ${meta.color}; font-weight: 700; text-align: right; white-space: nowrap; background: ${bg}; vertical-align: top;">${linkEsc(fmtMonto(info.monto))}</td>
+                                <td style="padding: 10px 8px; border: 1px solid ${meta.border}; font-size: 12px; background: ${bg}; vertical-align: top; text-align: center;">${renderLinksPresupuesto(info)}</td>
+                                <td style="padding: 10px 8px; border: 1px solid ${meta.border}; font-size: 11px; color: #4b5563; background: ${bg}; vertical-align: top;">${linkEsc(info.detalle || p.observaciones || '—')}</td>
+                                <td style="padding: 10px 8px; border: 1px solid ${meta.border}; font-size: 11px; color: ${meta.color}; font-weight: 700; text-align: center; background: ${bg}; vertical-align: top;">${meta.label}</td>
+                            </tr>`;
+                    });
+                }
+                const totalMonto = items.reduce((sum, p) => {
+                    const m = resolverMontoLink(p).monto;
+                    return sum + (m != null && !isNaN(m) ? Number(m) : 0);
+                }, 0);
+                return `
+                    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin: 18px 0 6px 0; border-collapse: collapse;">
+                        <tr>
+                            <td style="padding: 0 0 8px 0;">
+                                <div style="font-size: 15px; font-weight: 700; color: ${meta.color};">${meta.titulo}</div>
+                                <div style="font-size: 12px; color: #6b7280; margin-top: 2px;">
+                                    ${items.length} registro${items.length !== 1 ? 's' : ''}
+                                    ${totalMonto > 0 ? ' · Monto: <strong style="color:' + meta.color + ';">' + linkEsc(fmtMonto(totalMonto)) + '</strong>' : ''}
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse: collapse; width: 100%; margin-bottom: 4px;">
+                        <thead>
+                            <tr>
+                                <th style="padding: 10px 8px; background: ${meta.headerBg}; color: #ffffff; font-size: 11px; font-weight: 700; text-align: left; border: 1px solid ${meta.headerBg};">Fecha</th>
+                                <th style="padding: 10px 8px; background: ${meta.headerBg}; color: #ffffff; font-size: 11px; font-weight: 700; text-align: left; border: 1px solid ${meta.headerBg};">Propuesta</th>
+                                <th style="padding: 10px 8px; background: ${meta.headerBg}; color: #ffffff; font-size: 11px; font-weight: 700; text-align: left; border: 1px solid ${meta.headerBg};">Proveedor</th>
+                                <th style="padding: 10px 8px; background: ${meta.headerBg}; color: #ffffff; font-size: 11px; font-weight: 700; text-align: right; border: 1px solid ${meta.headerBg};">Monto</th>
+                                <th style="padding: 10px 8px; background: ${meta.headerBg}; color: #ffffff; font-size: 11px; font-weight: 700; text-align: center; border: 1px solid ${meta.headerBg};">Presupuesto / Link</th>
+                                <th style="padding: 10px 8px; background: ${meta.headerBg}; color: #ffffff; font-size: 11px; font-weight: 700; text-align: left; border: 1px solid ${meta.headerBg};">Detalle</th>
+                                <th style="padding: 10px 8px; background: ${meta.headerBg}; color: #ffffff; font-size: 11px; font-weight: 700; text-align: center; border: 1px solid ${meta.headerBg};">Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>${filas}</tbody>
+                    </table>`;
             };
 
             stats = stats || { borrador: 0, en_revision: 0, aprobada: 0, rechazada: 0 };
             total = total != null ? total : 0;
             const lista = Array.isArray(registros) ? registros : [];
-            const aprobadas = lista
-                .filter((p) => p && p.estado === 'aprobada')
-                .slice()
-                .sort((a, b) => String(b.fechaDecision || b.fecha || '').localeCompare(String(a.fechaDecision || a.fecha || '')));
-
-            let filasAprobadas = '';
-            if (!aprobadas.length) {
-                filasAprobadas = `
-                    <tr>
-                        <td colspan="7" style="padding: 14px 12px; text-align: center; font-size: 13px; color: #6b7280; background: #f9fafb; border: 1px solid #e5e7eb;">
-                            No hay propuestas aprobadas para mostrar en este reporte.
-                        </td>
-                    </tr>`;
-            } else {
-                aprobadas.forEach((p, i) => {
-                    const info = resolverMontoLink(p);
-                    const bg = i % 2 === 0 ? '#ffffff' : '#f0fdf4';
-                    const linkHtml = info.link
-                        ? `<a href="${linkEsc(info.link)}" target="_blank" rel="noopener" style="color: #1d4ed8; font-weight: 600; text-decoration: underline;">Abrir cotización</a>`
-                        : '<span style="color:#9ca3af;">—</span>';
-                    filasAprobadas += `
-                        <tr>
-                            <td style="padding: 10px 8px; border: 1px solid #d1fae5; font-size: 12px; color: #374151; white-space: nowrap; background: ${bg}; vertical-align: top;">${linkEsc(fechaDMY(p.fechaDecision || p.fecha))}</td>
-                            <td style="padding: 10px 8px; border: 1px solid #d1fae5; font-size: 12px; color: #111827; background: ${bg}; vertical-align: top;">
-                                <div style="font-weight: 700; margin: 0 0 2px 0;">${linkEsc(p.titulo || 'Sin título')}</div>
-                                <div style="font-size: 11px; color: #6b7280;">${linkEsc(cats[p.categoria] || p.categoria || '')}</div>
-                            </td>
-                            <td style="padding: 10px 8px; border: 1px solid #d1fae5; font-size: 12px; color: #374151; background: ${bg}; vertical-align: top;">${linkEsc(info.proveedor || '—')}</td>
-                            <td style="padding: 10px 8px; border: 1px solid #d1fae5; font-size: 12px; color: #047857; font-weight: 700; text-align: right; white-space: nowrap; background: ${bg}; vertical-align: top;">${linkEsc(fmtMonto(info.monto))}</td>
-                            <td style="padding: 10px 8px; border: 1px solid #d1fae5; font-size: 12px; background: ${bg}; vertical-align: top; text-align: center;">${linkHtml}</td>
-                            <td style="padding: 10px 8px; border: 1px solid #d1fae5; font-size: 11px; color: #4b5563; background: ${bg}; vertical-align: top;">${linkEsc(info.detalle || p.observaciones || '—')}</td>
-                            <td style="padding: 10px 8px; border: 1px solid #d1fae5; font-size: 11px; color: #065f46; font-weight: 700; text-align: center; background: ${bg}; vertical-align: top;">✅ Aprobada</td>
-                        </tr>`;
-                });
-            }
-
-            const totalAprobadoMonto = aprobadas.reduce((sum, p) => {
-                const m = resolverMontoLink(p).monto;
-                return sum + (m != null && !isNaN(m) ? Number(m) : 0);
-            }, 0);
+            const ordenar = (arr) => arr.slice().sort((a, b) =>
+                String(b.fechaDecision || b.fecha || '').localeCompare(String(a.fechaDecision || a.fecha || ''))
+            );
+            const aprobadas = ordenar(lista.filter((p) => p && p.estado === 'aprobada'));
+            const enRevision = ordenar(lista.filter((p) => p && p.estado === 'en_revision'));
+            const rechazadas = ordenar(lista.filter((p) => p && p.estado === 'rechazada'));
 
             let contenido = `
-                <p style="margin: 0 0 8px 0; font-size: 14px; color: #333333; line-height: 1.55;">
-                    Se adjunta el reporte profesional de <strong>Comité</strong> con las propuestas registradas
-                    (${linkEsc(total)} en total) para <strong>${linkEsc(nombreComunidad)}</strong>.
+                <p style="margin: 0 0 10px 0; font-size: 14px; color: #333333; line-height: 1.55;">
+                    Se adjunta el reporte de <strong>Comité</strong> con las <strong>propuestas y avances aprobados, en revisión y rechazados</strong>
+                    de <strong>${linkEsc(nombreComunidad)}</strong> (${linkEsc(total)} registro${total !== 1 ? 's' : ''} en total · ${linkEsc(nombreMes)}).
                 </p>
                 <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin: 12px 0; border-collapse: collapse;">
                     <tr>
@@ -42865,14 +42965,14 @@ document.getElementById('chatForm').onsubmit = function (e) {
                             <div style="font-size: 18px; font-weight: 700; color: #047857;">${stats.aprobada || 0}</div>
                         </td>
                         <td style="width: 8px;"></td>
-                        <td style="padding: 10px 12px; background: #fef2f2; border: 1px solid #fecaca; width: 25%; text-align: center;">
-                            <div style="font-size: 11px; color: #991b1b;">Rechazadas</div>
-                            <div style="font-size: 18px; font-weight: 700; color: #b91c1c;">${stats.rechazada || 0}</div>
-                        </td>
-                        <td style="width: 8px;"></td>
                         <td style="padding: 10px 12px; background: #fffbeb; border: 1px solid #fde68a; width: 25%; text-align: center;">
                             <div style="font-size: 11px; color: #92400e;">En revisión</div>
                             <div style="font-size: 18px; font-weight: 700; color: #b45309;">${stats.en_revision || 0}</div>
+                        </td>
+                        <td style="width: 8px;"></td>
+                        <td style="padding: 10px 12px; background: #fef2f2; border: 1px solid #fecaca; width: 25%; text-align: center;">
+                            <div style="font-size: 11px; color: #991b1b;">Rechazadas</div>
+                            <div style="font-size: 18px; font-weight: 700; color: #b91c1c;">${stats.rechazada || 0}</div>
                         </td>
                         <td style="width: 8px;"></td>
                         <td style="padding: 10px 12px; background: #f3f4f6; border: 1px solid #e5e7eb; width: 25%; text-align: center;">
@@ -42882,37 +42982,13 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     </tr>
                 </table>
 
-                <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin: 16px 0 8px 0; border-collapse: collapse;">
-                    <tr>
-                        <td style="padding: 0 0 8px 0;">
-                            <div style="font-size: 15px; font-weight: 700; color: #065f46;">✅ Propuestas aprobadas por el comité</div>
-                            <div style="font-size: 12px; color: #6b7280; margin-top: 2px;">
-                                ${aprobadas.length} registro${aprobadas.length !== 1 ? 's' : ''}
-                                ${totalAprobadoMonto > 0 ? ' · Total aprobado: <strong style="color:#047857;">' + linkEsc(fmtMonto(totalAprobadoMonto)) + '</strong>' : ''}
-                            </div>
-                        </td>
-                    </tr>
-                </table>
+                ${construirTablaEstado('aprobada', aprobadas)}
+                ${construirTablaEstado('en_revision', enRevision)}
+                ${construirTablaEstado('rechazada', rechazadas)}
 
-                <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse: collapse; width: 100%;">
-                    <thead>
-                        <tr>
-                            <th style="padding: 10px 8px; background: #047857; color: #ffffff; font-size: 11px; font-weight: 700; text-align: left; border: 1px solid #065f46;">Fecha</th>
-                            <th style="padding: 10px 8px; background: #047857; color: #ffffff; font-size: 11px; font-weight: 700; text-align: left; border: 1px solid #065f46;">Propuesta</th>
-                            <th style="padding: 10px 8px; background: #047857; color: #ffffff; font-size: 11px; font-weight: 700; text-align: left; border: 1px solid #065f46;">Proveedor</th>
-                            <th style="padding: 10px 8px; background: #047857; color: #ffffff; font-size: 11px; font-weight: 700; text-align: right; border: 1px solid #065f46;">Monto</th>
-                            <th style="padding: 10px 8px; background: #047857; color: #ffffff; font-size: 11px; font-weight: 700; text-align: center; border: 1px solid #065f46;">Link</th>
-                            <th style="padding: 10px 8px; background: #047857; color: #ffffff; font-size: 11px; font-weight: 700; text-align: left; border: 1px solid #065f46;">Detalle</th>
-                            <th style="padding: 10px 8px; background: #047857; color: #ffffff; font-size: 11px; font-weight: 700; text-align: center; border: 1px solid #065f46;">Estado</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${filasAprobadas}
-                    </tbody>
-                </table>
-
-                <p style="margin: 12px 0 0 0; font-size: 13px; color: #555; line-height: 1.5;">
-                    El archivo Excel adjunto incluye el detalle completo: <strong>Resumen</strong>, <strong>Propuestas</strong>, <strong>Cotizaciones</strong> y <strong>Adjuntos y enlaces</strong>.
+                <p style="margin: 14px 0 0 0; font-size: 13px; color: #555; line-height: 1.5;">
+                    En cada fila encontrará el <strong>enlace incrustado del presupuesto</strong> (botón “Ver presupuesto”).
+                    El archivo Excel adjunto incluye el detalle completo: Resumen, Propuestas, Cotizaciones y Adjuntos.
                 </p>
             `;
             if (mensajeAdicional) {
