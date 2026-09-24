@@ -42047,31 +42047,131 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 wsR.getCell('A11').value = 'Este reporte consolida las propuestas del comité, incluyendo requisitos de cotización/aprobación, hasta 3 cotizaciones por propuesta, documentos y enlaces de respaldo.';
                 wsR.getCell('A11').alignment = { wrapText: true, vertical: 'top' };
 
+                function comiteCotsOrdenadas(p) {
+                    var map = { 1: null, 2: null, 3: null };
+                    (p.cotizaciones || []).forEach(function (c) {
+                        if (!cotizacionTieneDatos(c)) return;
+                        var n = Number(c.n);
+                        if (n >= 1 && n <= 3) map[n] = c;
+                    });
+                    // Compatibilidad: si no tienen n, rellenar en orden
+                    var sinN = (p.cotizaciones || []).filter(cotizacionTieneDatos).filter(function (c) {
+                        var n = Number(c.n);
+                        return !(n >= 1 && n <= 3);
+                    });
+                    for (var i = 1; i <= 3 && sinN.length; i++) {
+                        if (!map[i]) map[i] = sinN.shift();
+                    }
+                    return [map[1], map[2], map[3]];
+                }
+                function comiteLinkCell(cell, url, label) {
+                    var u = String(url || '').trim();
+                    if (!u) {
+                        cell.value = '—';
+                        cell.font = { name: 'Calibri', size: 10, color: { argb: 'FF9CA3AF' } };
+                        cell.alignment = { vertical: 'middle', horizontal: 'center' };
+                        return;
+                    }
+                    if (!/^https?:\/\//i.test(u)) u = 'https://' + u;
+                    var txt = String(label || 'Abrir link').trim() || 'Abrir link';
+                    try {
+                        cell.value = { text: txt, hyperlink: u };
+                    } catch (e) {
+                        cell.value = u;
+                    }
+                    cell.font = { name: 'Calibri', size: 10, color: { argb: 'FF1D4ED8' }, underline: true, bold: true };
+                    cell.alignment = { vertical: 'middle', horizontal: 'center' };
+                }
+                function comiteDocCell(cell, doc) {
+                    if (!doc) {
+                        cell.value = '—';
+                        cell.font = { name: 'Calibri', size: 10, color: { argb: 'FF9CA3AF' } };
+                        cell.alignment = { vertical: 'middle', horizontal: 'center' };
+                        return;
+                    }
+                    var nombre = doc.nombre || 'Documento';
+                    if (doc.url) {
+                        try { cell.value = { text: nombre, hyperlink: doc.url }; }
+                        catch (e) { cell.value = nombre; }
+                        cell.font = { name: 'Calibri', size: 10, color: { argb: 'FF047857' }, underline: true };
+                    } else {
+                        cell.value = nombre;
+                        cell.font = { name: 'Calibri', size: 10 };
+                    }
+                    cell.alignment = { vertical: 'middle', wrapText: true };
+                }
+
+                var regsOrdenados = registros.slice().sort(function (a, b) {
+                    return String(b.fecha || '').localeCompare(String(a.fecha || '')) || String(a.titulo || '').localeCompare(String(b.titulo || ''));
+                });
+
                 // ---- Propuestas ----
-                var wsP = wb.addWorksheet('Propuestas', { views: [{ state: 'frozen', ySplit: 1 }] });
-                var headersP = ['N°', 'Fecha', 'Título', 'Categoría', 'Estado', 'Req. cotización', 'Req. aprobación', 'Cotizaciones', 'Cot. elegida', 'Monto elegida', 'Documentos', 'Enlaces', 'Descripción', 'Observaciones', 'Fecha decisión'];
-                headersP.forEach(function (h, i) {
-                    var cell = wsP.getCell(1, i + 1);
-                    cell.value = h;
+                var wsP = wb.addWorksheet('Propuestas', { views: [{ state: 'frozen', ySplit: 2 }] });
+                // Fila 1: grupos de cotizaciones
+                wsP.mergeCells(1, 1, 1, 8);
+                wsP.getCell(1, 1).value = 'Datos de la propuesta';
+                wsP.getCell(1, 1).font = { name: 'Calibri', bold: true, color: { argb: 'FFFFFFFF' }, size: 11 };
+                wsP.getCell(1, 1).fill = fillSolid('FF5A9219');
+                wsP.getCell(1, 1).alignment = { vertical: 'middle', horizontal: 'center' };
+                var cotGroupMeta = [
+                    { col: 9, fill: 'FF1E3A8A', title: 'Presupuesto 1' },
+                    { col: 13, fill: 'FF1E40AF', title: 'Presupuesto 2' },
+                    { col: 17, fill: 'FF1D4ED8', title: 'Presupuesto 3' }
+                ];
+                cotGroupMeta.forEach(function (g) {
+                    wsP.mergeCells(1, g.col, 1, g.col + 3);
+                    var cell = wsP.getCell(1, g.col);
+                    cell.value = g.title;
                     cell.font = { name: 'Calibri', bold: true, color: { argb: 'FFFFFFFF' }, size: 11 };
-                    cell.fill = fillSolid('FF75BB21');
-                    cell.border = borderThin('FF4B7A12');
+                    cell.fill = fillSolid(g.fill);
+                    cell.alignment = { vertical: 'middle', horizontal: 'center' };
+                    for (var gc = g.col; gc <= g.col + 3; gc++) {
+                        wsP.getCell(1, gc).fill = fillSolid(g.fill);
+                        wsP.getCell(1, gc).border = borderThin('FF1E3A8A');
+                    }
+                });
+                wsP.mergeCells(1, 21, 1, 23);
+                wsP.getCell(1, 21).value = 'Decisión';
+                wsP.getCell(1, 21).font = { name: 'Calibri', bold: true, color: { argb: 'FFFFFFFF' }, size: 11 };
+                wsP.getCell(1, 21).fill = fillSolid('FF374151');
+                wsP.getCell(1, 21).alignment = { vertical: 'middle', horizontal: 'center' };
+                for (var dc = 21; dc <= 23; dc++) {
+                    wsP.getCell(1, dc).fill = fillSolid('FF374151');
+                    wsP.getCell(1, dc).border = borderThin('FF111827');
+                }
+                wsP.getRow(1).height = 20;
+
+                var headersP = [
+                    'N°', 'Fecha', 'Título', 'Categoría', 'Estado', 'Req. cotiz.', 'Req. aprob.', 'Descripción',
+                    'Proveedor', 'Monto', 'Link', 'Detalle',
+                    'Proveedor', 'Monto', 'Link', 'Detalle',
+                    'Proveedor', 'Monto', 'Link', 'Detalle',
+                    'Elegida', 'Observaciones', 'Fecha decisión'
+                ];
+                var fillsP2 = [
+                    'FF75BB21', 'FF75BB21', 'FF75BB21', 'FF75BB21', 'FF75BB21', 'FF75BB21', 'FF75BB21', 'FF75BB21',
+                    'FF3B82F6', 'FF3B82F6', 'FF3B82F6', 'FF3B82F6',
+                    'FF60A5FA', 'FF60A5FA', 'FF60A5FA', 'FF60A5FA',
+                    'FF93C5FD', 'FF93C5FD', 'FF93C5FD', 'FF93C5FD',
+                    'FF6B7280', 'FF6B7280', 'FF6B7280'
+                ];
+                headersP.forEach(function (h, i) {
+                    var cell = wsP.getCell(2, i + 1);
+                    cell.value = h;
+                    cell.font = { name: 'Calibri', bold: true, color: { argb: 'FFFFFFFF' }, size: 10 };
+                    cell.fill = fillSolid(fillsP2[i]);
+                    cell.border = borderThin('FF4B5563');
                     cell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
                 });
-                wsP.getRow(1).height = 22;
-                var widthsP = [6, 12, 32, 12, 14, 14, 14, 12, 12, 14, 12, 10, 40, 28, 14];
+                wsP.getRow(2).height = 22;
+                var widthsP = [5, 11, 28, 12, 13, 10, 10, 34, 16, 12, 12, 22, 16, 12, 12, 22, 16, 12, 12, 22, 10, 26, 12];
                 widthsP.forEach(function (w, i) { wsP.getColumn(i + 1).width = w; });
 
-                registros.slice().sort(function (a, b) {
-                    return String(b.fecha || '').localeCompare(String(a.fecha || ''));
-                }).forEach(function (p, idx) {
-                    var cots = (p.cotizaciones || []).filter(cotizacionTieneDatos);
-                    var elegida = null;
-                    if (p.cotizacionElegida) {
-                        elegida = cots.find(function (c) { return Number(c.n) === Number(p.cotizacionElegida); }) || null;
-                    }
-                    var row = idx + 2;
-                    var vals = [
+                regsOrdenados.forEach(function (p, idx) {
+                    var cots = comiteCotsOrdenadas(p);
+                    var row = idx + 3;
+                    var elegN = p.cotizacionElegida ? Number(p.cotizacionElegida) : null;
+                    var baseVals = [
                         idx + 1,
                         comiteFechaDMY(p.fecha),
                         p.titulo || '',
@@ -42079,92 +42179,253 @@ document.getElementById('chatForm').onsubmit = function (e) {
                         comiteEstadoLabel(p.estado),
                         p.requiereCotizacion ? 'Sí' : 'No',
                         p.requiereAprobacion ? 'Sí' : 'No',
-                        cots.length,
-                        p.cotizacionElegida ? ('#' + p.cotizacionElegida) : '',
-                        elegida && elegida.monto != null ? Number(elegida.monto) : '',
-                        (p.documentos || []).length,
-                        (p.links || []).length,
-                        p.descripcion || '',
-                        p.observaciones || '',
-                        comiteFechaDMY(p.fechaDecision)
+                        p.descripcion || ''
                     ];
-                    vals.forEach(function (v, i) {
+                    baseVals.forEach(function (v, i) {
                         var cell = wsP.getCell(row, i + 1);
                         cell.value = v;
                         cell.font = { name: 'Calibri', size: 10 };
                         cell.border = borderThin();
-                        cell.alignment = { vertical: 'top', wrapText: true };
-                        if (i === 9 && typeof v === 'number') {
-                            cell.numFmt = '"$"#,##0';
-                        }
+                        cell.alignment = { vertical: 'middle', wrapText: true, horizontal: i === 0 || i === 5 || i === 6 ? 'center' : 'left' };
                         if (i === 4) {
                             var est = comiteNormEstado(p.estado);
                             if (est === 'aprobada') cell.fill = fillSolid('FFD1FAE5');
                             else if (est === 'rechazada') cell.fill = fillSolid('FFFEE2E2');
                             else if (est === 'en_revision') cell.fill = fillSolid('FFFEF3C7');
+                        } else if (idx % 2 === 1) {
+                            cell.fill = fillSolid('FFF9FAFB');
                         }
-                        if (idx % 2 === 1 && i !== 4) cell.fill = fillSolid('FFF9FAFB');
                     });
+                    // Presupuestos 1-3: Proveedor | Monto | Link | Detalle
+                    for (var ci = 0; ci < 3; ci++) {
+                        var c = cots[ci];
+                        var baseCol = 9 + ci * 4;
+                        var eleg = elegN === (ci + 1);
+                        var bg = eleg ? 'FFDCFCE7' : (idx % 2 === 1 ? 'FFF3F4F6' : 'FFFFFFFF');
+                        var prov = wsP.getCell(row, baseCol);
+                        var mon = wsP.getCell(row, baseCol + 1);
+                        var link = wsP.getCell(row, baseCol + 2);
+                        var det = wsP.getCell(row, baseCol + 3);
+                        [prov, mon, link, det].forEach(function (cell) {
+                            cell.border = borderThin();
+                            cell.fill = fillSolid(bg);
+                            cell.alignment = { vertical: 'middle', wrapText: true };
+                        });
+                        if (!c) {
+                            prov.value = '—';
+                            mon.value = '—';
+                            link.value = '—';
+                            det.value = '—';
+                            [prov, mon, link, det].forEach(function (cell) {
+                                cell.font = { name: 'Calibri', size: 10, color: { argb: 'FF9CA3AF' } };
+                                cell.alignment = { vertical: 'middle', horizontal: 'center' };
+                            });
+                        } else {
+                            prov.value = c.proveedor || '—';
+                            prov.font = { name: 'Calibri', size: 10, bold: eleg };
+                            if (c.monto != null && c.monto !== '') {
+                                mon.value = Number(c.monto);
+                                mon.numFmt = '"$"#,##0';
+                                mon.font = { name: 'Calibri', size: 10, bold: true };
+                                mon.alignment = { vertical: 'middle', horizontal: 'right' };
+                            } else {
+                                mon.value = '—';
+                                mon.font = { name: 'Calibri', size: 10, color: { argb: 'FF9CA3AF' } };
+                                mon.alignment = { vertical: 'middle', horizontal: 'center' };
+                            }
+                            comiteLinkCell(link, c.link, c.link ? 'Ver presupuesto' : '—');
+                            if (!c.link) link.value = '—';
+                            det.value = c.detalle || '—';
+                            det.font = { name: 'Calibri', size: 9, color: { argb: c.detalle ? 'FF374151' : 'FF9CA3AF' } };
+                        }
+                    }
+                    var cellEleg = wsP.getCell(row, 21);
+                    cellEleg.value = elegN ? ('#' + elegN) : '—';
+                    cellEleg.font = { name: 'Calibri', size: 10, bold: !!elegN };
+                    cellEleg.alignment = { vertical: 'middle', horizontal: 'center' };
+                    cellEleg.border = borderThin();
+                    if (elegN) cellEleg.fill = fillSolid('FFDCFCE7');
+                    var cellObs = wsP.getCell(row, 22);
+                    cellObs.value = p.observaciones || '';
+                    cellObs.font = { name: 'Calibri', size: 10 };
+                    cellObs.border = borderThin();
+                    cellObs.alignment = { vertical: 'middle', wrapText: true };
+                    var cellFd = wsP.getCell(row, 23);
+                    cellFd.value = comiteFechaDMY(p.fechaDecision);
+                    cellFd.font = { name: 'Calibri', size: 10 };
+                    cellFd.border = borderThin();
+                    cellFd.alignment = { vertical: 'middle', horizontal: 'center' };
+                    wsP.getRow(row).height = 28;
                 });
 
-                // ---- Cotizaciones ----
-                var wsC = wb.addWorksheet('Cotizaciones', { views: [{ state: 'frozen', ySplit: 1 }] });
-                var headersC = ['Propuesta', 'Fecha', 'Estado', '# Cot.', 'Proveedor', 'Monto', 'Detalle', 'Link', 'Documento', 'Elegida'];
+                // ---- Cotizaciones (comparativo limpio: 1 fila = 1 propuesta) ----
+                var wsC = wb.addWorksheet('Cotizaciones', { views: [{ state: 'frozen', ySplit: 2, showGridLines: false }] });
+                wsC.mergeCells(1, 1, 1, 4);
+                wsC.getCell(1, 1).value = 'Propuesta';
+                wsC.getCell(1, 1).font = { name: 'Calibri', bold: true, color: { argb: 'FFFFFFFF' }, size: 11 };
+                wsC.getCell(1, 1).fill = fillSolid('FF111827');
+                wsC.getCell(1, 1).alignment = { vertical: 'middle', horizontal: 'center' };
+                for (var hc = 1; hc <= 4; hc++) {
+                    wsC.getCell(1, hc).fill = fillSolid('FF111827');
+                    wsC.getCell(1, hc).border = borderThin('FF000000');
+                }
+                var cotColors = [
+                    { fill: 'FF1E3A8A', sub: 'FFDBEAFE' },
+                    { fill: 'FF1E40AF', sub: 'FFE0E7FF' },
+                    { fill: 'FF1D4ED8', sub: 'FFEFF6FF' }
+                ];
+                for (var cg = 0; cg < 3; cg++) {
+                    var startCol = 5 + cg * 5;
+                    wsC.mergeCells(1, startCol, 1, startCol + 4);
+                    var gCell = wsC.getCell(1, startCol);
+                    gCell.value = 'PRESUPUESTO ' + (cg + 1);
+                    gCell.font = { name: 'Calibri', bold: true, color: { argb: 'FFFFFFFF' }, size: 11 };
+                    gCell.fill = fillSolid(cotColors[cg].fill);
+                    gCell.alignment = { vertical: 'middle', horizontal: 'center' };
+                    for (var cc = startCol; cc <= startCol + 4; cc++) {
+                        wsC.getCell(1, cc).fill = fillSolid(cotColors[cg].fill);
+                        wsC.getCell(1, cc).border = borderThin('FF1E3A8A');
+                    }
+                }
+                wsC.mergeCells(1, 20, 1, 21);
+                wsC.getCell(1, 20).value = 'Resultado';
+                wsC.getCell(1, 20).font = { name: 'Calibri', bold: true, color: { argb: 'FFFFFFFF' }, size: 11 };
+                wsC.getCell(1, 20).fill = fillSolid('FF065F46');
+                wsC.getCell(1, 20).alignment = { vertical: 'middle', horizontal: 'center' };
+                wsC.getCell(1, 21).fill = fillSolid('FF065F46');
+                wsC.getRow(1).height = 22;
+
+                var headersC = [
+                    'N°', 'Fecha', 'Título', 'Estado',
+                    'Proveedor', 'Monto', 'Link', 'Documento', 'Detalle',
+                    'Proveedor', 'Monto', 'Link', 'Documento', 'Detalle',
+                    'Proveedor', 'Monto', 'Link', 'Documento', 'Detalle',
+                    'Elegida', 'Monto elegido'
+                ];
+                var fillsC2 = [
+                    'FF374151', 'FF374151', 'FF374151', 'FF374151',
+                    'FF3B82F6', 'FF3B82F6', 'FF3B82F6', 'FF3B82F6', 'FF3B82F6',
+                    'FF6366F1', 'FF6366F1', 'FF6366F1', 'FF6366F1', 'FF6366F1',
+                    'FF2563EB', 'FF2563EB', 'FF2563EB', 'FF2563EB', 'FF2563EB',
+                    'FF059669', 'FF059669'
+                ];
                 headersC.forEach(function (h, i) {
-                    var cell = wsC.getCell(1, i + 1);
+                    var cell = wsC.getCell(2, i + 1);
                     cell.value = h;
-                    cell.font = { name: 'Calibri', bold: true, color: { argb: 'FFFFFFFF' }, size: 11 };
-                    cell.fill = fillSolid('FF374151');
-                    cell.border = borderThin('FF111827');
+                    cell.font = { name: 'Calibri', bold: true, color: { argb: 'FFFFFFFF' }, size: 9 };
+                    cell.fill = fillSolid(fillsC2[i]);
+                    cell.border = borderThin('FF1F2937');
                     cell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
                 });
-                [28, 12, 14, 8, 22, 14, 36, 28, 24, 10].forEach(function (w, i) { wsC.getColumn(i + 1).width = w; });
-                var rCot = 2;
-                registros.forEach(function (p) {
-                    var cots = (p.cotizaciones || []).filter(cotizacionTieneDatos);
-                    if (!cots.length && p.requiereCotizacion) {
-                        var cellEmpty = [
-                            p.titulo || '', comiteFechaDMY(p.fecha), comiteEstadoLabel(p.estado),
-                            '', '(sin cotizaciones)', '', '', '', '', ''
-                        ];
-                        cellEmpty.forEach(function (v, i) {
-                            var cell = wsC.getCell(rCot, i + 1);
-                            cell.value = v;
-                            cell.font = { name: 'Calibri', size: 10, italic: true, color: { argb: 'FF6B7280' } };
-                            cell.border = borderThin();
-                        });
-                        rCot++;
-                        return;
-                    }
-                    cots.forEach(function (c) {
-                        var eleg = Number(p.cotizacionElegida) === Number(c.n);
-                        var vals = [
-                            p.titulo || '',
-                            comiteFechaDMY(p.fecha),
-                            comiteEstadoLabel(p.estado),
-                            c.n || '',
-                            c.proveedor || '',
-                            c.monto != null ? Number(c.monto) : '',
-                            c.detalle || '',
-                            c.link || '',
-                            (c.documento && (c.documento.nombre || c.documento.url)) || '',
-                            eleg ? 'Sí' : ''
-                        ];
-                        vals.forEach(function (v, i) {
-                            var cell = wsC.getCell(rCot, i + 1);
-                            cell.value = v;
-                            cell.font = { name: 'Calibri', size: 10, bold: eleg };
-                            cell.border = borderThin();
-                            cell.alignment = { vertical: 'top', wrapText: true };
-                            if (i === 5 && typeof v === 'number') cell.numFmt = '"$"#,##0';
-                            if (eleg) cell.fill = fillSolid('FFDCFCE7');
-                            if (i === 7 && c.link) {
-                                try { cell.value = { text: String(c.link), hyperlink: String(c.link) }; cell.font = { name: 'Calibri', size: 10, color: { argb: 'FF2563EB' }, underline: true }; } catch (eh) {}
-                            }
-                        });
-                        rCot++;
-                    });
+                wsC.getRow(2).height = 20;
+                [5, 11, 28, 13, 15, 12, 14, 16, 20, 15, 12, 14, 16, 20, 15, 12, 14, 16, 20, 10, 13].forEach(function (w, i) {
+                    wsC.getColumn(i + 1).width = w;
                 });
+
+                regsOrdenados.forEach(function (p, idx) {
+                    var cots = comiteCotsOrdenadas(p);
+                    var row = idx + 3;
+                    var elegN = p.cotizacionElegida ? Number(p.cotizacionElegida) : null;
+                    var elegCot = (elegN >= 1 && elegN <= 3) ? cots[elegN - 1] : null;
+                    var base = [
+                        idx + 1,
+                        comiteFechaDMY(p.fecha),
+                        p.titulo || '',
+                        comiteEstadoLabel(p.estado)
+                    ];
+                    base.forEach(function (v, i) {
+                        var cell = wsC.getCell(row, i + 1);
+                        cell.value = v;
+                        cell.font = { name: 'Calibri', size: 10, bold: i === 2 };
+                        cell.border = borderThin();
+                        cell.alignment = { vertical: 'middle', wrapText: true, horizontal: i === 0 || i === 1 || i === 3 ? 'center' : 'left' };
+                        var est = comiteNormEstado(p.estado);
+                        if (i === 3) {
+                            if (est === 'aprobada') cell.fill = fillSolid('FFD1FAE5');
+                            else if (est === 'rechazada') cell.fill = fillSolid('FFFEE2E2');
+                            else if (est === 'en_revision') cell.fill = fillSolid('FFFEF3C7');
+                            else cell.fill = fillSolid('FFF3F4F6');
+                        } else {
+                            cell.fill = fillSolid(idx % 2 === 1 ? 'FFF9FAFB' : 'FFFFFFFF');
+                        }
+                    });
+
+                    for (var ci2 = 0; ci2 < 3; ci2++) {
+                        var cot = cots[ci2];
+                        var col0 = 5 + ci2 * 5;
+                        var isEleg = elegN === (ci2 + 1);
+                        var bgCot = isEleg ? 'FFDCFCE7' : cotColors[ci2].sub;
+                        var cells = [];
+                        for (var k = 0; k < 5; k++) {
+                            var cellK = wsC.getCell(row, col0 + k);
+                            cellK.border = borderThin('FF93C5FD');
+                            cellK.fill = fillSolid(bgCot);
+                            cellK.alignment = { vertical: 'middle', wrapText: true };
+                            cells.push(cellK);
+                        }
+                        if (!cot) {
+                            cells[0].value = 'Sin cotización';
+                            cells[0].font = { name: 'Calibri', size: 9, italic: true, color: { argb: 'FF9CA3AF' } };
+                            cells[0].alignment = { vertical: 'middle', horizontal: 'center' };
+                            ['—', '—', '—', '—'].forEach(function (dash, di) {
+                                cells[di + 1].value = dash;
+                                cells[di + 1].font = { name: 'Calibri', size: 9, color: { argb: 'FF9CA3AF' } };
+                                cells[di + 1].alignment = { vertical: 'middle', horizontal: 'center' };
+                            });
+                        } else {
+                            cells[0].value = cot.proveedor || '—';
+                            cells[0].font = { name: 'Calibri', size: 10, bold: isEleg };
+                            if (cot.monto != null && cot.monto !== '') {
+                                cells[1].value = Number(cot.monto);
+                                cells[1].numFmt = '"$"#,##0';
+                                cells[1].font = { name: 'Calibri', size: 10, bold: true };
+                                cells[1].alignment = { vertical: 'middle', horizontal: 'right' };
+                            } else {
+                                cells[1].value = '—';
+                                cells[1].font = { name: 'Calibri', size: 9, color: { argb: 'FF9CA3AF' } };
+                                cells[1].alignment = { vertical: 'middle', horizontal: 'center' };
+                            }
+                            comiteLinkCell(cells[2], cot.link, cot.link ? 'Abrir link' : '—');
+                            comiteDocCell(cells[3], cot.documento || null);
+                            cells[4].value = cot.detalle || '—';
+                            cells[4].font = { name: 'Calibri', size: 9, color: { argb: cot.detalle ? 'FF374151' : 'FF9CA3AF' } };
+                            if (isEleg) {
+                                cells[0].border = borderThin('FF059669');
+                                cells[1].border = borderThin('FF059669');
+                                cells[2].border = borderThin('FF059669');
+                                cells[3].border = borderThin('FF059669');
+                                cells[4].border = borderThin('FF059669');
+                            }
+                        }
+                    }
+
+                    var cellEl = wsC.getCell(row, 20);
+                    cellEl.value = elegN ? ('Presupuesto #' + elegN) : 'Sin elegir';
+                    cellEl.font = { name: 'Calibri', size: 10, bold: !!elegN, color: { argb: elegN ? 'FF065F46' : 'FF6B7280' } };
+                    cellEl.fill = fillSolid(elegN ? 'FFD1FAE5' : 'FFF3F4F6');
+                    cellEl.border = borderThin();
+                    cellEl.alignment = { vertical: 'middle', horizontal: 'center' };
+
+                    var cellMonEl = wsC.getCell(row, 21);
+                    if (elegCot && elegCot.monto != null && elegCot.monto !== '') {
+                        cellMonEl.value = Number(elegCot.monto);
+                        cellMonEl.numFmt = '"$"#,##0';
+                        cellMonEl.font = { name: 'Calibri', size: 10, bold: true, color: { argb: 'FF065F46' } };
+                    } else {
+                        cellMonEl.value = '—';
+                        cellMonEl.font = { name: 'Calibri', size: 10, color: { argb: 'FF9CA3AF' } };
+                    }
+                    cellMonEl.fill = fillSolid(elegN ? 'FFD1FAE5' : 'FFF3F4F6');
+                    cellMonEl.border = borderThin();
+                    cellMonEl.alignment = { vertical: 'middle', horizontal: 'center' };
+                    wsC.getRow(row).height = 32;
+                });
+
+                if (!regsOrdenados.length) {
+                    wsC.mergeCells('A3:U3');
+                    wsC.getCell('A3').value = 'Sin propuestas con presupuestos para mostrar.';
+                    wsC.getCell('A3').font = { name: 'Calibri', size: 10, italic: true, color: { argb: 'FF6B7280' } };
+                }
 
                 // ---- Adjuntos / links ----
                 var wsA = wb.addWorksheet('Adjuntos y enlaces', { views: [{ state: 'frozen', ySplit: 1 }] });
