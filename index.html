@@ -9379,7 +9379,7 @@
                     <span style="display: inline-flex; align-items: center; width: 1.75rem; height: 1.75rem;"></span> Comité
                 </h2>
                 <p style="color: var(--gray-600); font-size: 0.875rem; margin: 0.5rem 0 0 0; max-width: 44rem; line-height: 1.5;">
-                    Gestione propuestas del comité: cotizaciones (hasta 3), documentos, enlaces, y decisión de aprobación o rechazo. Exporte a Excel profesional o envíe por correo.
+                    Gestione propuestas del comité: cotizaciones (hasta 3), documentos, enlaces, y decisión de aprobación o rechazo. Los trabajos aprobados se cierran con la fecha de realización, un comentario y los documentos de la mejora.
                 </p>
             </header>
 
@@ -9429,6 +9429,7 @@
                                 <option value="borrador">📝 Borrador</option>
                                 <option value="en_revision">🔄 En revisión</option>
                                 <option value="aprobada">✅ Aprobada</option>
+                                <option value="realizada">🏁 Realizada</option>
                                 <option value="rechazada">❌ Rechazada</option>
                             </select>
                         </div>
@@ -9559,6 +9560,7 @@
                             <option value="borrador">📝 Borrador</option>
                             <option value="en_revision">🔄 En revisión</option>
                             <option value="aprobada">✅ Aprobadas</option>
+                            <option value="realizada">🏁 Realizadas</option>
                             <option value="rechazada">❌ Rechazadas</option>
                         </select>
                         <select id="comiteFiltroReq" class="form-input" style="padding: 0.4rem 0.5rem; font-size: 0.8125rem; min-width: 150px;">
@@ -9588,6 +9590,30 @@
                     </table>
                 </div>
             </section>
+
+            <div id="modalCierreComite" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modalCierreComiteTitulo">
+                <div class="modal-confirm" style="max-width: 560px; text-align: left;">
+                    <h3 id="modalCierreComiteTitulo" style="margin: 0 0 0.35rem 0;">Cerrar trabajo aprobado</h3>
+                    <p id="modalCierreComitePropuesta" style="margin: 0 0 0.85rem 0; font-size: 0.8125rem; color: var(--gray-600); line-height: 1.45;"></p>
+                    <div class="form-group" style="margin: 0 0 0.65rem 0;">
+                        <label for="comiteCierreFecha" style="font-size: 0.75rem; margin-bottom: 0.2rem; display: block;">Fecha de realización *</label>
+                        <input type="date" id="comiteCierreFecha" class="form-input" style="padding: 0.45rem 0.55rem; font-size: 0.8125rem; width: 100%;">
+                    </div>
+                    <div class="form-group" style="margin: 0 0 0.65rem 0;">
+                        <label for="comiteCierreComentario" style="font-size: 0.75rem; margin-bottom: 0.2rem; display: block;">Comentario de la mejora *</label>
+                        <textarea id="comiteCierreComentario" rows="3" class="form-input" placeholder="Qué se hizo, quién ejecutó y el resultado del trabajo…" style="width: 100%; padding: 0.5rem 0.6rem; font-size: 0.8125rem; resize: vertical;"></textarea>
+                    </div>
+                    <div class="form-group" style="margin: 0 0 0.85rem 0;">
+                        <label for="comiteCierreArchivos" style="font-size: 0.75rem; margin-bottom: 0.2rem; display: block;">Documentos de la realización *</label>
+                        <input type="file" id="comiteCierreArchivos" multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg,.webp,.txt" style="padding: 0.3rem 0; font-size: 0.8125rem; max-width: 100%;">
+                        <div id="comiteCierreDocsLista" style="font-size: 0.75rem; color: var(--gray-600); margin-top: 0.35rem;"></div>
+                    </div>
+                    <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: flex-end;">
+                        <button type="button" class="btn btn-secondary" id="btnCancelarCierreComite" style="padding: 0.45rem 0.85rem; font-size: 0.8125rem;">Cancelar</button>
+                        <button type="button" class="btn btn-primary" id="btnGuardarCierreComite" style="padding: 0.45rem 0.9rem; font-size: 0.8125rem;">Cerrar trabajo</button>
+                    </div>
+                </div>
+            </div>
         </div>
 
 
@@ -41406,6 +41432,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 borrador: { label: 'Borrador', emoji: '📝' },
                 en_revision: { label: 'En revisión', emoji: '🔄' },
                 aprobada: { label: 'Aprobada', emoji: '✅' },
+                realizada: { label: 'Realizada', emoji: '🏁' },
                 rechazada: { label: 'Rechazada', emoji: '❌' }
             };
             var COMITE_CATEGORIAS = {
@@ -41419,6 +41446,8 @@ document.getElementById('chatForm').onsubmit = function (e) {
             var comiteLinksTemp = [];
             var comiteDocsExistentes = [];
             var comiteCotDocsExistentes = { 1: null, 2: null, 3: null };
+            var comiteCierreId = null;
+            var comiteCierreDocs = [];
             var comiteListenersBound = false;
 
             function escHtml(s) {
@@ -41429,8 +41458,15 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 return e.emoji + ' ' + e.label;
             }
             function comiteNormEstado(k) {
-                if (k === 'borrador' || k === 'en_revision' || k === 'aprobada' || k === 'rechazada') return k;
+                if (k === 'borrador' || k === 'en_revision' || k === 'aprobada' || k === 'realizada' || k === 'rechazada') return k;
                 return 'borrador';
+            }
+            function comitePuedeRegistrarCierre(p) {
+                if (!p) return false;
+                var est = comiteNormEstado(p.estado);
+                if (est === 'rechazada' || est === 'borrador') return false;
+                if (est === 'aprobada' || est === 'realizada') return true;
+                return !p.requiereAprobacion;
             }
             function comiteIdNuevo() {
                 return 'com_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 8);
@@ -41626,7 +41662,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
             function actualizarEstadisticasComite() {
                 var wrap = document.getElementById('comiteStatsWrap');
                 if (!wrap) return;
-                var st = { borrador: 0, en_revision: 0, aprobada: 0, rechazada: 0 };
+                var st = { borrador: 0, en_revision: 0, aprobada: 0, realizada: 0, rechazada: 0 };
                 propuestasComite.forEach(function (p) { st[comiteNormEstado(p.estado)]++; });
                 var total = propuestasComite.length;
                 if (!total) {
@@ -41634,7 +41670,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     return;
                 }
                 wrap.innerHTML = '<strong style="font-size:0.9rem">' + total + '</strong> total · 📝 ' + st.borrador +
-                    ' · 🔄 ' + st.en_revision + ' · ✅ ' + st.aprobada + ' · ❌ ' + st.rechazada;
+                    ' · 🔄 ' + st.en_revision + ' · ✅ ' + st.aprobada + ' · 🏁 ' + st.realizada + ' · ❌ ' + st.rechazada;
             }
 
             function comiteListaFiltrada() {
@@ -41656,6 +41692,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     if (q) {
                         var blob = [
                             p.titulo, p.descripcion, p.observaciones, p.categoria, p.estado,
+                            p.cierre && p.cierre.comentario,
                             (p.cotizaciones || []).map(function (c) { return [c.proveedor, c.detalle, c.link].join(' '); }).join(' '),
                             (p.links || []).map(function (l) { return [l.titulo, l.url].join(' '); }).join(' ')
                         ].join(' ').toLowerCase();
@@ -41708,24 +41745,33 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     var reqTxt = reqs.length ? reqs.join(' + ') : '—';
                     var nDocs = (p.documentos || []).length;
                     var nLinks = (p.links || []).length;
+                    var nCierre = (p.cierre && Array.isArray(p.cierre.documentos)) ? p.cierre.documentos.length : 0;
                     var adj = [];
                     if (nDocs) adj.push(nDocs + ' doc' + (nDocs !== 1 ? 's' : ''));
                     if (nLinks) adj.push(nLinks + ' link' + (nLinks !== 1 ? 's' : ''));
+                    if (nCierre) adj.push(nCierre + ' de cierre');
                     var adjTxt = adj.length ? adj.join(', ') : '—';
                     var rid = escHtml(p.id);
+                    var estNorm = comiteNormEstado(p.estado);
+                    var cierreLine = (p.cierre && p.cierre.fechaRealizacion)
+                        ? '<span style="display:block;font-size:0.7rem;color:#047857;margin-top:0.15rem;">🏁 Realizado ' + escHtml(comiteFechaDMY(p.cierre.fechaRealizacion)) + '</span>'
+                        : '';
                     var btns = '<div class="tabla-acciones" style="display:flex;flex-wrap:wrap;gap:0.25rem;justify-content:center;">' +
                         '<button type="button" class="btn btn-secondary btn-sm" data-comite-edit="' + rid + '">Editar</button>';
-                    if (p.requiereAprobacion && p.estado !== 'aprobada') {
+                    if (comitePuedeRegistrarCierre(p)) {
+                        btns += '<button type="button" class="btn btn-primary btn-sm" data-comite-cerrar="' + rid + '">' + (estNorm === 'realizada' ? 'Cierre' : 'Cerrar') + '</button>';
+                    }
+                    if (p.requiereAprobacion && estNorm !== 'aprobada' && estNorm !== 'realizada') {
                         btns += '<button type="button" class="btn btn-success btn-sm" data-comite-aprobar="' + rid + '" style="background:#10b981;border-color:#10b981;">Aprobar</button>';
                     }
-                    if (p.requiereAprobacion && p.estado !== 'rechazada') {
+                    if (p.requiereAprobacion && estNorm !== 'rechazada' && estNorm !== 'realizada') {
                         btns += '<button type="button" class="btn btn-danger btn-sm" data-comite-rechazar="' + rid + '">Rechazar</button>';
                     }
                     btns += '<button type="button" class="btn btn-danger btn-sm" data-comite-del="' + rid + '">Borrar</button></div>';
                     return '<tr data-comite-id="' + rid + '">' +
                         '<td style="white-space:nowrap;vertical-align:middle;">' + escHtml(comiteFechaDMY(p.fecha)) + '</td>' +
                         '<td style="max-width:280px;vertical-align:middle;"><strong style="display:block;font-size:0.8125rem;">' + escHtml(p.titulo) + '</strong>' +
-                        '<span style="font-size:0.72rem;color:var(--gray-600);">' + escHtml(COMITE_CATEGORIAS[p.categoria] || p.categoria || '') + '</span></td>' +
+                        '<span style="font-size:0.72rem;color:var(--gray-600);">' + escHtml(COMITE_CATEGORIAS[p.categoria] || p.categoria || '') + '</span>' + cierreLine + '</td>' +
                         '<td style="text-align:center;white-space:nowrap;vertical-align:middle;font-size:0.8125rem;">' + escHtml(comiteEstadoLabel(p.estado)) + '</td>' +
                         '<td style="text-align:center;vertical-align:middle;font-size:0.75rem;">' + escHtml(reqTxt) + '</td>' +
                         '<td style="text-align:center;vertical-align:middle;font-size:0.75rem;">' + escHtml(cotTxt) + '</td>' +
@@ -41828,6 +41874,9 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     (p.cotizaciones || []).forEach(function (c) {
                         if (c.documento && c.documento.storagePath) paths.push(c.documento.storagePath);
                     });
+                    if (p.cierre && Array.isArray(p.cierre.documentos)) {
+                        p.cierre.documentos.forEach(function (d) { if (d && d.storagePath) paths.push(d.storagePath); });
+                    }
                     for (var i = 0; i < paths.length; i++) {
                         try { await eliminarArchivoStorage(paths[i]); } catch (e) { /* ignore */ }
                     }
@@ -41948,7 +41997,8 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     documentos: documentos,
                     links: linksFinal,
                     observaciones: observaciones,
-                    fechaDecision: (estado === 'aprobada' || estado === 'rechazada')
+                    cierre: (prev && prev.cierre) ? prev.cierre : null,
+                    fechaDecision: (estado === 'aprobada' || estado === 'rechazada' || estado === 'realizada')
                         ? ((prev && prev.fechaDecision) || comiteHoyISO())
                         : (prev && prev.fechaDecision) || null,
                     creadoEn: (prev && prev.creadoEn) || new Date().toISOString(),
@@ -41964,6 +42014,129 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 renderTablaComite();
                 limpiarFormComite();
                 mostrarAlerta('Propuesta guardada.', 'Comité');
+            };
+
+            function renderCierreDocs() {
+                var el = document.getElementById('comiteCierreDocsLista');
+                if (!el) return;
+                if (!comiteCierreDocs.length) {
+                    el.innerHTML = '<span style="color:var(--gray-500)">Aún no hay documentos de la realización.</span>';
+                    return;
+                }
+                el.innerHTML = comiteCierreDocs.map(function (d, i) {
+                    var nombre = escHtml(d.nombre || 'documento');
+                    var link = d.url
+                        ? '<a href="' + escHtml(d.url) + '" target="_blank" rel="noopener">📄 ' + nombre + '</a>'
+                        : '📄 ' + nombre;
+                    return '<div style="display:flex;gap:0.4rem;align-items:center;margin:0.2rem 0;">' + link +
+                        '<button type="button" class="btn btn-danger btn-sm" data-comite-cierredoc-del="' + i + '" style="padding:0.1rem 0.35rem;font-size:0.65rem;">Quitar</button></div>';
+                }).join('');
+            }
+
+            function cerrarModalCierreComite() {
+                var modal = document.getElementById('modalCierreComite');
+                if (modal) modal.classList.remove('active');
+                comiteCierreId = null;
+                comiteCierreDocs = [];
+                var files = document.getElementById('comiteCierreArchivos');
+                if (files) files.value = '';
+            }
+
+            window.abrirCierreComite = function (rid) {
+                var p = propuestasComite.find(function (x) { return x.id === rid; });
+                if (!p) return;
+                if (!comitePuedeRegistrarCierre(p)) {
+                    mostrarAlerta('Solo se puede registrar la realización de un trabajo aprobado.', 'Comité');
+                    return;
+                }
+                comiteCierreId = rid;
+                comiteCierreDocs = (p.cierre && Array.isArray(p.cierre.documentos)) ? p.cierre.documentos.slice() : [];
+                var titulo = document.getElementById('modalCierreComiteTitulo');
+                var ya = comiteNormEstado(p.estado) === 'realizada';
+                if (titulo) titulo.textContent = ya ? 'Actualizar cierre del trabajo' : 'Cerrar trabajo aprobado';
+                var prop = document.getElementById('modalCierreComitePropuesta');
+                if (prop) prop.textContent = p.titulo || 'Propuesta';
+                var fecha = document.getElementById('comiteCierreFecha');
+                if (fecha) fecha.value = (p.cierre && p.cierre.fechaRealizacion) || comiteHoyISO();
+                var com = document.getElementById('comiteCierreComentario');
+                if (com) com.value = (p.cierre && p.cierre.comentario) || '';
+                var files = document.getElementById('comiteCierreArchivos');
+                if (files) files.value = '';
+                var btn = document.getElementById('btnGuardarCierreComite');
+                if (btn) btn.textContent = ya ? 'Actualizar cierre' : 'Cerrar trabajo';
+                renderCierreDocs();
+                var modal = document.getElementById('modalCierreComite');
+                if (modal) modal.classList.add('active');
+            };
+
+            window.guardarCierreComite = async function () {
+                var p = propuestasComite.find(function (x) { return x.id === comiteCierreId; });
+                if (!p) {
+                    mostrarAlerta('No se encontró la propuesta.', 'Comité');
+                    return;
+                }
+                var fechaEl = document.getElementById('comiteCierreFecha');
+                var comEl = document.getElementById('comiteCierreComentario');
+                var fecha = fechaEl ? String(fechaEl.value || '').trim() : '';
+                var comentario = comEl ? String(comEl.value || '').trim() : '';
+                if (!fecha) {
+                    mostrarAlerta('Indique la fecha de realización.', 'Comité');
+                    if (fechaEl) fechaEl.focus();
+                    return;
+                }
+                if (!comentario) {
+                    mostrarAlerta('Escriba el comentario de la mejora realizada.', 'Comité');
+                    if (comEl) comEl.focus();
+                    return;
+                }
+                var filesEl = document.getElementById('comiteCierreArchivos');
+                var nuevosFiles = (filesEl && filesEl.files) ? Array.prototype.slice.call(filesEl.files) : [];
+                if (!comiteCierreDocs.length && !nuevosFiles.length) {
+                    mostrarAlerta('Adjunte al menos un documento de la realización.', 'Comité');
+                    return;
+                }
+                if (typeof mostrarProgreso === 'function') mostrarProgreso('Guardando cierre del trabajo…');
+                try {
+                    var docs = comiteCierreDocs.slice();
+                    for (var i = 0; i < nuevosFiles.length; i++) {
+                        var up = await subirDocComite(nuevosFiles[i], p.id + '/cierre');
+                        if (up) docs.push(up);
+                    }
+                    if (!docs.length) {
+                        mostrarAlerta('No se pudo adjuntar el documento. Intente nuevamente.', 'Comité');
+                        return;
+                    }
+                    var prevDocs = (p.cierre && Array.isArray(p.cierre.documentos)) ? p.cierre.documentos : [];
+                    var kept = {};
+                    docs.forEach(function (d) { if (d && d.storagePath) kept[d.storagePath] = true; });
+                    if (storage && firebaseInitialized) {
+                        for (var j = 0; j < prevDocs.length; j++) {
+                            var old = prevDocs[j];
+                            if (old && old.storagePath && !kept[old.storagePath]) {
+                                try { await eliminarArchivoStorage(old.storagePath); } catch (eDel) { /* ignore */ }
+                            }
+                        }
+                    }
+                    p.cierre = {
+                        fechaRealizacion: fecha,
+                        comentario: comentario,
+                        documentos: docs,
+                        cerradoEn: (p.cierre && p.cierre.cerradoEn) || new Date().toISOString(),
+                        actualizadoEn: new Date().toISOString()
+                    };
+                    p.estado = 'realizada';
+                    if (!p.fechaDecision) p.fechaDecision = comiteHoyISO();
+                    p.actualizadoEn = new Date().toISOString();
+                    await guardarComiteFirestore();
+                    cerrarModalCierreComite();
+                    renderTablaComite();
+                    mostrarAlerta('Trabajo cerrado con la fecha, el comentario y los documentos de la realización.', 'Comité');
+                } catch (err) {
+                    console.error('Cierre comité:', err);
+                    mostrarAlerta('No se pudo guardar el cierre del trabajo.', 'Error');
+                } finally {
+                    if (typeof ocultarProgreso === 'function') ocultarProgreso();
+                }
             };
 
             function bindComiteListeners() {
@@ -42000,12 +42173,17 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     root.addEventListener('click', function (e) {
                         var t = e.target;
                         if (!t) return;
-                        var btn = t.closest ? t.closest('[data-comite-edit],[data-comite-del],[data-comite-aprobar],[data-comite-rechazar],[data-comite-link-del],[data-comite-doc-del],[data-comite-cotdoc-del]') : null;
+                        var btn = t.closest ? t.closest('[data-comite-edit],[data-comite-del],[data-comite-aprobar],[data-comite-rechazar],[data-comite-cerrar],[data-comite-link-del],[data-comite-doc-del],[data-comite-cotdoc-del],[data-comite-cierredoc-del]') : null;
                         if (!btn) return;
                         if (btn.hasAttribute('data-comite-edit')) window.editarComite(btn.getAttribute('data-comite-edit'));
                         else if (btn.hasAttribute('data-comite-del')) window.eliminarComite(btn.getAttribute('data-comite-del'));
                         else if (btn.hasAttribute('data-comite-aprobar')) window.decidirComite(btn.getAttribute('data-comite-aprobar'), 'aprobada');
                         else if (btn.hasAttribute('data-comite-rechazar')) window.decidirComite(btn.getAttribute('data-comite-rechazar'), 'rechazada');
+                        else if (btn.hasAttribute('data-comite-cerrar')) window.abrirCierreComite(btn.getAttribute('data-comite-cerrar'));
+                        else if (btn.hasAttribute('data-comite-cierredoc-del')) {
+                            var ci = parseInt(btn.getAttribute('data-comite-cierredoc-del'), 10);
+                            if (!isNaN(ci)) { comiteCierreDocs.splice(ci, 1); renderCierreDocs(); }
+                        }
                         else if (btn.hasAttribute('data-comite-link-del')) {
                             var li = parseInt(btn.getAttribute('data-comite-link-del'), 10);
                             if (!isNaN(li)) { comiteLinksTemp.splice(li, 1); renderLinksTemp(); }
@@ -42033,6 +42211,16 @@ document.getElementById('chatForm').onsubmit = function (e) {
                         if (b) b.value = 'todos';
                         if (c) c.value = 'todos';
                         renderTablaComite();
+                    });
+                }
+                var btnCierre = document.getElementById('btnGuardarCierreComite');
+                if (btnCierre) btnCierre.addEventListener('click', function () { window.guardarCierreComite(); });
+                var btnCierreCancel = document.getElementById('btnCancelarCierreComite');
+                if (btnCierreCancel) btnCierreCancel.addEventListener('click', cerrarModalCierreComite);
+                var modalCierre = document.getElementById('modalCierreComite');
+                if (modalCierre) {
+                    modalCierre.addEventListener('click', function (ev) {
+                        if (ev.target === modalCierre) cerrarModalCierreComite();
                     });
                 }
                 var btnXls = document.getElementById('btnExportarExcelComite');
@@ -42089,7 +42277,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 var fechaEmision = String(hoy.getDate()).padStart(2, '0') + '-' + String(hoy.getMonth() + 1).padStart(2, '0') + '-' + hoy.getFullYear();
                 var fechaArchivo = hoy.getFullYear() + '-' + String(hoy.getMonth() + 1).padStart(2, '0') + '-' + String(hoy.getDate()).padStart(2, '0');
 
-                var st = { borrador: 0, en_revision: 0, aprobada: 0, rechazada: 0 };
+                var st = { borrador: 0, en_revision: 0, aprobada: 0, realizada: 0, rechazada: 0 };
                 registros.forEach(function (r) { st[comiteNormEstado(r && r.estado)]++; });
 
                 function borderThin(c) {
@@ -42139,11 +42327,14 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 wsR.getCell('B7').value = st.en_revision;
                 wsR.getCell('A8').value = 'Borradores';
                 wsR.getCell('B8').value = st.borrador;
-                wsR.getCell('A10').value = 'Notas';
-                wsR.getCell('A10').font = { bold: true };
-                wsR.mergeCells('A11:C12');
-                wsR.getCell('A11').value = 'Este reporte consolida las propuestas del comité, incluyendo requisitos de cotización/aprobación, hasta 3 cotizaciones por propuesta, documentos y enlaces de respaldo.';
-                wsR.getCell('A11').alignment = { wrapText: true, vertical: 'top' };
+                wsR.getCell('A9').value = 'Realizadas';
+                wsR.getCell('B9').value = st.realizada;
+                wsR.getCell('B9').font = { bold: true, color: { argb: 'FF047857' } };
+                wsR.getCell('A11').value = 'Notas';
+                wsR.getCell('A11').font = { bold: true };
+                wsR.mergeCells('A12:C13');
+                wsR.getCell('A12').value = 'Este reporte consolida las propuestas del comité, incluyendo requisitos de cotización/aprobación, hasta 3 cotizaciones por propuesta, documentos, enlaces de respaldo y el cierre de los trabajos realizados (fecha, comentario y documentos).';
+                wsR.getCell('A12').alignment = { wrapText: true, vertical: 'top' };
 
                 function comiteCotsOrdenadas(p) {
                     var map = { 1: null, 2: null, 3: null };
@@ -42269,6 +42460,15 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     wsP.getCell(1, dc).fill = fillSolid('FF374151');
                     wsP.getCell(1, dc).border = borderThin('FF111827');
                 }
+                wsP.mergeCells(1, 27, 1, 29);
+                wsP.getCell(1, 27).value = 'Realización del trabajo';
+                wsP.getCell(1, 27).font = { name: 'Calibri', bold: true, color: { argb: 'FFFFFFFF' }, size: 11 };
+                wsP.getCell(1, 27).fill = fillSolid('FF047857');
+                wsP.getCell(1, 27).alignment = { vertical: 'middle', horizontal: 'center' };
+                for (var rc = 27; rc <= 29; rc++) {
+                    wsP.getCell(1, rc).fill = fillSolid('FF047857');
+                    wsP.getCell(1, rc).border = borderThin('FF065F46');
+                }
                 wsP.getRow(1).height = 20;
 
                 var headersP = [
@@ -42276,14 +42476,16 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     'Proveedor', 'Monto', 'Link', 'Detalle',
                     'Proveedor', 'Monto', 'Link', 'Detalle',
                     'Proveedor', 'Monto', 'Link', 'Detalle',
-                    'Elegida', 'Valor (sin aprob.)', 'Proveedor valor', 'Link valor', 'Observaciones', 'Fecha decisión'
+                    'Elegida', 'Valor (sin aprob.)', 'Proveedor valor', 'Link valor', 'Observaciones', 'Fecha decisión',
+                    'Fecha realización', 'Comentario de la mejora', 'Documentos de la realización'
                 ];
                 var fillsP2 = [
                     'FF75BB21', 'FF75BB21', 'FF75BB21', 'FF75BB21', 'FF75BB21', 'FF75BB21', 'FF75BB21', 'FF75BB21',
                     'FF3B82F6', 'FF3B82F6', 'FF3B82F6', 'FF3B82F6',
                     'FF60A5FA', 'FF60A5FA', 'FF60A5FA', 'FF60A5FA',
                     'FF93C5FD', 'FF93C5FD', 'FF93C5FD', 'FF93C5FD',
-                    'FF6B7280', 'FF059669', 'FF059669', 'FF059669', 'FF6B7280', 'FF6B7280'
+                    'FF6B7280', 'FF059669', 'FF059669', 'FF059669', 'FF6B7280', 'FF6B7280',
+                    'FF047857', 'FF047857', 'FF047857'
                 ];
                 headersP.forEach(function (h, i) {
                     var cell = wsP.getCell(2, i + 1);
@@ -42294,7 +42496,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     cell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
                 });
                 wsP.getRow(2).height = 22;
-                var widthsP = [5, 11, 28, 12, 13, 10, 10, 34, 16, 12, 12, 22, 16, 12, 12, 22, 16, 12, 12, 22, 10, 14, 16, 14, 26, 12];
+                var widthsP = [5, 11, 28, 12, 13, 10, 10, 34, 16, 12, 12, 22, 16, 12, 12, 22, 16, 12, 12, 22, 10, 14, 16, 14, 26, 12, 14, 32, 28];
                 widthsP.forEach(function (w, i) { wsP.getColumn(i + 1).width = w; });
 
                 regsOrdenados.forEach(function (p, idx) {
@@ -42321,6 +42523,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                         if (i === 4) {
                             var est = comiteNormEstado(p.estado);
                             if (est === 'aprobada') cell.fill = fillSolid('FFD1FAE5');
+                            else if (est === 'realizada') cell.fill = fillSolid('FFA7F3D0');
                             else if (est === 'rechazada') cell.fill = fillSolid('FFFEE2E2');
                             else if (est === 'en_revision') cell.fill = fillSolid('FFFEF3C7');
                         } else if (idx % 2 === 1) {
@@ -42430,6 +42633,42 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     cellFd.font = { name: 'Calibri', size: 10 };
                     cellFd.border = borderThin();
                     cellFd.alignment = { vertical: 'middle', horizontal: 'center' };
+
+                    var cierre = p.cierre || {};
+                    var cellCierreFecha = wsP.getCell(row, 27);
+                    cellCierreFecha.value = cierre.fechaRealizacion ? comiteFechaDMY(cierre.fechaRealizacion) : '—';
+                    cellCierreFecha.font = { name: 'Calibri', size: 10, color: { argb: cierre.fechaRealizacion ? 'FF065F46' : 'FF9CA3AF' }, bold: !!cierre.fechaRealizacion };
+                    cellCierreFecha.border = borderThin();
+                    cellCierreFecha.alignment = { vertical: 'middle', horizontal: 'center' };
+                    if (cierre.fechaRealizacion) cellCierreFecha.fill = fillSolid('FFD1FAE5');
+
+                    var cellCierreCom = wsP.getCell(row, 28);
+                    cellCierreCom.value = cierre.comentario || '—';
+                    cellCierreCom.font = { name: 'Calibri', size: 10, color: { argb: cierre.comentario ? 'FF374151' : 'FF9CA3AF' } };
+                    cellCierreCom.border = borderThin();
+                    cellCierreCom.alignment = { vertical: 'middle', wrapText: true };
+
+                    var cellCierreDocs = wsP.getCell(row, 29);
+                    cellCierreDocs.border = borderThin();
+                    var docsCierre = Array.isArray(cierre.documentos) ? cierre.documentos.filter(function (d) { return d && (d.nombre || d.url); }) : [];
+                    if (!docsCierre.length) {
+                        cellCierreDocs.value = '—';
+                        cellCierreDocs.font = { name: 'Calibri', size: 10, color: { argb: 'FF9CA3AF' } };
+                        cellCierreDocs.alignment = { vertical: 'middle', horizontal: 'center' };
+                    } else if (docsCierre.length === 1) {
+                        comiteDocCell(cellCierreDocs, docsCierre[0]);
+                    } else {
+                        var nombreDocs = docsCierre.map(function (d) { return d.nombre || 'Documento'; }).join('\n');
+                        if (docsCierre[0].url) {
+                            try { cellCierreDocs.value = { text: nombreDocs, hyperlink: docsCierre[0].url }; }
+                            catch (eCierre) { cellCierreDocs.value = nombreDocs; }
+                            cellCierreDocs.font = { name: 'Calibri', size: 9, color: { argb: 'FF047857' }, underline: true };
+                        } else {
+                            cellCierreDocs.value = nombreDocs;
+                            cellCierreDocs.font = { name: 'Calibri', size: 9 };
+                        }
+                        cellCierreDocs.alignment = { vertical: 'middle', wrapText: true };
+                    }
                     wsP.getRow(row).height = 28;
                 });
 
@@ -42519,6 +42758,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                         var est = comiteNormEstado(p.estado);
                         if (i === 3) {
                             if (est === 'aprobada') cell.fill = fillSolid('FFD1FAE5');
+                            else if (est === 'realizada') cell.fill = fillSolid('FFA7F3D0');
                             else if (est === 'rechazada') cell.fill = fillSolid('FFFEE2E2');
                             else if (est === 'en_revision') cell.fill = fillSolid('FFFEF3C7');
                             else cell.fill = fillSolid('FFF3F4F6');
@@ -42649,6 +42889,23 @@ document.getElementById('chatForm').onsubmit = function (e) {
                         for (var c = 1; c <= 4; c++) { wsA.getCell(rAdj, c).border = borderThin(); wsA.getCell(rAdj, c).font = { name: 'Calibri', size: 10 }; }
                         rAdj++;
                     });
+                    if (p.cierre && Array.isArray(p.cierre.documentos)) {
+                        p.cierre.documentos.forEach(function (d) {
+                            if (!d) return;
+                            wsA.getCell(rAdj, 1).value = p.titulo || '';
+                            wsA.getCell(rAdj, 2).value = 'Realización';
+                            wsA.getCell(rAdj, 3).value = d.nombre || '';
+                            if (d.url) {
+                                try { wsA.getCell(rAdj, 4).value = { text: d.url, hyperlink: d.url }; } catch (eC) { wsA.getCell(rAdj, 4).value = d.url; }
+                            }
+                            for (var cCierre = 1; cCierre <= 4; cCierre++) {
+                                wsA.getCell(rAdj, cCierre).border = borderThin();
+                                wsA.getCell(rAdj, cCierre).font = { name: 'Calibri', size: 10 };
+                                wsA.getCell(rAdj, cCierre).fill = fillSolid('FFD1FAE5');
+                            }
+                            rAdj++;
+                        });
+                    }
                     (p.links || []).forEach(function (l) {
                         wsA.getCell(rAdj, 1).value = p.titulo || '';
                         wsA.getCell(rAdj, 2).value = 'Enlace';
@@ -42943,15 +43200,51 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     </table>`;
             };
 
-            stats = stats || { borrador: 0, en_revision: 0, aprobada: 0, rechazada: 0 };
+            stats = stats || { borrador: 0, en_revision: 0, aprobada: 0, realizada: 0, rechazada: 0 };
             total = total != null ? total : 0;
             const lista = Array.isArray(registros) ? registros : [];
             const ordenar = (arr) => arr.slice().sort((a, b) =>
                 String(b.fechaDecision || b.fecha || '').localeCompare(String(a.fechaDecision || a.fecha || ''))
             );
             const aprobadas = ordenar(lista.filter((p) => p && p.estado === 'aprobada'));
+            const realizadas = ordenar(lista.filter((p) => p && p.estado === 'realizada'));
             const enRevision = ordenar(lista.filter((p) => p && p.estado === 'en_revision'));
             const rechazadas = ordenar(lista.filter((p) => p && p.estado === 'rechazada'));
+            const filasRealizadas = realizadas.map((p) => {
+                const docs = (p.cierre && Array.isArray(p.cierre.documentos)) ? p.cierre.documentos : [];
+                const docsHtml = docs.length
+                    ? docs.map((d) => {
+                        const nombre = linkEsc(d && (d.nombre || 'Documento'));
+                        const url = d && d.url ? normUrl(d.url) : '';
+                        return url
+                            ? `<a href="${linkEsc(url)}" target="_blank" rel="noopener noreferrer" style="display:inline-block;margin:2px 4px 2px 0;padding:3px 8px;background:#ecfdf5;border:1px solid #a7f3d0;border-radius:4px;color:#047857;font-size:11px;font-weight:700;text-decoration:none;">📄 ${nombre}</a>`
+                            : `<span style="font-size:11px;color:#374151;">${nombre}</span>`;
+                    }).join('')
+                    : '<span style="color:#9ca3af;">Sin documentos</span>';
+                return `
+                    <tr>
+                        <td style="padding: 10px 8px; border: 1px solid #a7f3d0; font-size: 12px; color: #065f46; white-space: nowrap; vertical-align: top;">${linkEsc(fechaDMY(p.cierre && p.cierre.fechaRealizacion))}</td>
+                        <td style="padding: 10px 8px; border: 1px solid #a7f3d0; font-size: 12px; color: #111827; font-weight: 700; vertical-align: top;">${linkEsc(p.titulo || 'Sin título')}</td>
+                        <td style="padding: 10px 8px; border: 1px solid #a7f3d0; font-size: 12px; color: #374151; vertical-align: top;">${linkEsc((p.cierre && p.cierre.comentario) || '—')}</td>
+                        <td style="padding: 10px 8px; border: 1px solid #a7f3d0; font-size: 12px; vertical-align: top;">${docsHtml}</td>
+                    </tr>`;
+            }).join('');
+            const bloqueRealizadas = realizadas.length ? `
+                <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin: 8px 0 6px 0;">
+                    <tr><td style="font-size: 15px; font-weight: 700; color: #047857;">🏁 Trabajos realizados</td></tr>
+                    <tr><td style="font-size: 12px; color: #6b7280; padding-top: 2px;">${realizadas.length} trabajo${realizadas.length !== 1 ? 's' : ''} cerrado${realizadas.length !== 1 ? 's' : ''} con fecha, comentario y documentos.</td></tr>
+                </table>
+                <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse: collapse; margin-bottom: 8px;">
+                    <thead>
+                        <tr>
+                            <th style="padding: 10px 8px; background: #047857; color: #ffffff; font-size: 11px; font-weight: 700; text-align: left;">Fecha de realización</th>
+                            <th style="padding: 10px 8px; background: #047857; color: #ffffff; font-size: 11px; font-weight: 700; text-align: left;">Trabajo</th>
+                            <th style="padding: 10px 8px; background: #047857; color: #ffffff; font-size: 11px; font-weight: 700; text-align: left;">Comentario</th>
+                            <th style="padding: 10px 8px; background: #047857; color: #ffffff; font-size: 11px; font-weight: 700; text-align: left;">Documentos</th>
+                        </tr>
+                    </thead>
+                    <tbody>${filasRealizadas}</tbody>
+                </table>` : '';
 
             let contenido = `
                 <p style="margin: 0 0 10px 0; font-size: 14px; color: #333333; line-height: 1.55;">
@@ -42983,6 +43276,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 </table>
 
                 ${construirTablaEstado('aprobada', aprobadas)}
+                ${bloqueRealizadas}
                 ${construirTablaEstado('en_revision', enRevision)}
                 ${construirTablaEstado('rechazada', rechazadas)}
 
@@ -51284,7 +51578,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                         title: 'Comité',
                         value: comiteTotal,
                         subtitle: comiteAprobadas > 0
-                            ? (comiteAprobadas + ' aprobada' + (comiteAprobadas !== 1 ? 's' : '') + (comiteTotal ? ' · ' + comiteTotal + ' total' : ''))
+                            ? (comiteAprobadas + ' aprobada' + (comiteAprobadas !== 1 ? 's' : '') + ' por cerrar' + (comiteTotal ? ' · ' + comiteTotal + ' total' : ''))
                             : (comiteTotal ? comiteTotal + ' propuesta' + (comiteTotal !== 1 ? 's' : '') : 'Sin propuestas registradas'),
                         icon: 'comite',
                         iconClass: 'success',
