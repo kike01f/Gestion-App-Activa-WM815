@@ -9394,6 +9394,7 @@
                         <div style="display: flex; flex-wrap: wrap; gap: 0.45rem;">
                             <button type="button" class="btn btn-primary" id="btnExportarExcelComite" style="padding: 0.45rem 0.8rem; font-size: 0.8125rem;">📊 Excel</button>
                             <button type="button" class="btn btn-success" id="btnEnviarCorreoComite" style="padding: 0.45rem 0.8rem; font-size: 0.8125rem; background: #10b981; border-color: #10b981;">📧 Enviar por correo</button>
+                            <button type="button" class="btn btn-primary" id="btnCorreoComiteSeleccion" style="padding: 0.45rem 0.8rem; font-size: 0.8125rem;" title="Notificar las propuestas que elija, en cualquier estado">📩 Correo (selección)</button>
                             <button type="button" class="btn btn-secondary" id="btnEnviarCerradasComite" style="padding: 0.45rem 0.8rem; font-size: 0.8125rem;">📧 Enviar cerradas</button>
                         </div>
                     </div>
@@ -41805,6 +41806,8 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     }
                     if (estNorm === 'realizada') {
                         btns += '<button type="button" class="btn btn-secondary btn-sm" data-comite-enviar-cierre="' + rid + '">Enviar</button>';
+                    } else {
+                        btns += '<button type="button" class="btn btn-secondary btn-sm" data-comite-enviar="' + rid + '" title="Enviar solo este requerimiento">Enviar</button>';
                     }
                     if (p.requiereAprobacion && estNorm !== 'aprobada' && estNorm !== 'realizada') {
                         btns += '<button type="button" class="btn btn-success btn-sm" data-comite-aprobar="' + rid + '" style="background:#10b981;border-color:#10b981;">Aprobar</button>';
@@ -42224,13 +42227,14 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     root.addEventListener('click', function (e) {
                         var t = e.target;
                         if (!t) return;
-                        var btn = t.closest ? t.closest('[data-comite-edit],[data-comite-del],[data-comite-aprobar],[data-comite-rechazar],[data-comite-cerrar],[data-comite-enviar-cierre],[data-comite-link-del],[data-comite-doc-del],[data-comite-docpend-del],[data-comite-cotdoc-del],[data-comite-cotpend-del],[data-comite-cierredoc-del],[data-comite-cierrepnd-del]') : null;
+                        var btn = t.closest ? t.closest('[data-comite-edit],[data-comite-del],[data-comite-aprobar],[data-comite-rechazar],[data-comite-cerrar],[data-comite-enviar],[data-comite-enviar-cierre],[data-comite-link-del],[data-comite-doc-del],[data-comite-docpend-del],[data-comite-cotdoc-del],[data-comite-cotpend-del],[data-comite-cierredoc-del],[data-comite-cierrepnd-del]') : null;
                         if (!btn) return;
                         if (btn.hasAttribute('data-comite-edit')) window.editarComite(btn.getAttribute('data-comite-edit'));
                         else if (btn.hasAttribute('data-comite-del')) window.eliminarComite(btn.getAttribute('data-comite-del'));
                         else if (btn.hasAttribute('data-comite-aprobar')) window.decidirComite(btn.getAttribute('data-comite-aprobar'), 'aprobada');
                         else if (btn.hasAttribute('data-comite-rechazar')) window.decidirComite(btn.getAttribute('data-comite-rechazar'), 'rechazada');
                         else if (btn.hasAttribute('data-comite-cerrar')) window.abrirCierreComite(btn.getAttribute('data-comite-cerrar'));
+                        else if (btn.hasAttribute('data-comite-enviar')) window.enviarCorreoPropuestaComite(btn.getAttribute('data-comite-enviar'));
                         else if (btn.hasAttribute('data-comite-enviar-cierre')) window.enviarCorreoMejorasCerradasComite(btn.getAttribute('data-comite-enviar-cierre'));
                         else if (btn.hasAttribute('data-comite-cierredoc-del')) {
                             var ci = parseInt(btn.getAttribute('data-comite-cierredoc-del'), 10);
@@ -42323,6 +42327,12 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 if (btnCerradas) {
                     btnCerradas.addEventListener('click', function () {
                         window.enviarCorreoMejorasCerradasComite();
+                    });
+                }
+                var btnSelCorreo = document.getElementById('btnCorreoComiteSeleccion');
+                if (btnSelCorreo) {
+                    btnSelCorreo.addEventListener('click', function () {
+                        window.enviarCorreoPropuestasSeleccionComite();
                     });
                 }
                 var btnXls = document.getElementById('btnExportarExcelComite');
@@ -43197,6 +43207,189 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 return adj;
             }
 
+            async function enviarSeleccionPropuestasComite(seleccionados, textoIntro) {
+                if (!seleccionados || !seleccionados.length) {
+                    mostrarAlerta('Seleccione al menos una propuesta para incluir en el correo.', 'Comité');
+                    return;
+                }
+                if (typeof mostrarProgreso === 'function') mostrarProgreso('Preparando correo de requerimientos…');
+                var xlsxRes = await window.generarExcelComiteComoAdjunto(seleccionados, { descargar: false });
+                var nombreComunidad = (xlsxRes && xlsxRes.comunidad) || 'Comunidad';
+                var nombreMes = (typeof obtenerNombreMes === 'function' && typeof obtenerMesPeriodoVista === 'function')
+                    ? obtenerNombreMes(obtenerMesPeriodoVista())
+                    : ((xlsxRes && xlsxRes.fechaEmision) || '');
+                var html = await generarCorreoNotificacionComite(
+                    nombreComunidad,
+                    nombreMes,
+                    '',
+                    (xlsxRes && xlsxRes.stats) || {},
+                    seleccionados.length,
+                    seleccionados,
+                    { soloSeleccion: true, textoIntro: textoIntro || null }
+                );
+                var adjuntos = [];
+                if (xlsxRes && xlsxRes.adjunto) adjuntos.push(xlsxRes.adjunto);
+                var archivos = await comiteAdjuntosDeMejoras(seleccionados);
+                adjuntos = adjuntos.concat(archivos);
+                var tituloUna = seleccionados.length === 1 ? (seleccionados[0].titulo || 'Requerimiento') : '';
+                var asunto = tituloUna
+                    ? ('Requerimiento — ' + tituloUna + ' — ' + nombreComunidad)
+                    : ('Requerimientos — ' + nombreComunidad + (nombreMes ? ' — ' + nombreMes : ''));
+                if (typeof ocultarProgreso === 'function') ocultarProgreso();
+                await mostrarModalSeleccionDestinatarios(asunto, html, adjuntos);
+            }
+
+            function mostrarModalSeleccionPropuestasComite(candidatos, textoInicial) {
+                return new Promise(function (resolve) {
+                    var saludoValor = (textoInicial && textoInicial.saludo) || 'Estimado/a,';
+                    var introValor = (textoInicial && textoInicial.cuerpo) || 'Junto con saludar, se informan los requerimientos seleccionados para su revisión.';
+                    var modal = document.createElement('div');
+                    modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:10000;display:flex;align-items:center;justify-content:center;padding:1rem;';
+                    var filasLista = candidatos.map(function (p, i) {
+                        var est = comiteEstadoLabel(comiteNormEstado(p && p.estado));
+                        var titulo = String((p && p.titulo) || 'Sin título').replace(/\s+/g, ' ').trim();
+                        var prev = titulo.length > 110 ? titulo.slice(0, 107) + '…' : titulo;
+                        var fecha = escHtml(comiteFechaDMY(p && p.fecha));
+                        return '<label style="display:flex;align-items:flex-start;gap:0.65rem;padding:0.55rem 0.65rem;border-bottom:1px solid var(--border-color);cursor:pointer;margin:0;">' +
+                            '<input type="checkbox" class="comite-sel-cb" data-comite-idx="' + i + '" style="margin-top:0.2rem;width:1.1rem;height:1.1rem;flex-shrink:0;accent-color:var(--primary);">' +
+                            '<span style="flex:1;font-size:0.8125rem;line-height:1.4;color:var(--text-primary);">' +
+                            '<strong style="white-space:nowrap;">' + fecha + '</strong>' +
+                            '<span style="color:var(--text-tertiary);font-size:0.75rem;margin-left:0.35rem;">' + escHtml(est) + '</span><br>' +
+                            '<span style="color:var(--text-secondary);">' + escHtml(prev) + '</span>' +
+                            '</span></label>';
+                    }).join('');
+                    modal.innerHTML = '' +
+                        '<div style="background:var(--bg-primary);border-radius:12px;max-width:560px;width:100%;max-height:88vh;overflow:hidden;box-shadow:0 20px 25px -5px rgba(0,0,0,0.1);display:flex;flex-direction:column;">' +
+                        '<div style="padding:1rem 1.25rem;border-bottom:1px solid var(--border-color);display:flex;justify-content:space-between;align-items:center;flex-shrink:0;">' +
+                        '<h3 style="margin:0;font-size:1.05rem;font-weight:700;color:var(--text-primary);">Correo: requerimientos a notificar</h3>' +
+                        '<button type="button" class="comite-sel-close" style="background:none;border:none;font-size:1.5rem;cursor:pointer;color:var(--text-secondary);padding:0;width:32px;height:32px;line-height:1;border-radius:4px;">×</button>' +
+                        '</div>' +
+                        '<div style="padding:0.75rem 1.25rem 0;font-size:0.8125rem;color:var(--text-secondary);line-height:1.45;">Marque las propuestas que desea incluir en el correo y en el Excel adjunto (cualquier estado). Cada envío queda aparte del reporte completo.</div>' +
+                        '<div style="padding:0.75rem 1.25rem 0.25rem;">' +
+                        '<label for="comiteIntroSaludo" style="display:block;font-size:0.75rem;font-weight:600;color:var(--text-primary);margin-bottom:0.25rem;">Saludo inicial del correo</label>' +
+                        '<input type="text" id="comiteIntroSaludo" value="' + escHtml(saludoValor) + '" style="width:100%;padding:0.45rem 0.55rem;font-size:0.8125rem;border:1px solid var(--border-color);border-radius:8px;background:var(--bg-primary);color:var(--text-primary);box-sizing:border-box;">' +
+                        '</div>' +
+                        '<div style="padding:0.35rem 1.25rem 0.25rem;">' +
+                        '<label for="comiteIntroCuerpo" style="display:block;font-size:0.75rem;font-weight:600;color:var(--text-primary);margin-bottom:0.25rem;">Texto introductorio</label>' +
+                        '<textarea id="comiteIntroCuerpo" rows="2" style="width:100%;padding:0.5rem 0.55rem;font-size:0.8125rem;border:1px solid var(--border-color);border-radius:8px;background:var(--bg-primary);color:var(--text-primary);font-family:inherit;resize:vertical;box-sizing:border-box;">' + escHtml(introValor) + '</textarea>' +
+                        '</div>' +
+                        '<div style="padding:0.5rem 1.25rem;display:flex;gap:0.5rem;flex-wrap:wrap;">' +
+                        '<button type="button" class="btn btn-secondary btn-sm" id="comiteSelTodos" style="padding:0.35rem 0.65rem;font-size:0.75rem;">Marcar todos</button>' +
+                        '<button type="button" class="btn btn-secondary btn-sm" id="comiteSelNinguno" style="padding:0.35rem 0.65rem;font-size:0.75rem;">Desmarcar todos</button>' +
+                        '</div>' +
+                        '<div style="flex:1;overflow-y:auto;border-top:1px solid var(--border-color);border-bottom:1px solid var(--border-color);max-height:min(52vh,420px);">' + filasLista + '</div>' +
+                        '<div style="padding:1rem 1.25rem;display:flex;gap:0.65rem;justify-content:flex-end;flex-shrink:0;">' +
+                        '<button type="button" class="btn btn-secondary comite-sel-close" style="padding:0.55rem 1rem;">Cancelar</button>' +
+                        '<button type="button" class="btn btn-primary" id="comiteSelContinuar" style="padding:0.55rem 1rem;">Continuar → destinatarios</button>' +
+                        '</div></div>';
+                    document.body.appendChild(modal);
+                    var cerrado = false;
+                    function cerrar() {
+                        if (cerrado) return;
+                        cerrado = true;
+                        modal.remove();
+                        resolve();
+                    }
+                    modal.querySelectorAll('.comite-sel-close').forEach(function (b) { b.addEventListener('click', cerrar); });
+                    modal.addEventListener('click', function (e) { if (e.target === modal) cerrar(); });
+                    var st = modal.querySelector('#comiteSelTodos');
+                    var sn = modal.querySelector('#comiteSelNinguno');
+                    if (st) st.addEventListener('click', function () { modal.querySelectorAll('.comite-sel-cb').forEach(function (c) { c.checked = true; }); });
+                    if (sn) sn.addEventListener('click', function () { modal.querySelectorAll('.comite-sel-cb').forEach(function (c) { c.checked = false; }); });
+                    modal.querySelector('#comiteSelContinuar').addEventListener('click', async function () {
+                        var idxs = Array.prototype.map.call(modal.querySelectorAll('.comite-sel-cb:checked'), function (c) {
+                            return parseInt(c.getAttribute('data-comite-idx'), 10);
+                        }).filter(function (x) { return !isNaN(x); });
+                        if (!idxs.length) {
+                            mostrarAlerta('Seleccione al menos una propuesta para incluir en el correo.', 'Comité');
+                            return;
+                        }
+                        var elegidas = idxs.map(function (i) { return candidatos[i]; }).filter(Boolean);
+                        var inpSaludo = modal.querySelector('#comiteIntroSaludo');
+                        var taCuerpo = modal.querySelector('#comiteIntroCuerpo');
+                        var textoIntro = {
+                            saludo: inpSaludo && inpSaludo.value ? inpSaludo.value.trim() : 'Estimado/a,',
+                            cuerpo: taCuerpo && taCuerpo.value ? taCuerpo.value.trim() : introValor
+                        };
+                        cerrado = true;
+                        modal.remove();
+                        try {
+                            await enviarSeleccionPropuestasComite(elegidas, textoIntro);
+                        } catch (err) {
+                            console.error('Correo requerimientos comité:', err);
+                            if (typeof ocultarProgreso === 'function') ocultarProgreso();
+                            mostrarAlerta('Error al preparar el correo: ' + (err.message || 'Error desconocido'), 'Error');
+                        }
+                        resolve();
+                    });
+                });
+            }
+
+            window.enviarCorreoPropuestasSeleccionComite = async function () {
+                try {
+                    if (typeof mostrarProgreso === 'function') mostrarProgreso('Cargando propuestas…');
+                    var registros = propuestasComite.length ? propuestasComite.slice() : await window.obtenerDatosComite();
+                    if (typeof ocultarProgreso === 'function') ocultarProgreso();
+                    if (!registros || !registros.length) {
+                        mostrarAlerta('No hay propuestas de comité para notificar.', 'Sin datos');
+                        return;
+                    }
+                    var candidatos = registros.slice().sort(function (a, b) {
+                        return String(b.fecha || '').localeCompare(String(a.fecha || '')) || String(b.id || '').localeCompare(String(a.id || ''));
+                    });
+                    var textoInicial = { saludo: 'Estimado/a,', cuerpo: 'Junto con saludar, se informan los requerimientos seleccionados para su revisión.' };
+                    try {
+                        if (typeof obtenerPlantillasCorreoModulosMap === 'function') {
+                            var mapPlant = await obtenerPlantillasCorreoModulosMap();
+                            var bloque = obtenerBloquePlantillaModulo(mapPlant, 'reporteComite');
+                            var nombreComunidadLista = 'Comunidad';
+                            try {
+                                if (typeof obtenerPersonalizacion === 'function') {
+                                    var pers = await obtenerPersonalizacion();
+                                    if (pers && pers.comunidad) nombreComunidadLista = pers.comunidad;
+                                }
+                            } catch (ePers) {}
+                            var nombreMesLista = (typeof obtenerNombreMes === 'function' && typeof obtenerMesPeriodoVista === 'function')
+                                ? obtenerNombreMes(obtenerMesPeriodoVista())
+                                : '';
+                            var ctxLista = { nombreComunidad: nombreComunidadLista, nombreMes: nombreMesLista, fechaEmision: (typeof fechaEmisionCorreoHoy === 'function' ? fechaEmisionCorreoHoy() : '') };
+                            if (bloque.saludoLista && typeof aplicarPlaceholdersPlantillaCorreo === 'function') {
+                                var sal = aplicarPlaceholdersPlantillaCorreo(bloque.saludoLista, ctxLista).trim();
+                                if (sal) textoInicial.saludo = sal;
+                            }
+                            if (bloque.textoIntroLista && typeof aplicarPlaceholdersPlantillaCorreo === 'function') {
+                                var intro = aplicarPlaceholdersPlantillaCorreo(bloque.textoIntroLista, ctxLista).trim();
+                                if (intro) textoInicial.cuerpo = intro;
+                            }
+                        }
+                    } catch (eTpl) {}
+                    await mostrarModalSeleccionPropuestasComite(candidatos, textoInicial);
+                } catch (error) {
+                    if (typeof ocultarProgreso === 'function') ocultarProgreso();
+                    console.error('Error correo selección comité:', error);
+                    mostrarAlerta('Ocurrió un error al preparar la selección.', 'Error');
+                }
+            };
+
+            window.enviarCorreoPropuestaComite = async function (id) {
+                try {
+                    var registros = propuestasComite.length ? propuestasComite.slice() : await window.obtenerDatosComite();
+                    var una = (registros || []).filter(function (p) { return p && String(p.id) === String(id); });
+                    if (!una.length) {
+                        mostrarAlerta('No se encontró la propuesta.', 'Comité');
+                        return;
+                    }
+                    await enviarSeleccionPropuestasComite(una, {
+                        saludo: 'Estimado/a,',
+                        cuerpo: 'Junto con saludar, se informa el siguiente requerimiento para su revisión.'
+                    });
+                } catch (error) {
+                    if (typeof ocultarProgreso === 'function') ocultarProgreso();
+                    console.error('Error al enviar requerimiento:', error);
+                    mostrarAlerta('Ocurrió un error al preparar el correo de este requerimiento.', 'Error');
+                }
+            };
+
             window.enviarCorreoMejorasCerradasComite = async function (soloId) {
                 try {
                     if (typeof mostrarProgreso === 'function') mostrarProgreso('Buscando mejoras cerradas…');
@@ -43364,6 +43557,15 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     emptyBg: '#fef2f2',
                     rowAlt: '#fef2f2',
                     label: '❌ Rechazada'
+                },
+                borrador: {
+                    titulo: '📝 Borradores',
+                    color: '#4b5563',
+                    headerBg: '#6b7280',
+                    border: '#e5e7eb',
+                    emptyBg: '#f9fafb',
+                    rowAlt: '#f9fafb',
+                    label: '📝 Borrador'
                 }
             };
 
@@ -43496,6 +43698,32 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     </table>`;
                 }
                 return generarPlantillaCorreoNotificacion('Comité — Mejoras cerradas', nombreComunidad, nombreMes, contenidoCerradas, true);
+            }
+
+            if (opciones.soloSeleccion) {
+                const introSel = opciones.textoIntro || {};
+                const saludoSel = (introSel.saludo && String(introSel.saludo).trim()) || 'Estimado/a,';
+                const cuerpoSel = (introSel.cuerpo && String(introSel.cuerpo).trim()) || 'Junto con saludar, se informan los requerimientos seleccionados para su revisión.';
+                const aHtml = (t) => linkEsc(t).replace(/\n/g, '<br>');
+                const borradoresSel = ordenar(lista.filter((p) => p && p.estado === 'borrador'));
+                const bloquesSel = [];
+                if (aprobadas.length) bloquesSel.push(construirTablaEstado('aprobada', aprobadas));
+                if (realizadas.length) bloquesSel.push(bloqueRealizadas);
+                if (enRevision.length) bloquesSel.push(construirTablaEstado('en_revision', enRevision));
+                if (rechazadas.length) bloquesSel.push(construirTablaEstado('rechazada', rechazadas));
+                if (borradoresSel.length) bloquesSel.push(construirTablaEstado('borrador', borradoresSel));
+                const contenidoSel = `
+                <p style="margin: 0 0 10px 0; font-size: 15px; color: #1a1a1a; line-height: 1.5;">${aHtml(saludoSel)}</p>
+                <p style="margin: 0 0 8px 0; font-size: 14px; color: #333333; line-height: 1.55;">${aHtml(cuerpoSel)}</p>
+                <p style="margin: 0 0 8px 0; font-size: 13px; color: #6b7280; line-height: 1.5;">
+                    ${linkEsc(String(lista.length))} requerimiento${lista.length !== 1 ? 's' : ''} de <strong>${linkEsc(nombreComunidad)}</strong>${nombreMes ? ' · ' + linkEsc(nombreMes) : ''}.
+                    Este aviso va aparte del reporte completo del comité.
+                </p>
+                ${bloquesSel.join('') || '<p style="font-size:13px;color:#6b7280;">No hay requerimientos en esta selección.</p>'}
+                <p style="margin: 14px 0 0 0; font-size: 13px; color: #555; line-height: 1.5;">
+                    Los respaldos van adjuntos a este correo cuando el tamaño lo permite. El Excel adjunto contiene solo estos requerimientos.
+                </p>`;
+                return generarPlantillaCorreoNotificacion('Comité — Requerimientos', nombreComunidad, nombreMes, contenidoSel, true);
             }
 
             let contenido = `
