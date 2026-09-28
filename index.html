@@ -44859,6 +44859,14 @@ document.getElementById('chatForm').onsubmit = function (e) {
                         </div>
                     `;
                     if (multas && multas.length > 0) {
+                        html += `<style>
+                            .multa-contenido-reporte p { margin: 0 0 6px 0; }
+                            .multa-contenido-reporte p:last-child { margin-bottom: 0; }
+                            .multa-contenido-reporte ul,
+                            .multa-contenido-reporte ol { margin: 4px 0 4px 18px; padding: 0; }
+                            .multa-contenido-reporte li { margin: 2px 0; }
+                            .multa-contenido-reporte strong, .multa-contenido-reporte b { font-weight: 700; }
+                        </style>`;
                         html += `
                         <div style="overflow-x: visible; width: 100%;">
                             <table class="reporte-table" style="width: 100%; border-collapse: collapse; table-layout: auto;">
@@ -44884,18 +44892,20 @@ document.getElementById('chatForm').onsubmit = function (e) {
                             const evidencias = m.evidencias || (m.link ? [m.link] : []);
                             const archivos = m.archivos || [];
                             const evidenciasHTML = renderizarArchivosReporte(archivos, evidencias);
-                            const contenidoReporte = String(m.contenido || '-')
-                                .replace(/&/g, '&amp;')
-                                .replace(/</g, '&lt;')
-                                .replace(/>/g, '&gt;')
-                                .replace(/"/g, '&quot;');
+                            const contenidoReporte = (typeof obtenerContenidoMultaHtml === 'function')
+                                ? (obtenerContenidoMultaHtml(m) || '—')
+                                : String(m.contenido || '—')
+                                    .replace(/&/g, '&amp;')
+                                    .replace(/</g, '&lt;')
+                                    .replace(/>/g, '&gt;')
+                                    .replace(/"/g, '&quot;');
                             html += `
                                 <tr>
                                     <td style="padding: 0.5rem; font-size: 0.75rem; border: 1px solid #e5e7eb;">${m.fecha ? formatearFechaParaCorreo(m.fecha) : '-'}</td>
                                     <td style="padding: 0.5rem; font-size: 0.75rem; border: 1px solid #e5e7eb;">${m.nombre || '-'}</td>
                                     <td style="padding: 0.5rem; font-size: 0.75rem; border: 1px solid #e5e7eb;">${m.departamento || '-'}</td>
                                     <td style="padding: 0.5rem; font-size: 0.75rem; border: 1px solid #e5e7eb;">${m.motivo || '-'}</td>
-                                    <td style="padding: 0.5rem; font-size: 0.75rem; border: 1px solid #e5e7eb; white-space: pre-wrap;">${contenidoReporte}</td>
+                                    <td style="padding: 0.5rem; font-size: 0.75rem; border: 1px solid #e5e7eb; vertical-align: top; line-height: 1.45; white-space: normal;"><div class="multa-contenido-reporte">${contenidoReporte}</div></td>
                                     <td style="padding: 0.5rem; font-size: 0.75rem; border: 1px solid #e5e7eb;">${(parseFloat(m.monto) || 0).toFixed(2)} ${m.tipoUnidad || 'UF'}</td>
                                     <td style="padding: 0.5rem; font-size: 0.75rem; border: 1px solid #e5e7eb; max-width: 200px;">${evidenciasHTML}</td>
                                 </tr>
