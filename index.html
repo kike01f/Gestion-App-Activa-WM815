@@ -45666,12 +45666,13 @@ document.getElementById('chatForm').onsubmit = function (e) {
                             <table class="reporte-table" style="width: 100%; border-collapse: collapse; table-layout: auto;">
                                 <thead>
                                     <tr>
-                                        <th style="padding: 0.5rem; text-align: left; font-weight: 600; font-size: 0.85rem; border: 1px solid #e5e7eb; background: #f3f4f6;">Fecha</th>
-                                        <th style="padding: 0.5rem; text-align: left; font-weight: 600; font-size: 0.85rem; border: 1px solid #e5e7eb; background: #f3f4f6;">Residente</th>
-                                        <th style="padding: 0.5rem; text-align: left; font-weight: 600; font-size: 0.85rem; border: 1px solid #e5e7eb; background: #f3f4f6;">Depto</th>
-                                        <th style="padding: 0.5rem; text-align: left; font-weight: 600; font-size: 0.85rem; border: 1px solid #e5e7eb; background: #f3f4f6;">Motivo</th>
-                                        <th style="padding: 0.5rem; text-align: left; font-weight: 600; font-size: 0.85rem; border: 1px solid #e5e7eb; background: #f3f4f6;">Monto</th>
-                                        <th style="padding: 0.5rem; text-align: left; font-weight: 600; font-size: 0.85rem; border: 1px solid #e5e7eb; background: #f3f4f6;">Respaldo</th>
+                                        <th style="padding: 0.5rem; text-align: left; font-weight: 600; font-size: 0.75rem; border: 1px solid #e5e7eb; background: #f3f4f6;">Fecha</th>
+                                        <th style="padding: 0.5rem; text-align: left; font-weight: 600; font-size: 0.75rem; border: 1px solid #e5e7eb; background: #f3f4f6;">Residente</th>
+                                        <th style="padding: 0.5rem; text-align: left; font-weight: 600; font-size: 0.75rem; border: 1px solid #e5e7eb; background: #f3f4f6;">Depto</th>
+                                        <th style="padding: 0.5rem; text-align: left; font-weight: 600; font-size: 0.75rem; border: 1px solid #e5e7eb; background: #f3f4f6;">Motivo</th>
+                                        <th style="padding: 0.5rem; text-align: left; font-weight: 600; font-size: 0.75rem; border: 1px solid #e5e7eb; background: #f3f4f6;">Contenido</th>
+                                        <th style="padding: 0.5rem; text-align: left; font-weight: 600; font-size: 0.75rem; border: 1px solid #e5e7eb; background: #f3f4f6;">Monto</th>
+                                        <th style="padding: 0.5rem; text-align: left; font-weight: 600; font-size: 0.75rem; border: 1px solid #e5e7eb; background: #f3f4f6;">Respaldo</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -45694,15 +45695,13 @@ document.getElementById('chatForm').onsubmit = function (e) {
                                     .replace(/"/g, '&quot;');
                             html += `
                                 <tr>
-                                    <td style="padding: 0.55rem; font-size: 0.85rem; border: 1px solid #e5e7eb; white-space: nowrap;">${m.fecha ? formatearFechaParaCorreo(m.fecha) : '-'}</td>
-                                    <td style="padding: 0.55rem; font-size: 0.85rem; border: 1px solid #e5e7eb;">${m.nombre || '-'}</td>
-                                    <td style="padding: 0.55rem; font-size: 0.85rem; border: 1px solid #e5e7eb;">${m.departamento || '-'}</td>
-                                    <td style="padding: 0.55rem; font-size: 0.85rem; border: 1px solid #e5e7eb; line-height: 1.4;">${m.motivo || '-'}</td>
-                                    <td style="padding: 0.55rem; font-size: 0.85rem; border: 1px solid #e5e7eb; white-space: nowrap;">${(parseFloat(m.monto) || 0).toFixed(2)} ${m.tipoUnidad || 'UF'}</td>
-                                    <td style="padding: 0.55rem; font-size: 0.85rem; border: 1px solid #e5e7eb;">${evidenciasHTML}</td>
-                                </tr>
-                                <tr>
-                                    <td colspan="6" style="padding: 0.7rem 0.85rem; font-size: 0.95rem; border: 1px solid #e5e7eb; vertical-align: top; line-height: 1.55; background: #fafafa;"><div class="multa-contenido-reporte">${contenidoReporte}</div></td>
+                                    <td style="padding: 0.5rem; font-size: 0.75rem; border: 1px solid #e5e7eb;">${m.fecha ? formatearFechaParaCorreo(m.fecha) : '-'}</td>
+                                    <td style="padding: 0.5rem; font-size: 0.75rem; border: 1px solid #e5e7eb;">${m.nombre || '-'}</td>
+                                    <td style="padding: 0.5rem; font-size: 0.75rem; border: 1px solid #e5e7eb;">${m.departamento || '-'}</td>
+                                    <td style="padding: 0.5rem; font-size: 0.75rem; border: 1px solid #e5e7eb;">${m.motivo || '-'}</td>
+                                    <td style="padding: 0.5rem; font-size: 0.75rem; border: 1px solid #e5e7eb; vertical-align: top; line-height: 1.45; white-space: normal;"><div class="multa-contenido-reporte">${contenidoReporte}</div></td>
+                                    <td style="padding: 0.5rem; font-size: 0.75rem; border: 1px solid #e5e7eb;">${(parseFloat(m.monto) || 0).toFixed(2)} ${m.tipoUnidad || 'UF'}</td>
+                                    <td style="padding: 0.5rem; font-size: 0.75rem; border: 1px solid #e5e7eb; max-width: 200px;">${evidenciasHTML}</td>
                                 </tr>
                             `;
                         });
