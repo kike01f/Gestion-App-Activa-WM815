@@ -9394,6 +9394,7 @@
                         <div style="display: flex; flex-wrap: wrap; gap: 0.45rem;">
                             <button type="button" class="btn btn-primary" id="btnExportarExcelComite" style="padding: 0.45rem 0.8rem; font-size: 0.8125rem;">📊 Excel</button>
                             <button type="button" class="btn btn-success" id="btnEnviarCorreoComite" style="padding: 0.45rem 0.8rem; font-size: 0.8125rem; background: #10b981; border-color: #10b981;">📧 Enviar por correo</button>
+                            <button type="button" class="btn btn-secondary" id="btnEnviarCerradasComite" style="padding: 0.45rem 0.8rem; font-size: 0.8125rem;">📧 Enviar cerradas</button>
                         </div>
                     </div>
                 </div>
@@ -9482,7 +9483,7 @@
                                     <div class="form-group" style="margin: 0;"><label style="font-size: 0.7rem;">Monto ($)</label><input type="number" id="comiteCot1Monto" class="form-input" min="0" step="1" placeholder="0" style="padding: 0.4rem 0.5rem; font-size: 0.8125rem; width: 100%;"></div>
                                     <div class="form-group" style="margin: 0; grid-column: 1 / -1;"><label style="font-size: 0.7rem;">Detalle</label><input type="text" id="comiteCot1Detalle" class="form-input" placeholder="Alcance, plazo, condiciones…" style="padding: 0.4rem 0.5rem; font-size: 0.8125rem; width: 100%;"></div>
                                     <div class="form-group" style="margin: 0;"><label style="font-size: 0.7rem;">Link</label><input type="url" id="comiteCot1Link" class="form-input" placeholder="https://…" style="padding: 0.4rem 0.5rem; font-size: 0.8125rem; width: 100%;"></div>
-                                    <div class="form-group" style="margin: 0;"><label style="font-size: 0.7rem;">Documento</label><input type="file" id="comiteCot1Archivo" accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg,.webp" style="padding: 0.25rem 0; font-size: 0.75rem; width: 100%;"><div id="comiteCot1ArchivoActual" style="font-size: 0.7rem; color: var(--gray-600); margin-top: 0.2rem;"></div></div>
+                                    <div class="form-group" style="margin: 0; grid-column: 1 / -1;"><label style="font-size: 0.7rem;">Respaldos (varios archivos)</label><input type="file" id="comiteCot1Archivo" multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg,.webp" style="padding: 0.25rem 0; font-size: 0.75rem; width: 100%;"><div id="comiteCot1ArchivoActual" style="font-size: 0.7rem; color: var(--gray-600); margin-top: 0.2rem;"></div></div>
                                 </div>
                             </div>
                             <div class="comite-cotizacion-card" data-cot="2" style="padding: 0.75rem; border-radius: 10px; border: 1px solid var(--border-color); background: var(--bg-secondary);">
@@ -9497,7 +9498,7 @@
                                     <div class="form-group" style="margin: 0;"><label style="font-size: 0.7rem;">Monto ($)</label><input type="number" id="comiteCot2Monto" class="form-input" min="0" step="1" placeholder="0" style="padding: 0.4rem 0.5rem; font-size: 0.8125rem; width: 100%;"></div>
                                     <div class="form-group" style="margin: 0; grid-column: 1 / -1;"><label style="font-size: 0.7rem;">Detalle</label><input type="text" id="comiteCot2Detalle" class="form-input" placeholder="Alcance, plazo, condiciones…" style="padding: 0.4rem 0.5rem; font-size: 0.8125rem; width: 100%;"></div>
                                     <div class="form-group" style="margin: 0;"><label style="font-size: 0.7rem;">Link</label><input type="url" id="comiteCot2Link" class="form-input" placeholder="https://…" style="padding: 0.4rem 0.5rem; font-size: 0.8125rem; width: 100%;"></div>
-                                    <div class="form-group" style="margin: 0;"><label style="font-size: 0.7rem;">Documento</label><input type="file" id="comiteCot2Archivo" accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg,.webp" style="padding: 0.25rem 0; font-size: 0.75rem; width: 100%;"><div id="comiteCot2ArchivoActual" style="font-size: 0.7rem; color: var(--gray-600); margin-top: 0.2rem;"></div></div>
+                                    <div class="form-group" style="margin: 0; grid-column: 1 / -1;"><label style="font-size: 0.7rem;">Respaldos (varios archivos)</label><input type="file" id="comiteCot2Archivo" multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg,.webp" style="padding: 0.25rem 0; font-size: 0.75rem; width: 100%;"><div id="comiteCot2ArchivoActual" style="font-size: 0.7rem; color: var(--gray-600); margin-top: 0.2rem;"></div></div>
                                 </div>
                             </div>
                             <div class="comite-cotizacion-card" data-cot="3" style="padding: 0.75rem; border-radius: 10px; border: 1px solid var(--border-color); background: var(--bg-secondary);">
@@ -9512,7 +9513,7 @@
                                     <div class="form-group" style="margin: 0;"><label style="font-size: 0.7rem;">Monto ($)</label><input type="number" id="comiteCot3Monto" class="form-input" min="0" step="1" placeholder="0" style="padding: 0.4rem 0.5rem; font-size: 0.8125rem; width: 100%;"></div>
                                     <div class="form-group" style="margin: 0; grid-column: 1 / -1;"><label style="font-size: 0.7rem;">Detalle</label><input type="text" id="comiteCot3Detalle" class="form-input" placeholder="Alcance, plazo, condiciones…" style="padding: 0.4rem 0.5rem; font-size: 0.8125rem; width: 100%;"></div>
                                     <div class="form-group" style="margin: 0;"><label style="font-size: 0.7rem;">Link</label><input type="url" id="comiteCot3Link" class="form-input" placeholder="https://…" style="padding: 0.4rem 0.5rem; font-size: 0.8125rem; width: 100%;"></div>
-                                    <div class="form-group" style="margin: 0;"><label style="font-size: 0.7rem;">Documento</label><input type="file" id="comiteCot3Archivo" accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg,.webp" style="padding: 0.25rem 0; font-size: 0.75rem; width: 100%;"><div id="comiteCot3ArchivoActual" style="font-size: 0.7rem; color: var(--gray-600); margin-top: 0.2rem;"></div></div>
+                                    <div class="form-group" style="margin: 0; grid-column: 1 / -1;"><label style="font-size: 0.7rem;">Respaldos (varios archivos)</label><input type="file" id="comiteCot3Archivo" multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg,.webp" style="padding: 0.25rem 0; font-size: 0.75rem; width: 100%;"><div id="comiteCot3ArchivoActual" style="font-size: 0.7rem; color: var(--gray-600); margin-top: 0.2rem;"></div></div>
                                 </div>
                             </div>
                         </div>
@@ -9520,7 +9521,8 @@
 
                     <div style="margin-top: 1rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0.75rem;">
                         <div class="form-group" style="margin: 0;">
-                            <label for="comiteDocumentos" style="font-size: 0.75rem; margin-bottom: 0.2rem; display: block;">Documentos adjuntos</label>
+                            <label for="comiteDocumentos" style="font-size: 0.75rem; margin-bottom: 0.2rem; display: block;">Respaldos</label>
+                            <p style="margin: 0 0 0.25rem 0; font-size: 0.7rem; color: var(--gray-600);">Puede agregar varios archivos. Cada vez que elige, se suman a la lista.</p>
                             <input type="file" id="comiteDocumentos" multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg,.webp,.txt" style="padding: 0.3rem 0; font-size: 0.8125rem; max-width: 100%;">
                             <div id="comiteDocumentosActuales" style="font-size: 0.75rem; color: var(--gray-600); margin-top: 0.35rem;"></div>
                         </div>
@@ -9605,6 +9607,7 @@
                     </div>
                     <div class="form-group" style="margin: 0 0 0.85rem 0;">
                         <label for="comiteCierreArchivos" style="font-size: 0.75rem; margin-bottom: 0.2rem; display: block;">Documentos de la realización *</label>
+                        <p style="margin: 0 0 0.25rem 0; font-size: 0.7rem; color: var(--gray-600);">Puede agregar varios respaldos. Si vuelve a elegir archivos, se suman.</p>
                         <input type="file" id="comiteCierreArchivos" multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg,.webp,.txt" style="padding: 0.3rem 0; font-size: 0.8125rem; max-width: 100%;">
                         <div id="comiteCierreDocsLista" style="font-size: 0.75rem; color: var(--gray-600); margin-top: 0.35rem;"></div>
                     </div>
@@ -41445,9 +41448,12 @@ document.getElementById('chatForm').onsubmit = function (e) {
             var propuestasComite = [];
             var comiteLinksTemp = [];
             var comiteDocsExistentes = [];
-            var comiteCotDocsExistentes = { 1: null, 2: null, 3: null };
+            var comiteDocsPendientes = [];
+            var comiteCotDocsExistentes = { 1: [], 2: [], 3: [] };
+            var comiteCotPendientes = { 1: [], 2: [], 3: [] };
             var comiteCierreId = null;
             var comiteCierreDocs = [];
+            var comiteCierrePendientes = [];
             var comiteListenersBound = false;
 
             function escHtml(s) {
@@ -41506,24 +41512,49 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 } catch (e) { /* ignore */ }
             }
 
+            function comiteListaDocsCot(c) {
+                if (!c) return [];
+                var list = [];
+                if (Array.isArray(c.documentos)) list = c.documentos.filter(function (d) { return d && (d.url || d.nombre); });
+                if (!list.length && c.documento && (c.documento.url || c.documento.nombre)) list = [c.documento];
+                return list;
+            }
+            function comiteClaveArchivo(f) {
+                return String(f && f.name) + '|' + String(f && f.size) + '|' + String(f && f.lastModified);
+            }
+            function comiteArchivosAcumulados(input, pendientes) {
+                var out = (pendientes || []).slice();
+                var seen = {};
+                out.forEach(function (f) { seen[comiteClaveArchivo(f)] = true; });
+                if (input && input.files) {
+                    for (var i = 0; i < input.files.length; i++) {
+                        var f = input.files[i];
+                        var k = comiteClaveArchivo(f);
+                        if (!seen[k]) { seen[k] = true; out.push(f); }
+                    }
+                }
+                return out;
+            }
             function leerCotizacionForm(n) {
                 var prov = document.getElementById('comiteCot' + n + 'Proveedor');
                 var mon = document.getElementById('comiteCot' + n + 'Monto');
                 var det = document.getElementById('comiteCot' + n + 'Detalle');
                 var link = document.getElementById('comiteCot' + n + 'Link');
+                var docs = Array.isArray(comiteCotDocsExistentes[n]) ? comiteCotDocsExistentes[n].slice() : [];
                 return {
                     n: n,
                     proveedor: prov ? String(prov.value || '').trim() : '',
                     monto: mon && mon.value !== '' ? (parseFloat(mon.value) || 0) : null,
                     detalle: det ? String(det.value || '').trim() : '',
                     link: link ? String(link.value || '').trim() : '',
-                    documento: comiteCotDocsExistentes[n] || null
+                    documento: docs[0] || null,
+                    documentos: docs
                 };
             }
 
             function cotizacionTieneDatos(c) {
                 if (!c) return false;
-                return !!(c.proveedor || c.detalle || c.link || (c.monto != null && c.monto !== '') || (c.documento && c.documento.url));
+                return !!(c.proveedor || c.detalle || c.link || (c.monto != null && c.monto !== '') || comiteListaDocsCot(c).length);
             }
 
             function toggleCotizacionesUI() {
@@ -41585,27 +41616,36 @@ document.getElementById('chatForm').onsubmit = function (e) {
             function renderDocsExistentes() {
                 var el = document.getElementById('comiteDocumentosActuales');
                 if (!el) return;
-                if (!comiteDocsExistentes.length) {
-                    el.innerHTML = '';
-                    return;
-                }
-                el.innerHTML = '<div style="margin-bottom:0.25rem;">Adjuntos actuales:</div>' + comiteDocsExistentes.map(function (d, i) {
+                var filas = comiteDocsExistentes.map(function (d, i) {
                     return '<div style="display:flex;gap:0.4rem;align-items:center;margin:0.15rem 0;">' +
                         '<a href="' + escHtml(d.url) + '" target="_blank" rel="noopener">📄 ' + escHtml(d.nombre || 'documento') + '</a>' +
                         '<button type="button" class="btn btn-danger btn-sm" data-comite-doc-del="' + i + '" style="padding:0.1rem 0.35rem;font-size:0.65rem;">Quitar</button></div>';
-                }).join('');
+                });
+                comiteDocsPendientes.forEach(function (f, i) {
+                    filas.push('<div style="display:flex;gap:0.4rem;align-items:center;margin:0.15rem 0;">📄 ' + escHtml(f.name) +
+                        ' <span style="color:var(--gray-500);font-size:0.68rem;">por subir</span>' +
+                        '<button type="button" class="btn btn-danger btn-sm" data-comite-docpend-del="' + i + '" style="padding:0.1rem 0.35rem;font-size:0.65rem;">Quitar</button></div>');
+                });
+                el.innerHTML = filas.length ? filas.join('') : '';
             }
 
             function renderCotDocActual(n) {
                 var el = document.getElementById('comiteCot' + n + 'ArchivoActual');
                 if (!el) return;
-                var d = comiteCotDocsExistentes[n];
-                if (!d || !d.url) {
-                    el.innerHTML = '';
-                    return;
-                }
-                el.innerHTML = '<a href="' + escHtml(d.url) + '" target="_blank" rel="noopener">📎 ' + escHtml(d.nombre || 'archivo') + '</a> ' +
-                    '<button type="button" class="btn btn-danger btn-sm" data-comite-cotdoc-del="' + n + '" style="padding:0.1rem 0.35rem;font-size:0.65rem;">Quitar</button>';
+                var docs = Array.isArray(comiteCotDocsExistentes[n]) ? comiteCotDocsExistentes[n] : [];
+                var pend = Array.isArray(comiteCotPendientes[n]) ? comiteCotPendientes[n] : [];
+                var filas = docs.map(function (d, i) {
+                    var nombre = escHtml(d.nombre || 'archivo');
+                    var link = d.url ? '<a href="' + escHtml(d.url) + '" target="_blank" rel="noopener">📎 ' + nombre + '</a>' : '📎 ' + nombre;
+                    return '<div style="display:flex;gap:0.35rem;align-items:center;margin:0.15rem 0;">' + link +
+                        '<button type="button" class="btn btn-danger btn-sm" data-comite-cotdoc-del="' + n + '-' + i + '" style="padding:0.1rem 0.35rem;font-size:0.65rem;">Quitar</button></div>';
+                });
+                pend.forEach(function (f, i) {
+                    filas.push('<div style="display:flex;gap:0.35rem;align-items:center;margin:0.15rem 0;">📎 ' + escHtml(f.name) +
+                        ' <span style="color:var(--gray-500);font-size:0.68rem;">por subir</span>' +
+                        '<button type="button" class="btn btn-danger btn-sm" data-comite-cotpend-del="' + n + '-' + i + '" style="padding:0.1rem 0.35rem;font-size:0.65rem;">Quitar</button></div>');
+                });
+                el.innerHTML = filas.join('');
             }
 
             function limpiarFormComite() {
@@ -41644,7 +41684,8 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     if (d) d.value = '';
                     if (l) l.value = '';
                     if (a) a.value = '';
-                    comiteCotDocsExistentes[n] = null;
+                    comiteCotDocsExistentes[n] = [];
+                    comiteCotPendientes[n] = [];
                     renderCotDocActual(n);
                 });
                 document.querySelectorAll('input[name="comiteCotElegida"]').forEach(function (r) { r.checked = false; });
@@ -41652,6 +41693,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 if (docs) docs.value = '';
                 comiteLinksTemp = [];
                 comiteDocsExistentes = [];
+                comiteDocsPendientes = [];
                 renderLinksTemp();
                 renderDocsExistentes();
                 toggleCotizacionesUI();
@@ -41761,6 +41803,9 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     if (comitePuedeRegistrarCierre(p)) {
                         btns += '<button type="button" class="btn btn-primary btn-sm" data-comite-cerrar="' + rid + '">' + (estNorm === 'realizada' ? 'Cierre' : 'Cerrar') + '</button>';
                     }
+                    if (estNorm === 'realizada') {
+                        btns += '<button type="button" class="btn btn-secondary btn-sm" data-comite-enviar-cierre="' + rid + '">Enviar</button>';
+                    }
                     if (p.requiereAprobacion && estNorm !== 'aprobada' && estNorm !== 'realizada') {
                         btns += '<button type="button" class="btn btn-success btn-sm" data-comite-aprobar="' + rid + '" style="background:#10b981;border-color:#10b981;">Aprobar</button>';
                     }
@@ -41850,7 +41895,8 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     if (mo) mo.value = (c.monto != null && c.monto !== '') ? c.monto : '';
                     if (de) de.value = c.detalle || '';
                     if (li) li.value = c.link || '';
-                    comiteCotDocsExistentes[n] = c.documento || null;
+                    comiteCotDocsExistentes[n] = comiteListaDocsCot(c).slice();
+                    comiteCotPendientes[n] = [];
                     renderCotDocActual(n);
                 });
                 if (p.cotizacionElegida) {
@@ -41872,7 +41918,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     var paths = [];
                     (p.documentos || []).forEach(function (d) { if (d.storagePath) paths.push(d.storagePath); });
                     (p.cotizaciones || []).forEach(function (c) {
-                        if (c.documento && c.documento.storagePath) paths.push(c.documento.storagePath);
+                        comiteListaDocsCot(c).forEach(function (d) { if (d && d.storagePath) paths.push(d.storagePath); });
                     });
                     if (p.cierre && Array.isArray(p.cierre.documentos)) {
                         p.cierre.documentos.forEach(function (d) { if (d && d.storagePath) paths.push(d.storagePath); });
@@ -41953,21 +41999,22 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     for (var n = 1; n <= 3; n++) {
                         var cot = leerCotizacionForm(n);
                         var fileInp = document.getElementById('comiteCot' + n + 'Archivo');
-                        if (fileInp && fileInp.files && fileInp.files[0]) {
-                            var up = await subirDocComite(fileInp.files[0], id + '/cot' + n);
-                            if (up) cot.documento = up;
+                        var archivosCot = comiteArchivosAcumulados(fileInp, comiteCotPendientes[n]);
+                        for (var ai = 0; ai < archivosCot.length; ai++) {
+                            var up = await subirDocComite(archivosCot[ai], id + '/cot' + n);
+                            if (up) cot.documentos.push(up);
                         }
-                        if (cotizacionTieneDatos(cot) || cot.documento) cotizaciones.push(cot);
+                        cot.documento = cot.documentos[0] || null;
+                        if (cotizacionTieneDatos(cot)) cotizaciones.push(cot);
                     }
                 }
 
                 var documentos = comiteDocsExistentes.slice();
                 var docsInp = document.getElementById('comiteDocumentos');
-                if (docsInp && docsInp.files && docsInp.files.length) {
-                    for (var i = 0; i < docsInp.files.length; i++) {
-                        var du = await subirDocComite(docsInp.files[i], id + '/docs');
-                        if (du) documentos.push(du);
-                    }
+                var archivosRespaldo = comiteArchivosAcumulados(docsInp, comiteDocsPendientes);
+                for (var i = 0; i < archivosRespaldo.length; i++) {
+                    var du = await subirDocComite(archivosRespaldo[i], id + '/docs');
+                    if (du) documentos.push(du);
                 }
 
                 // Si no requiere aprobación y dejó un link de valor, agregarlo a links si no existe
@@ -42019,18 +42066,20 @@ document.getElementById('chatForm').onsubmit = function (e) {
             function renderCierreDocs() {
                 var el = document.getElementById('comiteCierreDocsLista');
                 if (!el) return;
-                if (!comiteCierreDocs.length) {
-                    el.innerHTML = '<span style="color:var(--gray-500)">Aún no hay documentos de la realización.</span>';
-                    return;
-                }
-                el.innerHTML = comiteCierreDocs.map(function (d, i) {
+                var filas = comiteCierreDocs.map(function (d, i) {
                     var nombre = escHtml(d.nombre || 'documento');
                     var link = d.url
                         ? '<a href="' + escHtml(d.url) + '" target="_blank" rel="noopener">📄 ' + nombre + '</a>'
                         : '📄 ' + nombre;
                     return '<div style="display:flex;gap:0.4rem;align-items:center;margin:0.2rem 0;">' + link +
                         '<button type="button" class="btn btn-danger btn-sm" data-comite-cierredoc-del="' + i + '" style="padding:0.1rem 0.35rem;font-size:0.65rem;">Quitar</button></div>';
-                }).join('');
+                });
+                comiteCierrePendientes.forEach(function (f, i) {
+                    filas.push('<div style="display:flex;gap:0.4rem;align-items:center;margin:0.2rem 0;">📄 ' + escHtml(f.name) +
+                        ' <span style="color:var(--gray-500);font-size:0.68rem;">por subir</span>' +
+                        '<button type="button" class="btn btn-danger btn-sm" data-comite-cierrepnd-del="' + i + '" style="padding:0.1rem 0.35rem;font-size:0.65rem;">Quitar</button></div>');
+                });
+                el.innerHTML = filas.length ? filas.join('') : '<span style="color:var(--gray-500)">Aún no hay documentos de la realización.</span>';
             }
 
             function cerrarModalCierreComite() {
@@ -42038,6 +42087,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 if (modal) modal.classList.remove('active');
                 comiteCierreId = null;
                 comiteCierreDocs = [];
+                comiteCierrePendientes = [];
                 var files = document.getElementById('comiteCierreArchivos');
                 if (files) files.value = '';
             }
@@ -42060,6 +42110,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 if (fecha) fecha.value = (p.cierre && p.cierre.fechaRealizacion) || comiteHoyISO();
                 var com = document.getElementById('comiteCierreComentario');
                 if (com) com.value = (p.cierre && p.cierre.comentario) || '';
+                comiteCierrePendientes = [];
                 var files = document.getElementById('comiteCierreArchivos');
                 if (files) files.value = '';
                 var btn = document.getElementById('btnGuardarCierreComite');
@@ -42090,7 +42141,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     return;
                 }
                 var filesEl = document.getElementById('comiteCierreArchivos');
-                var nuevosFiles = (filesEl && filesEl.files) ? Array.prototype.slice.call(filesEl.files) : [];
+                var nuevosFiles = comiteArchivosAcumulados(filesEl, comiteCierrePendientes);
                 if (!comiteCierreDocs.length && !nuevosFiles.length) {
                     mostrarAlerta('Adjunte al menos un documento de la realización.', 'Comité');
                     return;
@@ -42173,16 +42224,20 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     root.addEventListener('click', function (e) {
                         var t = e.target;
                         if (!t) return;
-                        var btn = t.closest ? t.closest('[data-comite-edit],[data-comite-del],[data-comite-aprobar],[data-comite-rechazar],[data-comite-cerrar],[data-comite-link-del],[data-comite-doc-del],[data-comite-cotdoc-del],[data-comite-cierredoc-del]') : null;
+                        var btn = t.closest ? t.closest('[data-comite-edit],[data-comite-del],[data-comite-aprobar],[data-comite-rechazar],[data-comite-cerrar],[data-comite-enviar-cierre],[data-comite-link-del],[data-comite-doc-del],[data-comite-docpend-del],[data-comite-cotdoc-del],[data-comite-cotpend-del],[data-comite-cierredoc-del],[data-comite-cierrepnd-del]') : null;
                         if (!btn) return;
                         if (btn.hasAttribute('data-comite-edit')) window.editarComite(btn.getAttribute('data-comite-edit'));
                         else if (btn.hasAttribute('data-comite-del')) window.eliminarComite(btn.getAttribute('data-comite-del'));
                         else if (btn.hasAttribute('data-comite-aprobar')) window.decidirComite(btn.getAttribute('data-comite-aprobar'), 'aprobada');
                         else if (btn.hasAttribute('data-comite-rechazar')) window.decidirComite(btn.getAttribute('data-comite-rechazar'), 'rechazada');
                         else if (btn.hasAttribute('data-comite-cerrar')) window.abrirCierreComite(btn.getAttribute('data-comite-cerrar'));
+                        else if (btn.hasAttribute('data-comite-enviar-cierre')) window.enviarCorreoMejorasCerradasComite(btn.getAttribute('data-comite-enviar-cierre'));
                         else if (btn.hasAttribute('data-comite-cierredoc-del')) {
                             var ci = parseInt(btn.getAttribute('data-comite-cierredoc-del'), 10);
                             if (!isNaN(ci)) { comiteCierreDocs.splice(ci, 1); renderCierreDocs(); }
+                        } else if (btn.hasAttribute('data-comite-cierrepnd-del')) {
+                            var cp = parseInt(btn.getAttribute('data-comite-cierrepnd-del'), 10);
+                            if (!isNaN(cp)) { comiteCierrePendientes.splice(cp, 1); renderCierreDocs(); }
                         }
                         else if (btn.hasAttribute('data-comite-link-del')) {
                             var li = parseInt(btn.getAttribute('data-comite-link-del'), 10);
@@ -42190,9 +42245,25 @@ document.getElementById('chatForm').onsubmit = function (e) {
                         } else if (btn.hasAttribute('data-comite-doc-del')) {
                             var di = parseInt(btn.getAttribute('data-comite-doc-del'), 10);
                             if (!isNaN(di)) { comiteDocsExistentes.splice(di, 1); renderDocsExistentes(); }
+                        } else if (btn.hasAttribute('data-comite-docpend-del')) {
+                            var dp = parseInt(btn.getAttribute('data-comite-docpend-del'), 10);
+                            if (!isNaN(dp)) { comiteDocsPendientes.splice(dp, 1); renderDocsExistentes(); }
                         } else if (btn.hasAttribute('data-comite-cotdoc-del')) {
-                            var cn = parseInt(btn.getAttribute('data-comite-cotdoc-del'), 10);
-                            if (!isNaN(cn)) { comiteCotDocsExistentes[cn] = null; renderCotDocActual(cn); }
+                            var partesCot = String(btn.getAttribute('data-comite-cotdoc-del') || '').split('-');
+                            var cn = parseInt(partesCot[0], 10);
+                            var cix = parseInt(partesCot[1], 10);
+                            if (!isNaN(cn) && !isNaN(cix) && Array.isArray(comiteCotDocsExistentes[cn])) {
+                                comiteCotDocsExistentes[cn].splice(cix, 1);
+                                renderCotDocActual(cn);
+                            }
+                        } else if (btn.hasAttribute('data-comite-cotpend-del')) {
+                            var partesPend = String(btn.getAttribute('data-comite-cotpend-del') || '').split('-');
+                            var pn = parseInt(partesPend[0], 10);
+                            var pix = parseInt(partesPend[1], 10);
+                            if (!isNaN(pn) && !isNaN(pix) && Array.isArray(comiteCotPendientes[pn])) {
+                                comiteCotPendientes[pn].splice(pix, 1);
+                                renderCotDocActual(pn);
+                            }
                         }
                     });
                 }
@@ -42221,6 +42292,37 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 if (modalCierre) {
                     modalCierre.addEventListener('click', function (ev) {
                         if (ev.target === modalCierre) cerrarModalCierreComite();
+                    });
+                }
+                function comiteBindAcumulador(input, alElegir) {
+                    if (!input || input.dataset.comiteAcum === '1') return;
+                    input.dataset.comiteAcum = '1';
+                    input.addEventListener('change', function () {
+                        alElegir(input);
+                        input.value = '';
+                    });
+                }
+                var inpDocs = document.getElementById('comiteDocumentos');
+                comiteBindAcumulador(inpDocs, function (input) {
+                    comiteDocsPendientes = comiteArchivosAcumulados(input, comiteDocsPendientes);
+                    renderDocsExistentes();
+                });
+                [1, 2, 3].forEach(function (n) {
+                    var inpCot = document.getElementById('comiteCot' + n + 'Archivo');
+                    comiteBindAcumulador(inpCot, function (input) {
+                        comiteCotPendientes[n] = comiteArchivosAcumulados(input, comiteCotPendientes[n]);
+                        renderCotDocActual(n);
+                    });
+                });
+                var inpCierre = document.getElementById('comiteCierreArchivos');
+                comiteBindAcumulador(inpCierre, function (input) {
+                    comiteCierrePendientes = comiteArchivosAcumulados(input, comiteCierrePendientes);
+                    renderCierreDocs();
+                });
+                var btnCerradas = document.getElementById('btnEnviarCerradasComite');
+                if (btnCerradas) {
+                    btnCerradas.addEventListener('click', function () {
+                        window.enviarCorreoMejorasCerradasComite();
                     });
                 }
                 var btnXls = document.getElementById('btnExportarExcelComite');
@@ -42803,7 +42905,21 @@ document.getElementById('chatForm').onsubmit = function (e) {
                                 cells[1].alignment = { vertical: 'middle', horizontal: 'center' };
                             }
                             comiteLinkCell(cells[2], cot.link, cot.link ? 'Abrir link' : '—');
-                            comiteDocCell(cells[3], cot.documento || null);
+                            var docsCotExcel = comiteListaDocsCot(cot);
+                            if (docsCotExcel.length <= 1) {
+                                comiteDocCell(cells[3], docsCotExcel[0] || null);
+                            } else {
+                                var nombresCot = docsCotExcel.map(function (d) { return d.nombre || 'Documento'; }).join('\n');
+                                if (docsCotExcel[0].url) {
+                                    try { cells[3].value = { text: nombresCot, hyperlink: docsCotExcel[0].url }; }
+                                    catch (eDocsCot) { cells[3].value = nombresCot; }
+                                    cells[3].font = { name: 'Calibri', size: 9, color: { argb: 'FF047857' }, underline: true };
+                                } else {
+                                    cells[3].value = nombresCot;
+                                    cells[3].font = { name: 'Calibri', size: 9 };
+                                }
+                                cells[3].alignment = { vertical: 'middle', wrapText: true };
+                            }
                             cells[4].value = cot.detalle || '—';
                             cells[4].font = { name: 'Calibri', size: 9, color: { argb: cot.detalle ? 'FF374151' : 'FF9CA3AF' } };
                             if (isEleg) {
@@ -42935,6 +43051,20 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     }
                     // Links de cada cotización
                     (p.cotizaciones || []).forEach(function (cot) {
+                        comiteListaDocsCot(cot).forEach(function (d) {
+                            if (!d) return;
+                            wsA.getCell(rAdj, 1).value = p.titulo || '';
+                            wsA.getCell(rAdj, 2).value = 'Respaldo cotización';
+                            wsA.getCell(rAdj, 3).value = d.nombre || '';
+                            if (d.url) {
+                                try { wsA.getCell(rAdj, 4).value = { text: d.url, hyperlink: d.url }; } catch (eCotD) { wsA.getCell(rAdj, 4).value = d.url; }
+                            }
+                            for (var cCotD = 1; cCotD <= 4; cCotD++) {
+                                wsA.getCell(rAdj, cCotD).border = borderThin();
+                                wsA.getCell(rAdj, cCotD).font = { name: 'Calibri', size: 10 };
+                            }
+                            rAdj++;
+                        });
                         if (!cot || !cot.link) return;
                         wsA.getCell(rAdj, 1).value = p.titulo || '';
                         wsA.getCell(rAdj, 2).value = 'Cotización';
@@ -43020,13 +43150,107 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 }
             };
 
+            async function comiteBlobComoAdjunto(blob, nombre, tipo) {
+                var buf = await blob.arrayBuffer();
+                if (!buf || buf.byteLength > 6 * 1024 * 1024) return null;
+                var bytes = new Uint8Array(buf);
+                var binary = '';
+                var chunk = 0x8000;
+                for (var i = 0; i < bytes.length; i += chunk) {
+                    binary += String.fromCharCode.apply(null, bytes.subarray(i, Math.min(i + chunk, bytes.length)));
+                }
+                return {
+                    filename: nombre || 'respaldo',
+                    content: btoa(binary),
+                    contentType: tipo || blob.type || 'application/octet-stream',
+                    encoding: 'base64'
+                };
+            }
+
+            async function comiteAdjuntosDeMejoras(lista) {
+                var adj = [];
+                var usados = {};
+                var docs = [];
+                (lista || []).forEach(function (p) {
+                    (p.documentos || []).forEach(function (d) { if (d) docs.push(d); });
+                    if (p.cierre && Array.isArray(p.cierre.documentos)) {
+                        p.cierre.documentos.forEach(function (d) { if (d) docs.push(d); });
+                    }
+                    (p.cotizaciones || []).forEach(function (c) {
+                        comiteListaDocsCot(c).forEach(function (d) { if (d) docs.push(d); });
+                    });
+                });
+                for (var i = 0; i < docs.length && adj.length < 12; i++) {
+                    var d = docs[i];
+                    var url = d && d.url ? String(d.url) : '';
+                    if (!url || usados[url]) continue;
+                    usados[url] = true;
+                    try {
+                        var res = await fetch(url);
+                        if (!res.ok) continue;
+                        var blob = await res.blob();
+                        var nombre = d.nombre || ('respaldo-' + (adj.length + 1));
+                        var item = await comiteBlobComoAdjunto(blob, nombre, d.tipo || blob.type);
+                        if (item) adj.push(item);
+                    } catch (eFetch) { /* el enlace queda en el cuerpo del correo */ }
+                }
+                return adj;
+            }
+
+            window.enviarCorreoMejorasCerradasComite = async function (soloId) {
+                try {
+                    if (typeof mostrarProgreso === 'function') mostrarProgreso('Buscando mejoras cerradas…');
+                    var registros = propuestasComite.length ? propuestasComite.slice() : await window.obtenerDatosComite();
+                    var cerradas = (registros || []).filter(function (p) { return p && comiteNormEstado(p.estado) === 'realizada'; });
+                    if (soloId) cerradas = cerradas.filter(function (p) { return String(p.id) === String(soloId); });
+                    if (!cerradas.length) {
+                        mostrarAlerta(soloId ? 'Esa mejora no está cerrada.' : 'No hay mejoras cerradas para enviar.', 'Comité');
+                        return;
+                    }
+                    if (typeof mostrarProgreso === 'function') mostrarProgreso('Preparando correo de mejoras cerradas…');
+                    var xlsxRes = await window.generarExcelComiteComoAdjunto(cerradas, { descargar: false });
+                    var nombreComunidad = (xlsxRes && xlsxRes.comunidad) || 'Comunidad';
+                    var nombreMes = (typeof obtenerNombreMes === 'function' && typeof obtenerMesPeriodoVista === 'function')
+                        ? obtenerNombreMes(obtenerMesPeriodoVista())
+                        : ((xlsxRes && xlsxRes.fechaEmision) || '');
+                    var html = await generarCorreoNotificacionComite(
+                        nombreComunidad,
+                        nombreMes,
+                        '',
+                        (xlsxRes && xlsxRes.stats) || { realizada: cerradas.length },
+                        cerradas.length,
+                        cerradas,
+                        { soloCerradas: true }
+                    );
+                    var adjuntos = [];
+                    if (xlsxRes && xlsxRes.adjunto) adjuntos.push(xlsxRes.adjunto);
+                    var archivos = await comiteAdjuntosDeMejoras(cerradas);
+                    adjuntos = adjuntos.concat(archivos);
+                    var tituloUna = cerradas.length === 1 ? (cerradas[0].titulo || 'Mejora cerrada') : '';
+                    var asunto = tituloUna
+                        ? ('Mejora cerrada — ' + tituloUna + ' — ' + nombreComunidad)
+                        : ('Mejoras cerradas — ' + nombreComunidad + (nombreMes ? ' — ' + nombreMes : ''));
+                    await mostrarModalSeleccionDestinatarios(asunto, html, adjuntos, {
+                        mensajeInicialPrefill: tituloUna
+                            ? ('Se informa el cierre de la mejora «' + tituloUna + '», con su comentario, fecha de realización y respaldos.')
+                            : ('Se informan por separado las mejoras ya cerradas, con comentario, fecha de realización y respaldos.')
+                    });
+                } catch (error) {
+                    console.error('Error al enviar mejoras cerradas:', error);
+                    mostrarAlerta('Ocurrió un error al preparar el correo de las mejoras cerradas.', 'Error');
+                } finally {
+                    if (typeof ocultarProgreso === 'function') ocultarProgreso();
+                }
+            };
+
             // Precarga silenciosa si el DOM ya está listo
             if (document.getElementById('formComite')) {
                 bindComiteListeners();
             }
         })();
 
-        async function generarCorreoNotificacionComite(nombreComunidad, nombreMes, mensajeAdicional, stats, total, registros) {
+        async function generarCorreoNotificacionComite(nombreComunidad, nombreMes, mensajeAdicional, stats, total, registros, opciones) {
+            opciones = opciones || {};
             const linkEsc = (v) => String(v == null ? '' : v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
             const fmtMonto = (n) => {
                 if (n == null || n === '' || isNaN(Number(n))) return '—';
@@ -43074,10 +43298,15 @@ document.getElementById('chatForm').onsubmit = function (e) {
                         const u = normUrl(c.link);
                         if (u && linksExtra.indexOf(u) === -1) linksExtra.push(u);
                     }
-                    if (c && c.documento && c.documento.url) {
-                        const u = normUrl(c.documento.url);
-                        if (u && linksExtra.indexOf(u) === -1) linksExtra.push(u);
-                    }
+                    const docsCotMail = (c && Array.isArray(c.documentos) && c.documentos.length)
+                        ? c.documentos
+                        : ((c && c.documento) ? [c.documento] : []);
+                    docsCotMail.forEach((d) => {
+                        if (d && d.url) {
+                            const u = normUrl(d.url);
+                            if (u && linksExtra.indexOf(u) === -1) linksExtra.push(u);
+                        }
+                    });
                 });
                 if (link) {
                     const u = normUrl(link);
@@ -43210,16 +43439,19 @@ document.getElementById('chatForm').onsubmit = function (e) {
             const realizadas = ordenar(lista.filter((p) => p && p.estado === 'realizada'));
             const enRevision = ordenar(lista.filter((p) => p && p.estado === 'en_revision'));
             const rechazadas = ordenar(lista.filter((p) => p && p.estado === 'rechazada'));
+            const enlaceDocCorreo = (d) => {
+                const nombre = linkEsc(d && (d.nombre || 'Documento'));
+                const url = d && d.url ? normUrl(d.url) : '';
+                return url
+                    ? `<a href="${linkEsc(url)}" target="_blank" rel="noopener noreferrer" style="display:inline-block;margin:2px 4px 2px 0;padding:3px 8px;background:#ecfdf5;border:1px solid #a7f3d0;border-radius:4px;color:#047857;font-size:11px;font-weight:700;text-decoration:none;">📄 ${nombre}</a>`
+                    : `<span style="font-size:11px;color:#374151;">${nombre}</span>`;
+            };
             const filasRealizadas = realizadas.map((p) => {
                 const docs = (p.cierre && Array.isArray(p.cierre.documentos)) ? p.cierre.documentos : [];
-                const docsHtml = docs.length
-                    ? docs.map((d) => {
-                        const nombre = linkEsc(d && (d.nombre || 'Documento'));
-                        const url = d && d.url ? normUrl(d.url) : '';
-                        return url
-                            ? `<a href="${linkEsc(url)}" target="_blank" rel="noopener noreferrer" style="display:inline-block;margin:2px 4px 2px 0;padding:3px 8px;background:#ecfdf5;border:1px solid #a7f3d0;border-radius:4px;color:#047857;font-size:11px;font-weight:700;text-decoration:none;">📄 ${nombre}</a>`
-                            : `<span style="font-size:11px;color:#374151;">${nombre}</span>`;
-                    }).join('')
+                const respaldos = Array.isArray(p.documentos) ? p.documentos : [];
+                const docsHtml = (docs.length || respaldos.length)
+                    ? (docs.length ? '<div style="font-size:11px;color:#065f46;font-weight:700;margin-bottom:2px;">Cierre</div>' + docs.map(enlaceDocCorreo).join('') : '')
+                        + (respaldos.length ? '<div style="font-size:11px;color:#065f46;font-weight:700;margin:6px 0 2px;">Respaldos</div>' + respaldos.map(enlaceDocCorreo).join('') : '')
                     : '<span style="color:#9ca3af;">Sin documentos</span>';
                 return `
                     <tr>
@@ -43245,6 +43477,26 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     </thead>
                     <tbody>${filasRealizadas}</tbody>
                 </table>` : '';
+
+            if (opciones.soloCerradas) {
+                let contenidoCerradas = `
+                <p style="margin: 0 0 10px 0; font-size: 14px; color: #333333; line-height: 1.55;">
+                    Este correo informa <strong>por separado</strong> las <strong>mejoras cerradas</strong>
+                    de <strong>${linkEsc(nombreComunidad)}</strong>${nombreMes ? ' · ' + linkEsc(nombreMes) : ''}.
+                    Incluye la fecha de realización, el comentario y los respaldos.
+                </p>
+                ${bloqueRealizadas || '<p style="font-size:13px;color:#6b7280;">No hay mejoras cerradas.</p>'}
+                <p style="margin: 14px 0 0 0; font-size: 13px; color: #555; line-height: 1.5;">
+                    Los archivos de respaldo van adjuntos a este correo cuando el tamaño lo permite. El Excel adjunto contiene solo estos trabajos.
+                </p>`;
+                if (mensajeAdicional) {
+                    contenidoCerradas += `
+                    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color: #fff8e1; border-radius: 8px; border: 1px solid #ffecb3; margin: 12px 0;">
+                        <tr><td style="padding: 12px 14px;"><p style="margin: 0; font-size: 14px; color: #333333; line-height: 1.5;">${linkEsc(mensajeAdicional)}</p></td></tr>
+                    </table>`;
+                }
+                return generarPlantillaCorreoNotificacion('Comité — Mejoras cerradas', nombreComunidad, nombreMes, contenidoCerradas, true);
+            }
 
             let contenido = `
                 <p style="margin: 0 0 10px 0; font-size: 14px; color: #333333; line-height: 1.55;">
