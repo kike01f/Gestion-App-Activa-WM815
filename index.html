@@ -13259,25 +13259,28 @@
                 : 'Junto con saludar, se informa los nuevos requerimientos para su revisión.';
             const filas = (registrosSeleccionados || []).map((r) => {
                 const est = postventaNormalizarEstadoRegistro(r);
-                const obs = String(r.observacion == null ? '' : r.observacion).replace(/\s+/g, ' ').trim();
-                const obsCorto = obs.length > 400 ? obs.slice(0, 397) + '…' : obs;
+                const obs = String(r.observacion == null ? '' : r.observacion).replace(/\r\n/g, '\n').trim();
+                const obsHtml = linkEsc(obs).replace(/\n/g, '<br>') || '—';
                 const fechaTxt = r.fecha && typeof formatearFechaParaCorreo === 'function' ? formatearFechaParaCorreo(r.fecha) : (r.fecha || '—');
                 const fecha = linkEsc(fechaTxt);
                 return `<tr>
-                  <td style="padding:10px 12px;font-size:13px;color:#1a1a1a;border-bottom:1px solid #e8eee8;white-space:nowrap;">${fecha}</td>
-                  <td style="padding:10px 12px;font-size:13px;color:#333;border-bottom:1px solid #e8eee8;line-height:1.45;">${linkEsc(obsCorto)}</td>
-                  <td style="padding:10px 12px;font-size:12px;color:#555;border-bottom:1px solid #e8eee8;white-space:nowrap;">${linkEsc(postventaEtiquetaEstadoCorreo(est))}</td>
+                  <td style="padding:0 0 12px 0;">
+                    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border:1px solid #e8eee8;border-radius:8px;background:#ffffff;">
+                      <tr>
+                        <td style="padding:14px 16px;font-size:13px;color:#666666;line-height:1.4;">
+                          <strong style="color:#1a1a1a;">${fecha}</strong>
+                          <span style="margin-left:8px;">${linkEsc(postventaEtiquetaEstadoCorreo(est))}</span>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="padding:0 16px 14px 16px;font-size:15px;color:#1a1a1a;line-height:1.55;word-wrap:break-word;">${obsHtml}</td>
+                      </tr>
+                    </table>
+                  </td>
                 </tr>`;
             }).join('');
             const tabla = (registrosSeleccionados && registrosSeleccionados.length) ? `
-              <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border:1px solid #e8eee8;border-radius:8px;overflow:hidden;margin:12px 0 0 0;">
-                <thead>
-                  <tr style="background:#f8faf8;">
-                    <th align="left" style="padding:10px 12px;font-size:12px;color:#666;font-weight:700;border-bottom:1px solid #e8eee8;">Fecha</th>
-                    <th align="left" style="padding:10px 12px;font-size:12px;color:#666;font-weight:700;border-bottom:1px solid #e8eee8;">Observación</th>
-                    <th align="left" style="padding:10px 12px;font-size:12px;color:#666;font-weight:700;border-bottom:1px solid #e8eee8;">Estado</th>
-                  </tr>
-                </thead>
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:12px 0 0 0;">
                 <tbody>${filas}</tbody>
               </table>` : '';
             const contenido = `
@@ -13285,7 +13288,7 @@
                 <p style="margin: 0 0 8px 0; font-size: 14px; color: #333333; line-height: 1.55;">${linkEsc(introCuerpo)}</p>
                 ${tabla}
             `;
-            return generarPlantillaCorreoNotificacion('Postventa — Observaciones areas comunes', nombreComunidad, nombreMes, contenido, true, true);
+            return generarPlantillaCorreoNotificacion('Postventa — Observaciones areas comunes', nombreComunidad, nombreMes, contenido, true, true, 960);
         }
 
         /** Modal: el usuario elige qué registros incluir; luego abre el modal de destinatarios. */
@@ -28706,7 +28709,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
             const montoStr = (multa.monto != null ? Number(multa.monto).toFixed(2) : '0') + ' ' + (multa.tipoUnidad || 'UF');
             const contenidoMulta = obtenerContenidoMultaHtml(multa);
             const filaContenidoMulta = contenidoMulta
-                ? `<tr><td class="data-cell" style="padding: 10px 14px; font-size: 13px; color: #666666; border-bottom: 1px solid #e8eee8;">Contenido</td><td class="data-cell" style="padding: 10px 14px; font-size: 14px; color: #1a1a1a; border-bottom: 1px solid #e8eee8; line-height: 1.45;">${contenidoMulta}</td></tr>`
+                ? `<tr><td class="data-cell" colspan="2" style="padding: 12px 16px; border-bottom: 1px solid #e8eee8;"><div style="font-size: 13px; color: #666666; margin: 0 0 6px 0;">Contenido</div><div style="font-size: 15px; color: #1a1a1a; line-height: 1.55; word-wrap: break-word;">${contenidoMulta}</div></td></tr>`
                 : '';
             return `<!DOCTYPE html>
 <html lang="es">
@@ -28741,7 +28744,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
   <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color: #ffffff;">
     <tr>
       <td class="wrapper-td" align="center" style="padding: 16px 10px;">
-        <table class="main-table" role="presentation" cellpadding="0" cellspacing="0" border="0" width="600" style="max-width: 600px; width: 100%; background-color: #ffffff; border-radius: 12px;">
+        <table class="main-table" role="presentation" cellpadding="0" cellspacing="0" border="0" width="860" style="max-width: 860px; width: 100%; background-color: #ffffff; border-radius: 12px;">
           <tr>
             <td class="content-padding content-padding-lg" style="padding: 18px 28px 14px 28px; border-bottom: 3px solid #74BD20; background-color: #ffffff; border-radius: 12px 12px 0 0;">
               <div style="text-align:center;margin-bottom:12px"><img src="https://img.mailinblue.com/8323725/images/content_library/original/6844749040dd0f16c5341248.png" alt="Logo" style="max-width:120px;height:auto;"></div>
@@ -28764,7 +28767,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 <tr><td class="data-cell" style="padding: 10px 14px; font-size: 13px; color: #666666; border-bottom: 1px solid #e8eee8; width: 38%;">Residente</td><td class="data-cell" style="padding: 10px 14px; font-size: 14px; color: #1a1a1a; font-weight: 600; border-bottom: 1px solid #e8eee8;">${linkEsc(multa.nombre)}</td></tr>
                 <tr><td class="data-cell" style="padding: 10px 14px; font-size: 13px; color: #666666; border-bottom: 1px solid #e8eee8;">Departamento</td><td class="data-cell" style="padding: 10px 14px; font-size: 14px; color: #1a1a1a; border-bottom: 1px solid #e8eee8;">${linkEsc(multa.departamento)}</td></tr>
                 <tr><td class="data-cell" style="padding: 10px 14px; font-size: 13px; color: #666666; border-bottom: 1px solid #e8eee8;">Fecha</td><td class="data-cell" style="padding: 10px 14px; font-size: 14px; color: #1a1a1a; border-bottom: 1px solid #e8eee8;">${linkEsc(fechaStr)}</td></tr>
-                <tr><td class="data-cell" style="padding: 10px 14px; font-size: 13px; color: #666666; border-bottom: 1px solid #e8eee8;">Motivo</td><td class="data-cell" style="padding: 10px 14px; font-size: 14px; color: #1a1a1a; border-bottom: 1px solid #e8eee8;">${linkEsc(multa.motivo)}</td></tr>
+                <tr><td class="data-cell" style="padding: 10px 14px; font-size: 13px; color: #666666; border-bottom: 1px solid #e8eee8; width: 28%; vertical-align: top;">Motivo</td><td class="data-cell" style="padding: 10px 14px; font-size: 15px; color: #1a1a1a; border-bottom: 1px solid #e8eee8; line-height: 1.5; word-wrap: break-word;">${linkEsc(multa.motivo)}</td></tr>
                 ${filaContenidoMulta}
                 <tr><td class="data-cell" style="padding: 10px 14px; font-size: 13px; color: #666666;">Tipo de unidad</td><td class="data-cell" style="padding: 10px 14px; font-size: 14px; color: #1a1a1a;">${linkEsc(multa.tipoUnidad || 'UF')}</td></tr>
               </table>
@@ -28824,7 +28827,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 : `<p style="margin: 0; font-size: 12px; color: #666666;"><strong>Folio del comunicado:</strong> <span style="font-family: monospace; letter-spacing: 0.04em; color: #1a1a1a;">${linkEsc(folioComunicado)}</span></p>`;
             const contenidoMulta = obtenerContenidoMultaHtml(multa);
             const filaContenidoMulta = contenidoMulta
-                ? `<tr><td class="data-cell" style="padding: 10px 14px; font-size: 13px; color: #666666;">Contenido</td><td class="data-cell" style="padding: 10px 14px; font-size: 14px; color: #1a1a1a; line-height: 1.45;">${contenidoMulta}</td></tr>`
+                ? `<tr><td class="data-cell" colspan="2" style="padding: 12px 16px;"><div style="font-size: 13px; color: #666666; margin: 0 0 6px 0;">Contenido</div><div style="font-size: 15px; color: #1a1a1a; line-height: 1.55; word-wrap: break-word;">${contenidoMulta}</div></td></tr>`
                 : '';
             return `<!DOCTYPE html>
 <html lang="es">
@@ -28857,7 +28860,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
   <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color: #ffffff;">
     <tr>
       <td class="wrapper-td" align="center" style="padding: 16px 10px;">
-        <table class="main-table" role="presentation" cellpadding="0" cellspacing="0" border="0" width="600" style="max-width: 600px; width: 100%; background-color: #ffffff; border-radius: 12px;">
+        <table class="main-table" role="presentation" cellpadding="0" cellspacing="0" border="0" width="860" style="max-width: 860px; width: 100%; background-color: #ffffff; border-radius: 12px;">
           <tr>
             <td class="content-padding content-padding-lg" style="padding: 18px 28px 14px 28px; border-bottom: 3px solid #74BD20; background-color: #ffffff; border-radius: 12px 12px 0 0;">
               <div style="text-align:center;margin-bottom:12px"><img src="https://img.mailinblue.com/8323725/images/content_library/original/6844749040dd0f16c5341248.png" alt="Logo" style="max-width:120px;height:auto;"></div>
@@ -32043,7 +32046,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     </tr>
                 </table>
             `;
-                    return generarPlantillaCorreoNotificacion('Reporte Comité', nombreComunidad, nombreMes, contenido, true);
+                    return generarPlantillaCorreoNotificacion('Reporte Comité', nombreComunidad, nombreMes, contenido, true, false, 960);
                 }
                 
                 let analisisCierreMorosos = null;
@@ -32204,7 +32207,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
 
         // Funciones para generar correos de notificación por módulo
 
-        function generarPlantillaCorreoNotificacion(tituloModulo, nombreComunidad, nombreMes, contenidoHtml, incluirNotaAdjunto, omitirNotaAdjunto) {
+        function generarPlantillaCorreoNotificacion(tituloModulo, nombreComunidad, nombreMes, contenidoHtml, incluirNotaAdjunto, omitirNotaAdjunto, anchoPx) {
             var esc = function (v) {
                 return String(v == null ? '' : v)
                     .replace(/&/g, '&amp;')
@@ -32215,6 +32218,9 @@ document.getElementById('chatForm').onsubmit = function (e) {
             var titulo = String(tituloModulo || 'Notificación').trim() || 'Notificación';
             var comunidad = String(nombreComunidad || 'Comunidad').trim() || 'Comunidad';
             var mes = String(nombreMes || '').trim();
+            var ancho = Number(anchoPx);
+            if (!ancho || ancho < 560) ancho = 600;
+            if (ancho > 1040) ancho = 1040;
             var mostrarAdjunto = !!incluirNotaAdjunto && !omitirNotaAdjunto;
             var bloqueAdjunto = '';
             if (mostrarAdjunto) {
@@ -32249,7 +32255,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
     body, p, h1, h2, a, td, span { font-family: Arial, Helvetica, sans-serif; }
     body { margin: 0; padding: 0; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
     table { border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
-    @media only screen and (max-width: 620px) {
+    @media only screen and (max-width: ${ancho}px) {
       .wrapper-td { padding: 16px 8px !important; }
       .main-table { width: 100% !important; max-width: 100% !important; }
       .content-padding { padding-left: 20px !important; padding-right: 20px !important; }
@@ -32260,7 +32266,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
   <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" bgcolor="#ffffff" style="background-color: #ffffff;">
     <tr>
       <td class="wrapper-td" align="center" bgcolor="#ffffff" style="background-color: #ffffff; padding: 16px 10px;">
-        <table class="main-table" role="presentation" cellpadding="0" cellspacing="0" border="0" width="600" bgcolor="#ffffff" style="max-width: 600px; width: 100%; background-color: #ffffff; border-radius: 12px;">
+        <table class="main-table" role="presentation" cellpadding="0" cellspacing="0" border="0" width="${ancho}" bgcolor="#ffffff" style="max-width: ${ancho}px; width: 100%; background-color: #ffffff; border-radius: 12px;">
           <tr>
             <td class="content-padding" bgcolor="#ffffff" style="padding: 18px 28px 14px 28px; border-bottom: 3px solid #74BD20; background-color: #ffffff; border-radius: 12px 12px 0 0;">
               <div style="text-align:center;margin-bottom:12px"><img src="https://img.mailinblue.com/8323725/images/content_library/original/6844749040dd0f16c5341248.png" alt="Logo" style="max-width:120px;height:auto;"></div>
@@ -32638,7 +32644,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 `;
             }
             
-            return generarPlantillaCorreoNotificacion('Postventa', nombreComunidad, nombreMes, contenido, true);
+            return generarPlantillaCorreoNotificacion('Postventa', nombreComunidad, nombreMes, contenido, true, false, 960);
         }
         
 
@@ -43569,13 +43575,14 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 }
             };
 
+            const textoCorreo = (t) => linkEsc(t).replace(/\n/g, '<br>');
             const construirTablaEstado = (estadoKey, items) => {
                 const meta = metaEstado[estadoKey];
                 let filas = '';
                 if (!items.length) {
                     filas = `
                         <tr>
-                            <td colspan="7" style="padding: 14px 12px; text-align: center; font-size: 13px; color: #6b7280; background: ${meta.emptyBg}; border: 1px solid ${meta.border};">
+                            <td style="padding: 14px 12px; text-align: center; font-size: 14px; color: #6b7280; background: ${meta.emptyBg}; border: 1px solid ${meta.border};">
                                 No hay registros en este estado.
                             </td>
                         </tr>`;
@@ -43584,18 +43591,37 @@ document.getElementById('chatForm').onsubmit = function (e) {
                         const info = resolverMontoLink(p);
                         const bg = i % 2 === 0 ? '#ffffff' : meta.rowAlt;
                         const fechaShow = fechaDMY(p.fechaDecision || p.fecha);
+                        const desc = String(p.descripcion || '').trim();
+                        const det = String(info.detalle || p.observaciones || '').trim();
+                        const bloquesTexto = [];
+                        if (desc) bloquesTexto.push('<div style="margin: 8px 0 0 0; font-size: 14px; color: #1f2937; line-height: 1.55; word-wrap: break-word;">' + textoCorreo(desc) + '</div>');
+                        if (det && det !== desc) bloquesTexto.push('<div style="margin: 8px 0 0 0; font-size: 13px; color: #4b5563; line-height: 1.5; word-wrap: break-word;"><strong>Detalle de cotización:</strong> ' + textoCorreo(det) + '</div>');
                         filas += `
                             <tr>
-                                <td style="padding: 10px 8px; border: 1px solid ${meta.border}; font-size: 12px; color: #374151; white-space: nowrap; background: ${bg}; vertical-align: top;">${linkEsc(fechaShow)}</td>
-                                <td style="padding: 10px 8px; border: 1px solid ${meta.border}; font-size: 12px; color: #111827; background: ${bg}; vertical-align: top;">
-                                    <div style="font-weight: 700; margin: 0 0 2px 0;">${linkEsc(p.titulo || 'Sin título')}</div>
-                                    <div style="font-size: 11px; color: #6b7280;">${linkEsc(cats[p.categoria] || p.categoria || '')}</div>
+                                <td style="padding: 0 0 10px 0;">
+                                    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border: 1px solid ${meta.border}; border-radius: 8px; background: ${bg};">
+                                        <tr>
+                                            <td style="padding: 14px 16px 6px 16px;">
+                                                <div style="font-size: 16px; font-weight: 700; color: #111827; line-height: 1.35; word-wrap: break-word;">${linkEsc(p.titulo || 'Sin título')}</div>
+                                                <div style="margin-top: 4px; font-size: 13px; color: #6b7280;">${linkEsc(cats[p.categoria] || p.categoria || '')}</div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding: 4px 16px 8px 16px; font-size: 14px; color: #374151; line-height: 1.5;">
+                                                <strong>Fecha:</strong> ${linkEsc(fechaShow)}
+                                                &nbsp;·&nbsp; <strong>Proveedor:</strong> ${linkEsc(info.proveedor || '—')}
+                                                &nbsp;·&nbsp; <strong style="color:${meta.color};">Monto:</strong> <span style="color:${meta.color}; font-weight:700;">${linkEsc(fmtMonto(info.monto))}</span>
+                                                &nbsp;·&nbsp; <span style="color:${meta.color}; font-weight:700;">${meta.label}</span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding: 0 16px 14px 16px;">
+                                                ${bloquesTexto.join('') || '<div style="font-size:13px;color:#9ca3af;">Sin detalle</div>'}
+                                                <div style="margin-top: 10px;">${renderLinksPresupuesto(info)}</div>
+                                            </td>
+                                        </tr>
+                                    </table>
                                 </td>
-                                <td style="padding: 10px 8px; border: 1px solid ${meta.border}; font-size: 12px; color: #374151; background: ${bg}; vertical-align: top;">${linkEsc(info.proveedor || '—')}</td>
-                                <td style="padding: 10px 8px; border: 1px solid ${meta.border}; font-size: 12px; color: ${meta.color}; font-weight: 700; text-align: right; white-space: nowrap; background: ${bg}; vertical-align: top;">${linkEsc(fmtMonto(info.monto))}</td>
-                                <td style="padding: 10px 8px; border: 1px solid ${meta.border}; font-size: 12px; background: ${bg}; vertical-align: top; text-align: center;">${renderLinksPresupuesto(info)}</td>
-                                <td style="padding: 10px 8px; border: 1px solid ${meta.border}; font-size: 11px; color: #4b5563; background: ${bg}; vertical-align: top;">${linkEsc(info.detalle || p.observaciones || '—')}</td>
-                                <td style="padding: 10px 8px; border: 1px solid ${meta.border}; font-size: 11px; color: ${meta.color}; font-weight: 700; text-align: center; background: ${bg}; vertical-align: top;">${meta.label}</td>
                             </tr>`;
                     });
                 }
@@ -43607,8 +43633,8 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin: 18px 0 6px 0; border-collapse: collapse;">
                         <tr>
                             <td style="padding: 0 0 8px 0;">
-                                <div style="font-size: 15px; font-weight: 700; color: ${meta.color};">${meta.titulo}</div>
-                                <div style="font-size: 12px; color: #6b7280; margin-top: 2px;">
+                                <div style="font-size: 16px; font-weight: 700; color: ${meta.color};">${meta.titulo}</div>
+                                <div style="font-size: 13px; color: #6b7280; margin-top: 2px;">
                                     ${items.length} registro${items.length !== 1 ? 's' : ''}
                                     ${totalMonto > 0 ? ' · Monto: <strong style="color:' + meta.color + ';">' + linkEsc(fmtMonto(totalMonto)) + '</strong>' : ''}
                                 </div>
@@ -43616,17 +43642,6 @@ document.getElementById('chatForm').onsubmit = function (e) {
                         </tr>
                     </table>
                     <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse: collapse; width: 100%; margin-bottom: 4px;">
-                        <thead>
-                            <tr>
-                                <th style="padding: 10px 8px; background: ${meta.headerBg}; color: #ffffff; font-size: 11px; font-weight: 700; text-align: left; border: 1px solid ${meta.headerBg};">Fecha</th>
-                                <th style="padding: 10px 8px; background: ${meta.headerBg}; color: #ffffff; font-size: 11px; font-weight: 700; text-align: left; border: 1px solid ${meta.headerBg};">Propuesta</th>
-                                <th style="padding: 10px 8px; background: ${meta.headerBg}; color: #ffffff; font-size: 11px; font-weight: 700; text-align: left; border: 1px solid ${meta.headerBg};">Proveedor</th>
-                                <th style="padding: 10px 8px; background: ${meta.headerBg}; color: #ffffff; font-size: 11px; font-weight: 700; text-align: right; border: 1px solid ${meta.headerBg};">Monto</th>
-                                <th style="padding: 10px 8px; background: ${meta.headerBg}; color: #ffffff; font-size: 11px; font-weight: 700; text-align: center; border: 1px solid ${meta.headerBg};">Presupuesto / Link</th>
-                                <th style="padding: 10px 8px; background: ${meta.headerBg}; color: #ffffff; font-size: 11px; font-weight: 700; text-align: left; border: 1px solid ${meta.headerBg};">Detalle</th>
-                                <th style="padding: 10px 8px; background: ${meta.headerBg}; color: #ffffff; font-size: 11px; font-weight: 700; text-align: center; border: 1px solid ${meta.headerBg};">Estado</th>
-                            </tr>
-                        </thead>
                         <tbody>${filas}</tbody>
                     </table>`;
             };
@@ -43655,28 +43670,33 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     ? (docs.length ? '<div style="font-size:11px;color:#065f46;font-weight:700;margin-bottom:2px;">Cierre</div>' + docs.map(enlaceDocCorreo).join('') : '')
                         + (respaldos.length ? '<div style="font-size:11px;color:#065f46;font-weight:700;margin:6px 0 2px;">Respaldos</div>' + respaldos.map(enlaceDocCorreo).join('') : '')
                     : '<span style="color:#9ca3af;">Sin documentos</span>';
+                const comentario = String((p.cierre && p.cierre.comentario) || '').trim();
                 return `
                     <tr>
-                        <td style="padding: 10px 8px; border: 1px solid #a7f3d0; font-size: 12px; color: #065f46; white-space: nowrap; vertical-align: top;">${linkEsc(fechaDMY(p.cierre && p.cierre.fechaRealizacion))}</td>
-                        <td style="padding: 10px 8px; border: 1px solid #a7f3d0; font-size: 12px; color: #111827; font-weight: 700; vertical-align: top;">${linkEsc(p.titulo || 'Sin título')}</td>
-                        <td style="padding: 10px 8px; border: 1px solid #a7f3d0; font-size: 12px; color: #374151; vertical-align: top;">${linkEsc((p.cierre && p.cierre.comentario) || '—')}</td>
-                        <td style="padding: 10px 8px; border: 1px solid #a7f3d0; font-size: 12px; vertical-align: top;">${docsHtml}</td>
+                        <td style="padding: 0 0 10px 0;">
+                            <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border: 1px solid #a7f3d0; border-radius: 8px; background: #f0fdf4;">
+                                <tr>
+                                    <td style="padding: 14px 16px 4px 16px; font-size: 16px; font-weight: 700; color: #111827; line-height: 1.35; word-wrap: break-word;">${linkEsc(p.titulo || 'Sin título')}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 4px 16px 8px 16px; font-size: 14px; color: #065f46;"><strong>Fecha de realización:</strong> ${linkEsc(fechaDMY(p.cierre && p.cierre.fechaRealizacion))}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 0 16px 8px 16px; font-size: 14px; color: #1f2937; line-height: 1.55; word-wrap: break-word;">${comentario ? textoCorreo(comentario) : '—'}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 0 16px 14px 16px; font-size: 13px; line-height: 1.5;">${docsHtml}</td>
+                                </tr>
+                            </table>
+                        </td>
                     </tr>`;
             }).join('');
             const bloqueRealizadas = realizadas.length ? `
                 <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin: 8px 0 6px 0;">
-                    <tr><td style="font-size: 15px; font-weight: 700; color: #047857;">🏁 Trabajos realizados</td></tr>
-                    <tr><td style="font-size: 12px; color: #6b7280; padding-top: 2px;">${realizadas.length} trabajo${realizadas.length !== 1 ? 's' : ''} cerrado${realizadas.length !== 1 ? 's' : ''} con fecha, comentario y documentos.</td></tr>
+                    <tr><td style="font-size: 16px; font-weight: 700; color: #047857;">🏁 Trabajos realizados</td></tr>
+                    <tr><td style="font-size: 13px; color: #6b7280; padding-top: 2px; padding-bottom: 8px;">${realizadas.length} trabajo${realizadas.length !== 1 ? 's' : ''} cerrado${realizadas.length !== 1 ? 's' : ''} con fecha, comentario y documentos.</td></tr>
                 </table>
                 <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse: collapse; margin-bottom: 8px;">
-                    <thead>
-                        <tr>
-                            <th style="padding: 10px 8px; background: #047857; color: #ffffff; font-size: 11px; font-weight: 700; text-align: left;">Fecha de realización</th>
-                            <th style="padding: 10px 8px; background: #047857; color: #ffffff; font-size: 11px; font-weight: 700; text-align: left;">Trabajo</th>
-                            <th style="padding: 10px 8px; background: #047857; color: #ffffff; font-size: 11px; font-weight: 700; text-align: left;">Comentario</th>
-                            <th style="padding: 10px 8px; background: #047857; color: #ffffff; font-size: 11px; font-weight: 700; text-align: left;">Documentos</th>
-                        </tr>
-                    </thead>
                     <tbody>${filasRealizadas}</tbody>
                 </table>` : '';
 
@@ -43697,7 +43717,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                         <tr><td style="padding: 12px 14px;"><p style="margin: 0; font-size: 14px; color: #333333; line-height: 1.5;">${linkEsc(mensajeAdicional)}</p></td></tr>
                     </table>`;
                 }
-                return generarPlantillaCorreoNotificacion('Comité — Mejoras cerradas', nombreComunidad, nombreMes, contenidoCerradas, true);
+                return generarPlantillaCorreoNotificacion('Comité — Mejoras cerradas', nombreComunidad, nombreMes, contenidoCerradas, true, false, 960);
             }
 
             if (opciones.soloSeleccion) {
@@ -43723,7 +43743,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 <p style="margin: 14px 0 0 0; font-size: 13px; color: #555; line-height: 1.5;">
                     Los respaldos van adjuntos a este correo cuando el tamaño lo permite. El Excel adjunto contiene solo estos requerimientos.
                 </p>`;
-                return generarPlantillaCorreoNotificacion('Comité — Requerimientos', nombreComunidad, nombreMes, contenidoSel, true);
+                return generarPlantillaCorreoNotificacion('Comité — Requerimientos', nombreComunidad, nombreMes, contenidoSel, true, false, 960);
             }
 
             let contenido = `
@@ -43771,7 +43791,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                         <tr><td style="padding: 12px 14px;"><p style="margin: 0; font-size: 14px; color: #333333; line-height: 1.5;">${linkEsc(mensajeAdicional)}</p></td></tr>
                     </table>`;
             }
-            return generarPlantillaCorreoNotificacion('Comité — Propuestas', nombreComunidad, nombreMes, contenido, true);
+            return generarPlantillaCorreoNotificacion('Comité — Propuestas', nombreComunidad, nombreMes, contenido, true, false, 960);
         }
         window.generarCorreoNotificacionComite = generarCorreoNotificacionComite;
 
@@ -45646,13 +45666,12 @@ document.getElementById('chatForm').onsubmit = function (e) {
                             <table class="reporte-table" style="width: 100%; border-collapse: collapse; table-layout: auto;">
                                 <thead>
                                     <tr>
-                                        <th style="padding: 0.5rem; text-align: left; font-weight: 600; font-size: 0.75rem; border: 1px solid #e5e7eb; background: #f3f4f6;">Fecha</th>
-                                        <th style="padding: 0.5rem; text-align: left; font-weight: 600; font-size: 0.75rem; border: 1px solid #e5e7eb; background: #f3f4f6;">Residente</th>
-                                        <th style="padding: 0.5rem; text-align: left; font-weight: 600; font-size: 0.75rem; border: 1px solid #e5e7eb; background: #f3f4f6;">Depto</th>
-                                        <th style="padding: 0.5rem; text-align: left; font-weight: 600; font-size: 0.75rem; border: 1px solid #e5e7eb; background: #f3f4f6;">Motivo</th>
-                                        <th style="padding: 0.5rem; text-align: left; font-weight: 600; font-size: 0.75rem; border: 1px solid #e5e7eb; background: #f3f4f6;">Contenido</th>
-                                        <th style="padding: 0.5rem; text-align: left; font-weight: 600; font-size: 0.75rem; border: 1px solid #e5e7eb; background: #f3f4f6;">Monto</th>
-                                        <th style="padding: 0.5rem; text-align: left; font-weight: 600; font-size: 0.75rem; border: 1px solid #e5e7eb; background: #f3f4f6;">Respaldo</th>
+                                        <th style="padding: 0.5rem; text-align: left; font-weight: 600; font-size: 0.85rem; border: 1px solid #e5e7eb; background: #f3f4f6;">Fecha</th>
+                                        <th style="padding: 0.5rem; text-align: left; font-weight: 600; font-size: 0.85rem; border: 1px solid #e5e7eb; background: #f3f4f6;">Residente</th>
+                                        <th style="padding: 0.5rem; text-align: left; font-weight: 600; font-size: 0.85rem; border: 1px solid #e5e7eb; background: #f3f4f6;">Depto</th>
+                                        <th style="padding: 0.5rem; text-align: left; font-weight: 600; font-size: 0.85rem; border: 1px solid #e5e7eb; background: #f3f4f6;">Motivo</th>
+                                        <th style="padding: 0.5rem; text-align: left; font-weight: 600; font-size: 0.85rem; border: 1px solid #e5e7eb; background: #f3f4f6;">Monto</th>
+                                        <th style="padding: 0.5rem; text-align: left; font-weight: 600; font-size: 0.85rem; border: 1px solid #e5e7eb; background: #f3f4f6;">Respaldo</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -45675,13 +45694,15 @@ document.getElementById('chatForm').onsubmit = function (e) {
                                     .replace(/"/g, '&quot;');
                             html += `
                                 <tr>
-                                    <td style="padding: 0.5rem; font-size: 0.75rem; border: 1px solid #e5e7eb;">${m.fecha ? formatearFechaParaCorreo(m.fecha) : '-'}</td>
-                                    <td style="padding: 0.5rem; font-size: 0.75rem; border: 1px solid #e5e7eb;">${m.nombre || '-'}</td>
-                                    <td style="padding: 0.5rem; font-size: 0.75rem; border: 1px solid #e5e7eb;">${m.departamento || '-'}</td>
-                                    <td style="padding: 0.5rem; font-size: 0.75rem; border: 1px solid #e5e7eb;">${m.motivo || '-'}</td>
-                                    <td style="padding: 0.5rem; font-size: 0.75rem; border: 1px solid #e5e7eb; vertical-align: top; line-height: 1.45; white-space: normal;"><div class="multa-contenido-reporte">${contenidoReporte}</div></td>
-                                    <td style="padding: 0.5rem; font-size: 0.75rem; border: 1px solid #e5e7eb;">${(parseFloat(m.monto) || 0).toFixed(2)} ${m.tipoUnidad || 'UF'}</td>
-                                    <td style="padding: 0.5rem; font-size: 0.75rem; border: 1px solid #e5e7eb; max-width: 200px;">${evidenciasHTML}</td>
+                                    <td style="padding: 0.55rem; font-size: 0.85rem; border: 1px solid #e5e7eb; white-space: nowrap;">${m.fecha ? formatearFechaParaCorreo(m.fecha) : '-'}</td>
+                                    <td style="padding: 0.55rem; font-size: 0.85rem; border: 1px solid #e5e7eb;">${m.nombre || '-'}</td>
+                                    <td style="padding: 0.55rem; font-size: 0.85rem; border: 1px solid #e5e7eb;">${m.departamento || '-'}</td>
+                                    <td style="padding: 0.55rem; font-size: 0.85rem; border: 1px solid #e5e7eb; line-height: 1.4;">${m.motivo || '-'}</td>
+                                    <td style="padding: 0.55rem; font-size: 0.85rem; border: 1px solid #e5e7eb; white-space: nowrap;">${(parseFloat(m.monto) || 0).toFixed(2)} ${m.tipoUnidad || 'UF'}</td>
+                                    <td style="padding: 0.55rem; font-size: 0.85rem; border: 1px solid #e5e7eb;">${evidenciasHTML}</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="6" style="padding: 0.7rem 0.85rem; font-size: 0.95rem; border: 1px solid #e5e7eb; vertical-align: top; line-height: 1.55; background: #fafafa;"><div class="multa-contenido-reporte">${contenidoReporte}</div></td>
                                 </tr>
                             `;
                         });
