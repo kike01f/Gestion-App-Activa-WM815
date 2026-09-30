@@ -8154,6 +8154,10 @@
                                 Se calcula automáticamente como Lectura Actual - Lectura Anterior
                             </small>
                         </div>
+                        <div class="form-group" style="margin-bottom: 0.5rem; grid-column: 1 / -1;">
+                            <label for="aguaObservaciones" style="margin-bottom: 0.25rem; font-size: 0.875rem;">Observaciones</label>
+                            <input type="text" id="aguaObservaciones" placeholder="Opcional. Queda en el registro y en el Excel." style="padding: 0.5rem; font-size: 0.875rem; width: 100%;">
+                        </div>
                     </div>
                     <button type="submit" class="btn btn-primary" style="padding: 0.5rem 1rem; font-size: 0.875rem; margin-top: 0.5rem;">Registrar Lectura</button>
                 </form>
@@ -8163,7 +8167,7 @@
                 <h3 style="margin: 0 0 0.75rem 0; font-size: 1rem; font-weight: 700;">Importar Lecturas desde Excel/CSV</h3>
                 <p style="color: var(--gray-600); font-size: 0.8rem; margin: 0 0 0.5rem 0;">
                     El archivo debe tener, al menos, tres columnas en este orden: Unidad, Lectura Anterior, Lectura Actual.
-                    La primera fila puede ser de encabezados.
+                    Si hay una columna Observaciones, también se importa. La primera fila puede ser de encabezados.
                 </p>
                 <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center;">
                     <label class="btn btn-primary" style="cursor: pointer; margin: 0;">
@@ -8206,6 +8210,7 @@
                             <th>Lectura Anterior</th>
                             <th>Lectura Actual</th>
                             <th>Consumo Total</th>
+                            <th>Observaciones</th>
                             <th>Acciones</th>
                         </tr>
                     </thead>
@@ -13508,6 +13513,7 @@
                         colgroup col:nth-child(3) { width: 120px; }
                         colgroup col:nth-child(4) { width: 120px; }
                         colgroup col:nth-child(5) { width: 120px; }
+                        colgroup col:nth-child(6) { width: 220px; }
                         thead th { 
                             background-color: #4a7c1a;
                             color: #ffffff !important;
@@ -13550,6 +13556,7 @@
                             <col style="width: 120px;">
                             <col style="width: 120px;">
                             <col style="width: 120px;">
+                            <col style="width: 220px;">
                         </colgroup>
                         <thead>
                             <tr>
@@ -13558,6 +13565,7 @@
                                 <th style="background-color: #4a7c1a; color: #ffffff;">Lectura Anterior</th>
                                 <th style="background-color: #4a7c1a; color: #ffffff;">Lectura Actual</th>
                                 <th style="background-color: #4a7c1a; color: #ffffff;">Consumo Total</th>
+                                <th style="background-color: #4a7c1a; color: #ffffff;">Observaciones</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -13580,6 +13588,7 @@
                             <td style="text-align: right;">${formatearLectura(l.lecturaAnterior)}</td>
                             <td style="text-align: right;">${formatearLectura(l.lecturaActual)}</td>
                             <td style="text-align: right; font-weight: 500;">${formatearLectura(consumo)}</td>
+                            <td>${String(l.observaciones || l.comentarios || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</td>
                         </tr>
                     `;
                 });
@@ -13588,6 +13597,7 @@
                             <tr class="total-row">
                                 <td colspan="4" style="text-align: right;"><strong>TOTAL CONSUMO:</strong></td>
                                 <td style="text-align: right;"><strong>${totalConsumo % 1 === 0 ? totalConsumo.toString() : totalConsumo.toFixed(2)}</strong></td>
+                                <td></td>
                             </tr>
                         </tbody>
                     </table>
@@ -32734,6 +32744,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
             const anteriorNum = lecturaAnterior !== null && !isNaN(lecturaAnterior) ? lecturaAnterior : 0;
             const actualNum = lecturaActual !== null && !isNaN(lecturaActual) ? lecturaActual : 0;
             const consumo = Math.max(0, actualNum - anteriorNum);
+            const observaciones = (document.getElementById('aguaObservaciones').value || '').trim();
             const fechaRegistro = obtenerFechaHoy();
             const mes = obtenerMesActual();
             
@@ -32753,6 +32764,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                         lecturaAnterior,
                         lecturaActual,
                         consumo,
+                        observaciones,
                         fechaRegistro,
                         mes
                     };
@@ -32770,6 +32782,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     lecturaAnterior,
                     lecturaActual,
                     consumo,
+                    observaciones,
                     fechaRegistro,
                     mes
                 };
@@ -32832,7 +32845,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
             }
             
             if (!lecturas || lecturas.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" class="empty-state"><p>No hay lecturas registradas para este mes</p></td></tr>';
+                tbody.innerHTML = '<tr><td colspan="7" class="empty-state"><p>No hay lecturas registradas para este mes</p></td></tr>';
                 return;
             }
             
@@ -32922,8 +32935,14 @@ document.getElementById('chatForm').onsubmit = function (e) {
                             placeholder="0">
                     </td>
                     <td>
-                        <input type="text" value="${formatearConsumo(consumo)}" readonly
+                        <input type="text" data-agua-consumo="1" value="${formatearConsumo(consumo)}" readonly
                             style="width: 100%; padding: 0.25rem 0.4rem; font-size: 0.8rem; ${estiloConsumo}">
+                    </td>
+                    <td>
+                        <input type="text" value="${String(l.observaciones || l.comentarios || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;')}" ${disabledAttr}
+                            style="width: 100%; min-width: 8rem; padding: 0.25rem 0.4rem; font-size: 0.8rem;"
+                            oninput="actualizarLecturaAguaEnLinea('${l.id}', 'observaciones', this.value)"
+                            placeholder="Observación">
                     </td>
                     <td style="text-align: center;">
                         ${puedeEditar ? `
@@ -32959,6 +32978,11 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     lectura.unidad = valor.trim();
                     const fila = document.querySelector('#tbodyLecturasAgua tr[data-id="' + id + '"]');
                     if (fila) fila.setAttribute('data-unidad', lectura.unidad);
+                } else if (campo === 'observaciones') {
+                    lectura.observaciones = String(valor || '').trim();
+                    lecturas[index] = lectura;
+                    await guardarDatosMes('lecturasAguaCaliente', lecturas);
+                    return;
                 } else if (campo === 'lecturaAnterior' || campo === 'lecturaActual') {
                     // Si el valor está en blanco (string vacío, null, undefined), guardar como null
                     const valorTrimmed = (valor || '').toString().trim();
@@ -32998,8 +33022,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 // Actualizar el consumo en la UI inmediatamente
                 const fila = document.querySelector(`tr[data-id="${id}"]`);
                 if (fila) {
-                    const inputs = fila.querySelectorAll('input');
-                    const inputConsumo = inputs[inputs.length - 1];
+                    const inputConsumo = fila.querySelector('input[data-agua-consumo]');
                     if (inputConsumo) {
                         inputConsumo.value = formatearConsumo(lectura.consumo);
                     }
@@ -33218,7 +33241,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
             try {
                 let datos = [];
                 let tieneEncabezado = false;
-                let indicesColumnas = { unidad: 0, anterior: 1, actual: 2 }; // Índices por defecto
+                let indicesColumnas = { unidad: 0, anterior: 1, actual: 2, observaciones: -1 };
                 
                 if (file.name.endsWith('.csv')) {
                     const text = await file.text();
@@ -33251,6 +33274,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                         const idxUnidad = buscarColumna(['unidad', 'departamento', 'depto', 'dept', 'apto', 'apt']);
                         const idxAnterior = buscarColumna(['anterior', 'previo', 'prev', 'inicial', 'inicio']);
                         const idxActual = buscarColumna(['actual', 'final', 'lectura', 'medidor']);
+                        const idxObs = buscarColumna(['observacion', 'observación', 'comentario', 'nota']);
                         
                         // Si encontramos al menos una columna con nombre, asumimos que hay encabezado
                         if (idxUnidad !== -1 || idxAnterior !== -1 || idxActual !== -1) {
@@ -33258,6 +33282,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                             if (idxUnidad !== -1) indicesColumnas.unidad = idxUnidad;
                             if (idxAnterior !== -1) indicesColumnas.anterior = idxAnterior;
                             if (idxActual !== -1) indicesColumnas.actual = idxActual;
+                            if (idxObs !== -1) indicesColumnas.observaciones = idxObs;
                         }
                     }
                     
@@ -33313,12 +33338,14 @@ document.getElementById('chatForm').onsubmit = function (e) {
                             const idxUnidad = buscarColumna(['unidad', 'departamento', 'depto', 'dept', 'apto', 'apt']);
                             const idxAnterior = buscarColumna(['anterior', 'previo', 'prev', 'inicial', 'inicio']);
                             const idxActual = buscarColumna(['actual', 'final', 'lectura', 'medidor']);
+                            const idxObs = buscarColumna(['observacion', 'observación', 'comentario', 'nota']);
                             
                             if (idxUnidad !== -1 || idxAnterior !== -1 || idxActual !== -1) {
                                 tieneEncabezado = true;
                                 if (idxUnidad !== -1) indicesColumnas.unidad = idxUnidad;
                                 if (idxAnterior !== -1) indicesColumnas.anterior = idxAnterior;
                                 if (idxActual !== -1) indicesColumnas.actual = idxActual;
+                                if (idxObs !== -1) indicesColumnas.observaciones = idxObs;
                             }
                         }
                     }
@@ -33416,6 +33443,9 @@ document.getElementById('chatForm').onsubmit = function (e) {
                         fechaRegistro: obtenerFechaHoy(),
                         mes: mesDestino
                     };
+                    if (indicesColumnas.observaciones >= 0 && row[indicesColumnas.observaciones] != null && String(row[indicesColumnas.observaciones]).trim() !== '') {
+                        lectura.observaciones = String(row[indicesColumnas.observaciones]).trim();
+                    }
                     // Evitar duplicación de unidades: si ya existe una lectura para esta unidad en el mes destino,
                     // se actualiza ese registro en lugar de crear uno nuevo.
                     const existenteIndex = lecturas.findIndex(l => (l.unidad || '').toString().trim().toLowerCase() === unidadKey);
@@ -33487,6 +33517,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                         colgroup col:nth-child(3) { width: 120px; }
                         colgroup col:nth-child(4) { width: 120px; }
                         colgroup col:nth-child(5) { width: 120px; }
+                        colgroup col:nth-child(6) { width: 220px; }
                         thead th { 
                             background-color: #4a7c1a;
                             color: #ffffff !important;
@@ -33529,6 +33560,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                             <col style="width: 120px;">
                             <col style="width: 120px;">
                             <col style="width: 120px;">
+                            <col style="width: 220px;">
                         </colgroup>
                         <thead>
                             <tr>
@@ -33537,6 +33569,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                                 <th style="background-color: #4a7c1a; color: #ffffff;">Lectura Anterior</th>
                                 <th style="background-color: #4a7c1a; color: #ffffff;">Lectura Actual</th>
                                 <th style="background-color: #4a7c1a; color: #ffffff;">Consumo Total</th>
+                                <th style="background-color: #4a7c1a; color: #ffffff;">Observaciones</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -33577,6 +33610,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                         <td style="text-align: right;">${formatearLectura(l.lecturaAnterior)}</td>
                         <td style="text-align: right;">${formatearLectura(l.lecturaActual)}</td>
                         <td style="text-align: right; font-weight: 500;">${formatearLectura(consumo)}</td>
+                            <td>${String(l.observaciones || l.comentarios || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</td>
                     </tr>
                 `;
             });
@@ -33585,6 +33619,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                             <tr class="total-row">
                                 <td colspan="4" style="text-align: right;"><strong>TOTAL CONSUMO:</strong></td>
                                 <td style="text-align: right;"><strong>${totalConsumo % 1 === 0 ? totalConsumo.toString() : totalConsumo.toFixed(2)}</strong></td>
+                                <td></td>
                             </tr>
                         </tbody>
                     </table>
@@ -45855,6 +45890,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                                         <th style="padding: 0.5rem; text-align: left; font-weight: 600; font-size: 0.75rem; border: 1px solid #e5e7eb; background: #f3f4f6;">Lectura Anterior</th>
                                         <th style="padding: 0.5rem; text-align: left; font-weight: 600; font-size: 0.75rem; border: 1px solid #e5e7eb; background: #f3f4f6;">Lectura Actual</th>
                                         <th style="padding: 0.5rem; text-align: left; font-weight: 600; font-size: 0.75rem; border: 1px solid #e5e7eb; background: #f3f4f6;">Consumo</th>
+                                        <th style="padding: 0.5rem; text-align: left; font-weight: 600; font-size: 0.75rem; border: 1px solid #e5e7eb; background: #f3f4f6;">Observaciones</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -45874,6 +45910,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                                     <td style="padding: 0.5rem; font-size: 0.75rem; border: 1px solid #e5e7eb;">${formatearNumero(lecturaAnterior)}</td>
                                     <td style="padding: 0.5rem; font-size: 0.75rem; border: 1px solid #e5e7eb;">${formatearNumero(lecturaActual)}</td>
                                     <td style="padding: 0.5rem; font-size: 0.75rem; border: 1px solid #e5e7eb; font-weight: 700;">${formatearNumero(consumo)}</td>
+                                    <td style="padding: 0.5rem; font-size: 0.75rem; border: 1px solid #e5e7eb;">${String(l.observaciones || l.comentarios || '-').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</td>
                                 </tr>
                             `;
                         });
@@ -47287,7 +47324,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     lecturaActual,
                     consumo,
                     reporteFinMesUrlsEvidencia(l) || '-',
-                    (l.comentarios && String(l.comentarios).trim()) ? String(l.comentarios).trim() : '-'
+                    (l.observaciones && String(l.observaciones).trim()) ? String(l.observaciones).trim() : ((l.comentarios && String(l.comentarios).trim()) ? String(l.comentarios).trim() : '-')
                 ]);
             });
             
