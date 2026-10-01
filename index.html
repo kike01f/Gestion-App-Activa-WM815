@@ -8001,7 +8001,7 @@
                                 <label style="margin-bottom: 0.25rem; font-size: 0.875rem; display: block;">Archivos de Evidencia (PDF, imágenes, videos)</label>
                                 <input type="file" id="multaArchivos" multiple accept=".pdf,.jpg,.jpeg,.png,.gif,.mp4,.mov,.avi" style="padding: 0.5rem; font-size: 0.875rem; width: 100%;">
                                 <small style="color: var(--gray-500); font-size: 0.7rem; margin-top: 0.15rem; display: block;">
-                                    Puede seleccionar múltiples archivos (PDF, imágenes JPG/PNG, videos MP4/MOV/AVI)
+                                    Puede agregar varios archivos. Si vuelve a abrir el selector, los nuevos se suman a la lista. Puede quitar cualquiera antes de guardar.
                                 </small>
                                 <div id="multaArchivosLista" style="margin-top: 0.5rem; display: none;">
                                     <div style="font-size: 0.75rem; color: var(--gray-600); margin-bottom: 0.25rem;">Archivos seleccionados:</div>
@@ -28228,6 +28228,50 @@ document.getElementById('chatForm').onsubmit = function (e) {
             }
         }
 
+        var multaArchivosPendientes = [];
+
+        function multaClaveArchivo(f) {
+            return String((f && f.name) || '') + '|' + String((f && f.size) || 0) + '|' + String((f && f.lastModified) || 0);
+        }
+
+        function multaArchivosAcumulados(input, pendientes) {
+            var lista = (pendientes || []).slice();
+            var claves = {};
+            lista.forEach(function (f) { claves[multaClaveArchivo(f)] = true; });
+            Array.from((input && input.files) || []).forEach(function (f) {
+                var k = multaClaveArchivo(f);
+                if (!claves[k]) {
+                    claves[k] = true;
+                    lista.push(f);
+                }
+            });
+            return lista;
+        }
+
+        function renderMultaArchivosPendientes() {
+            var lista = document.getElementById('multaArchivosLista');
+            var nombres = document.getElementById('multaArchivosNombres');
+            if (!lista || !nombres) return;
+            if (!multaArchivosPendientes.length) {
+                lista.style.display = 'none';
+                nombres.innerHTML = '';
+                return;
+            }
+            lista.style.display = 'block';
+            nombres.innerHTML = multaArchivosPendientes.map(function (f, i) {
+                var nombre = String((f && f.name) || 'archivo').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                return '<div style="display:flex;align-items:center;gap:0.45rem;margin:0.15rem 0;">• ' + nombre +
+                    ' <button type="button" data-multa-archivo-del="' + i + '" style="border:none;background:transparent;color:#b91c1c;cursor:pointer;font-size:0.75rem;padding:0;">Quitar</button></div>';
+            }).join('');
+        }
+
+        function limpiarMultaArchivosPendientes() {
+            multaArchivosPendientes = [];
+            var input = document.getElementById('multaArchivos');
+            if (input) input.value = '';
+            renderMultaArchivosPendientes();
+        }
+
         // Función para agregar evidencia (disponible globalmente)
         window.agregarEvidencia = function() {
             const contenedor = document.getElementById('multaEvidencias');
@@ -28274,7 +28318,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
             
             // Obtener archivos si hay
             const inputArchivos = document.getElementById('multaArchivos');
-            const archivosSeleccionados = inputArchivos ? Array.from(inputArchivos.files) : [];
+            const archivosSeleccionados = multaArchivosAcumulados(inputArchivos, multaArchivosPendientes);
             
             const fechaSeleccionada = document.getElementById('multaFecha').value;
             const radTipo = document.querySelector('input[name="multaTipoRegistro"]:checked');
@@ -28440,7 +28484,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     <button type="button" class="btn btn-secondary btn-sm" onclick="agregarEvidencia()">+ Agregar Link</button>
                 </div>
             `;
-            document.getElementById('multaArchivosLista').style.display = 'none';
+            limpiarMultaArchivosPendientes();
             // Limpiar archivos existentes
             const archivosExistentes = document.getElementById('multaArchivosExistentes');
             if (archivosExistentes) archivosExistentes.innerHTML = '';
@@ -28569,6 +28613,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
             // Limpiar archivos existentes
             const archivosExistentes = document.getElementById('multaArchivosExistentes');
             if (archivosExistentes) archivosExistentes.innerHTML = '';
+            limpiarMultaArchivosPendientes();
             const fechaHoy = obtenerFechaHoy();
             document.getElementById('multaFecha').value = fechaHoy;
             const rM = document.getElementById('multaTipoRegistroMulta');
@@ -54673,17 +54718,24 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 }
                 
                 const multaArchivos = document.getElementById('multaArchivos');
-                if (multaArchivos) {
+                if (multaArchivos && multaArchivos.dataset.multaAcum !== '1') {
+                    multaArchivos.dataset.multaAcum = '1';
                     multaArchivos.addEventListener('change', function() {
-                        const lista = document.getElementById('multaArchivosLista');
-                        const nombres = document.getElementById('multaArchivosNombres');
-                        if (this.files.length > 0) {
-                            lista.style.display = 'block';
-                            nombres.innerHTML = Array.from(this.files).map(f => `<div>• ${f.name}</div>`).join('');
-                        } else {
-                            lista.style.display = 'none';
-                        }
+                        multaArchivosPendientes = multaArchivosAcumulados(this, multaArchivosPendientes);
+                        this.value = '';
+                        renderMultaArchivosPendientes();
                     });
+                    var nombresPend = document.getElementById('multaArchivosNombres');
+                    if (nombresPend) {
+                        nombresPend.addEventListener('click', function(ev) {
+                            var btn = ev.target && ev.target.closest ? ev.target.closest('[data-multa-archivo-del]') : null;
+                            if (!btn) return;
+                            var idx = parseInt(btn.getAttribute('data-multa-archivo-del'), 10);
+                            if (isNaN(idx)) return;
+                            multaArchivosPendientes.splice(idx, 1);
+                            renderMultaArchivosPendientes();
+                        });
+                    }
                 }
                 
                 const cajaArchivos = document.getElementById('cajaArchivos');
