@@ -10724,11 +10724,26 @@
                 storage = firebase.storage();
                 auth = firebase.auth();
                 firebaseInitialized = true;
+                liberarRespaldosLocalesObsoletos();
             } else {
-                // Firebase SDK no disponible, usando LocalStorage como respaldo
+                // Firebase SDK no disponible
             }
         } catch (error) {
-            // Error al inicializar Firebase, usando LocalStorage como respaldo
+            // Error al inicializar Firebase
+        }
+
+        /** Borra copias locales de módulos. Los datos viven solo en Firestore. */
+        function liberarRespaldosLocalesObsoletos() {
+            try {
+                const borrar = [];
+                for (let i = 0; i < localStorage.length; i++) {
+                    const k = localStorage.key(i);
+                    if (!k || !k.startsWith(LS_WM_PREFIX)) continue;
+                    const logical = k.slice(LS_WM_PREFIX.length);
+                    if (logical.indexOf('backup_') === 0 || logical === 'backup_modulos_index') borrar.push(k);
+                }
+                borrar.forEach(function (k) { localStorage.removeItem(k); });
+            } catch (e) {}
         }
 
         // ============================================
@@ -22643,66 +22658,242 @@ document.getElementById('chatForm').onsubmit = function (e) {
             };
         }
 
-        // Función para obtener datos del LocalStorage (compatibilidad con sistema antiguo)
-        async function obtenerDatos(key) {
-            // Para datos que no están organizados por mes (como proveedores)
-            // Intentar obtener de Firestore
-            if (firebaseInitialized && db) {
-                try {
-                    const docRef = db.collection('comunidad').doc(key);
-                    const doc = await docRef.get();
-                    if (doc.exists) {
-                        const data = doc.data() || {};
-                        // Asegurar que siempre devolvemos un array (compatibilidad con estructuras antiguas)
-                        const resultado = data.datos;
-                        if (Array.isArray(resultado)) return resultado;
-                        if (resultado && typeof resultado === 'object') {
-                            return Object.values(resultado).filter(v => v && typeof v === 'object');
-                        }
-                        return [];
-                    }
-                } catch (error) {
-                    console.error('Error al leer de Firestore:', error);
-                    // Si hay error de permisos, continuar con LocalStorage
-                }
-            }
-            
-            // Respaldo: LocalStorage
+        // Persistencia solo en Firestore. Un documento no puede pasar de 1 MB;
+        // los listados grandes se parten en documentos hermanos comunidad/{id}__p_0000.
+        const NUBE_LIMITE_BYTES = 700000;
+
+        function nubeOlvidarLocal(clave) {
+            try { localStorage.removeItem(lsKey(clave)); } catch (e) {}
+        }
+
+        function nubeLeerLocal(clave) {
             try {
-                const datos = localStorage.getItem(lsKey(key));
-                if (datos) {
-                    const parsed = JSON.parse(datos);
-                    if (Array.isArray(parsed)) return parsed;
-                    if (parsed && typeof parsed === 'object') {
-                        return Object.values(parsed).filter(v => v && typeof v === 'object');
-                    }
-                    return [];
-                }
-            } catch (error) {
-                console.error('Error al leer de LocalStorage:', error);
+                const raw = localStorage.getItem(lsKey(clave));
+                if (!raw) return null;
+                const parsed = JSON.parse(raw);
+                if (Array.isArray(parsed)) return parsed;
+                if (parsed && typeof parsed === 'object' && Array.isArray(parsed.datos)) return parsed.datos;
+                return null;
+            } catch (e) {
+                return null;
             }
-            
-            // Si todo falla, devolver array vacío
+        }
+
+        function nubeAPlano(valor) {
+            return JSON.parse(JSON.stringify(valor == null ? [] : valor));
+        }
+
+        function nubeBytes(valor) {
+            try {
+                return new TextEncoder().encode(JSON.stringify(valor)).length;
+            } catch (e) {
+                return 0;
+            }
+        }
+
+        function nubeIdParte(docId, indice) {
+            return docId + '__p_' + String(indice).padStart(4, '0');
+        }
+
+        function nubePartir(lista) {
+            const partes = [];
+            let actual = [];
+            let bytes = 2;
+            lista.forEach(function (item) {
+                const b = nubeBytes(item) + 1;
+                if (b > NUBE_LIMITE_BYTES) {
+                    throw new Error('Un registro supera el tamaño máximo de Firestore (1 MB). Quite archivos embebidos y vuelva a guardar.');
+                }
+                if (actual.length > 0 && bytes + b > NUBE_LIMITE_BYTES) {
+                    partes.push(actual);
+                    actual = [];
+                    bytes = 2;
+                }
+                actual.push(item);
+                bytes += b;
+            });
+            if (actual.length) partes.push(actual);
+            return partes;
+        }
+
+        function nubeNormalizarLista(data) {
+            if (!data) return [];
+            const resultado = data.datos;
+            if (Array.isArray(resultado)) return resultado;
+            if (resultado && typeof resultado === 'object') {
+                return Object.values(resultado).filter(function (v) { return v && typeof v === 'object'; });
+            }
             return [];
         }
 
-        // Función para guardar datos (compatibilidad con sistema antiguo y datos globales)
-        async function guardarDatos(key, datos) {
-            // Guardar en Firestore
-            if (firebaseInitialized && db) {
-                try {
-                    await db.collection('comunidad').doc(key).set({
-                        datos: datos,
-                        modulo: key,
-                        actualizado: firebase.firestore.FieldValue.serverTimestamp()
-                    });
-                } catch (error) {
-                    console.error('Error al guardar en Firestore:', error);
+        async function nubeBorrarPartes(docId, cantidad) {
+            const n = cantidad || 0;
+            if (!n || !db) return;
+            let batch = db.batch();
+            let ops = 0;
+            const commits = [];
+            for (let i = 0; i < n; i++) {
+                batch.delete(db.collection('comunidad').doc(nubeIdParte(docId, i)));
+                ops++;
+                if (ops === 400) {
+                    commits.push(batch.commit());
+                    batch = db.batch();
+                    ops = 0;
                 }
             }
-            
-            // Respaldo: LocalStorage
-            localStorage.setItem(lsKey(key), JSON.stringify(datos));
+            if (ops) commits.push(batch.commit());
+            await Promise.all(commits);
+        }
+
+        async function nubeEscribir(docId, datos, extra) {
+            if (!firebaseInitialized || !db) {
+                throw new Error('No hay conexión con Firestore. Los datos solo se guardan en la nube.');
+            }
+            const plano = Array.isArray(datos) ? nubeAPlano(datos) : [];
+            const ref = db.collection('comunidad').doc(docId);
+            let prevPartes = 0;
+            try {
+                const prev = await ref.get();
+                if (prev.exists && prev.data() && prev.data().partido) prevPartes = prev.data().partes || 0;
+            } catch (e) {}
+            const campos = Object.assign({
+                modulo: (extra && extra.modulo) || docId,
+                actualizado: firebase.firestore.FieldValue.serverTimestamp(),
+                partido: false,
+                partes: 0
+            }, (extra && extra.campos) || {});
+
+            if (nubeBytes(plano) <= NUBE_LIMITE_BYTES) {
+                campos.datos = plano;
+                campos.partido = false;
+                campos.partes = 0;
+                await ref.set(campos);
+                if (prevPartes) await nubeBorrarPartes(docId, prevPartes);
+            } else {
+                const partes = nubePartir(plano);
+                campos.datos = [];
+                campos.partido = true;
+                campos.partes = partes.length;
+                await ref.set(campos);
+                let batch = db.batch();
+                let ops = 0;
+                const commits = [];
+                partes.forEach(function (parte, i) {
+                    batch.set(db.collection('comunidad').doc(nubeIdParte(docId, i)), { i: i, datos: parte });
+                    ops++;
+                    if (ops === 400) {
+                        commits.push(batch.commit());
+                        batch = db.batch();
+                        ops = 0;
+                    }
+                });
+                if (ops) commits.push(batch.commit());
+                await Promise.all(commits);
+                if (prevPartes > partes.length) {
+                    let batchDel = db.batch();
+                    let opsDel = 0;
+                    const commitsDel = [];
+                    for (let i = partes.length; i < prevPartes; i++) {
+                        batchDel.delete(db.collection('comunidad').doc(nubeIdParte(docId, i)));
+                        opsDel++;
+                        if (opsDel === 400) {
+                            commitsDel.push(batchDel.commit());
+                            batchDel = db.batch();
+                            opsDel = 0;
+                        }
+                    }
+                    if (opsDel) commitsDel.push(batchDel.commit());
+                    await Promise.all(commitsDel);
+                }
+            }
+            nubeOlvidarLocal(docId);
+        }
+
+        async function nubeLeer(docId) {
+            if (!firebaseInitialized || !db) return { existe: false, datos: [] };
+            const ref = db.collection('comunidad').doc(docId);
+            const doc = await ref.get();
+            if (!doc.exists) return { existe: false, datos: [] };
+            const data = doc.data() || {};
+            if (data.partido === true) {
+                const n = data.partes || 0;
+                const datos = [];
+                for (let i = 0; i < n; i++) {
+                    const parte = await db.collection('comunidad').doc(nubeIdParte(docId, i)).get();
+                    const arr = parte.exists ? parte.data().datos : null;
+                    if (Array.isArray(arr)) datos.push.apply(datos, arr);
+                }
+                return { existe: true, datos: datos };
+            }
+            return { existe: true, datos: nubeNormalizarLista(data) };
+        }
+
+        async function nubeEliminar(docId) {
+            if (!firebaseInitialized || !db) return;
+            const ref = db.collection('comunidad').doc(docId);
+            let prevPartes = 0;
+            try {
+                const prev = await ref.get();
+                if (prev.exists && prev.data() && prev.data().partido) prevPartes = prev.data().partes || 0;
+            } catch (e) {}
+            if (prevPartes) await nubeBorrarPartes(docId, prevPartes);
+            await ref.delete().catch(function () {});
+            nubeOlvidarLocal(docId);
+        }
+
+        async function nubeLeerOMigrar(docId) {
+            const nube = await nubeLeer(docId);
+            if (nube.existe && nube.datos.length > 0) {
+                nubeOlvidarLocal(docId);
+                return nube.datos;
+            }
+            let local = nubeLeerLocal(docId);
+            if (docId === 'personalEdificio' && local) local = aligerarPersonalEdificio(local);
+            if (local && local.length > 0) {
+                await nubeEscribir(docId, local, { modulo: docId });
+                return local;
+            }
+            return nube.existe ? nube.datos : [];
+        }
+
+        function aligerarPersonalEdificio(datos) {
+            const lista = typeof deduplicarEmpleadosNomina === 'function'
+                ? deduplicarEmpleadosNomina(Array.isArray(datos) ? datos : [])
+                : (Array.isArray(datos) ? datos : []);
+            return lista.map(function (p) {
+                return {
+                    id: p && p.id != null ? String(p.id) : '',
+                    nombre: p && p.nombre ? String(p.nombre) : '',
+                    cargo: p && p.cargo ? String(p.cargo) : '',
+                    estado: typeof normalizarEstadoPersonalNomina === 'function'
+                        ? normalizarEstadoPersonalNomina(p.estado)
+                        : ((p && p.estado) || 'Activo')
+                };
+            }).filter(function (p) { return p.nombre; });
+        }
+
+        async function obtenerDatos(key) {
+            if (!firebaseInitialized || !db) {
+                throw new Error('No hay conexión con Firestore. Los datos solo se leen desde la nube.');
+            }
+            const datos = await nubeLeerOMigrar(key);
+            if (key !== 'personalEdificio') return datos;
+            const ligero = aligerarPersonalEdificio(datos);
+            const sucio = datos.some(function (p) {
+                return p && Object.keys(p).some(function (k) {
+                    return k !== 'id' && k !== 'nombre' && k !== 'cargo' && k !== 'estado';
+                });
+            });
+            if (sucio || ligero.length !== datos.length) {
+                await nubeEscribir(key, ligero, { modulo: key });
+            }
+            return ligero;
+        }
+
+        async function guardarDatos(key, datos) {
+            let lista = Array.isArray(datos) ? datos : [];
+            if (key === 'personalEdificio') lista = aligerarPersonalEdificio(lista);
+            await nubeEscribir(key, lista, { modulo: key });
         }
 
         // Funciones para personalización de la app
@@ -22734,22 +22925,6 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 }
             }
             
-            // Respaldo: LocalStorage
-            try {
-                const datos = localStorage.getItem(lsKey(key));
-                if (datos) {
-                    const parsed = JSON.parse(datos);
-                    personalizacion = {
-                        comunidad: parsed.comunidad || personalizacion.comunidad,
-                        jefeEdificio: parsed.jefeEdificio || personalizacion.jefeEdificio,
-                        deptos: parsed.deptos || personalizacion.deptos,
-                        tema: 'dark'
-                    };
-                }
-            } catch (error) {
-                console.error('Error al leer personalización de LocalStorage:', error);
-            }
-            
             return personalizacion;
         }
 
@@ -22769,11 +22944,12 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     });
                 } catch (error) {
                     console.error('Error al guardar personalización en Firestore:', error);
+                    throw error;
                 }
+            } else {
+                throw new Error('No hay conexión con Firestore. La personalización solo se guarda en la nube.');
             }
-            
-            // Respaldo: LocalStorage
-            localStorage.setItem(lsKey(key), JSON.stringify(datos));
+            try { localStorage.removeItem(lsKey(key)); } catch (e) {}
         }
 
         // Función para cargar datos de personalización en el formulario
@@ -23100,232 +23276,51 @@ document.getElementById('chatForm').onsubmit = function (e) {
         }
 
         // ============================================
-        // FUNCIONES DE FIRESTORE (con respaldo LocalStorage)
+        // FUNCIONES DE FIRESTORE
         // ============================================
         
-        // Función para obtener datos del mes actual o del mes en consulta
         async function obtenerDatosMes(key) {
+            if (!firebaseInitialized || !db) {
+                throw new Error('No hay conexión con Firestore. Los datos solo se leen desde la nube.');
+            }
             const mesActual = obtenerMesActual();
             const mesConsulta = window.mesEnConsulta || mesActual;
-            
-            // Si hay un mes en consulta y es diferente al actual, primero intentar obtener datos activos (reabiertos)
-            // Si no hay datos activos, entonces buscar datos archivados
-            let docKey = `${key}_${mesConsulta}`;
-            let datosEncontrados = null;
-            
-            // Intentar obtener datos activos (reabiertos) desde Firestore
-            if (firebaseInitialized && db && mesConsulta !== mesActual) {
-                try {
-                    const docRef = db.collection('comunidad').doc(docKey);
-                    const doc = await docRef.get();
-                    if (doc.exists) {
-                        const data = doc.data();
-                        datosEncontrados = Array.isArray(data.datos) ? data.datos : [];
-                        if (datosEncontrados.length > 0) {
-                            return datosEncontrados;
-                        }
-                    }
-                } catch (error) {
-                    console.error('Error al leer datos activos de Firestore:', error);
-                }
-            }
-            
-            // Si no hay datos activos y hay mes en consulta, buscar datos archivados
-            if (mesConsulta !== mesActual && (!datosEncontrados || datosEncontrados.length === 0)) {
-                docKey = `${key}_archivo_${mesConsulta}`;
-            }
-            
-            // Intentar obtener de Firestore
-            if (firebaseInitialized && db) {
-                try {
-                    const docRef = db.collection('comunidad').doc(docKey);
-                    const doc = await docRef.get();
-                    if (doc.exists) {
-                        const data = doc.data();
-                        // Asegurar que siempre devolvemos un array
-                        const resultado = data.datos || [];
-                        return Array.isArray(resultado) ? resultado : [];
-                    }
-                } catch (error) {
-                    console.error('Error al leer de Firestore:', error);
-                    // Si hay error de permisos, continuar con LocalStorage
-                }
-            }
-            
-            // Respaldo: LocalStorage - primero intentar datos activos si hay mes en consulta
             if (mesConsulta !== mesActual) {
-                try {
-                    const datosActivos = localStorage.getItem(lsKey(`${key}_${mesConsulta}`));
-                    if (datosActivos) {
-                        const parsed = JSON.parse(datosActivos);
-                        if (Array.isArray(parsed) && parsed.length > 0) {
-                            return parsed;
-                        }
-                    }
-                } catch (error) {
-                    console.error('Error al leer datos activos de LocalStorage:', error);
-                }
+                const activos = await nubeLeerOMigrar(`${key}_${mesConsulta}`);
+                if (activos.length > 0) return activos;
+                return await nubeLeerOMigrar(`${key}_archivo_${mesConsulta}`);
             }
-            
-            // Si no hay datos activos, buscar archivados o del mes actual
-            try {
-                const datos = localStorage.getItem(lsKey(docKey));
-                if (datos) {
-                    const parsed = JSON.parse(datos);
-                    return Array.isArray(parsed) ? parsed : [];
-                }
-            } catch (error) {
-                console.error('Error al leer de LocalStorage:', error);
-            }
-            
-            // Si todo falla, devolver array vacío
-            return [];
+            return await nubeLeerOMigrar(`${key}_${mesConsulta}`);
         }
 
-
-        // Función para obtener datos archivados de un mes específico (para reportes)
         async function obtenerDatosArchivados(key, mesAnio) {
-            const archivoKey = `${key}_archivo_${mesAnio}`;
-            
-            // Intentar obtener de Firestore
-            if (firebaseInitialized && db) {
-                try {
-                    const docRef = db.collection('comunidad').doc(archivoKey);
-                    const doc = await docRef.get();
-                    if (doc.exists) {
-                        const data = doc.data();
-                        const resultado = data.datos || [];
-                        if (Array.isArray(resultado)) {
-                            return resultado;
-                        } else {
-                            return [];
-                        }
-                    }
-                } catch (error) {
-                    console.error(`✗ Error al leer datos archivados de Firestore para ${key}:`, error);
-                }
-            }
-            
-            // Respaldo: LocalStorage
-            try {
-                const datos = localStorage.getItem(lsKey(archivoKey));
-                if (datos) {
-                    const parsed = JSON.parse(datos);
-                    if (Array.isArray(parsed)) {
-                        return parsed;
-                    } else {
-                        return [];
-                    }
-                }
-            } catch (error) {
-                console.error(`✗ Error al leer datos archivados de LocalStorage para ${key}:`, error);
-            }
-            
-            // Si todo falla, devolver array vacío
-            return [];
+            if (!firebaseInitialized || !db) return [];
+            return await nubeLeerOMigrar(`${key}_archivo_${mesAnio}`);
         }
 
-        function respaldarSnapshotLocal(docKey, key, mes, datosActuales) {
-            try {
-                if (!Array.isArray(datosActuales) || datosActuales.length === 0) return;
-                const backupKey = `backup_${docKey}`;
-                const raw = localStorage.getItem(lsKey(backupKey));
-                let historial = [];
-                if (raw) {
-                    const parsed = JSON.parse(raw);
-                    historial = Array.isArray(parsed) ? parsed : [];
-                }
-                const ultimo = historial.length > 0 ? historial[0] : null;
-                const ultimoPayload = ultimo && Array.isArray(ultimo.datos) ? JSON.stringify(ultimo.datos) : null;
-                const actualPayload = JSON.stringify(datosActuales);
-                if (ultimoPayload === actualPayload) return;
-                historial.unshift({
-                    fecha: new Date().toISOString(),
-                    modulo: key,
-                    mes: mes,
-                    total: datosActuales.length,
-                    datos: datosActuales
-                });
-                if (historial.length > 25) historial = historial.slice(0, 25);
-                localStorage.setItem(lsKey(backupKey), JSON.stringify(historial));
-                // Índice liviano para poder auditar y recuperar por módulo/mes rápidamente.
-                const idxKey = 'backup_modulos_index';
-                const idxRaw = localStorage.getItem(lsKey(idxKey));
-                let idx = [];
-                if (idxRaw) {
-                    const idxParsed = JSON.parse(idxRaw);
-                    idx = Array.isArray(idxParsed) ? idxParsed : [];
-                }
-                const token = `${key}_${mes}`;
-                if (!idx.includes(token)) {
-                    idx.unshift(token);
-                    if (idx.length > 200) idx = idx.slice(0, 200);
-                    localStorage.setItem(lsKey(idxKey), JSON.stringify(idx));
-                }
-            } catch (error) {
-                console.warn('No se pudo guardar snapshot de respaldo local:', error);
-            }
+        function respaldarSnapshotLocal() {
+            /* Los respaldos locales llenaban la cuota del navegador. La copia vigente está en Firestore. */
         }
 
         async function obtenerDatosActivosDirectos(key, mesAnio) {
-            const docKey = `${key}_${mesAnio}`;
-            // Preferir Firestore
-            if (firebaseInitialized && db) {
-                try {
-                    const doc = await db.collection('comunidad').doc(docKey).get();
-                    if (doc.exists) {
-                        const data = doc.data() || {};
-                        const arr = Array.isArray(data.datos) ? data.datos : [];
-                        if (arr.length > 0) return arr;
-                    }
-                } catch (error) {
-                    console.warn('No se pudo leer snapshot activo de Firestore para respaldo:', error);
-                }
-            }
-            // Fallback local
-            try {
-                const raw = localStorage.getItem(lsKey(docKey));
-                if (!raw) return [];
-                const parsed = JSON.parse(raw);
-                return Array.isArray(parsed) ? parsed : [];
-            } catch (error) {
-                console.warn('No se pudo leer snapshot activo local para respaldo:', error);
-                return [];
-            }
+            if (!firebaseInitialized || !db) return [];
+            const leido = await nubeLeer(`${key}_${mesAnio}`);
+            return leido.datos;
         }
 
-        // Función para guardar datos del mes actual o del mes reabierto
         async function guardarDatosMes(key, datos) {
             const mesActual = obtenerMesActual();
-            // Si hay un mes reabierto, guardar en ese mes; si no, guardar en el mes actual
             const mesAGuardar = (window.mesReabierto && window.mesEnConsulta) ? window.mesEnConsulta : mesActual;
             const docKey = `${key}_${mesAGuardar}`;
             const datosNormalizados = Array.isArray(datos) ? datos : [];
-
-            // Respaldo preventivo global (todos los módulos) antes de sobrescribir.
-            const snapshotPrevio = await obtenerDatosActivosDirectos(key, mesAGuardar);
-            respaldarSnapshotLocal(docKey, key, mesAGuardar, snapshotPrevio);
-            
-            // Intentar guardar en Firestore
-            if (firebaseInitialized && db) {
-                try {
-                    await db.collection('comunidad').doc(docKey).set({
-                        datos: datosNormalizados,
-                        mes: mesAGuardar,
-                        modulo: key,
-                        actualizado: firebase.firestore.FieldValue.serverTimestamp(),
-                        reabierto: window.mesReabierto || false
-                    });
-                } catch (error) {
-                    console.error('Error al guardar en Firestore:', error);
-                    // Continuar con LocalStorage como respaldo
+            await nubeEscribir(docKey, datosNormalizados, {
+                modulo: key,
+                campos: {
+                    mes: mesAGuardar,
+                    modulo: key,
+                    reabierto: window.mesReabierto || false
                 }
-            }
-
-            // Respaldo: LocalStorage
-            localStorage.setItem(lsKey(docKey), JSON.stringify(datosNormalizados));
-
-            // Actualizar Panel de Control en tiempo real (sin bloquear el guardado)
+            });
             if (typeof window.cargarEstadisticasDashboard === 'function') {
                 window.cargarEstadisticasDashboard().then(function() {
                     if (typeof window.renderPanelControl2 === 'function') window.renderPanelControl2();
@@ -23365,20 +23360,14 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 mes: mes
             };
             
-            // Intentar guardar en Firestore
-            if (firebaseInitialized && db) {
-                try {
-                    await db.collection('comunidad').doc(estadoKey).set({
-                        ...estado,
-                        actualizado: firebase.firestore.FieldValue.serverTimestamp()
-                    });
-                } catch (error) {
-                    console.error('Error al guardar estado de cierre en Firestore:', error);
-                }
+            if (!firebaseInitialized || !db) {
+                throw new Error('No hay conexión con Firestore. El cierre del pedido solo se guarda en la nube.');
             }
-            
-            // Respaldo: LocalStorage
-            localStorage.setItem(lsKey(estadoKey), JSON.stringify(estado));
+            await db.collection('comunidad').doc(estadoKey).set({
+                ...estado,
+                actualizado: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            nubeOlvidarLocal(estadoKey);
         }
 
         // Función para verificar si el pedido está cerrado
@@ -23397,17 +23386,6 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 } catch (error) {
                     console.error('Error al leer estado de cierre de Firestore:', error);
                 }
-            }
-            
-            // Respaldo: LocalStorage
-            try {
-                const estado = localStorage.getItem(lsKey(estadoKey));
-                if (estado) {
-                    const parsed = JSON.parse(estado);
-                    return parsed.cerrado === true;
-                }
-            } catch (error) {
-                console.error('Error al leer estado de cierre de LocalStorage:', error);
             }
             
             return false;
@@ -27141,19 +27119,26 @@ document.getElementById('chatForm').onsubmit = function (e) {
             if (typeof firebaseInitialized !== 'undefined' && firebaseInitialized && typeof db !== 'undefined' && db) {
                 try {
                     var doc = await db.collection('comunidad').doc('multas_eliminadas').get();
+                    var remoto = [];
                     if (doc.exists) {
                         var data = doc.data() || {};
-                        var remoto = Array.isArray(data.datos) ? data.datos : [];
-                        local = multaMezclarTombstones(local, remoto);
+                        remoto = Array.isArray(data.datos) ? data.datos : [];
                     }
+                    var mezclado = multaMezclarTombstones(local, remoto);
+                    if (local.length && mezclado.length !== remoto.length) {
+                        await db.collection('comunidad').doc('multas_eliminadas').set({
+                            datos: mezclado,
+                            modulo: 'multas_eliminadas',
+                            actualizado: firebase.firestore.FieldValue.serverTimestamp()
+                        }, { merge: true });
+                    }
+                    local = mezclado;
+                    nubeOlvidarLocal('multas_eliminadas');
                 } catch (eFs) {
                     console.warn('[multas] tombstones:', eFs);
                 }
             }
             window._multasTombstones = local;
-            try {
-                localStorage.setItem(typeof lsKey === 'function' ? lsKey('multas_eliminadas') : 'multas_eliminadas', JSON.stringify(local));
-            } catch (eS) {}
             return local;
         }
         async function multaRegistrarEliminacionUsuario(multa) {
@@ -27166,9 +27151,6 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 at: new Date().toISOString()
             }]);
             window._multasTombstones = tomb;
-            try {
-                localStorage.setItem(typeof lsKey === 'function' ? lsKey('multas_eliminadas') : 'multas_eliminadas', JSON.stringify(tomb));
-            } catch (eLs) {}
             if (typeof firebaseInitialized !== 'undefined' && firebaseInitialized && typeof db !== 'undefined' && db) {
                 try {
                     await db.collection('comunidad').doc('multas_eliminadas').set({
@@ -27176,6 +27158,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                         modulo: 'multas_eliminadas',
                         actualizado: firebase.firestore.FieldValue.serverTimestamp()
                     }, { merge: true });
+                    nubeOlvidarLocal('multas_eliminadas');
                 } catch (eFs) {
                     console.warn('[multas] guardar eliminación:', eFs);
                 }
@@ -27205,22 +27188,10 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 await guardarDatosMes('multas', datos);
                 return;
             }
-            var docKey = 'multas_' + mes;
-            if (typeof firebaseInitialized !== 'undefined' && firebaseInitialized && typeof db !== 'undefined' && db) {
-                try {
-                    await db.collection('comunidad').doc(docKey).set({
-                        datos: datos,
-                        mes: mes,
-                        modulo: 'multas',
-                        actualizado: firebase.firestore.FieldValue.serverTimestamp()
-                    }, { merge: true });
-                } catch (eFs) {
-                    console.warn('[multas] persistir mes:', eFs);
-                }
-            }
-            try {
-                if (typeof lsKey === 'function') localStorage.setItem(lsKey(docKey), JSON.stringify(datos));
-            } catch (eLs) {}
+            await nubeEscribir('multas_' + mes, datos, {
+                modulo: 'multas',
+                campos: { mes: mes, modulo: 'multas' }
+            });
         }
         async function multaReubicarRegistrosAjenos(lista, mesDoc) {
             if (!mesDoc || !Array.isArray(lista) || typeof obtenerDatosMesEspecifico !== 'function') {
@@ -27426,6 +27397,8 @@ document.getElementById('chatForm').onsubmit = function (e) {
                             if (n.texto) {
                                 exist.contenido = String(n.texto);
                                 exist.motivo = multaMotivoDesdeTexto(n.texto);
+                                var frescoHtml = multaPayloadDesdeNovedad(n, libro != null ? libro : exist.novedadLibro);
+                                if (frescoHtml && frescoHtml.contenidoHtml) exist.contenidoHtml = frescoHtml.contenidoHtml;
                             }
                             var deptoN = multaInferirDeptoTexto(n.texto || '');
                             if (deptoN && (!exist.departamento || exist.departamento === '—')) exist.departamento = deptoN;
@@ -27461,6 +27434,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                                 got.novedadLibro = m.novedadLibro != null ? m.novedadLibro : got.novedadLibro;
                                 if (multaRequiereTratamiento(got)) {
                                     if (m.contenido) got.contenido = m.contenido;
+                                    if (m.contenidoHtml) got.contenidoHtml = m.contenidoHtml;
                                     if (m.motivo) got.motivo = m.motivo;
                                     if (m.departamento && (got.departamento === '—' || !got.departamento)) got.departamento = m.departamento;
                                     if (m.nombre && (got.nombre === 'Por confirmar' || !got.nombre)) got.nombre = m.nombre;
@@ -29270,33 +29244,16 @@ document.getElementById('chatForm').onsubmit = function (e) {
         async function guardarDatosModuloMesPersistido(key, mesAnio, datos, almacen) {
             const docKey = almacen === 'archivo' ? `${key}_archivo_${mesAnio}` : `${key}_${mesAnio}`;
             const datosNormalizados = Array.isArray(datos) ? datos : [];
-            let snapshotPrevio = [];
+            const campos = {
+                mes: mesAnio,
+                modulo: key
+            };
             if (almacen === 'archivo') {
-                snapshotPrevio = await obtenerDatosArchivados(key, mesAnio);
-            } else {
-                snapshotPrevio = await obtenerDatosActivosDirectos(key, mesAnio);
+                campos.archivado = true;
+            } else if (mesAnio !== obtenerMesActual()) {
+                campos.reabierto = true;
             }
-            respaldarSnapshotLocal(docKey, key, mesAnio, snapshotPrevio);
-
-            if (firebaseInitialized && db) {
-                try {
-                    const payload = {
-                        datos: datosNormalizados,
-                        mes: mesAnio,
-                        modulo: key,
-                        actualizado: firebase.firestore.FieldValue.serverTimestamp()
-                    };
-                    if (almacen === 'archivo') {
-                        payload.archivado = true;
-                    } else if (mesAnio !== obtenerMesActual()) {
-                        payload.reabierto = true;
-                    }
-                    await db.collection('comunidad').doc(docKey).set(payload, { merge: true });
-                } catch (error) {
-                    console.error('Error al guardar traslado en Firestore:', error);
-                }
-            }
-            localStorage.setItem(lsKey(docKey), JSON.stringify(datosNormalizados));
+            await nubeEscribir(docKey, datosNormalizados, { modulo: key, campos: campos });
 
             if (typeof window.cargarEstadisticasDashboard === 'function') {
                 window.cargarEstadisticasDashboard().then(function() {
@@ -34066,11 +34023,24 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     const docRef = db.collection('comunidad').doc('inventario-productos');
                     const doc = await docRef.get();
                     if (doc.exists) {
-                        return doc.data().productos || [];
+                        const productos = doc.data().productos || [];
+                        if (productos.length) {
+                            nubeOlvidarLocal('inventario-productos');
+                            return productos;
+                        }
                     }
+                    const local = nubeLeerLocal('inventario-productos');
+                    if (local && local.length) {
+                        await db.collection('comunidad').doc('inventario-productos').set({
+                            productos: local,
+                            actualizado: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+                        nubeOlvidarLocal('inventario-productos');
+                        return local;
+                    }
+                    return doc.exists ? (doc.data().productos || []) : [];
                 }
-                const datos = localStorage.getItem(lsKey('inventario-productos'));
-                return datos ? JSON.parse(datos) : [];
+                return [];
             } catch (error) {
                 console.error('Error al obtener inventario:', error);
                 return [];
@@ -34083,13 +34053,14 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 // Ordenar alfabéticamente antes de guardar
                 productos.sort((a, b) => a.nombre.localeCompare(b.nombre));
                 
-                if (firebaseInitialized && db) {
-                    await db.collection('comunidad').doc('inventario-productos').set({
-                        productos: productos,
-                        actualizado: firebase.firestore.FieldValue.serverTimestamp()
-                    });
+                if (!firebaseInitialized || !db) {
+                    throw new Error('No hay conexión con Firestore. El inventario solo se guarda en la nube.');
                 }
-                localStorage.setItem(lsKey('inventario-productos'), JSON.stringify(productos));
+                await db.collection('comunidad').doc('inventario-productos').set({
+                    productos: productos,
+                    actualizado: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                nubeOlvidarLocal('inventario-productos');
             } catch (error) {
                 console.error('Error al guardar inventario:', error);
             }
@@ -38903,12 +38874,6 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     modulosVisibles = modulosValidos;
                 }
                 
-                const configData = { 
-                    modulosVisibles: modulosVisibles,
-                    configuracionExplicita: esConfiguracionExplicita
-                };
-                
-                // Guardar en Firestore
                 if (firebaseInitialized && db) {
                     try {
                         await db.collection('comunidad').doc('config-modulos').set({
@@ -38921,8 +38886,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     }
                 }
                 
-                // Respaldo: LocalStorage
-                localStorage.setItem(lsKey('config-modulos'), JSON.stringify(configData));
+                nubeOlvidarLocal('config-modulos');
             } catch (error) {
                 console.error('Error al guardar módulos visibles:', error);
             }
@@ -40909,13 +40873,11 @@ document.getElementById('chatForm').onsubmit = function (e) {
                             registros: registrosPostventa,
                             updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                         }, { merge: true });
+                        nubeOlvidarLocal(POSTVENTA_LS);
                     } catch (e) {
                         console.error('Postventa Firestore:', e);
                     }
                 }
-                try {
-                    localStorage.setItem(lsKey(POSTVENTA_LS), JSON.stringify(registrosPostventa));
-                } catch (e) { /* ignore */ }
             }
 
             function postventaNormHead(s) {
@@ -41590,13 +41552,11 @@ document.getElementById('chatForm').onsubmit = function (e) {
                             propuestas: propuestasComite,
                             actualizado: firebase.firestore.FieldValue.serverTimestamp()
                         }, { merge: true });
+                        nubeOlvidarLocal(COMITE_LS);
                     } catch (e) {
                         console.error('Comité Firestore:', e);
                     }
                 }
-                try {
-                    localStorage.setItem(lsKey(COMITE_LS), JSON.stringify(propuestasComite));
-                } catch (e) { /* ignore */ }
             }
 
             function comiteListaDocsCot(c) {
@@ -48518,32 +48478,19 @@ document.getElementById('chatForm').onsubmit = function (e) {
                         if (datos && Array.isArray(datos) && datos.length > 0) {
                             const archivoKey = `${modulo}_archivo_${mesActual}`;
                             
-                            // Guardar en Firestore
-                            if (firebaseInitialized && db) {
-                                try {
-                                    await db.collection('comunidad').doc(archivoKey).set({
-                                        datos: datos,
-                                        mes: mesActual,
-                                        modulo: modulo,
-                                        archivado: true,
-                                        archivadoEn: firebase.firestore.FieldValue.serverTimestamp()
-                                    });
-                                } catch (error) {
-                                    console.error(`❌ Error al archivar ${modulo} en Firestore:`, error);
+                            await nubeEscribir(archivoKey, datos, {
+                                modulo: modulo,
+                                campos: {
+                                    mes: mesActual,
+                                    modulo: modulo,
+                                    archivado: true,
+                                    archivadoEn: firebase.firestore.FieldValue.serverTimestamp()
                                 }
+                            });
+                            if (!modulo.includes('config') && !modulo.includes('personalizacion')) {
+                                nubeOlvidarLocal(`${modulo}_${mesActual}`);
                             }
-                            
-                            // Guardar en LocalStorage
-                            try {
-                                localStorage.setItem(lsKey(archivoKey), JSON.stringify(datos));
-                                // Limpiar datos del mes actual (solo si no es un módulo de configuración)
-                                if (!modulo.includes('config') && !modulo.includes('personalizacion')) {
-                                    localStorage.removeItem(lsKey(`${modulo}_${mesActual}`));
-                                }
-                                modulosArchivados++;
-                            } catch (error) {
-                                console.error(`❌ Error al archivar ${modulo} en LocalStorage:`, error);
-                            }
+                            modulosArchivados++;
                         }
                     } catch (error) {
                         console.error(`❌ Error al procesar ${modulo}:`, error);
@@ -48599,7 +48546,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                         console.error('❌ Error al actualizar config en Firestore:', error);
                     }
                 }
-                localStorage.setItem(lsKey('ultimoMesProcesado'), mesActual);
+                nubeOlvidarLocal('ultimoMesProcesado');
                 
                 // Generar reporte: si se archivaron tarjetas, usar snapshot (garantiza todas las líneas en el PDF al cierre)
                 progreso.actualizar(totalModulos + 3, totalModulos + 3, 'Generando reporte mensual...');
@@ -48655,72 +48602,23 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 for (const modulo of modulos) {
                     const archivoKey = `${modulo}_archivo_${mesAnio}`;
                     const activoKey = `${modulo}_${mesAnio}`;
-                    
-                    // Obtener datos archivados desde Firestore o LocalStorage
-                    let datos = null;
-                    
-                    if (firebaseInitialized && db) {
-                        try {
-                            const doc = await db.collection('comunidad').doc(archivoKey).get();
-                            if (doc.exists) {
-                                const data = doc.data();
-                                datos = Array.isArray(data.datos) ? data.datos : [];
-                                
-                                if (datos.length > 0) {
-                                    // Guardar como activo en Firestore
-                                    await db.collection('comunidad').doc(activoKey).set({
-                                        datos: datos,
-                                        mes: mesAnio,
-                                        modulo: modulo,
-                                        reabierto: true,
-                                        reabiertoEn: firebase.firestore.FieldValue.serverTimestamp()
-                                    });
-                                    
-                                    // Eliminar archivo
-                                    await db.collection('comunidad').doc(archivoKey).delete();
-                                    datosReabiertos += datos.length;
+                    try {
+                        const datos = await nubeLeerOMigrar(archivoKey);
+                        if (datos.length > 0) {
+                            await nubeEscribir(activoKey, datos, {
+                                modulo: modulo,
+                                campos: {
+                                    mes: mesAnio,
+                                    modulo: modulo,
+                                    reabierto: true,
+                                    reabiertoEn: firebase.firestore.FieldValue.serverTimestamp()
                                 }
-                            }
-                        } catch (error) {
-                            console.error(`Error al reabrir ${modulo} en Firestore:`, error);
+                            });
+                            await nubeEliminar(archivoKey);
+                            datosReabiertos += datos.length;
                         }
-                    }
-                    
-                    // Respaldo: LocalStorage
-                    const datosLS = localStorage.getItem(lsKey(archivoKey));
-                    if (datosLS) {
-                        try {
-                            const datosArray = JSON.parse(datosLS);
-                            if (Array.isArray(datosArray) && datosArray.length > 0) {
-                                // Si no se obtuvieron datos de Firestore, usar los de LocalStorage
-                                if (!datos || datos.length === 0) {
-                                    datos = datosArray;
-                                    
-                                    // Intentar guardar en Firestore también para sincronización
-                                    if (firebaseInitialized && db) {
-                                        try {
-                                            await db.collection('comunidad').doc(activoKey).set({
-                                                datos: datos,
-                                                mes: mesAnio,
-                                                modulo: modulo,
-                                                reabierto: true,
-                                                reabiertoEn: firebase.firestore.FieldValue.serverTimestamp()
-                                            });
-                                        } catch (error) {
-                                            console.error(`Error al guardar ${modulo} reabierto en Firestore:`, error);
-                                        }
-                                    }
-                                    
-                                    datosReabiertos += datosArray.length;
-                                }
-                                
-                                // Guardar en LocalStorage como activo
-                                localStorage.setItem(lsKey(activoKey), datosLS);
-                                localStorage.removeItem(lsKey(archivoKey));
-                            }
-                        } catch (error) {
-                            console.error(`Error al reabrir ${modulo} en LocalStorage:`, error);
-                        }
+                    } catch (error) {
+                        console.error(`Error al reabrir ${modulo} en Firestore:`, error);
                     }
                 }
                 
@@ -48728,74 +48626,34 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 for (const moduloConfig of modulosConfig) {
                     const archivoKey = `${moduloConfig}_archivo_${mesAnio}`;
                     const activoKey = `${moduloConfig}_${mesAnio}`;
-                    
-                    // Obtener datos archivados desde Firestore o LocalStorage
-                    let datos = null;
-                    
-                    if (firebaseInitialized && db) {
-                        try {
-                            const doc = await db.collection('comunidad').doc(archivoKey).get();
-                            if (doc.exists) {
-                                const data = doc.data();
-                                datos = Array.isArray(data.datos) ? data.datos : [];
-                                
-                                if (datos.length > 0) {
-                                    // Guardar como activo en Firestore
-                                    await db.collection('comunidad').doc(activoKey).set({
-                                        datos: datos,
-                                        mes: mesAnio,
-                                        modulo: moduloConfig,
-                                        reabierto: true,
-                                        reabiertoEn: firebase.firestore.FieldValue.serverTimestamp()
-                                    });
-                                    
-                                    // Eliminar archivo
-                                    await db.collection('comunidad').doc(archivoKey).delete();
+                    try {
+                        const datos = await nubeLeerOMigrar(archivoKey);
+                        if (datos.length > 0) {
+                            await nubeEscribir(activoKey, datos, {
+                                modulo: moduloConfig,
+                                campos: {
+                                    mes: mesAnio,
+                                    modulo: moduloConfig,
+                                    reabierto: true,
+                                    reabiertoEn: firebase.firestore.FieldValue.serverTimestamp()
                                 }
-                            }
-                        } catch (error) {
-                            console.error(`Error al reabrir ${moduloConfig} en Firestore:`, error);
+                            });
+                            await nubeEliminar(archivoKey);
                         }
-                    }
-                    
-                    // Respaldo: LocalStorage
-                    const datosLS = localStorage.getItem(lsKey(archivoKey));
-                    if (datosLS) {
-                        try {
-                            const datosArray = JSON.parse(datosLS);
-                            if (Array.isArray(datosArray) && datosArray.length > 0) {
-                                // Si no se obtuvieron datos de Firestore, usar los de LocalStorage
-                                if (!datos || datos.length === 0) {
-                                    datos = datosArray;
-                                    
-                                    // Intentar guardar en Firestore también para sincronización
-                                    if (firebaseInitialized && db) {
-                                        try {
-                                            await db.collection('comunidad').doc(activoKey).set({
-                                                datos: datos,
-                                                mes: mesAnio,
-                                                modulo: moduloConfig,
-                                                reabierto: true,
-                                                reabiertoEn: firebase.firestore.FieldValue.serverTimestamp()
-                                            });
-                                        } catch (error) {
-                                            console.error(`Error al guardar ${moduloConfig} reabierto en Firestore:`, error);
-                                        }
-                                    }
-                                }
-                                
-                                // Guardar en LocalStorage como activo
-                                localStorage.setItem(lsKey(activoKey), datosLS);
-                                localStorage.removeItem(lsKey(archivoKey));
-                            }
-                        } catch (error) {
-                            console.error(`Error al reabrir ${moduloConfig} en LocalStorage:`, error);
-                        }
+                    } catch (error) {
+                        console.error(`Error al reabrir ${moduloConfig} en Firestore:`, error);
                     }
                 }
                 
-                // Actualizar último mes procesado si el mes reabierto es más reciente
-                const ultimoMes = localStorage.getItem(lsKey('ultimoMesProcesado'));
+                let ultimoMes = '';
+                if (firebaseInitialized && db) {
+                    try {
+                        const cfg = await db.collection('comunidad').doc('config').get();
+                        if (cfg.exists) ultimoMes = (cfg.data() && cfg.data().ultimoMesProcesado) || '';
+                    } catch (error) {
+                        console.error('Error al leer config en Firestore:', error);
+                    }
+                }
                 if (!ultimoMes || mesAnio > ultimoMes) {
                     if (firebaseInitialized && db) {
                         try {
@@ -48804,11 +48662,11 @@ document.getElementById('chatForm').onsubmit = function (e) {
                                 reabierto: true,
                                 actualizado: firebase.firestore.FieldValue.serverTimestamp()
                             }, { merge: true });
+                            nubeOlvidarLocal('ultimoMesProcesado');
                         } catch (error) {
                             console.error('Error al actualizar config en Firestore:', error);
                         }
                     }
-                    localStorage.setItem(lsKey('ultimoMesProcesado'), mesAnio);
                 }
                 
                 // Recargar lista de meses archivados (el mes reabierto ya no debería aparecer)
@@ -53837,56 +53695,10 @@ document.getElementById('chatForm').onsubmit = function (e) {
 
         // Función para obtener datos de un mes específico (sin usar mesEnConsulta)
         async function obtenerDatosMesEspecifico(key, mes) {
-            let docKey = `${key}_${mes}`;
-            let datosEncontrados = null;
-            
-            // Intentar obtener datos activos desde Firestore
-            if (firebaseInitialized && db) {
-                try {
-                    const docRef = db.collection('comunidad').doc(docKey);
-                    const doc = await docRef.get();
-                    if (doc.exists) {
-                        const data = doc.data();
-                        datosEncontrados = Array.isArray(data.datos) ? data.datos : [];
-                        if (datosEncontrados.length > 0) {
-                            return datosEncontrados;
-                        }
-                    }
-                } catch (error) {
-                    console.error('Error al leer datos de Firestore:', error);
-                }
-            }
-            
-            // Si no hay datos activos, buscar datos archivados
-            docKey = `${key}_archivo_${mes}`;
-            
-            // Intentar obtener de Firestore
-            if (firebaseInitialized && db) {
-                try {
-                    const docRef = db.collection('comunidad').doc(docKey);
-                    const doc = await docRef.get();
-                    if (doc.exists) {
-                        const data = doc.data();
-                        const resultado = data.datos || [];
-                        return Array.isArray(resultado) ? resultado : [];
-                    }
-                } catch (error) {
-                    console.error('Error al leer de Firestore:', error);
-                }
-            }
-            
-            // Respaldo: LocalStorage
-            try {
-                const datosLocal = localStorage.getItem(lsKey(docKey));
-                if (datosLocal) {
-                    const parsed = JSON.parse(datosLocal);
-                    return Array.isArray(parsed) ? parsed : [];
-                }
-            } catch (error) {
-                console.error('Error al leer de LocalStorage:', error);
-            }
-            
-            return [];
+            if (!firebaseInitialized || !db) return [];
+            const activos = await nubeLeerOMigrar(`${key}_${mes}`);
+            if (activos.length > 0) return activos;
+            return await nubeLeerOMigrar(`${key}_archivo_${mes}`);
         }
         
         // Función para obtener el nombre del mes en español
@@ -55696,6 +55508,9 @@ document.getElementById('chatForm').onsubmit = function (e) {
 
                 cargarTablaNomina();
                 limpiarFormularioNomina();
+            } catch (error) {
+                console.error('Error al guardar trabajador:', error);
+                mostrarAlerta(error && error.message ? error.message : 'No se pudo guardar en la nube.', 'Error');
             } finally {
                 guardandoTrabajadorNomina = false;
             }
