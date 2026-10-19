@@ -14068,78 +14068,15 @@
             });
         }
 
-        /** Descarga un archivo de Firebase Storage (autenticado) o URL directa → Blob. */
+        /** Descarga un archivo de Firebase Storage o URL directa → Blob. Una lectura simple por enlace, sin reintentos del SDK. */
         async function _descargarBlobDesdeUrlStorage(url, contentTypeHint, rutaHint) {
             var u = _normalizarUrlDescarga(url);
             var rutas = _rutasCandidatasStorage(rutaHint, u);
             if (!u && !rutas.length) throw new Error('sin referencia del archivo');
-            var blob = null;
             var errores = [];
-            var maxBytes = 50 * 1024 * 1024;
+            var token = '';
+            try { token = new URL(u).searchParams.get('token') || ''; } catch (eTokUrl) { token = ''; }
 
-            function aceptar(candidato) {
-                return candidato && candidato.size ? candidato : null;
-            }
-
-            async function intentarRef(ref) {
-                if (!ref) return null;
-                try {
-                    var mod = await _cargarStorageModular();
-                    if (mod && typeof mod.getBytes === 'function') {
-                        var rawMod = await mod.getBytes(ref, maxBytes);
-                        var desdeMod = _blobDesdeRaw(rawMod, contentTypeHint);
-                        if (desdeMod) return desdeMod;
-                    }
-                } catch (eMod) {
-                    errores.push('sdk:' + (eMod && eMod.code ? eMod.code + ' ' : '') + (eMod && eMod.message ? eMod.message : eMod));
-                }
-                if (typeof ref.getBytes === 'function') {
-                    try {
-                        var raw = await ref.getBytes(maxBytes);
-                        var desdeBytes = _blobDesdeRaw(raw, contentTypeHint);
-                        if (desdeBytes) return desdeBytes;
-                    } catch (eGb) { errores.push('getBytes:' + (eGb && eGb.message ? eGb.message : eGb)); }
-                }
-                if (typeof ref.getBlob === 'function') {
-                    try {
-                        var b = await ref.getBlob(maxBytes);
-                        if (b && b.size) {
-                            var ab = await b.arrayBuffer();
-                            if (!_bytesParecenHtml(new Uint8Array(ab))) return b;
-                        }
-                    } catch (eGbl) { errores.push('getBlob:' + (eGbl && eGbl.message ? eGbl.message : eGbl)); }
-                }
-                return null;
-            }
-
-            async function intentarUrlDescarga(downloadUrl) {
-                var limpia = _normalizarUrlDescarga(downloadUrl);
-                if (!limpia) return null;
-                try {
-                    var b1 = await _xhrDescargarBlob(limpia);
-                    if (b1 && b1.size) {
-                        var chk = new Uint8Array(await b1.slice(0, 80).arrayBuffer());
-                        if (!_bytesParecenHtml(chk)) return b1;
-                    }
-                } catch (eX1) { errores.push('xhr:' + (eX1 && eX1.message ? eX1.message : eX1)); }
-                try {
-                    var resp = await fetch(limpia, { mode: 'cors', credentials: 'omit', cache: 'no-cache' });
-                    if (resp.ok) {
-                        var b2 = await resp.blob();
-                        if (b2 && b2.size) {
-                            var chk2 = new Uint8Array(await b2.slice(0, 80).arrayBuffer());
-                            if (!_bytesParecenHtml(chk2)) return b2;
-                        }
-                    } else {
-                        errores.push('fetch:HTTP ' + resp.status);
-                    }
-                } catch (eF1) { errores.push('fetch:' + (eF1 && eF1.message ? eF1.message : eF1)); }
-                return null;
-            }
-
-            // El SDK compat (firebase-storage-compat) no expone getBytes/getBlob.
-            // El enlace con token redirige a storage.googleapis.com y el navegador lo bloquea por CORS.
-            // La lectura que sí funciona es GET autenticado a firebasestorage.googleapis.com, con Authorization: Firebase.
             var buckets = [];
             function agregarBucket(b) {
                 b = String(b || '').trim();
@@ -14147,62 +14084,74 @@
             }
             agregarBucket(typeof firebaseConfig !== 'undefined' && firebaseConfig ? firebaseConfig.storageBucket : '');
             agregarBucket(_bucketDesdeUrlStorage(u));
-            if (rutas.length && buckets.length && auth) {
-                try {
-                    var userAuth = await _esperarUsuarioAuth(6000);
-                    if (userAuth && typeof userAuth.getIdToken === 'function') {
-                        var idToken = await userAuth.getIdToken(false);
-                        for (var ib = 0; ib < buckets.length && !blob; ib++) {
-                            for (var ir = 0; ir < rutas.length && !blob; ir++) {
-                                var restUrl = 'https://firebasestorage.googleapis.com/v0/b/' + encodeURIComponent(buckets[ib]) + '/o/' + encodeURIComponent(rutas[ir]) + '?alt=media';
-                                try {
-                                    var abAuth = await _xhrDescargarArrayBuffer(restUrl, {
-                                        Authorization: 'Firebase ' + idToken,
-                                        'X-Firebase-Storage-Version': 'webjs/12.19.0'
-                                    });
-                                    blob = aceptar(_blobDesdeRaw(abAuth, contentTypeHint));
-                                } catch (eAuth) {
-                                    errores.push('media:' + buckets[ib] + ':' + (eAuth && eAuth.message ? eAuth.message : eAuth));
-                                }
-                            }
-                        }
-                    } else {
-                        errores.push('media:sin sesion');
-                    }
-                } catch (eTok) { errores.push('token:' + (eTok && eTok.message ? eTok.message : eTok)); }
+
+            var candidatas = [];
+            function agregarUrl(valor) {
+                var limpia = _normalizarUrlDescarga(valor);
+                if (limpia && candidatas.indexOf(limpia) === -1) candidatas.push(limpia);
+            }
+            agregarUrl(u);
+            rutas.forEach(function (ruta) {
+                buckets.forEach(function (bucket) {
+                    var media = 'https://firebasestorage.googleapis.com/v0/b/' + encodeURIComponent(bucket) + '/o/' + encodeURIComponent(ruta) + '?alt=media';
+                    if (token) agregarUrl(media + '&token=' + encodeURIComponent(token));
+                    agregarUrl(media);
+                });
+            });
+
+            async function leerSimple(downloadUrl) {
+                var b1 = await _xhrDescargarBlob(downloadUrl);
+                if (!b1 || !b1.size) return null;
+                var chk = new Uint8Array(await b1.slice(0, 80).arrayBuffer());
+                if (_bytesParecenHtml(chk)) return null;
+                return b1;
             }
 
-            if (!blob && rutas.length && storage && firebaseInitialized) {
-                await _esperarUsuarioAuth(3000);
-                for (var iRef = 0; iRef < rutas.length && !blob; iRef++) {
-                    try { blob = aceptar(await intentarRef(storage.ref(rutas[iRef]))); }
-                    catch (eRef) { errores.push('ref:' + (eRef && eRef.message ? eRef.message : eRef)); }
+            // GET sin cabeceras propias: el navegador no manda preflight.
+            // getBytes del SDK reintenta unos dos minutos ante un fallo de red y repite el mismo error de CORS.
+            for (var i = 0; i < candidatas.length; i++) {
+                try {
+                    var simple = await leerSimple(candidatas[i]);
+                    if (simple) return simple;
+                } catch (eSimple) {
+                    errores.push('lectura:' + (eSimple && eSimple.message ? eSimple.message : eSimple));
                 }
             }
 
-            if (!blob && u && storage && firebaseInitialized && typeof storage.refFromURL === 'function' && _esUrlFirebaseStorage(u)) {
+            if (auth && rutas.length && buckets.length) {
                 try {
-                    await _esperarUsuarioAuth(2000);
-                    blob = aceptar(await intentarRef(storage.refFromURL(u)));
-                } catch (eRf) { errores.push('refFromURL:' + (eRf && eRf.message ? eRf.message : eRf)); }
+                    var userAuth = await _esperarUsuarioAuth(4000);
+                    if (userAuth && typeof userAuth.getIdToken === 'function') {
+                        var idToken = await userAuth.getIdToken(false);
+                        var restUrl = 'https://firebasestorage.googleapis.com/v0/b/' + encodeURIComponent(buckets[0]) + '/o/' + encodeURIComponent(rutas[0]) + '?alt=media';
+                        var abAuth = await _xhrDescargarArrayBuffer(restUrl, { Authorization: 'Firebase ' + idToken });
+                        var blobAuth = _blobDesdeRaw(abAuth, contentTypeHint);
+                        if (blobAuth) return blobAuth;
+                    }
+                } catch (eAuth) {
+                    errores.push('sesion:' + (eAuth && eAuth.message ? eAuth.message : eAuth));
+                }
             }
 
-            if (!blob && u) blob = aceptar(await intentarUrlDescarga(u));
-
-            if (!blob && rutas.length && storage && firebaseInitialized) {
+            if (rutas.length && storage && firebaseInitialized) {
                 try {
-                    var urlNueva = await storage.ref(rutas[0]).getDownloadURL();
-                    blob = aceptar(await intentarUrlDescarga(urlNueva));
-                } catch (eFresh) { errores.push('getDownloadURL:' + (eFresh && eFresh.message ? eFresh.message : eFresh)); }
+                    var urlNueva = _normalizarUrlDescarga(await storage.ref(rutas[0]).getDownloadURL());
+                    if (urlNueva && candidatas.indexOf(urlNueva) === -1) {
+                        var fresco = await leerSimple(urlNueva);
+                        if (fresco) return fresco;
+                    }
+                } catch (eFresh) {
+                    errores.push('enlace:' + (eFresh && eFresh.message ? eFresh.message : eFresh));
+                }
             }
 
-            if (!blob || !blob.size) {
-                console.warn('_descargarBlobDesdeUrlStorage fallos:', rutas, errores);
-                var detalle = errores.length ? String(errores[errores.length - 1]) : 'archivo vacio o inaccesible';
-                if (detalle.length > 180) detalle = detalle.slice(0, 177) + '...';
-                throw new Error(detalle);
+            console.warn('_descargarBlobDesdeUrlStorage fallos:', rutas, errores);
+            var detalle = errores.length ? String(errores[0]) : 'archivo vacio o inaccesible';
+            if (/Error de red|Failed to fetch|NetworkError|CORS/i.test(detalle)) {
+                detalle = 'El navegador bloqueó la lectura del archivo en el almacenamiento (CORS).';
             }
-            return blob;
+            if (detalle.length > 180) detalle = detalle.slice(0, 177) + '...';
+            throw new Error(detalle);
         }
 
         /** Descarga bytes (Firebase Storage con SDK si aplica; si no XHR/fetch) → adjunto correo. */
