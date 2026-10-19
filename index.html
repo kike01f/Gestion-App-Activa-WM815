@@ -47722,7 +47722,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
 
             sheet.getCell('A2').value = 'Fecha:';
             sheet.getCell('B2').value = fechaEmision;
-            sheet.getCell('A3').value = 'Mayordomo:';
+            sheet.getCell('A3').value = 'Jefe de Edificio:';
             sheet.getCell('B3').value = mayordomo;
             ['A2', 'A3', 'B2', 'B3'].forEach(function (addr) {
                 sheet.getCell(addr).font = { bold: addr.charAt(0) === 'B', size: 11, color: { argb: 'FF000000' } };
@@ -50484,7 +50484,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 texto(verdeOscuro);
                 doc.setFont('helvetica', 'bold');
                 doc.text('PROYECTO', margen + 3, y + 4.3);
-                doc.text('MAYORDOMO', colMed + 2, y + 4.3);
+                doc.text('JEFE DE EDIFICIO', colMed + 2, y + 4.3);
                 texto(tinta);
                 doc.setFont('helvetica', 'normal');
                 doc.setFontSize(8.5);
@@ -50509,14 +50509,16 @@ document.getElementById('chatForm').onsubmit = function (e) {
             function dibujarCabeceraColumnas(y) {
                 var x = margen;
                 var h = 7;
+                var fondoCab = [232, 246, 212];
+                relleno(fondoCab);
+                trazo(verdeOscuro);
+                doc.setLineWidth(0.35);
+                doc.rect(margen, y, usable, h, 'FD');
                 doc.setFont('helvetica', 'bold');
                 doc.setFontSize(8);
-                texto(blanco);
-                relleno(verdeOscuro);
-                trazo(verdeOscuro);
-                doc.setLineWidth(0.15);
-                cols.forEach(function (col) {
-                    doc.rect(x, y, col.w, h, 'FD');
+                texto(verdeOscuro);
+                cols.forEach(function (col, i) {
+                    if (i > 0) doc.line(x, y, x, y + h);
                     doc.text(col.titulo, x + col.w / 2, y + 4.6, { align: 'center' });
                     x += col.w;
                 });
