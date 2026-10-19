@@ -13949,6 +13949,100 @@
             });
         }
 
+        function _xhrDescargarArrayBuffer(url, headers) {
+            return new Promise(function (resolve, reject) {
+                var xhr = new XMLHttpRequest();
+                xhr.open('GET', url, true);
+                xhr.responseType = 'arraybuffer';
+                if (headers) {
+                    Object.keys(headers).forEach(function (k) {
+                        try { xhr.setRequestHeader(k, headers[k]); } catch (eH) { /* header no permitido */ }
+                    });
+                }
+                xhr.onload = function () {
+                    if (xhr.status >= 200 && xhr.status < 300 && xhr.response) resolve(xhr.response);
+                    else reject(new Error('HTTP ' + xhr.status));
+                };
+                xhr.onerror = function () { reject(new Error('Error de red')); };
+                xhr.send();
+            });
+        }
+
+        function _blobDesdeRaw(raw, mimeHint) {
+            if (!raw) return null;
+            if (typeof Blob !== 'undefined' && raw instanceof Blob) return raw.size ? raw : null;
+            var u8 = null;
+            if (raw instanceof Uint8Array) u8 = new Uint8Array(raw);
+            else if (raw instanceof ArrayBuffer) u8 = new Uint8Array(raw);
+            else if (raw && raw.buffer instanceof ArrayBuffer) u8 = new Uint8Array(raw.buffer, raw.byteOffset || 0, raw.byteLength || 0);
+            if (!u8 || !u8.byteLength || _bytesParecenHtml(u8)) return null;
+            var head = '';
+            for (var i = 0; i < Math.min(48, u8.length); i++) head += String.fromCharCode(u8[i]);
+            var headL = head.trim().toLowerCase();
+            if (headL.charAt(0) === '{' && (headL.indexOf('error') !== -1 || headL.indexOf('permission') !== -1)) return null;
+            var mime = '';
+            try { mime = _mimeDesdeBytesSniff(u8) || ''; } catch (eMime) { mime = ''; }
+            return new Blob([u8], { type: mime || mimeHint || 'application/octet-stream' });
+        }
+
+        function _normalizarRutaStorage(ruta) {
+            var r = String(ruta || '').trim().replace(/&amp;/g, '&');
+            if (!r) return '';
+            if (/^gs:\/\//i.test(r)) r = r.replace(/^gs:\/\/[^/]+\//i, '');
+            if (/^https?:\/\//i.test(r)) r = _extraerRutaStorageDesdeUrl(r) || '';
+            r = String(r || '').replace(/^\/+/, '');
+            if (r.indexOf('%') !== -1) {
+                try { r = decodeURIComponent(r); } catch (eDec) { /* ruta ya decodificada */ }
+            }
+            return r;
+        }
+
+        function _rutasCandidatasStorage(ruta, url) {
+            var set = [];
+            function add(v) {
+                var n = _normalizarRutaStorage(v);
+                if (n && set.indexOf(n) === -1) set.push(n);
+            }
+            add(ruta);
+            add(url);
+            return set;
+        }
+
+        function _bucketDesdeUrlStorage(url) {
+            try {
+                var obj = new URL(String(url || ''));
+                var parts = obj.pathname.split('/').filter(function (p) { return p !== ''; });
+                var b = parts.indexOf('b');
+                if (b !== -1 && parts[b + 1]) return decodeURIComponent(parts[b + 1]);
+            } catch (eB) { /* sin bucket en la URL */ }
+            return '';
+        }
+
+        function _normalizarUrlDescarga(url) {
+            var u = String(url || '').trim().replace(/&amp;/g, '&');
+            if (!u) return '';
+            try {
+                var obj = new URL(u);
+                var host = obj.hostname || '';
+                if ((host.indexOf('firebasestorage') !== -1 || host === 'storage.googleapis.com') && !obj.searchParams.get('alt')) {
+                    obj.searchParams.set('alt', 'media');
+                }
+                return obj.toString();
+            } catch (eU) {
+                return u;
+            }
+        }
+
+        var _storageModularPromesa = null;
+        function _cargarStorageModular() {
+            if (_storageModularPromesa) return _storageModularPromesa;
+            _storageModularPromesa = import('https://www.gstatic.com/firebasejs/12.19.0/firebase-storage.js').catch(function (eImp) {
+                _storageModularPromesa = null;
+                throw eImp;
+            });
+            return _storageModularPromesa;
+        }
+
         async function _esperarUsuarioAuth(timeoutMs) {
             if (!auth) return null;
             if (auth.currentUser) return auth.currentUser;
@@ -13976,26 +14070,39 @@
 
         /** Descarga un archivo de Firebase Storage (autenticado) o URL directa → Blob. */
         async function _descargarBlobDesdeUrlStorage(url, contentTypeHint, rutaHint) {
-            var u = String(url || '').trim();
-            var ruta = String(rutaHint || '').trim() || _extraerRutaStorageDesdeUrl(u);
-            if (!u && !ruta) throw new Error('URL vacia');
+            var u = _normalizarUrlDescarga(url);
+            var rutas = _rutasCandidatasStorage(rutaHint, u);
+            if (!u && !rutas.length) throw new Error('sin referencia del archivo');
             var blob = null;
             var errores = [];
+            var maxBytes = 50 * 1024 * 1024;
+
+            function aceptar(candidato) {
+                return candidato && candidato.size ? candidato : null;
+            }
 
             async function intentarRef(ref) {
                 if (!ref) return null;
+                try {
+                    var mod = await _cargarStorageModular();
+                    if (mod && typeof mod.getBytes === 'function') {
+                        var rawMod = await mod.getBytes(ref, maxBytes);
+                        var desdeMod = _blobDesdeRaw(rawMod, contentTypeHint);
+                        if (desdeMod) return desdeMod;
+                    }
+                } catch (eMod) {
+                    errores.push('sdk:' + (eMod && eMod.code ? eMod.code + ' ' : '') + (eMod && eMod.message ? eMod.message : eMod));
+                }
                 if (typeof ref.getBytes === 'function') {
                     try {
-                        var raw = await ref.getBytes(50 * 1024 * 1024);
-                        if (raw && raw.byteLength && !_bytesParecenHtml(raw)) {
-                            var mimeRef = contentTypeHint || _mimeDesdeBytesSniff(raw) || 'application/octet-stream';
-                            return new Blob([raw], { type: mimeRef });
-                        }
+                        var raw = await ref.getBytes(maxBytes);
+                        var desdeBytes = _blobDesdeRaw(raw, contentTypeHint);
+                        if (desdeBytes) return desdeBytes;
                     } catch (eGb) { errores.push('getBytes:' + (eGb && eGb.message ? eGb.message : eGb)); }
                 }
                 if (typeof ref.getBlob === 'function') {
                     try {
-                        var b = await ref.getBlob();
+                        var b = await ref.getBlob(maxBytes);
                         if (b && b.size) {
                             var ab = await b.arrayBuffer();
                             if (!_bytesParecenHtml(new Uint8Array(ab))) return b;
@@ -14006,16 +14113,17 @@
             }
 
             async function intentarUrlDescarga(downloadUrl) {
-                if (!downloadUrl) return null;
+                var limpia = _normalizarUrlDescarga(downloadUrl);
+                if (!limpia) return null;
                 try {
-                    var b1 = await _xhrDescargarBlob(downloadUrl);
+                    var b1 = await _xhrDescargarBlob(limpia);
                     if (b1 && b1.size) {
                         var chk = new Uint8Array(await b1.slice(0, 80).arrayBuffer());
                         if (!_bytesParecenHtml(chk)) return b1;
                     }
                 } catch (eX1) { errores.push('xhr:' + (eX1 && eX1.message ? eX1.message : eX1)); }
                 try {
-                    var resp = await fetch(downloadUrl, { mode: 'cors', credentials: 'omit', cache: 'no-cache' });
+                    var resp = await fetch(limpia, { mode: 'cors', credentials: 'omit', cache: 'no-cache' });
                     if (resp.ok) {
                         var b2 = await resp.blob();
                         if (b2 && b2.size) {
@@ -14029,59 +14137,70 @@
                 return null;
             }
 
-            // 1) SDK autenticado por ruta (no depende de CORS del enlace)
-            if (ruta && storage && firebaseInitialized) {
-                await _esperarUsuarioAuth(6000);
-                blob = await intentarRef(storage.ref(ruta));
+            // El SDK compat (firebase-storage-compat) no expone getBytes/getBlob.
+            // El enlace con token redirige a storage.googleapis.com y el navegador lo bloquea por CORS.
+            // La lectura que sí funciona es GET autenticado a firebasestorage.googleapis.com, con Authorization: Firebase.
+            var buckets = [];
+            function agregarBucket(b) {
+                b = String(b || '').trim();
+                if (b && buckets.indexOf(b) === -1) buckets.push(b);
+            }
+            agregarBucket(typeof firebaseConfig !== 'undefined' && firebaseConfig ? firebaseConfig.storageBucket : '');
+            agregarBucket(_bucketDesdeUrlStorage(u));
+            if (rutas.length && buckets.length && auth) {
+                try {
+                    var userAuth = await _esperarUsuarioAuth(6000);
+                    if (userAuth && typeof userAuth.getIdToken === 'function') {
+                        var idToken = await userAuth.getIdToken(false);
+                        for (var ib = 0; ib < buckets.length && !blob; ib++) {
+                            for (var ir = 0; ir < rutas.length && !blob; ir++) {
+                                var restUrl = 'https://firebasestorage.googleapis.com/v0/b/' + encodeURIComponent(buckets[ib]) + '/o/' + encodeURIComponent(rutas[ir]) + '?alt=media';
+                                try {
+                                    var abAuth = await _xhrDescargarArrayBuffer(restUrl, {
+                                        Authorization: 'Firebase ' + idToken,
+                                        'X-Firebase-Storage-Version': 'webjs/12.19.0'
+                                    });
+                                    blob = aceptar(_blobDesdeRaw(abAuth, contentTypeHint));
+                                } catch (eAuth) {
+                                    errores.push('media:' + buckets[ib] + ':' + (eAuth && eAuth.message ? eAuth.message : eAuth));
+                                }
+                            }
+                        }
+                    } else {
+                        errores.push('media:sin sesion');
+                    }
+                } catch (eTok) { errores.push('token:' + (eTok && eTok.message ? eTok.message : eTok)); }
             }
 
-            // 2) SDK desde la URL de descarga
+            if (!blob && rutas.length && storage && firebaseInitialized) {
+                await _esperarUsuarioAuth(3000);
+                for (var iRef = 0; iRef < rutas.length && !blob; iRef++) {
+                    try { blob = aceptar(await intentarRef(storage.ref(rutas[iRef]))); }
+                    catch (eRef) { errores.push('ref:' + (eRef && eRef.message ? eRef.message : eRef)); }
+                }
+            }
+
             if (!blob && u && storage && firebaseInitialized && typeof storage.refFromURL === 'function' && _esUrlFirebaseStorage(u)) {
                 try {
-                    await _esperarUsuarioAuth(3000);
-                    blob = await intentarRef(storage.refFromURL(u));
+                    await _esperarUsuarioAuth(2000);
+                    blob = aceptar(await intentarRef(storage.refFromURL(u)));
                 } catch (eRf) { errores.push('refFromURL:' + (eRf && eRf.message ? eRf.message : eRf)); }
             }
 
-            // 3) URL con token (mismo enlace que abre el navegador)
-            if (!blob) blob = await intentarUrlDescarga(u);
+            if (!blob && u) blob = aceptar(await intentarUrlDescarga(u));
 
-            // 4) URL fresca vía SDK (token renovado) y descarga directa
-            if (!blob && ruta && storage && firebaseInitialized) {
+            if (!blob && rutas.length && storage && firebaseInitialized) {
                 try {
-                    var urlNueva = await storage.ref(ruta).getDownloadURL();
-                    blob = await intentarUrlDescarga(urlNueva);
+                    var urlNueva = await storage.ref(rutas[0]).getDownloadURL();
+                    blob = aceptar(await intentarUrlDescarga(urlNueva));
                 } catch (eFresh) { errores.push('getDownloadURL:' + (eFresh && eFresh.message ? eFresh.message : eFresh)); }
             }
 
-            // 5) REST API con token de sesión
-            if (!blob && ruta && auth && firebaseConfig && firebaseConfig.storageBucket) {
-                try {
-                    var userAuth = await _esperarUsuarioAuth(6000);
-                    if (userAuth) {
-                        var idToken = await userAuth.getIdToken(false);
-                        var bucket = firebaseConfig.storageBucket;
-                        var restUrl = 'https://firebasestorage.googleapis.com/v0/b/' + encodeURIComponent(bucket) + '/o/' + encodeURIComponent(ruta) + '?alt=media';
-                        var respAuth = await fetch(restUrl, { headers: { Authorization: 'Bearer ' + idToken } });
-                        if (!respAuth.ok) {
-                            respAuth = await fetch(restUrl, { headers: { Authorization: 'Firebase ' + idToken } });
-                        }
-                        if (respAuth.ok) {
-                            var bRest = await respAuth.blob();
-                            if (bRest && bRest.size) {
-                                var chkRest = new Uint8Array(await bRest.slice(0, 80).arrayBuffer());
-                                if (!_bytesParecenHtml(chkRest)) blob = bRest;
-                            }
-                        } else {
-                            errores.push('REST:HTTP ' + respAuth.status);
-                        }
-                    }
-                } catch (eRest) { errores.push('REST:' + (eRest && eRest.message ? eRest.message : eRest)); }
-            }
-
             if (!blob || !blob.size) {
-                console.warn('_descargarBlobDesdeUrlStorage fallos:', u, ruta, errores);
-                throw new Error('Archivo vacio o inaccesible');
+                console.warn('_descargarBlobDesdeUrlStorage fallos:', rutas, errores);
+                var detalle = errores.length ? String(errores[errores.length - 1]) : 'archivo vacio o inaccesible';
+                if (detalle.length > 180) detalle = detalle.slice(0, 177) + '...';
+                throw new Error(detalle);
             }
             return blob;
         }
@@ -50051,20 +50170,21 @@ document.getElementById('chatForm').onsubmit = function (e) {
             return null;
         }
 
-        async function _pdfLibAgregarImagen(out, dataUrl, titulo) {
-            var bytes = _dataUrlABytes(dataUrl);
-            var esPng = String(dataUrl).indexOf('data:image/png') === 0;
-            var img = esPng ? await out.embedPng(bytes) : await out.embedJpg(bytes);
+        async function _pdfLibAgregarImagenBytes(out, bytes, mime, titulo) {
+            var u8 = _copiarU8(bytes);
+            var esPng = String(mime || '').indexOf('png') !== -1 || _bytesParecenPng(u8);
+            var img = esPng ? await out.embedPng(u8) : await out.embedJpg(u8);
             var page = out.addPage([595.28, 841.89]);
             var margen = 28;
             var yTitulo = 841.89 - 32;
             var tituloTxt = _textoPdfSeguro(titulo);
             if (tituloTxt) {
-                page.drawText(tituloTxt.slice(0, 110), { x: margen, y: yTitulo, size: 9 });
+                page.drawText(tituloTxt.slice(0, 140), { x: margen, y: yTitulo, size: 9 });
             }
             var maxW = 595.28 - margen * 2;
             var maxH = (tituloTxt ? yTitulo - 10 : 841.89 - margen) - margen;
             var scale = Math.min(maxW / img.width, maxH / img.height);
+            if (!(scale > 0) || !isFinite(scale)) throw new Error('escala de imagen invalida');
             var w = img.width * scale;
             var h = img.height * scale;
             page.drawImage(img, {
@@ -50075,12 +50195,33 @@ document.getElementById('chatForm').onsubmit = function (e) {
             });
         }
 
-        async function _pdfLibAnexarPdf(out, bytes, lib) {
+        async function _pdfLibAgregarImagen(out, dataUrl, titulo) {
+            var bytes = _dataUrlABytes(dataUrl);
+            var mime = String(dataUrl).indexOf('data:image/png') === 0 ? 'image/png' : 'image/jpeg';
+            await _pdfLibAgregarImagenBytes(out, bytes, mime, titulo);
+        }
+
+        async function _pdfLibAnexarPdf(out, bytes, lib, titulo) {
             var src = await lib.PDFDocument.load(_copiarU8(bytes), { ignoreEncryption: true });
             var indices = src.getPageIndices();
             if (!indices.length) return false;
             var pages = await out.copyPages(src, indices);
-            pages.forEach(function (p) { out.addPage(p); });
+            var color = typeof lib.rgb === 'function' ? lib.rgb(0.2, 0.2, 0.2) : undefined;
+            pages.forEach(function (p, idx) {
+                var etiqueta = _textoPdfSeguro(titulo || '');
+                if (indices.length > 1) {
+                    etiqueta = _textoPdfSeguro((titulo || 'Comprobante') + ' · pag. ' + (idx + 1) + '/' + indices.length);
+                }
+                if (etiqueta) {
+                    try {
+                        var alto = typeof p.getHeight === 'function' ? p.getHeight() : 0;
+                        var opts = { x: 16, y: Math.min(12, Math.max(6, alto ? 8 : 8)), size: 7 };
+                        if (color) opts.color = color;
+                        p.drawText(etiqueta.slice(0, 150), opts);
+                    } catch (eTxt) { /* la página original se conserva aunque el rótulo no quepa */ }
+                }
+                out.addPage(p);
+            });
             return true;
         }
 
@@ -50091,25 +50232,33 @@ document.getElementById('chatForm').onsubmit = function (e) {
             for (var i = 0; i < segmentos.length; i++) {
                 var seg = segmentos[i];
                 var ok = false;
-                if (seg.pdfBytes) {
+                if (seg.pdfBytes && !seg.esPlaceholder) {
                     try {
-                        ok = await _pdfLibAnexarPdf(out, seg.pdfBytes, lib);
+                        ok = await _pdfLibAnexarPdf(out, seg.pdfBytes, lib, seg.titulo);
                     } catch (ePdf) {
                         console.warn('No se pudo copiar el PDF del comprobante:', seg.titulo, ePdf);
                     }
                 }
-                if (!ok && seg.pdfBytes) {
+                if (!ok && seg.pdfBytes && !seg.esPlaceholder) {
                     try {
                         var urls = await _pdfBytesAPaginasJpegDataUrl(seg.pdfBytes, 1.35);
                         for (var n = 0; n < urls.length; n++) {
-                            await _pdfLibAgregarImagen(out, urls[n], n === 0 ? seg.titulo : (seg.titulo + ' pag. ' + (n + 1)));
+                            await _pdfLibAgregarImagen(out, urls[n], n === 0 ? seg.titulo : (seg.titulo + ' · pag. ' + (n + 1) + '/' + urls.length));
                         }
                         ok = urls.length > 0;
                     } catch (eRas) {
                         console.warn('No se pudo rasterizar el PDF del comprobante:', seg.titulo, eRas);
                     }
                 }
-                if (!ok && seg.dataUrl) {
+                if (!ok && seg.imagenBytes && !seg.esPlaceholder) {
+                    try {
+                        await _pdfLibAgregarImagenBytes(out, seg.imagenBytes, seg.mime, seg.titulo);
+                        ok = true;
+                    } catch (eImgB) {
+                        console.warn('No se pudo incrustar los bytes de la imagen:', seg.titulo, eImgB);
+                    }
+                }
+                if (!ok && seg.dataUrl && !seg.esPlaceholder) {
                     try {
                         await _pdfLibAgregarImagen(out, seg.dataUrl, seg.titulo);
                         ok = true;
@@ -50118,7 +50267,11 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     }
                 }
                 if (!ok) {
-                    var ph = seg.dataUrl || await _placeholderComprobanteDataUrl(seg.titulo || 'Comprobante', ['No se pudo incorporar el archivo.']);
+                    var linea = seg.motivo || ('No se pudo incorporar "' + (seg.titulo || 'el archivo') + '". El archivo falta, no se puede leer o está dañado.');
+                    var ph = seg.dataUrl;
+                    if (!ph || !seg.esPlaceholder) {
+                        ph = await _placeholderComprobanteDataUrl(seg.titulo || 'Comprobante', [linea]);
+                    }
                     try { await _pdfLibAgregarImagen(out, ph, seg.titulo); } catch (ePh) { console.warn(ePh); }
                 }
             }
@@ -50185,60 +50338,83 @@ document.getElementById('chatForm').onsubmit = function (e) {
             });
         }
 
-        async function _comprobanteArchivoAPaginasImagen(archivo) {
+        function _paginaImagenOriginal(bytes, mime) {
+            var u8 = _copiarU8(bytes);
+            var dataUrl = null;
+            try { dataUrl = _u8ADataUrl(u8, mime); }
+            catch (eData) { console.warn('_paginaImagenOriginal:', eData); }
+            return {
+                imagenBytes: u8,
+                mime: mime,
+                dataUrl: dataUrl,
+                esPlaceholder: false
+            };
+        }
+
+        async function _paginaFalloComprobante(titulo, lineas) {
+            return {
+                dataUrl: await _placeholderComprobanteDataUrl(titulo, lineas),
+                esPlaceholder: true,
+                motivo: (lineas || []).join(' ')
+            };
+        }
+
+        async function _comprobanteArchivoAPaginasImagen(archivo, tituloFolio) {
+            var nombre = (archivo && archivo.nombre) ? String(archivo.nombre) : 'Comprobante';
+            var titulo = tituloFolio || nombre;
             var urlArchivo = _urlComprobanteArchivo(archivo);
             var rutaArchivo = _rutaComprobanteArchivo(archivo);
             if (!urlArchivo && !rutaArchivo) {
-                return [{
-                    dataUrl: await _placeholderComprobanteDataUrl(archivo && archivo.nombre ? archivo.nombre : 'Sin comprobante', ['Sin URL de archivo.']),
-                    esPlaceholder: true
-                }];
+                return [await _paginaFalloComprobante(titulo, [
+                    'Falta la referencia del archivo "' + nombre + '" en el movimiento.',
+                    'No hay ruta ni enlace de almacenamiento.'
+                ])];
             }
             var tipoArch = _tipoArchivoComprobanteCaja(archivo);
-            var esPdf = tipoArch === 'pdf' || (archivo.nombre && String(archivo.nombre).toLowerCase().endsWith('.pdf'));
+            var esPdf = tipoArch === 'pdf';
             var esVideo = tipoArch === 'video';
 
-            try {
-                var desc = await _descargarComprobanteBytes(urlArchivo, archivo.tipo || '', rutaArchivo);
+            async function clasificar(desc) {
                 var bytes = desc.bytes;
-                var mime = desc.mime || archivo.tipo || _mimeDesdeNombreArchivo(archivo.nombre);
-                if (_bytesParecenPdf(bytes)) {
+                if (_bytesParecenPdf(bytes) || (esPdf && !_bytesParecenJpeg(bytes) && !_bytesParecenPng(bytes))) {
                     return [{ pdfBytes: _copiarU8(bytes), esPlaceholder: false }];
                 }
+                if (_bytesParecenJpeg(bytes)) return [_paginaImagenOriginal(bytes, 'image/jpeg')];
+                if (_bytesParecenPng(bytes)) return [_paginaImagenOriginal(bytes, 'image/png')];
                 if (esVideo) {
-                    try {
-                        var blobVid = new Blob([bytes], { type: mime || 'video/mp4' });
-                        var framePng = await _videoBlobAPngFrame(blobVid);
-                        var frameBlob = new Blob([framePng], { type: 'image/png' });
-                        return [{ dataUrl: await _blobADataUrlJpeg(frameBlob, 1400), esPlaceholder: false }];
-                    } catch (eVid) {
-                        return [{
-                            dataUrl: await _placeholderComprobanteDataUrl(archivo.nombre || 'Video', ['Vista previa no disponible.', 'Ver enlace en Excel.']),
-                            esPlaceholder: true
-                        }];
-                    }
+                    var blobVid = new Blob([bytes], { type: desc.mime || 'video/mp4' });
+                    var framePng = await _videoBlobAPngFrame(blobVid);
+                    return [_paginaImagenOriginal(framePng, 'image/png')];
                 }
-                return [{ dataUrl: await _bytesADataUrlJpeg(bytes, mime, 1400), esPlaceholder: false }];
-            } catch (errDl) {
-                console.warn('_comprobanteArchivoAPaginasImagen descarga:', archivo.nombre, urlArchivo, errDl);
-                try {
-                    var urlUsar = await _urlComprobanteFresca(archivo);
-                    if (!urlUsar) throw errDl;
-                    var desc2 = await _descargarComprobanteBytes(urlUsar, archivo.tipo || '', rutaArchivo);
-                    if (_bytesParecenPdf(desc2.bytes)) {
-                        return [{ pdfBytes: _copiarU8(desc2.bytes), esPlaceholder: false }];
-                    }
-                    if (!esVideo) {
-                        return [{ dataUrl: await _bytesADataUrlJpeg(desc2.bytes, desc2.mime || archivo.tipo, 1400), esPlaceholder: false }];
-                    }
-                } catch (errUrl) {
-                    console.error('_comprobanteArchivoAPaginasImagen:', archivo.nombre, urlArchivo, errDl, errUrl);
-                }
-                return [{
-                    dataUrl: await _placeholderComprobanteDataUrl(archivo.nombre || 'Comprobante', ['No se pudo cargar el archivo.', 'Ver enlace en Excel.']),
-                    esPlaceholder: true
-                }];
+                return [{ dataUrl: await _bytesADataUrlJpeg(bytes, desc.mime || archivo.tipo, 1600), esPlaceholder: false }];
             }
+
+            var ultimoError = null;
+            try {
+                return await clasificar(await _descargarComprobanteBytes(urlArchivo, archivo.tipo || '', rutaArchivo));
+            } catch (errDl) {
+                ultimoError = errDl;
+                console.warn('_comprobanteArchivoAPaginasImagen descarga:', nombre, errDl);
+            }
+            try {
+                var urlUsar = await _urlComprobanteFresca(archivo);
+                if (urlUsar && urlUsar !== urlArchivo) {
+                    return await clasificar(await _descargarComprobanteBytes(urlUsar, archivo.tipo || '', rutaArchivo));
+                }
+            } catch (errUrl) {
+                ultimoError = errUrl;
+                console.error('_comprobanteArchivoAPaginasImagen:', nombre, ultimoError);
+            }
+            var detalle = ultimoError && ultimoError.message ? String(ultimoError.message) : 'sin respuesta del almacenamiento';
+            if (/damaged|invalid|no es un|imagen no legible|escala/i.test(detalle)) {
+                return [await _paginaFalloComprobante(titulo, [
+                    'El archivo "' + nombre + '" está dañado o no es un PDF ni una imagen válida.'
+                ])];
+            }
+            return [await _paginaFalloComprobante(titulo, [
+                'No se pudo leer "' + nombre + '" desde el almacenamiento.',
+                detalle
+            ])];
         }
 
         function _formatoImagenDataUrl(dataUrl) {
@@ -50524,7 +50700,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     mostrarProgreso('Preparando comprobantes...', 'Descargando ' + Math.min(ix + lote, items.length) + '/' + items.length + '...');
                 }
                 var resultados = await Promise.all(grupo.map(function (item) {
-                    return _comprobanteArchivoAPaginasImagen(item.arch).then(function (paginas) {
+                    return _comprobanteArchivoAPaginasImagen(item.arch, item.titulo).then(function (paginas) {
                         return { titulo: item.titulo, paginas: paginas };
                     });
                 }));
@@ -50536,10 +50712,13 @@ document.getElementById('chatForm').onsubmit = function (e) {
                         paginasDoc.push({
                             dataUrl: pag.dataUrl || null,
                             pdfBytes: pag.pdfBytes || null,
+                            imagenBytes: pag.imagenBytes || null,
+                            mime: pag.mime || '',
                             titulo: tituloPag,
-                            esPlaceholder: !!pag.esPlaceholder
+                            esPlaceholder: !!pag.esPlaceholder,
+                            motivo: pag.motivo || ''
                         });
-                        if (pag.pdfBytes || (pag.dataUrl && !pag.esPlaceholder)) stats.incluidos++;
+                        if (!pag.esPlaceholder && (pag.pdfBytes || pag.imagenBytes || pag.dataUrl)) stats.incluidos++;
                         else stats.errores++;
                     });
                 });
