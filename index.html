@@ -25,7 +25,7 @@
     <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
     <!-- pdf-lib: unificar comprobantes de caja chica en un solo PDF -->
     <script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
-    <!-- jsPDF: comprobantes unificados como imagenes (rapido y compatible) -->
+    <!-- jsPDF: informe de caja chica (tabla + comprobantes como imagen) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <!-- heic2any: fotos iPhone (HEIC) → JPEG para el PDF -->
     <script src="https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js"></script>
@@ -8234,7 +8234,7 @@
                     <h3 style="margin: 0; font-size: 1rem; font-weight: 700;">Caja Chica</h3>
                     <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
                         <button type="button" class="btn btn-primary" id="btnDescargarReporteCaja" style="padding: 0.5rem 1rem; font-size: 0.875rem;">
-                            📊 Descargar reporte (.xlsx + comprobantes.pdf)
+                            📊 Descargar reporte (.xlsx + informe.pdf)
                         </button>
                         <button type="button" class="btn btn-success" id="btnEnviarCorreoCaja" style="padding: 0.5rem 1rem; font-size: 0.875rem; background: #10b981; border-color: #10b981;">
                             📧 Enviar por Correo
@@ -12733,7 +12733,7 @@
                     return;
                 }
                 
-                mostrarProgreso('Unificando comprobantes en PDF...');
+                mostrarProgreso('Armando informe PDF (tabla y comprobantes)...');
                 const pdfRes = await generarComprobantesUnificadosCajaPDF(mesReporte, nombreMes, {
                     descargar: false,
                     caja: xlsxRes.caja || cajaActual,
@@ -32410,7 +32410,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
             
             let contenido = `
                 <p style="margin: 0 0 8px 0; font-size: 14px; color: #333333; line-height: 1.55;">
-                    Se adjunta el resumen completo de <strong>caja chica</strong> para el período de <strong>${linkEsc(nombreMes)}</strong>. El reporte incluye todos los movimientos financieros, comprobantes y el estado de cuenta del período.
+                    Se adjunta el control en Excel y el informe PDF de <strong>caja chica</strong> del período <strong>${linkEsc(nombreMes)}</strong>. El PDF abre con la tabla de movimientos y continúa con los comprobantes en imagen.
                 </p>
             `;
             
@@ -40275,7 +40275,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
             await generarReporteCajaChicaPDF(window.mesEnConsulta, nombreMes);
             await generarReporteMantencionesPDF(window.mesEnConsulta, nombreMes);
             
-            mostrarAlerta(`Reportes del mes ${nombreMes} generados exitosamente (Caja Chica: Excel + comprobantes PDF).`, 'Reportes Generados');
+            mostrarAlerta(`Reportes del mes ${nombreMes} generados exitosamente (Caja Chica: Excel + informe PDF con tabla y comprobantes).`, 'Reportes Generados');
         };
         
         function generarReportesMesConsulta() {
@@ -50025,6 +50025,181 @@ document.getElementById('chatForm').onsubmit = function (e) {
             return 'JPEG';
         }
 
+        function _montoInformeCajaPdf(n) {
+            var v = Number(n) || 0;
+            if (typeof formatearMoneda === 'function') return formatearMoneda(v);
+            return '$' + Math.round(v).toLocaleString('es-CL');
+        }
+
+        function _jspdfLineasCelda(doc, texto, ancho, maxLineas) {
+            var lineas = doc.splitTextToSize(String(texto == null || texto === '' ? '-' : texto), Math.max(ancho - 2.6, 8));
+            if (!lineas || !lineas.length) lineas = ['-'];
+            if (maxLineas && lineas.length > maxLineas) {
+                lineas = lineas.slice(0, maxLineas);
+                lineas[maxLineas - 1] = String(lineas[maxLineas - 1]).replace(/\s+$/, '') + '...';
+            }
+            return lineas;
+        }
+
+        function _jspdfTextoEnCelda(doc, lineas, x, y, w, h, align) {
+            var lineH = 3.45;
+            var block = lineas.length * lineH;
+            var base = y + Math.max(3.2, (h - block) / 2 + 2.5);
+            lineas.forEach(function (ln, i) {
+                var tx = align === 'right' ? (x + w - 1.4) : (align === 'center' ? (x + w / 2) : (x + 1.4));
+                var opt = align === 'left' ? undefined : { align: align };
+                doc.text(String(ln), tx, base + i * lineH, opt);
+            });
+        }
+
+        /** Primeras páginas del informe: tabla de movimientos. Las imágenes van después. */
+        function _jspdfEscribirTablaInformeCaja(doc, filas, meta) {
+            meta = meta || {};
+            filas = Array.isArray(filas) ? filas : [];
+            var margen = 10;
+            var anchoPag = doc.internal.pageSize.getWidth();
+            var altoPag = doc.internal.pageSize.getHeight();
+            var usable = anchoPag - margen * 2;
+            var cols = [
+                { titulo: 'Folio', w: 36, align: 'center' },
+                { titulo: 'Fecha', w: 24, align: 'center' },
+                { titulo: 'N° documento', w: 32, align: 'center' },
+                { titulo: 'Descripción', w: 0, align: 'left' },
+                { titulo: 'Monto', w: 28, align: 'right' }
+            ];
+            cols[3].w = usable - cols[0].w - cols[1].w - cols[2].w - cols[4].w;
+            var total = 0;
+            filas.forEach(function (f) { total += Number(f.monto) || 0; });
+
+            function dibujarEncabezado(continuacion) {
+                doc.setTextColor(0, 0, 0);
+                if (continuacion) {
+                    doc.setFont(undefined, 'bold');
+                    doc.setFontSize(9);
+                    doc.text('INFORME DE CAJA CHICA - ' + (meta.nombreMes || '') + ' (continuacion)', margen, margen + 4);
+                    return margen + 8;
+                }
+                var y = margen;
+                doc.setFont(undefined, 'bold');
+                doc.setFontSize(13);
+                doc.text('INFORME DE CAJA CHICA', margen, y + 4);
+                y += 9;
+                doc.setFont(undefined, 'normal');
+                doc.setFontSize(9);
+                doc.text('Proyecto: ' + (meta.nombreComunidad || 'Activa WM815'), margen, y);
+                y += 4.6;
+                doc.text('Período: ' + (meta.nombreMes || meta.mesAnio || '-'), margen, y);
+                y += 4.6;
+                doc.text('Mayordomo: ' + (meta.jefeEdificio || 'Administración'), margen, y);
+                y += 4.6;
+                doc.text('Generado: ' + (meta.fechaEmision || '-'), margen, y);
+                y += 4.6;
+                doc.text('Movimientos: ' + filas.length + '    ·    Comprobantes: ' + (meta.totalComprobantes || 0), margen, y);
+                y += 6;
+                doc.setFillColor(217, 217, 217);
+                doc.setDrawColor(0, 0, 0);
+                doc.rect(margen, y, usable, 7, 'F');
+                doc.setFont(undefined, 'bold');
+                doc.setFontSize(10);
+                doc.text('CONTROL DE CAJA CHICA', anchoPag / 2, y + 4.7, { align: 'center' });
+                return y + 9;
+            }
+
+            function dibujarCabeceraColumnas(y) {
+                var x = margen;
+                var h = 7;
+                doc.setFont(undefined, 'bold');
+                doc.setFontSize(8);
+                doc.setTextColor(0, 0, 0);
+                doc.setFillColor(237, 237, 237);
+                doc.setDrawColor(0, 0, 0);
+                doc.setLineWidth(0.2);
+                cols.forEach(function (col) {
+                    doc.rect(x, y, col.w, h, 'FD');
+                    doc.text(col.titulo, x + col.w / 2, y + 4.6, { align: 'center' });
+                    x += col.w;
+                });
+                return y + h;
+            }
+
+            var y = dibujarEncabezado(false);
+            y = dibujarCabeceraColumnas(y);
+
+            if (!filas.length) {
+                doc.setFont(undefined, 'italic');
+                doc.setFontSize(9);
+                doc.text('Sin movimientos en este período.', margen, y + 8);
+                y += 12;
+            }
+
+            filas.forEach(function (fila) {
+                doc.setFont(undefined, 'normal');
+                doc.setFontSize(8);
+                var celdas = [
+                    _jspdfLineasCelda(doc, fila.folio, cols[0].w, 2),
+                    _jspdfLineasCelda(doc, fila.fecha, cols[1].w, 2),
+                    _jspdfLineasCelda(doc, fila.doc, cols[2].w, 3),
+                    _jspdfLineasCelda(doc, fila.desc, cols[3].w, 6),
+                    _jspdfLineasCelda(doc, _montoInformeCajaPdf(fila.monto), cols[4].w, 2)
+                ];
+                var maxLineas = 1;
+                celdas.forEach(function (ln) { if (ln.length > maxLineas) maxLineas = ln.length; });
+                var h = Math.max(7, maxLineas * 3.45 + 2.2);
+                if (y + h > altoPag - margen) {
+                    doc.addPage();
+                    y = dibujarEncabezado(true);
+                    y = dibujarCabeceraColumnas(y);
+                }
+                var x = margen;
+                doc.setDrawColor(0, 0, 0);
+                doc.setLineWidth(0.15);
+                doc.setFont(undefined, 'normal');
+                doc.setFontSize(8);
+                doc.setTextColor(0, 0, 0);
+                celdas.forEach(function (ln, idx) {
+                    doc.setFillColor(255, 255, 255);
+                    doc.rect(x, y, cols[idx].w, h, 'FD');
+                    _jspdfTextoEnCelda(doc, ln, x, y, cols[idx].w, h, cols[idx].align);
+                    x += cols[idx].w;
+                });
+                y += h;
+            });
+
+            var hTotal = 8;
+            if (y + hTotal > altoPag - margen) {
+                doc.addPage();
+                y = dibujarEncabezado(true);
+                y = dibujarCabeceraColumnas(y);
+            }
+            var wEtiqueta = usable - cols[4].w;
+            doc.setFillColor(217, 217, 217);
+            doc.setDrawColor(0, 0, 0);
+            doc.setLineWidth(0.2);
+            doc.rect(margen, y, wEtiqueta, hTotal, 'FD');
+            doc.rect(margen + wEtiqueta, y, cols[4].w, hTotal, 'FD');
+            doc.setFont(undefined, 'bold');
+            doc.setFontSize(9);
+            doc.setTextColor(0, 0, 0);
+            doc.text('TOTALES', margen + wEtiqueta / 2, y + 5.2, { align: 'center' });
+            doc.text(_montoInformeCajaPdf(total), margen + usable - 1.4, y + 5.2, { align: 'right' });
+            y += hTotal + 6;
+
+            doc.setFont(undefined, 'italic');
+            doc.setFontSize(8);
+            doc.setTextColor(70, 70, 70);
+            var nota = meta.tieneComprobantes
+                ? 'A continuación, los comprobantes en imagen, en el mismo orden de la tabla.'
+                : 'Sin comprobantes adjuntos en este período.';
+            var lineasNota = doc.splitTextToSize(nota, usable);
+            if (y + lineasNota.length * 4 > altoPag - margen) {
+                doc.addPage();
+                y = margen + 6;
+            }
+            doc.text(lineasNota, margen, y + 3);
+            doc.setTextColor(0, 0, 0);
+            doc.setFont(undefined, 'normal');
+        }
+
         function _jspdfAgregarPaginaImagen(doc, dataUrl, titulo, nuevaPagina) {
             if (nuevaPagina) doc.addPage();
             var margen = 10;
@@ -50065,13 +50240,22 @@ document.getElementById('chatForm').onsubmit = function (e) {
             if (!Array.isArray(caja)) caja = [];
             var personalizacion = await obtenerPersonalizacion();
             var nombreComunidad = personalizacion.comunidad || 'Activa WM815';
+            var jefeEdificio = personalizacion.jefeEdificio || 'Angel Avendaño';
             var stats = { total: 0, incluidos: 0, errores: 0 };
             var ordenados = caja.slice().sort(function (a, b) { return new Date(a.fecha) - new Date(b.fecha); });
             var items = [];
+            var filasTabla = [];
             ordenados.forEach(function (mov, i) {
                 var archivos = mov.archivos || [];
                 var folio = mov.folio || (typeof getFolioCajaProvisional === 'function' ? getFolioCajaProvisional(mov, ordenados, mesAnio) : ('Mov. ' + (i + 1)));
                 var fechaTxt = mov.fecha && typeof formatearFechaParaCorreo === 'function' ? formatearFechaParaCorreo(mov.fecha) : (mov.fecha || '-');
+                filasTabla.push({
+                    folio: folio,
+                    fecha: fechaTxt || '-',
+                    doc: mov.numeroDocumento || '-',
+                    desc: mov.descripcion || '-',
+                    monto: parseFloat(mov.monto) || 0
+                });
                 archivos.forEach(function (arch, j) {
                     stats.total++;
                     items.push({
@@ -50109,30 +50293,31 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 });
             }
 
-            var doc = new JsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4', compress: true });
-            doc.setProperties({
-                title: 'Comprobantes Caja Chica - ' + (nombreMes || mesAnio),
-                creator: 'Gestion Comunidad'
-            });
-            doc.setFontSize(13);
-            doc.text('COMPROBANTES UNIFICADOS - CAJA CHICA', 10, 14);
-            doc.setFontSize(9);
-            doc.text('Proyecto: ' + nombreComunidad, 10, 22);
-            doc.text('Periodo: ' + (nombreMes || mesAnio), 10, 28);
-            doc.text('Generado: ' + (typeof formatearFechaParaCorreo === 'function' ? formatearFechaParaCorreo(obtenerFechaHoy()) : obtenerFechaHoy()), 10, 34);
-            doc.text('Total comprobantes: ' + stats.total, 10, 40);
-
-            if (!paginasDoc.length) {
-                doc.setFontSize(10);
-                doc.text('Sin comprobantes adjuntos en este periodo.', 10, 52);
-            } else {
-                paginasDoc.forEach(function (pag, idx) {
-                    _jspdfAgregarPaginaImagen(doc, pag.dataUrl, pag.titulo, true);
-                });
+            if (typeof mostrarProgreso === 'function' && opciones.mostrarProgreso !== false) {
+                mostrarProgreso('Armando informe PDF...', 'Tabla de movimientos y comprobantes en imagen');
             }
 
+            var doc = new JsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4', compress: true });
+            doc.setProperties({
+                title: 'Informe Caja Chica - ' + (nombreMes || mesAnio),
+                creator: 'Gestion Comunidad'
+            });
+            _jspdfEscribirTablaInformeCaja(doc, filasTabla, {
+                nombreComunidad: nombreComunidad,
+                nombreMes: nombreMes || mesAnio,
+                mesAnio: mesAnio,
+                jefeEdificio: jefeEdificio,
+                fechaEmision: (typeof formatearFechaParaCorreo === 'function' ? formatearFechaParaCorreo(obtenerFechaHoy()) : obtenerFechaHoy()),
+                totalComprobantes: stats.total,
+                tieneComprobantes: paginasDoc.length > 0
+            });
+
+            paginasDoc.forEach(function (pag) {
+                _jspdfAgregarPaginaImagen(doc, pag.dataUrl, pag.titulo, true);
+            });
+
             var buffer = doc.output('arraybuffer');
-            var nombreArchivo = _nombreArchivoCajaChicaSeguro(nombreMes, '_Comprobantes.pdf');
+            var nombreArchivo = _nombreArchivoCajaChicaSeguro(nombreMes, '_Informe.pdf');
             if (opciones.descargar !== false) {
                 _descargarBlobComoArchivo(buffer, nombreArchivo, 'application/pdf');
             }
@@ -50140,7 +50325,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
         }
         window.generarComprobantesUnificadosCajaPDF = generarComprobantesUnificadosCajaPDF;
 
-        // Función para generar reporte de Caja Chica (.xlsx + comprobantes unificados en PDF)
+        // Función para generar reporte de Caja Chica (.xlsx + informe PDF: tabla y luego comprobantes en imagen)
         async function generarReporteCajaChicaPDF(mesAnio, nombreMes, usarMesActual = false, opciones) {
             opciones = opciones || {};
             var xlsxRes = await generarReporteCajaChicaXLSX(mesAnio, nombreMes, {
@@ -50714,18 +50899,18 @@ document.getElementById('chatForm').onsubmit = function (e) {
             const mesReporte = obtenerMesPeriodoVista();
             const nombreMes = obtenerNombreMes(mesReporte);
             try {
-                mostrarProgreso('Generando reporte Excel (.xlsx)...');
+                mostrarProgreso('Generando informe de caja chica...');
                 const resultado = await generarReporteCajaChicaPDF(mesReporte, nombreMes, true, { descargar: true, mostrarProgreso: true });
                 ocultarProgreso();
-                var msg = 'Reporte Excel (.xlsx) descargado con enlaces de comprobantes.';
+                var msg = 'Se descargó el Excel de control y el informe PDF.';
                 var stats = resultado && resultado.pdf && resultado.pdf.stats ? resultado.pdf.stats : null;
                 if (stats) {
                     if (stats.total === 0) {
-                        msg += ' No hay comprobantes adjuntos para unificar en PDF.';
+                        msg += ' El PDF incluye la tabla de movimientos. No hay comprobantes en imagen para este período.';
                     } else {
-                        msg += ' Comprobantes incorporados como imagenes en PDF: ' + stats.incluidos + ' de ' + stats.total + ' archivo(s).';
+                        msg += ' El PDF trae la tabla y, a continuación, ' + stats.incluidos + ' de ' + stats.total + ' comprobante(s) en imagen.';
                         if (stats.errores > 0) {
-                            msg += ' (' + stats.errores + ' con incidencias; revise el PDF y los enlaces en Excel).';
+                            msg += ' ' + stats.errores + ' archivo(s) no se pudieron mostrar; revise el PDF y los enlaces del Excel.';
                         }
                     }
                 }
