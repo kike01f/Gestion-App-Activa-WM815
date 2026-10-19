@@ -8233,8 +8233,11 @@
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 0.5rem;">
                     <h3 style="margin: 0; font-size: 1rem; font-weight: 700;">Caja Chica</h3>
                     <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-                        <button type="button" class="btn btn-primary" id="btnDescargarReporteCaja" style="padding: 0.5rem 1rem; font-size: 0.875rem;">
-                            📊 Descargar reporte (.xlsx + informe.pdf)
+                        <button type="button" class="btn btn-primary" id="btnDescargarExcelCaja" style="padding: 0.5rem 1rem; font-size: 0.875rem;">
+                            📊 Descargar Excel
+                        </button>
+                        <button type="button" class="btn btn-secondary" id="btnDescargarPdfCaja" style="padding: 0.5rem 1rem; font-size: 0.875rem;">
+                            📄 Descargar PDF
                         </button>
                         <button type="button" class="btn btn-success" id="btnEnviarCorreoCaja" style="padding: 0.5rem 1rem; font-size: 0.875rem; background: #10b981; border-color: #10b981;">
                             📧 Enviar por Correo
@@ -49751,24 +49754,137 @@ document.getElementById('chatForm').onsubmit = function (e) {
 
 
 
+        function _u8ADataUrl(u8, mime) {
+            var bin = '';
+            for (var i = 0; i < u8.length; i += 8192) {
+                bin += String.fromCharCode.apply(null, u8.subarray(i, Math.min(i + 8192, u8.length)));
+            }
+            return 'data:' + (mime || 'image/jpeg') + ';base64,' + btoa(bin);
+        }
+
+        function _dimensionesJpeg(u8) {
+            var i = 2;
+            while (i < u8.length - 8) {
+                if (u8[i] !== 0xFF) { i++; continue; }
+                while (i < u8.length && u8[i] === 0xFF) i++;
+                if (i >= u8.length) break;
+                var marker = u8[i];
+                i++;
+                if (marker === 0xD8 || marker === 0xD9) continue;
+                if (marker === 0x01 || (marker >= 0xD0 && marker <= 0xD7)) continue;
+                if (i + 1 >= u8.length) break;
+                var len = (u8[i] << 8) | u8[i + 1];
+                if (len < 2) break;
+                if ((marker >= 0xC0 && marker <= 0xC3) || (marker >= 0xC5 && marker <= 0xC7) || (marker >= 0xC9 && marker <= 0xCB) || (marker >= 0xCD && marker <= 0xCF)) {
+                    if (i + 7 >= u8.length) return null;
+                    return { w: (u8[i + 5] << 8) | u8[i + 6], h: (u8[i + 3] << 8) | u8[i + 4] };
+                }
+                i += len;
+            }
+            return null;
+        }
+
+        function _orientacionExifJpeg(u8) {
+            var i = 2;
+            while (i < u8.length - 12) {
+                if (u8[i] !== 0xFF) { i++; continue; }
+                while (i < u8.length && u8[i] === 0xFF) i++;
+                var marker = u8[i++];
+                if (marker === 0xD8 || marker === 0xD9) continue;
+                if (marker === 0x01 || (marker >= 0xD0 && marker <= 0xD7)) continue;
+                if (i + 1 >= u8.length) break;
+                var len = (u8[i] << 8) | u8[i + 1];
+                if (len < 2) break;
+                if (marker === 0xE1 && len > 14 && i + 8 < u8.length) {
+                    var exif = String.fromCharCode(u8[i + 2], u8[i + 3], u8[i + 4], u8[i + 5]);
+                    if (exif === 'Exif') {
+                        var t = i + 8;
+                        var le = u8[t] === 0x49;
+                        function u16(o) { return le ? (u8[o] | (u8[o + 1] << 8)) : ((u8[o] << 8) | u8[o + 1]); }
+                        function u32(o) { return le ? (u8[o] | (u8[o + 1] << 8) | (u8[o + 2] << 16) | (u8[o + 3] << 24)) : ((u8[o] << 24) | (u8[o + 1] << 16) | (u8[o + 2] << 8) | u8[o + 3]); }
+                        var ifd = t + u32(t + 4);
+                        if (ifd > 0 && ifd + 2 < u8.length) {
+                            var n = u16(ifd);
+                            for (var k = 0; k < n; k++) {
+                                var e = ifd + 2 + k * 12;
+                                if (e + 10 >= u8.length) break;
+                                if (u16(e) === 0x0112) return u16(e + 8) || 1;
+                            }
+                        }
+                    }
+                }
+                i += len;
+            }
+            return 1;
+        }
+
+        function _dimensionesImagenBytes(u8) {
+            if (_bytesParecenPng(u8) && u8.length >= 24) {
+                var w = (u8[16] << 24) | (u8[17] << 16) | (u8[18] << 8) | u8[19];
+                var h = (u8[20] << 24) | (u8[21] << 16) | (u8[22] << 8) | u8[23];
+                return { w: w >>> 0, h: h >>> 0, mime: 'image/png', orientacion: 1 };
+            }
+            if (_bytesParecenJpeg(u8)) {
+                var dim = _dimensionesJpeg(u8);
+                if (dim && dim.w && dim.h) return { w: dim.w, h: dim.h, mime: 'image/jpeg', orientacion: _orientacionExifJpeg(u8) };
+            }
+            return null;
+        }
+
+        function _escalaLadoMax(w, h, maxPx) {
+            var lado = Math.max(w || 1, h || 1);
+            if (lado <= maxPx) return { w: Math.max(1, w || 1), h: Math.max(1, h || 1) };
+            var s = maxPx / lado;
+            return { w: Math.max(1, Math.round(w * s)), h: Math.max(1, Math.round(h * s)) };
+        }
+
+        function _canvasPareceVacio(canvas) {
+            try {
+                var ctx = canvas.getContext('2d', { willReadFrequently: true });
+                var w = canvas.width || 1;
+                var h = canvas.height || 1;
+                var vals = [];
+                [[0.5, 0.5], [0.2, 0.25], [0.8, 0.3], [0.3, 0.75], [0.7, 0.8]].forEach(function (p) {
+                    var d = ctx.getImageData(Math.min(w - 1, Math.floor(p[0] * (w - 1))), Math.min(h - 1, Math.floor(p[1] * (h - 1))), 1, 1).data;
+                    vals.push(d[0], d[1], d[2]);
+                });
+                var mean = vals.reduce(function (a, b) { return a + b; }, 0) / vals.length;
+                var varianza = 0;
+                vals.forEach(function (n) { varianza += (n - mean) * (n - mean); });
+                return Math.sqrt(varianza / vals.length) < 1.5;
+            } catch (eVacio) {
+                return false;
+            }
+        }
+
+        function _pintarImagenEnCanvas(origen, sw, sh, maxPx) {
+            var dim = _escalaLadoMax(sw, sh, maxPx || 1400);
+            var c = document.createElement('canvas');
+            c.width = dim.w;
+            c.height = dim.h;
+            var ctx = c.getContext('2d');
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, dim.w, dim.h);
+            ctx.drawImage(origen, 0, 0, dim.w, dim.h);
+            return c;
+        }
+
         async function _blobADataUrlJpeg(blob, maxPx) {
             maxPx = maxPx || 1400;
             if (typeof createImageBitmap === 'function') {
+                var bitmap = null;
                 try {
-                    var bitmap = await createImageBitmap(blob);
-                    var w = bitmap.width || 1;
-                    var h = bitmap.height || 1;
-                    if (w > maxPx) {
-                        h = Math.max(1, Math.round(h * maxPx / w));
-                        w = maxPx;
+                    try {
+                        bitmap = await createImageBitmap(blob, { imageOrientation: 'from-image' });
+                    } catch (eOrient) {
+                        bitmap = await createImageBitmap(blob);
                     }
-                    var cBmp = document.createElement('canvas');
-                    cBmp.width = w;
-                    cBmp.height = h;
-                    cBmp.getContext('2d').drawImage(bitmap, 0, 0, w, h);
+                    var cBmp = _pintarImagenEnCanvas(bitmap, bitmap.width || 1, bitmap.height || 1, maxPx);
                     if (typeof bitmap.close === 'function') bitmap.close();
+                    if (_canvasPareceVacio(cBmp)) throw new Error('canvas vacio');
                     return cBmp.toDataURL('image/jpeg', 0.86);
                 } catch (eBmp) {
+                    if (bitmap && typeof bitmap.close === 'function') bitmap.close();
                     console.warn('_blobADataUrlJpeg createImageBitmap:', eBmp);
                 }
             }
@@ -49776,17 +49892,12 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 var objUrl = URL.createObjectURL(blob);
                 var img = new Image();
                 img.onload = function () {
-                    var w = img.naturalWidth || img.width || 1;
-                    var h = img.naturalHeight || img.height || 1;
-                    if (w > maxPx) {
-                        h = Math.max(1, Math.round(h * maxPx / w));
-                        w = maxPx;
-                    }
-                    var c = document.createElement('canvas');
-                    c.width = w;
-                    c.height = h;
-                    c.getContext('2d').drawImage(img, 0, 0, w, h);
+                    var c = _pintarImagenEnCanvas(img, img.naturalWidth || img.width || 1, img.naturalHeight || img.height || 1, maxPx);
                     URL.revokeObjectURL(objUrl);
+                    if (_canvasPareceVacio(c)) {
+                        reject(new Error('canvas vacio'));
+                        return;
+                    }
                     resolve(c.toDataURL('image/jpeg', 0.86));
                 };
                 img.onerror = function () {
@@ -49811,20 +49922,31 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     var blobHeic = new Blob([u8], { type: mimeHint || 'image/heic' });
                     var conv = await heic2any({ blob: blobHeic, toType: 'image/jpeg', quality: 0.86 });
                     var blobJpg = Array.isArray(conv) ? conv[0] : conv;
-                    return _blobADataUrlJpeg(blobJpg, maxPx);
+                    var abJpg = new Uint8Array(await blobJpg.arrayBuffer());
+                    return _bytesADataUrlJpeg(abJpg, 'image/jpeg', maxPx);
                 } catch (eHeic) {
                     console.warn('_bytesADataUrlJpeg heic2any:', eHeic);
                 }
             }
-            var blob = new Blob([u8], { type: mimeHint || _mimeDesdeBytesSniff(u8) || 'image/jpeg' });
-            return _blobADataUrlJpeg(blob, maxPx);
+            var dim = _dimensionesImagenBytes(u8);
+            var mimeReal = (dim && dim.mime) || mime || 'image/jpeg';
+            var puedeOriginal = mimeReal === 'image/jpeg' || mimeReal === 'image/png';
+            var cabeDirecto = !!(dim && puedeOriginal && Math.max(dim.w, dim.h) <= (maxPx || 1400) && (!dim.orientacion || dim.orientacion === 1));
+            if (cabeDirecto) return _u8ADataUrl(u8, mimeReal);
+            try {
+                var blob = new Blob([u8], { type: mimeReal || 'image/jpeg' });
+                return await _blobADataUrlJpeg(blob, maxPx);
+            } catch (eCanvas) {
+                if (puedeOriginal) return _u8ADataUrl(u8, mimeReal);
+                throw eCanvas;
+            }
         }
 
         async function _urlImagenADataUrlJpeg(url, maxPx) {
             maxPx = maxPx || 1400;
             return new Promise(function (resolve, reject) {
                 var img = new Image();
-                img.crossOrigin = 'anonymous';
+                if (/^https?:/i.test(String(url || ''))) img.crossOrigin = 'anonymous';
                 var timeout = setTimeout(function () {
                     img.onload = img.onerror = null;
                     reject(new Error('timeout imagen URL'));
@@ -49832,16 +49954,11 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 img.onload = function () {
                     clearTimeout(timeout);
                     try {
-                        var w = img.naturalWidth || img.width || 1;
-                        var h = img.naturalHeight || img.height || 1;
-                        if (w > maxPx) {
-                            h = Math.max(1, Math.round(h * maxPx / w));
-                            w = maxPx;
+                        var c = _pintarImagenEnCanvas(img, img.naturalWidth || img.width || 1, img.naturalHeight || img.height || 1, maxPx);
+                        if (_canvasPareceVacio(c)) {
+                            reject(new Error('canvas vacio'));
+                            return;
                         }
-                        var c = document.createElement('canvas');
-                        c.width = w;
-                        c.height = h;
-                        c.getContext('2d').drawImage(img, 0, 0, w, h);
                         resolve(c.toDataURL('image/jpeg', 0.86));
                     } catch (eDraw) {
                         reject(eDraw);
@@ -50206,22 +50323,46 @@ document.getElementById('chatForm').onsubmit = function (e) {
             var anchoPag = doc.internal.pageSize.getWidth();
             var altoPag = doc.internal.pageSize.getHeight();
             var y = margen;
+            doc.setTextColor(0, 0, 0);
             if (titulo) {
-                doc.setFont(undefined, 'bold');
-                doc.setFontSize(7);
+                doc.setFont('helvetica', 'bold');
+                doc.setFontSize(8);
                 var lineasTit = doc.splitTextToSize(String(titulo), anchoPag - margen * 2);
-                doc.text(lineasTit, margen, y + 3);
-                y += lineasTit.length * 3.2 + 2;
+                if (lineasTit.length > 2) {
+                    lineasTit = lineasTit.slice(0, 2);
+                    lineasTit[1] = String(lineasTit[1]).replace(/\s+$/, '') + '...';
+                }
+                doc.text(lineasTit, margen, y + 4);
+                y += lineasTit.length * 4 + 2;
             }
-            var props = doc.getImageProperties(dataUrl);
-            var maxAncho = anchoPag - margen * 2;
-            var maxAlto = altoPag - y - margen;
-            var iw = Math.max(props.width || 1, 1);
-            var ih = Math.max(props.height || 1, 1);
-            var ratio = Math.min(maxAncho / iw, maxAlto / ih);
-            iw *= ratio;
-            ih *= ratio;
-            doc.addImage(dataUrl, _formatoImagenDataUrl(dataUrl), (anchoPag - iw) / 2, y, iw, ih, undefined, 'FAST');
+            try {
+                if (!dataUrl) throw new Error('sin datos de imagen');
+                var formato = _formatoImagenDataUrl(dataUrl);
+                if (formato === 'WEBP') formato = 'JPEG';
+                var props = doc.getImageProperties(dataUrl);
+                var iw = props && props.width ? props.width : 0;
+                var ih = props && props.height ? props.height : 0;
+                if (iw < 2 || ih < 2) throw new Error('dimensiones invalidas');
+                var maxAncho = anchoPag - margen * 2;
+                var maxAlto = altoPag - y - margen;
+                if (maxAlto < 40) maxAlto = altoPag - margen * 2;
+                var ratio = Math.min(maxAncho / iw, maxAlto / ih);
+                if (!(ratio > 0) || !isFinite(ratio)) throw new Error('escala invalida');
+                iw *= ratio;
+                ih *= ratio;
+                var x = (anchoPag - iw) / 2;
+                doc.setDrawColor(160, 160, 160);
+                doc.setLineWidth(0.3);
+                doc.rect(x - 0.6, y - 0.6, iw + 1.2, ih + 1.2);
+                doc.addImage(dataUrl, formato, x, y, iw, ih, undefined, 'NONE');
+            } catch (eImg) {
+                console.error('_jspdfAgregarPaginaImagen:', eImg);
+                doc.setFont('helvetica', 'normal');
+                doc.setFontSize(10);
+                doc.setTextColor(80, 80, 80);
+                doc.text('No se pudo incrustar la imagen del adjunto.', margen, Math.min(y + 10, altoPag - margen));
+                doc.setTextColor(0, 0, 0);
+            }
         }
 
         async function generarComprobantesUnificadosCajaPDF(mesAnio, nombreMes, opciones) {
@@ -50894,31 +51035,45 @@ document.getElementById('chatForm').onsubmit = function (e) {
             descargarReporteHTML(html, `Reporte_Mantenciones_${nombreMes.replace(/\s+/g, '_')}`, 'Reporte de Mantenciones');
         }
 
-        // Función para descargar reporte de Caja Chica del mes actual (disponible globalmente)
-        window.descargarReporteCajaActual = async function() {
+        window.descargarExcelCajaActual = async function() {
             const mesReporte = obtenerMesPeriodoVista();
             const nombreMes = obtenerNombreMes(mesReporte);
             try {
-                mostrarProgreso('Generando informe de caja chica...');
-                const resultado = await generarReporteCajaChicaPDF(mesReporte, nombreMes, true, { descargar: true, mostrarProgreso: true });
+                mostrarProgreso('Generando Excel de caja chica...');
+                await generarReporteCajaChicaXLSX(mesReporte, nombreMes, { descargar: true, mostrarProgreso: true });
                 ocultarProgreso();
-                var msg = 'Se descargó el Excel de control y el informe PDF.';
-                var stats = resultado && resultado.pdf && resultado.pdf.stats ? resultado.pdf.stats : null;
+                mostrarAlerta('Excel de control de caja chica descargado.', 'Reporte Descargado');
+            } catch (error) {
+                console.error('Error al generar Excel de caja chica:', error);
+                ocultarProgreso();
+                mostrarAlerta('Ocurrió un error al generar el Excel. Por favor, intente nuevamente.', 'Error');
+            }
+        };
+
+        window.descargarPdfCajaActual = async function() {
+            const mesReporte = obtenerMesPeriodoVista();
+            const nombreMes = obtenerNombreMes(mesReporte);
+            try {
+                mostrarProgreso('Generando informe PDF de caja chica...');
+                const pdfRes = await generarComprobantesUnificadosCajaPDF(mesReporte, nombreMes, { descargar: true, mostrarProgreso: true });
+                ocultarProgreso();
+                var msg = 'Informe PDF descargado.';
+                var stats = pdfRes && pdfRes.stats ? pdfRes.stats : null;
                 if (stats) {
                     if (stats.total === 0) {
-                        msg += ' El PDF incluye la tabla de movimientos. No hay comprobantes en imagen para este período.';
+                        msg += ' Incluye la tabla de movimientos. No hay comprobantes en imagen para este período.';
                     } else {
-                        msg += ' El PDF trae la tabla y, a continuación, ' + stats.incluidos + ' de ' + stats.total + ' comprobante(s) en imagen.';
+                        msg += ' Trae la tabla y, a continuación, ' + stats.incluidos + ' de ' + stats.total + ' comprobante(s) en imagen.';
                         if (stats.errores > 0) {
-                            msg += ' ' + stats.errores + ' archivo(s) no se pudieron mostrar; revise el PDF y los enlaces del Excel.';
+                            msg += ' ' + stats.errores + ' archivo(s) no se pudieron mostrar.';
                         }
                     }
                 }
                 mostrarAlerta(msg, 'Reporte Descargado');
             } catch (error) {
-                console.error('Error al generar reporte de caja chica:', error);
+                console.error('Error al generar PDF de caja chica:', error);
                 ocultarProgreso();
-                mostrarAlerta('Ocurrió un error al generar el reporte. Por favor, intente nuevamente.', 'Error');
+                mostrarAlerta('Ocurrió un error al generar el PDF. Por favor, intente nuevamente.', 'Error');
             }
         };
 
@@ -55120,16 +55275,29 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     });
                 }
                 
-                // Event listener para botón de descargar reporte de caja chica
-                const btnDescargarReporteCaja = document.getElementById('btnDescargarReporteCaja');
-                if (btnDescargarReporteCaja) {
-                    btnDescargarReporteCaja.addEventListener('click', async function() {
-                        if (typeof window.descargarReporteCajaActual === 'function') {
+                const btnDescargarExcelCaja = document.getElementById('btnDescargarExcelCaja');
+                if (btnDescargarExcelCaja) {
+                    btnDescargarExcelCaja.addEventListener('click', async function() {
+                        if (typeof window.descargarExcelCajaActual === 'function') {
                             try {
-                                await window.descargarReporteCajaActual();
+                                await window.descargarExcelCajaActual();
                             } catch (error) {
-                                console.error('Error al descargar reporte de caja chica:', error);
-                                mostrarAlerta('Ocurrió un error al generar el reporte. Por favor, intente nuevamente.', 'Error');
+                                console.error('Error al descargar Excel de caja chica:', error);
+                                mostrarAlerta('Ocurrió un error al generar el Excel. Por favor, intente nuevamente.', 'Error');
+                            }
+                        }
+                    });
+                }
+
+                const btnDescargarPdfCaja = document.getElementById('btnDescargarPdfCaja');
+                if (btnDescargarPdfCaja) {
+                    btnDescargarPdfCaja.addEventListener('click', async function() {
+                        if (typeof window.descargarPdfCajaActual === 'function') {
+                            try {
+                                await window.descargarPdfCajaActual();
+                            } catch (error) {
+                                console.error('Error al descargar PDF de caja chica:', error);
+                                mostrarAlerta('Ocurrió un error al generar el PDF. Por favor, intente nuevamente.', 'Error');
                             }
                         }
                     });
