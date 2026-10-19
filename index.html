@@ -13875,12 +13875,13 @@
             }
             try {
                 var urlObj = new URL(u);
-                var pathParts = urlObj.pathname.split('/');
+                var pathParts = urlObj.pathname.split('/').filter(function (p) { return p !== ''; });
                 var oIndex = pathParts.indexOf('o');
                 if (oIndex !== -1 && pathParts.length > oIndex + 1) {
-                    var encoded = pathParts.slice(oIndex + 1).join('/');
-                    if (encoded.indexOf('?') !== -1) encoded = encoded.split('?')[0];
-                    return decodeURIComponent(encoded);
+                    return decodeURIComponent(pathParts.slice(oIndex + 1).join('/'));
+                }
+                if (urlObj.hostname === 'storage.googleapis.com' && pathParts.length >= 2) {
+                    return decodeURIComponent(pathParts.slice(1).join('/'));
                 }
             } catch (ePath) { /* ignore */ }
             return null;
@@ -13891,9 +13892,12 @@
         }
 
         function _bytesParecenHtml(u8) {
-            if (!u8 || u8.length < 5) return false;
+            var bytes = null;
+            if (u8 instanceof Uint8Array) bytes = u8;
+            else if (u8 instanceof ArrayBuffer) bytes = new Uint8Array(u8);
+            if (!bytes || bytes.length < 5) return false;
             var head = '';
-            for (var i = 0; i < Math.min(80, u8.length); i++) head += String.fromCharCode(u8[i]);
+            for (var i = 0; i < Math.min(80, bytes.length); i++) head += String.fromCharCode(bytes[i]);
             head = head.toLowerCase();
             return head.indexOf('<!doctype') !== -1 || head.indexOf('<html') !== -1 || head.indexOf('<?xml') === 0;
         }
@@ -13909,8 +13913,11 @@
         }
 
         function _bytesParecenPdf(bytes) {
-            var u8 = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes);
-            return u8.length >= 4 && u8[0] === 0x25 && u8[1] === 0x50 && u8[2] === 0x44 && u8[3] === 0x46;
+            var u8 = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes || 0);
+            var inicio = 0;
+            if (u8.length >= 3 && u8[0] === 0xEF && u8[1] === 0xBB && u8[2] === 0xBF) inicio = 3;
+            while (inicio < u8.length && (u8[inicio] === 0x20 || u8[inicio] === 0x0A || u8[inicio] === 0x0D || u8[inicio] === 0x09)) inicio++;
+            return u8.length >= inicio + 4 && u8[inicio] === 0x25 && u8[inicio + 1] === 0x50 && u8[inicio + 2] === 0x44 && u8[inicio + 3] === 0x46;
         }
 
         function _mimeDesdeBytesSniff(bytes) {
@@ -13970,9 +13977,9 @@
         /** Descarga un archivo de Firebase Storage (autenticado) o URL directa → Blob. */
         async function _descargarBlobDesdeUrlStorage(url, contentTypeHint, rutaHint) {
             var u = String(url || '').trim();
-            if (!u) throw new Error('URL vacia');
-            var blob = null;
             var ruta = String(rutaHint || '').trim() || _extraerRutaStorageDesdeUrl(u);
+            if (!u && !ruta) throw new Error('URL vacia');
+            var blob = null;
             var errores = [];
 
             async function intentarRef(ref) {
@@ -14022,29 +14029,29 @@
                 return null;
             }
 
-            // 1) URL con token (mismo enlace que abre el Excel / navegador)
-            blob = await intentarUrlDescarga(u);
+            // 1) SDK autenticado por ruta (no depende de CORS del enlace)
+            if (ruta && storage && firebaseInitialized) {
+                await _esperarUsuarioAuth(6000);
+                blob = await intentarRef(storage.ref(ruta));
+            }
 
-            // 2) URL fresca vía SDK (token renovado)
+            // 2) SDK desde la URL de descarga
+            if (!blob && u && storage && firebaseInitialized && typeof storage.refFromURL === 'function' && _esUrlFirebaseStorage(u)) {
+                try {
+                    await _esperarUsuarioAuth(3000);
+                    blob = await intentarRef(storage.refFromURL(u));
+                } catch (eRf) { errores.push('refFromURL:' + (eRf && eRf.message ? eRf.message : eRf)); }
+            }
+
+            // 3) URL con token (mismo enlace que abre el navegador)
+            if (!blob) blob = await intentarUrlDescarga(u);
+
+            // 4) URL fresca vía SDK (token renovado) y descarga directa
             if (!blob && ruta && storage && firebaseInitialized) {
                 try {
                     var urlNueva = await storage.ref(ruta).getDownloadURL();
                     blob = await intentarUrlDescarga(urlNueva);
                 } catch (eFresh) { errores.push('getDownloadURL:' + (eFresh && eFresh.message ? eFresh.message : eFresh)); }
-            }
-
-            // 3) SDK autenticado por ruta
-            if (!blob && ruta && storage && firebaseInitialized) {
-                await _esperarUsuarioAuth(6000);
-                blob = await intentarRef(storage.ref(ruta));
-            }
-
-            // 4) refFromURL (dominios googleapis y firebasestorage.app)
-            if (!blob && storage && firebaseInitialized && typeof storage.refFromURL === 'function' && _esUrlFirebaseStorage(u)) {
-                try {
-                    await _esperarUsuarioAuth(3000);
-                    blob = await intentarRef(storage.refFromURL(u));
-                } catch (eRf) { errores.push('refFromURL:' + (eRf && eRf.message ? eRf.message : eRf)); }
             }
 
             // 5) REST API con token de sesión
@@ -50017,10 +50024,111 @@ document.getElementById('chatForm').onsubmit = function (e) {
             return c.toDataURL('image/jpeg', 0.85);
         }
 
+        function _copiarU8(bytes) {
+            var u8 = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes || 0);
+            var copy = new Uint8Array(u8.byteLength);
+            copy.set(u8);
+            return copy;
+        }
+
+        function _dataUrlABytes(dataUrl) {
+            var s = String(dataUrl || '');
+            var i = s.indexOf(',');
+            var b64 = i >= 0 ? s.slice(i + 1) : s;
+            var bin = atob(b64);
+            var out = new Uint8Array(bin.length);
+            for (var n = 0; n < bin.length; n++) out[n] = bin.charCodeAt(n);
+            return out;
+        }
+
+        function _textoPdfSeguro(texto) {
+            return String(texto || '').replace(/[^\x09\x0A\x0D\x20-\xFF]/g, ' ').trim();
+        }
+
+        function _pdfLibApi() {
+            if (typeof PDFLib !== 'undefined' && PDFLib.PDFDocument) return PDFLib;
+            if (typeof window !== 'undefined' && window.PDFLib && window.PDFLib.PDFDocument) return window.PDFLib;
+            return null;
+        }
+
+        async function _pdfLibAgregarImagen(out, dataUrl, titulo) {
+            var bytes = _dataUrlABytes(dataUrl);
+            var esPng = String(dataUrl).indexOf('data:image/png') === 0;
+            var img = esPng ? await out.embedPng(bytes) : await out.embedJpg(bytes);
+            var page = out.addPage([595.28, 841.89]);
+            var margen = 28;
+            var yTitulo = 841.89 - 32;
+            var tituloTxt = _textoPdfSeguro(titulo);
+            if (tituloTxt) {
+                page.drawText(tituloTxt.slice(0, 110), { x: margen, y: yTitulo, size: 9 });
+            }
+            var maxW = 595.28 - margen * 2;
+            var maxH = (tituloTxt ? yTitulo - 10 : 841.89 - margen) - margen;
+            var scale = Math.min(maxW / img.width, maxH / img.height);
+            var w = img.width * scale;
+            var h = img.height * scale;
+            page.drawImage(img, {
+                x: (595.28 - w) / 2,
+                y: Math.max(margen, (tituloTxt ? yTitulo - 10 : 841.89 - margen) - h - 6),
+                width: w,
+                height: h
+            });
+        }
+
+        async function _pdfLibAnexarPdf(out, bytes, lib) {
+            var src = await lib.PDFDocument.load(_copiarU8(bytes), { ignoreEncryption: true });
+            var indices = src.getPageIndices();
+            if (!indices.length) return false;
+            var pages = await out.copyPages(src, indices);
+            pages.forEach(function (p) { out.addPage(p); });
+            return true;
+        }
+
+        async function _informeCajaAnexarComprobantes(tablaBytes, segmentos) {
+            var lib = _pdfLibApi();
+            if (!lib) throw new Error('pdf-lib no esta disponible');
+            var out = await lib.PDFDocument.load(tablaBytes);
+            for (var i = 0; i < segmentos.length; i++) {
+                var seg = segmentos[i];
+                var ok = false;
+                if (seg.pdfBytes) {
+                    try {
+                        ok = await _pdfLibAnexarPdf(out, seg.pdfBytes, lib);
+                    } catch (ePdf) {
+                        console.warn('No se pudo copiar el PDF del comprobante:', seg.titulo, ePdf);
+                    }
+                }
+                if (!ok && seg.pdfBytes) {
+                    try {
+                        var urls = await _pdfBytesAPaginasJpegDataUrl(seg.pdfBytes, 1.35);
+                        for (var n = 0; n < urls.length; n++) {
+                            await _pdfLibAgregarImagen(out, urls[n], n === 0 ? seg.titulo : (seg.titulo + ' pag. ' + (n + 1)));
+                        }
+                        ok = urls.length > 0;
+                    } catch (eRas) {
+                        console.warn('No se pudo rasterizar el PDF del comprobante:', seg.titulo, eRas);
+                    }
+                }
+                if (!ok && seg.dataUrl) {
+                    try {
+                        await _pdfLibAgregarImagen(out, seg.dataUrl, seg.titulo);
+                        ok = true;
+                    } catch (eImg) {
+                        console.warn('No se pudo incrustar la imagen del comprobante:', seg.titulo, eImg);
+                    }
+                }
+                if (!ok) {
+                    var ph = seg.dataUrl || await _placeholderComprobanteDataUrl(seg.titulo || 'Comprobante', ['No se pudo incorporar el archivo.']);
+                    try { await _pdfLibAgregarImagen(out, ph, seg.titulo); } catch (ePh) { console.warn(ePh); }
+                }
+            }
+            return await out.save();
+        }
+
         async function _pdfBytesAPaginasJpegDataUrl(bytes, escala) {
             var lib = _ensurePdfJsListo();
-            var input = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes);
-            var pdf = await lib.getDocument({ data: input }).promise;
+            var input = _copiarU8(bytes);
+            var pdf = await lib.getDocument({ data: input, disableRange: true, disableStream: true }).promise;
             var urls = [];
             var esc = escala || 1.25;
             for (var n = 1; n <= pdf.numPages; n++) {
@@ -50094,9 +50202,8 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 var desc = await _descargarComprobanteBytes(urlArchivo, archivo.tipo || '', rutaArchivo);
                 var bytes = desc.bytes;
                 var mime = desc.mime || archivo.tipo || _mimeDesdeNombreArchivo(archivo.nombre);
-                if (_bytesParecenPdf(bytes) || esPdf) {
-                    var paginas = await _pdfBytesAPaginasJpegDataUrl(bytes, 1.25);
-                    return paginas.map(function (u) { return { dataUrl: u, esPlaceholder: false }; });
+                if (_bytesParecenPdf(bytes)) {
+                    return [{ pdfBytes: _copiarU8(bytes), esPlaceholder: false }];
                 }
                 if (esVideo) {
                     try {
@@ -50117,13 +50224,12 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 try {
                     var urlUsar = await _urlComprobanteFresca(archivo);
                     if (!urlUsar) throw errDl;
-                    if (esPdf || (archivo.nombre && String(archivo.nombre).toLowerCase().endsWith('.pdf'))) {
-                        var paginasUrl = await _pdfUrlAPaginasJpegDataUrl(urlUsar, 1.25);
-                        return paginasUrl.map(function (u) { return { dataUrl: u, esPlaceholder: false }; });
+                    var desc2 = await _descargarComprobanteBytes(urlUsar, archivo.tipo || '', rutaArchivo);
+                    if (_bytesParecenPdf(desc2.bytes)) {
+                        return [{ pdfBytes: _copiarU8(desc2.bytes), esPlaceholder: false }];
                     }
                     if (!esVideo) {
-                        var dataUrlImg = await _urlImagenADataUrlJpeg(urlUsar, 1400);
-                        return [{ dataUrl: dataUrlImg, esPlaceholder: false }];
+                        return [{ dataUrl: await _bytesADataUrlJpeg(desc2.bytes, desc2.mime || archivo.tipo, 1400), esPlaceholder: false }];
                     }
                 } catch (errUrl) {
                     console.error('_comprobanteArchivoAPaginasImagen:', archivo.nombre, urlArchivo, errDl, errUrl);
@@ -50304,9 +50410,9 @@ document.getElementById('chatForm').onsubmit = function (e) {
             doc.setFont(undefined, 'italic');
             doc.setFontSize(8);
             doc.setTextColor(70, 70, 70);
-            var nota = meta.tieneComprobantes
-                ? 'A continuación, los comprobantes en imagen, en el mismo orden de la tabla.'
-                : 'Sin comprobantes adjuntos en este período.';
+                var nota = meta.tieneComprobantes
+                    ? 'A continuacion, los comprobantes, en el mismo orden de la tabla.'
+                    : 'Sin comprobantes adjuntos en este período.';
             var lineasNota = doc.splitTextToSize(nota, usable);
             if (y + lineasNota.length * 4 > altoPag - margen) {
                 doc.addPage();
@@ -50427,9 +50533,14 @@ document.getElementById('chatForm').onsubmit = function (e) {
                         var tituloPag = res.paginas.length > 1
                             ? res.titulo + ' (pag. ' + (pIdx + 1) + '/' + res.paginas.length + ')'
                             : res.titulo;
-                        paginasDoc.push({ dataUrl: pag.dataUrl, titulo: tituloPag, esPlaceholder: !!pag.esPlaceholder });
-                        if (pag.esPlaceholder) stats.errores++;
-                        else stats.incluidos++;
+                        paginasDoc.push({
+                            dataUrl: pag.dataUrl || null,
+                            pdfBytes: pag.pdfBytes || null,
+                            titulo: tituloPag,
+                            esPlaceholder: !!pag.esPlaceholder
+                        });
+                        if (pag.pdfBytes || (pag.dataUrl && !pag.esPlaceholder)) stats.incluidos++;
+                        else stats.errores++;
                     });
                 });
             }
@@ -50453,11 +50564,25 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 tieneComprobantes: paginasDoc.length > 0
             });
 
-            paginasDoc.forEach(function (pag) {
-                _jspdfAgregarPaginaImagen(doc, pag.dataUrl, pag.titulo, true);
-            });
+            var hayPdfOriginal = paginasDoc.some(function (p) { return p.pdfBytes; });
+            if (!hayPdfOriginal) {
+                paginasDoc.forEach(function (pag) {
+                    _jspdfAgregarPaginaImagen(doc, pag.dataUrl, pag.titulo, true);
+                });
+            }
 
             var buffer = doc.output('arraybuffer');
+            if (hayPdfOriginal) {
+                try {
+                    buffer = await _informeCajaAnexarComprobantes(buffer, paginasDoc);
+                } catch (eUnir) {
+                    console.error('No se pudo unir el comprobante PDF:', eUnir);
+                    paginasDoc.forEach(function (pag) {
+                        if (pag.dataUrl) _jspdfAgregarPaginaImagen(doc, pag.dataUrl, pag.titulo, true);
+                    });
+                    buffer = doc.output('arraybuffer');
+                }
+            }
             var nombreArchivo = _nombreArchivoCajaChicaSeguro(nombreMes, '_Informe.pdf');
             if (opciones.descargar !== false) {
                 _descargarBlobComoArchivo(buffer, nombreArchivo, 'application/pdf');
