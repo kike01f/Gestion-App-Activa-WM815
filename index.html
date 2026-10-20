@@ -13286,17 +13286,21 @@
                     return;
                 }
                 
-                mostrarProgreso('Generando reporte HTML de Insumos...');
-                const htmlReporte = await generarHTMLReporteInsumos(mesReporte, nombreMes);
-                if (!htmlReporte) {
-                    mostrarAlerta('Error al generar el reporte. Por favor, intente nuevamente.', 'Error');
+                mostrarProgreso('Generando PDF del pedido de insumos...');
+                const pedidoPdf = await construirPdfPedidoInsumos(insumosActual, {
+                    nombreMes: nombreMes,
+                    nombreComunidad: nombreComunidad,
+                    mesReporte: mesReporte,
+                    descargar: false
+                });
+                if (!pedidoPdf || !pedidoPdf.doc) {
+                    mostrarAlerta('Error al generar el PDF del pedido. Por favor, intente nuevamente.', 'Error');
                     ocultarProgreso();
                     return;
                 }
-                
-                const adjunto = await generarReporteHTMLComoAdjunto(htmlReporte, `Reporte_Insumos_${nombreMes.replace(/\s+/g, '_')}.html`);
+                const adjunto = adjuntoPdfBufferComoMail(pedidoPdf.doc.output('arraybuffer'), pedidoPdf.nombreArchivo);
                 if (!adjunto) {
-                    mostrarAlerta('Error al generar el adjunto del reporte. Por favor, intente nuevamente.', 'Error');
+                    mostrarAlerta('Error al preparar el PDF para el correo. Por favor, intente nuevamente.', 'Error');
                     ocultarProgreso();
                     return;
                 }
@@ -33002,7 +33006,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
             
             let contenido = `
                 <p style="margin: 0 0 8px 0; font-size: 14px; color: #333333; line-height: 1.55;">
-                    Se adjunta el resumen completo de <strong>pedidos de insumos</strong> para el período de <strong>${linkEsc(nombreMes)}</strong>. El reporte incluye todos los productos solicitados con sus cantidades, prioridades y observaciones.
+                    Se adjunta el <strong>PDF del pedido de insumos</strong> de <strong>${linkEsc(nombreMes)}</strong>. Incluye los productos solicitados, con cantidad, prioridad y observaciones.
                 </p>
             `;
             
@@ -36453,205 +36457,237 @@ document.getElementById('chatForm').onsubmit = function (e) {
             await cargarInsumos();
         }
 
+        async function construirPdfPedidoInsumos(insumos, opciones) {
+            opciones = opciones || {};
+            if (typeof window.jspdf === 'undefined' || !window.jspdf.jsPDF) {
+                mostrarAlerta('No se pudo generar el PDF. Recargue la página e intente de nuevo.', 'Error');
+                return null;
+            }
+            var lista = (Array.isArray(insumos) ? insumos : []).slice();
+            var prioridadOrden = { 'Alta': 1, 'Media': 2, 'Baja': 3 };
+            lista.sort(function (a, b) {
+                var pa = prioridadOrden[a && a.prioridad] || 4;
+                var pb = prioridadOrden[b && b.prioridad] || 4;
+                if (pa !== pb) return pa - pb;
+                return String((a && a.nombre) || '').localeCompare(String((b && b.nombre) || ''), 'es');
+            });
+            if (!lista.length) return null;
+
+            var mesReporte = opciones.mesReporte || (typeof obtenerMesPeriodoVista === 'function' ? obtenerMesPeriodoVista() : '');
+            var partesMes = String(mesReporte || '').split('-');
+            var year = partesMes[0] || '';
+            var month = parseInt(partesMes[1], 10);
+            var meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+            var nombreMes = opciones.nombreMes || ((month >= 1 && month <= 12) ? (meses[month - 1] + (year ? ' ' + year : '')) : 'Pedido');
+            var comunidad = opciones.nombreComunidad || 'Activa WM815';
+            var jefe = opciones.jefe || '';
+            if (!opciones.nombreComunidad) {
+                try { comunidad = (await obtenerNombreComunidad()) || comunidad; } catch (eNom) {}
+            }
+            if (!opciones.jefe) {
+                try { jefe = (await obtenerJefeEdificio()) || ''; } catch (eJefe) {}
+            }
+            var ahora = new Date();
+            var fecha = ahora.toLocaleDateString('es-CL');
+            var JsPDF = window.jspdf.jsPDF;
+            var doc = new JsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4', compress: true });
+            doc.setProperties({
+                title: 'Pedido de insumos - ' + nombreMes,
+                creator: 'Gestion Comunidad'
+            });
+            var margen = 10;
+            var anchoPag = doc.internal.pageSize.getWidth();
+            var altoPag = doc.internal.pageSize.getHeight();
+            var usable = anchoPag - margen * 2;
+            var cols = [
+                { titulo: 'N°', w: 12 },
+                { titulo: 'Producto', w: 68 },
+                { titulo: 'Cant.', w: 18 },
+                { titulo: 'Prioridad', w: 24 },
+                { titulo: 'Observaciones', w: usable - 122 }
+            ];
+            var verde = [117, 187, 33];
+            var verdeOscuro = [90, 146, 25];
+            var fondoCab = [232, 246, 212];
+            var filaClara = [249, 250, 251];
+            var borde = [209, 213, 219];
+            var tinta = [17, 24, 39];
+            var blanco = [255, 255, 255];
+            var gris = [107, 114, 128];
+            var colorPrioridad = { Alta: [185, 28, 28], Media: [180, 83, 9], Baja: [21, 128, 61] };
+            function relleno(c) { doc.setFillColor(c[0], c[1], c[2]); }
+            function trazo(c) { doc.setDrawColor(c[0], c[1], c[2]); }
+            function texto(c) { doc.setTextColor(c[0], c[1], c[2]); }
+            function ponerLogo(x, y, ancho) {
+                var alto = ancho * (182 / 286);
+                try {
+                    if (typeof _LOGO_INFORME_WM815 === 'string' && _LOGO_INFORME_WM815) {
+                        doc.addImage(_LOGO_INFORME_WM815, 'JPEG', x, y, ancho, alto, 'logo-wm815', 'NONE');
+                    }
+                } catch (eLogo) {}
+                return alto;
+            }
+            function cortar(lineas, max) {
+                if (lineas.length <= max) return lineas;
+                lineas = lineas.slice(0, max);
+                lineas[max - 1] = String(lineas[max - 1]).replace(/\s+$/, '') + '...';
+                return lineas;
+            }
+            function dibujarEncabezado(continuacion) {
+                if (continuacion) {
+                    relleno(verdeOscuro);
+                    doc.rect(0, 0, anchoPag, 12, 'F');
+                    ponerLogo(margen, 1.5, 14);
+                    texto(blanco);
+                    doc.setFont('helvetica', 'bold');
+                    doc.setFontSize(9);
+                    doc.text('PEDIDO DE INSUMOS  (continuacion)', margen + 16.5, 7.5);
+                    return 16;
+                }
+                relleno(verde);
+                doc.rect(0, 0, anchoPag, 2.4, 'F');
+                var y = 4.2;
+                var logoAncho = 28;
+                y += ponerLogo((anchoPag - logoAncho) / 2, y, logoAncho) + 1.4;
+                relleno(verde);
+                doc.rect(margen, y, usable, 1.1, 'F');
+                y += 5.2;
+                texto(tinta);
+                doc.setFont('helvetica', 'bold');
+                doc.setFontSize(13);
+                doc.text('PEDIDO DE INSUMOS', anchoPag / 2, y, { align: 'center' });
+                y += 4.6;
+                texto(verdeOscuro);
+                doc.setFontSize(8);
+                doc.text(String(comunidad || 'Activa WM815'), anchoPag / 2, y, { align: 'center' });
+                y += 3.4;
+                relleno(filaClara);
+                trazo(borde);
+                doc.setLineWidth(0.25);
+                doc.rect(margen, y, usable, 16, 'FD');
+                doc.setFont('helvetica', 'normal');
+                doc.setFontSize(8);
+                texto(tinta);
+                var lineaInfo = 'Fecha de emisión: ' + fecha + '    ·    Período: ' + nombreMes + '    ·    Productos: ' + lista.length;
+                if (jefe) lineaInfo += '    ·    Jefe de edificio: ' + jefe;
+                var infoLineas = doc.splitTextToSize(lineaInfo, usable - 6);
+                doc.text(infoLineas[0], margen + 3, y + 5);
+                texto(gris);
+                doc.setFontSize(7.5);
+                var aviso = doc.splitTextToSize('Pedido de productos e insumos del edificio. La cantidad es lo solicitado para el período. La prioridad indica la urgencia de cada producto.', usable - 6);
+                doc.text(aviso, margen + 3, y + 9.2);
+                return y + 16 + 3;
+            }
+            function dibujarCabecera(y) {
+                var x = margen;
+                var h = 7;
+                relleno(fondoCab);
+                trazo(verdeOscuro);
+                doc.setLineWidth(0.35);
+                doc.rect(margen, y, usable, h, 'FD');
+                doc.setFont('helvetica', 'bold');
+                doc.setFontSize(8);
+                texto(verdeOscuro);
+                cols.forEach(function (col, i) {
+                    if (i > 0) doc.line(x, y, x, y + h);
+                    doc.text(col.titulo, x + col.w / 2, y + 4.6, { align: 'center' });
+                    x += col.w;
+                });
+                return y + h;
+            }
+            function pie(num) {
+                texto(gris);
+                doc.setFont('helvetica', 'normal');
+                doc.setFontSize(7.5);
+                doc.text('Página ' + num, anchoPag - margen, altoPag - 6, { align: 'right' });
+                doc.text('Pedido de insumos', margen, altoPag - 6);
+            }
+            var y = dibujarEncabezado(false);
+            y = dibujarCabecera(y);
+            var pagina = 1;
+            var limite = altoPag - 14;
+            lista.forEach(function (item, idx) {
+                var nombre = formatearNombre(item.nombre || '');
+                var obs = String(item.observaciones || '').replace(/\s+/g, ' ').trim() || '-';
+                var prioridad = String(item.prioridad || '-');
+                doc.setFont('helvetica', 'normal');
+                doc.setFontSize(8);
+                var lineasNombre = cortar(doc.splitTextToSize(nombre, cols[1].w - 3), 3);
+                var lineasObs = cortar(doc.splitTextToSize(obs, cols[4].w - 3), 3);
+                if (!lineasNombre.length) lineasNombre = ['-'];
+                if (!lineasObs.length) lineasObs = ['-'];
+                var nLineas = Math.max(lineasNombre.length, lineasObs.length);
+                var h = Math.max(8, nLineas * 3.5 + 2.4);
+                if (y + h > limite) {
+                    pie(pagina);
+                    doc.addPage();
+                    pagina += 1;
+                    y = dibujarEncabezado(true);
+                    y = dibujarCabecera(y);
+                }
+                var fondo = idx % 2 === 0 ? blanco : filaClara;
+                relleno(fondo);
+                trazo(borde);
+                doc.setLineWidth(0.2);
+                doc.rect(margen, y, usable, h, 'FD');
+                var x = margen;
+                cols.forEach(function (col, i) {
+                    if (i > 0) doc.line(x, y, x, y + h);
+                    x += col.w;
+                });
+                texto(tinta);
+                doc.setFont('helvetica', 'normal');
+                doc.setFontSize(8);
+                doc.text(String(idx + 1), margen + cols[0].w / 2, y + h / 2 + 1.2, { align: 'center' });
+                var xProd = margen + cols[0].w;
+                var baseNombre = y + (h - lineasNombre.length * 3.5) / 2 + 2.8;
+                lineasNombre.forEach(function (ln, i) {
+                    doc.text(String(ln), xProd + 1.6, baseNombre + i * 3.5);
+                });
+                var xCant = xProd + cols[1].w;
+                doc.setFont('helvetica', 'bold');
+                doc.text(String(item.cantidad != null ? item.cantidad : ''), xCant + cols[2].w / 2, y + h / 2 + 1.2, { align: 'center' });
+                var xPri = xCant + cols[2].w;
+                texto(colorPrioridad[prioridad] || tinta);
+                doc.text(prioridad, xPri + cols[3].w / 2, y + h / 2 + 1.2, { align: 'center' });
+                texto(tinta);
+                doc.setFont('helvetica', 'normal');
+                var xObs = xPri + cols[3].w;
+                var baseObs = y + (h - lineasObs.length * 3.5) / 2 + 2.8;
+                lineasObs.forEach(function (ln, i) {
+                    doc.text(String(ln), xObs + 1.6, baseObs + i * 3.5);
+                });
+                y += h;
+            });
+            var firmaH = 16;
+            if (y + firmaH > limite) {
+                pie(pagina);
+                doc.addPage();
+                pagina += 1;
+                y = dibujarEncabezado(true);
+            }
+            y += 8;
+            texto(tinta);
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(9);
+            doc.text('Solicitado por: ______________________________', margen, y);
+            doc.text('Autorizado por: ____________________________', margen + 105, y);
+            pie(pagina);
+            var slug = String(nombreMes || 'pedido').replace(/\s+/g, '_').replace(/[^A-Za-z0-9_-]/g, '');
+            return { doc: doc, nombreArchivo: 'Pedido_Insumos_' + (slug || 'pedido') + '.pdf' };
+        }
+        window.construirPdfPedidoInsumos = construirPdfPedidoInsumos;
+
         window.generarPedidoInsumosPDF = async function() {
             const insumos = await obtenerDatosMes('insumos');
-            
-            if (insumos.length === 0) {
+            if (!insumos || insumos.length === 0) {
                 mostrarAlerta('No hay insumos registrados para generar el pedido.', 'Información');
                 return;
             }
-
             const mesReporte = obtenerMesPeriodoVista();
-            const [year, month] = mesReporte.split('-');
-            const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
-            const nombreMes = meses[parseInt(month, 10) - 1];
-            
-            // Ordenar por prioridad y luego por nombre
-            const prioridadOrden = { 'Alta': 1, 'Media': 2, 'Baja': 3 };
-            insumos.sort((a, b) => {
-                const prioridadA = prioridadOrden[a.prioridad] || 4;
-                const prioridadB = prioridadOrden[b.prioridad] || 4;
-                if (prioridadA !== prioridadB) {
-                    return prioridadA - prioridadB;
-                }
-                return a.nombre.localeCompare(b.nombre);
-            });
-
-            let html = `
-                <!DOCTYPE html>
-                <html>
-                <head>
-                    <meta charset="UTF-8">
-                    <title>Pedido de Insumos - ${nombreMes} ${year}</title>
-                    <style>
-                        @page {
-                            margin: 1cm;
-                            size: A4;
-                        }
-                        * {
-                            box-sizing: border-box;
-                        }
-                        body {
-                            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-                            color: var(--text-primary);
-                            line-height: 1.4;
-                            margin: 0;
-                            padding: 0.5rem;
-                            font-size: 12px;
-                            background: var(--bg-primary);
-                            transition: background-color 0.3s ease, color 0.3s ease;
-                        }
-                        .header {
-                            text-align: center;
-                            border-bottom: 2px solid rgba(117, 187, 33, 0.5);
-                            padding-bottom: 0.5rem;
-                            margin-bottom: 0.75rem;
-                        }
-                        .header h1 {
-                            color: #75bb21;
-                            font-size: 1.5rem;
-                            font-weight: 700;
-                            margin: 0 0 0.25rem 0;
-                        }
-                        .header p {
-                            color: var(--text-tertiary);
-                            font-size: 0.875rem;
-                            margin: 0;
-                            transition: color 0.3s ease;
-                        }
-                        table {
-                            width: 100%;
-                            border-collapse: collapse;
-                            margin-bottom: 0.5rem;
-                            font-size: 11px;
-                        }
-                        th {
-                            background: linear-gradient(135deg, rgba(117, 187, 33, 0.2) 0%, rgba(117, 187, 33, 0.1) 100%);
-                            color: var(--text-primary);
-                            padding: 0.5rem 0.375rem;
-                            text-align: left;
-                            font-weight: 700;
-                            border-bottom: 2px solid #75bb21;
-                            font-size: 10px;
-                            transition: color 0.3s ease;
-                        }
-                        td {
-                            padding: 0.5rem 0.375rem;
-                            border-bottom: 1px solid var(--border-color);
-                            word-wrap: break-word;
-                            color: var(--text-secondary);
-                            transition: border-color 0.3s ease, color 0.3s ease;
-                        }
-                        tr:nth-child(even) {
-                            background: var(--bg-secondary);
-                            transition: background-color 0.3s ease;
-                        }
-                        .prioridad-alta {
-                            color: #ef4444;
-                            font-weight: 600;
-                            font-size: 10px;
-                        }
-                        .prioridad-media {
-                            color: #f59e0b;
-                            font-weight: 600;
-                            font-size: 10px;
-                        }
-                        .prioridad-baja {
-                            color: #10b981;
-                            font-weight: 600;
-                            font-size: 10px;
-                        }
-                        .footer {
-                            margin-top: 0.75rem;
-                            padding-top: 0.5rem;
-                            border-top: 1px solid var(--border-color);
-                            text-align: center;
-                            color: var(--text-tertiary);
-                            font-size: 10px;
-                            transition: border-color 0.3s ease, color 0.3s ease;
-                        }
-                        @media print {
-                            body {
-                                padding: 0;
-                            }
-                        }
-                        @media screen and (max-width: 768px) {
-                            table {
-                                font-size: 10px;
-                            }
-                            th, td {
-                                padding: 0.375rem 0.25rem;
-                            }
-                        }
-                        body { position: relative; }
-                        .informe-marca-agua-wm815 {
-                            position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%);
-                            width: min(70vmin, 400px); max-width: 92vw; z-index: 0; pointer-events: none; opacity: 0.12;
-                            -webkit-print-color-adjust: exact; print-color-adjust: exact;
-                        }
-                        .informe-marca-agua-wm815 img { width: 100%; height: auto; display: block; }
-                        .informe-doc-principal { position: relative; z-index: 1; }
-                        .informe-doc-principal table thead th {
-                            background: rgba(117, 187, 33, 0.22) !important;
-                            -webkit-print-color-adjust: exact; print-color-adjust: exact;
-                        }
-                        .informe-doc-principal table tbody td {
-                            background: rgba(255, 255, 255, 0.7) !important;
-                        }
-                        .informe-doc-principal table tbody tr:nth-child(even) td {
-                            background: rgba(248, 250, 252, 0.65) !important;
-                        }
-                    </style>
-                </head>
-                <body>
-                    <div class="informe-marca-agua-wm815" aria-hidden="true"><img src="https://img.mailinblue.com/8323725/images/content_library/original/6844749040dd0f16c5341248.png" alt=""></div>
-                    <div class="informe-doc-principal">
-                    <div class="header">
-                        <img src="https://img.mailinblue.com/8323725/images/content_library/original/6844749040dd0f16c5341248.png" alt="Logo" style="max-width:120px;height:auto;display:block;margin:0 auto 10px auto;">
-                        <h1>PEDIDO DE INSUMOS</h1>
-                        <p>${nombreMes} ${year}</p>
-                    </div>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th style="width: 45%;">Producto</th>
-                                <th style="width: 12%; text-align: center;">Cantidad</th>
-                                <th style="width: 12%; text-align: center;">Prioridad</th>
-                                <th style="width: 31%;">Observaciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-            `;
-            
-            insumos.forEach(insumo => {
-                const prioridadClass = `prioridad-${insumo.prioridad.toLowerCase()}`;
-                const observacionesTexto = insumo.observaciones ? (insumo.observaciones.length > 50 ? insumo.observaciones.substring(0, 50) + '...' : insumo.observaciones) : '-';
-                html += `
-                    <tr>
-                        <td style="font-weight: 500;">${insumo.nombre}</td>
-                        <td style="text-align: center; font-weight: 600;">${insumo.cantidad}</td>
-                        <td class="${prioridadClass}" style="text-align: center;">${insumo.prioridad}</td>
-                        <td style="font-size: 10px;">${observacionesTexto}</td>
-                    </tr>
-                `;
-            });
-            
-            html += `
-                        </tbody>
-                    </table>
-            `;
-
-            html += `
-                    <div class="footer">
-                        <p>Documento generado el ${formatearFechaParaCorreo(obtenerFechaHoy())}</p>
-                    </div>
-                    </div>
-                </body>
-                </html>
-            `;
-
-            // Abrir HTML para imprimir usando función auxiliar
-            abrirHTMLParaImprimir(html);
+            const pedido = await construirPdfPedidoInsumos(insumos, { mesReporte: mesReporte, descargar: true });
+            if (!pedido || !pedido.doc) return;
+            pedido.doc.save(pedido.nombreArchivo);
         }
 
         async function cargarCaja() {
