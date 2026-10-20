@@ -19015,10 +19015,10 @@
                 '<div class="chk-detalle-sec"><h4>Radios</h4><p style="margin:0;">Cantidad: ' + chkEsc(r.radiosCant) + '</p>' +
                 '<p style="margin:0.35rem 0 0;font-size:0.8rem;">Observación: ' + chkEsc(r.radiosObs || 'Sin observaciones.') + '</p></div>' +
                 (r.tarSuperCant != null || r.tarInvitadoCant != null || r.tarEmergenciaCant != null || r.tarZona8Cant != null
-                  ? '<div class="chk-detalle-sec"><h4>Tarjetas</h4><p style="margin:0;">Supermercado: ' + chkEsc(r.tarSuperCant != null ? r.tarSuperCant : '—') + '<br>Invitado: ' + chkEsc(r.tarInvitadoCant != null ? r.tarInvitadoCant : '—') + '<br>Emergencia: ' + chkEsc(r.tarEmergenciaCant != null ? r.tarEmergenciaCant : '—') + '<br>Zona 8: ' + chkEsc(r.tarZona8Cant != null ? r.tarZona8Cant : '—') + '</p></div>'
+                  ? '<div class="chk-detalle-sec"><h4>Tarjetas</h4><p style="margin:0;">Supermercado: ' + chkEsc(r.tarSuperCant != null ? r.tarSuperCant : '—') + (r.tarSuperObs ? ' · ' + chkEsc(r.tarSuperObs) : '') + '<br>Invitado: ' + chkEsc(r.tarInvitadoCant != null ? r.tarInvitadoCant : '—') + (r.tarInvitadoObs ? ' · ' + chkEsc(r.tarInvitadoObs) : '') + '<br>Emergencia: ' + chkEsc(r.tarEmergenciaCant != null ? r.tarEmergenciaCant : '—') + (r.tarEmergenciaObs ? ' · ' + chkEsc(r.tarEmergenciaObs) : '') + '<br>Zona 8: ' + chkEsc(r.tarZona8Cant != null ? r.tarZona8Cant : '—') + (r.tarZona8Obs ? ' · ' + chkEsc(r.tarZona8Obs) : '') + '</p></div>'
                   : '') +
                 (r.tvCant != null || r.acCant != null
-                  ? '<div class="chk-detalle-sec"><h4>Controles</h4><p style="margin:0;">Control de TV: ' + chkEsc(r.tvCant != null ? r.tvCant : '—') + '<br>Controles de aire acondicionado: ' + chkEsc(r.acCant != null ? r.acCant : '—') + '</p></div>'
+                  ? '<div class="chk-detalle-sec"><h4>Controles</h4><p style="margin:0;">Control de TV: ' + chkEsc(r.tvCant != null ? r.tvCant : '—') + (r.tvObs ? ' · ' + chkEsc(r.tvObs) : '') + '<br>Controles de aire acondicionado: ' + chkEsc(r.acCant != null ? r.acCant : '—') + (r.acObs ? ' · ' + chkEsc(r.acObs) : '') + '</p></div>'
                   : '') +
                 varHtml +
                 '<p style="margin:0.5rem 0 0;">Estado: ' + chkEstadoHtml(chkEstadoOperativo(r)) +
