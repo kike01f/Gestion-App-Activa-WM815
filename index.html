@@ -18989,6 +18989,10 @@
                     'Radios: ' + (v.radios === 0 ? 'sin variación' : (v.radios > 0 ? '+' : '') + v.radios),
                     'Mouse: ' + (v.mouse === 0 ? 'sin variación' : (v.mouse > 0 ? '+' : '') + v.mouse)
                 ];
+                [['tarSuper', 'T. supermercado'], ['tarInvitado', 'T. invitado'], ['tarEmergencia', 'T. emergencia'], ['tarZona8', 'T. zona 8']].forEach(function (par) {
+                    if (v[par[0]] == null || Number(v[par[0]]) === 0) return;
+                    bits.push(par[1] + ': ' + (Number(v[par[0]]) > 0 ? '+' : '') + v[par[0]]);
+                });
                 if (bits.some(function (b) { return b.indexOf('sin variación') < 0; })) {
                     varHtml = '<div class="chk-detalle-sec"><h4>⚠️ Variaciones respecto al turno anterior</h4><ul style="margin:0;padding-left:1.1rem;">' +
                         bits.map(function (b) { return '<li>' + chkEsc(b) + '</li>'; }).join('') + '</ul></div>';
@@ -19010,6 +19014,9 @@
                 '<p style="margin:0.35rem 0 0;font-size:0.8rem;">Observación: ' + chkEsc(r.encObs || 'Sin observaciones.') + '</p></div>' +
                 '<div class="chk-detalle-sec"><h4>Radios</h4><p style="margin:0;">Cantidad: ' + chkEsc(r.radiosCant) + '</p>' +
                 '<p style="margin:0.35rem 0 0;font-size:0.8rem;">Observación: ' + chkEsc(r.radiosObs || 'Sin observaciones.') + '</p></div>' +
+                (r.tarSuperCant != null || r.tarInvitadoCant != null || r.tarEmergenciaCant != null || r.tarZona8Cant != null
+                  ? '<div class="chk-detalle-sec"><h4>Tarjetas</h4><p style="margin:0;">Supermercado: ' + chkEsc(r.tarSuperCant != null ? r.tarSuperCant : '—') + '<br>Invitado: ' + chkEsc(r.tarInvitadoCant != null ? r.tarInvitadoCant : '—') + '<br>Emergencia: ' + chkEsc(r.tarEmergenciaCant != null ? r.tarEmergenciaCant : '—') + '<br>Zona 8: ' + chkEsc(r.tarZona8Cant != null ? r.tarZona8Cant : '—') + '</p></div>'
+                  : '') +
                 varHtml +
                 '<p style="margin:0.5rem 0 0;">Estado: ' + chkEstadoHtml(chkEstadoOperativo(r)) +
                 (r.estadoGestion ? ' <span style="font-size:0.75rem;color:var(--gray-600);">(gestionado desde Administración)</span>' : '') +
@@ -19122,6 +19129,11 @@
                 };
                 if (tmp.variacionesAnterior.radios !== 0) tmp.alertas.push({ codigo: 'radios_vs_anterior', nivel: 'roja', mensaje: 'Cantidad de radios diferente al turno anterior' });
                 if (tmp.variacionesAnterior.mouse !== 0) tmp.alertas.push({ codigo: 'mouse_vs_anterior', nivel: 'roja', mensaje: 'Cantidad de mouse diferente al turno anterior' });
+                [['tarSuper', 'tarSuperCant', 'Tarjetas de supermercado'], ['tarInvitado', 'tarInvitadoCant', 'Tarjetas de invitado'], ['tarEmergencia', 'tarEmergenciaCant', 'Tarjeta de emergencia'], ['tarZona8', 'tarZona8Cant', 'Tarjeta zona 8']].forEach(function (par) {
+                    if (r[par[1]] == null || r.variacionesAnterior[par[0]] == null) return;
+                    tmp.variacionesAnterior[par[0]] = Number(r[par[1]]) - (Number(r[par[1]]) - Number(r.variacionesAnterior[par[0]]));
+                    if (tmp.variacionesAnterior[par[0]] !== 0) tmp.alertas.push({ codigo: par[0] + '_vs_anterior', nivel: 'roja', mensaje: par[2] + ' diferente al turno anterior' });
+                });
                 patch.variacionesAnterior = tmp.variacionesAnterior;
             }
             if (estadoSel === 'ok' || estadoSel === 'observaciones') {
@@ -34546,6 +34558,14 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 }
                 var movimientos = ((usarRemoto ? remoto.movimientos : admin.movimientos) || []).slice(-200);
                 var productos = fusionarProductosBodega(preferidos, respaldo);
+                var faltabanTarjetas = false;
+                ['Tarjetas de supermercado', 'Tarjetas de invitado', 'Tarjeta de emergencia', 'Tarjeta zona 8'].forEach(function (nombre) {
+                    var clave = formatearNombre(nombre).toLowerCase();
+                    var ya = productos.some(function (p) { return String(p.nombre || '').toLowerCase() === clave; });
+                    if (ya) return;
+                    faltabanTarjetas = true;
+                    productos.push(normalizarProductoBodega({ id: generarId(), nombre: nombre, existencia: 0, minimo: 0, unidad: 'un' }));
+                });
                 window._invBodegaMovs = movimientos;
                 window._invBodegaMs = usarRemoto ? tRemoto : admin.stockActualizadoMs;
                 window._invBodegaCache = productos;
@@ -34570,7 +34590,10 @@ document.getElementById('chatForm').onsubmit = function (e) {
                         console.warn('[inventario-bodega] No se pudo publicar el inventario en conserjería:', ePush);
                     }
                 }
-                return productos;
+                if (faltabanTarjetas && firebaseInitialized && db) {
+                    await guardarInventario(productos, movimientos);
+                }
+                return window._invBodegaCache || productos;
             } catch (error) {
                 console.error('Error al obtener inventario:', error);
                 return Array.isArray(window._invBodegaCache) ? window._invBodegaCache : [];
