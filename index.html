@@ -8808,6 +8808,9 @@
                         <p style="margin: 0.35rem 0 0; color: var(--gray-600); font-size: 0.8125rem; max-width: 40rem;">Existencia actual de cada producto. Si la cantidad está bajo el mínimo, aparece cuánto conviene pedir este mes. Conserjería registra las salidas y entradas de bodega sobre la misma lista.</p>
                     </div>
                     <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+                        <button type="button" class="btn btn-primary" id="btnPdfInventarioFisico" onclick="generarInventarioFisicoPDF()">
+                            PDF inventario físico
+                        </button>
                         <button type="button" class="btn btn-primary" id="btnPedirFaltantesInventario" onclick="agregarFaltantesAlPedido()">
                             Pedir lo que falta
                         </button>
@@ -34663,6 +34666,202 @@ document.getElementById('chatForm').onsubmit = function (e) {
             await guardarInventario(productos, window._invBodegaMovs);
             mostrarAlerta('Pedido ingresado a bodega. La existencia quedó actualizada.', 'Inventario');
             await cargarInventario();
+        };
+
+        window.generarInventarioFisicoPDF = async function () {
+            if (typeof window.jspdf === 'undefined' || !window.jspdf.jsPDF) {
+                mostrarAlerta('No se pudo generar el PDF. Recargue la página e intente de nuevo.', 'Error');
+                return;
+            }
+            var productos = await obtenerInventario();
+            productos = (Array.isArray(productos) ? productos : []).slice().sort(function (a, b) {
+                return String(a.nombre || '').localeCompare(String(b.nombre || ''), 'es');
+            });
+            if (!productos.length) {
+                mostrarAlerta('No hay productos en el inventario para imprimir.', 'Inventario');
+                return;
+            }
+            var comunidad = 'Activa WM815';
+            var jefe = '';
+            try { comunidad = (await obtenerNombreComunidad()) || comunidad; } catch (eNom) {}
+            try { jefe = (await obtenerJefeEdificio()) || ''; } catch (eJefe) {}
+            var ahora = new Date();
+            var fecha = ahora.toLocaleDateString('es-CL');
+            var JsPDF = window.jspdf.jsPDF;
+            var doc = new JsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4', compress: true });
+            doc.setProperties({
+                title: 'Inventario físico de bodega',
+                creator: 'Gestion Comunidad'
+            });
+            var margen = 10;
+            var anchoPag = doc.internal.pageSize.getWidth();
+            var altoPag = doc.internal.pageSize.getHeight();
+            var usable = anchoPag - margen * 2;
+            var cols = [
+                { titulo: 'N°', w: 10 },
+                { titulo: 'Producto', w: 78 },
+                { titulo: 'Un.', w: 16 },
+                { titulo: 'Sistema', w: 22 },
+                { titulo: 'Conteo', w: 28 },
+                { titulo: 'Observación', w: 36 }
+            ];
+            var verde = [117, 187, 33];
+            var verdeOscuro = [90, 146, 25];
+            var fondoCab = [232, 246, 212];
+            var filaClara = [249, 250, 251];
+            var borde = [209, 213, 219];
+            var tinta = [17, 24, 39];
+            var blanco = [255, 255, 255];
+            var gris = [107, 114, 128];
+            function relleno(c) { doc.setFillColor(c[0], c[1], c[2]); }
+            function trazo(c) { doc.setDrawColor(c[0], c[1], c[2]); }
+            function texto(c) { doc.setTextColor(c[0], c[1], c[2]); }
+            function ponerLogo(x, y, ancho) {
+                var alto = ancho * (182 / 286);
+                try {
+                    if (typeof _LOGO_INFORME_WM815 === 'string' && _LOGO_INFORME_WM815) {
+                        doc.addImage(_LOGO_INFORME_WM815, 'JPEG', x, y, ancho, alto, 'logo-wm815', 'NONE');
+                    }
+                } catch (eLogo) {}
+                return alto;
+            }
+            function dibujarEncabezado(continuacion) {
+                if (continuacion) {
+                    relleno(verdeOscuro);
+                    doc.rect(0, 0, anchoPag, 12, 'F');
+                    ponerLogo(margen, 1.5, 14);
+                    texto(blanco);
+                    doc.setFont('helvetica', 'bold');
+                    doc.setFontSize(9);
+                    doc.text('INVENTARIO FISICO DE BODEGA  (continuacion)', margen + 16.5, 7.5);
+                    return 16;
+                }
+                relleno(verde);
+                doc.rect(0, 0, anchoPag, 2.4, 'F');
+                var y = 4.2;
+                var logoAncho = 28;
+                y += ponerLogo((anchoPag - logoAncho) / 2, y, logoAncho) + 1.4;
+                relleno(verde);
+                doc.rect(margen, y, usable, 1.1, 'F');
+                y += 5.2;
+                texto(tinta);
+                doc.setFont('helvetica', 'bold');
+                doc.setFontSize(13);
+                doc.text('INVENTARIO FISICO DE BODEGA', anchoPag / 2, y, { align: 'center' });
+                y += 4.6;
+                texto(verdeOscuro);
+                doc.setFontSize(8);
+                doc.text(String(comunidad || 'Activa WM815'), anchoPag / 2, y, { align: 'center' });
+                y += 3.4;
+                relleno(filaClara);
+                trazo(borde);
+                doc.setLineWidth(0.25);
+                doc.rect(margen, y, usable, 16, 'FD');
+                doc.setFont('helvetica', 'normal');
+                doc.setFontSize(8);
+                texto(tinta);
+                var lineaInfo = 'Fecha de emisión: ' + fecha + '    ·    Productos: ' + productos.length;
+                if (jefe) lineaInfo += '    ·    Jefe de edificio: ' + jefe;
+                doc.text(lineaInfo, margen + 3, y + 5);
+                texto(gris);
+                doc.setFontSize(7.5);
+                var aviso = doc.splitTextToSize('Hoja para el conteo en bodega. Sistema es la existencia registrada. Escriba el conteo físico y, si hay diferencia, una observación. No modifique la columna Sistema.', usable - 6);
+                doc.text(aviso, margen + 3, y + 9.2);
+                return y + 16 + 3;
+            }
+            function dibujarCabecera(y) {
+                var x = margen;
+                var h = 7;
+                relleno(fondoCab);
+                trazo(verdeOscuro);
+                doc.setLineWidth(0.35);
+                doc.rect(margen, y, usable, h, 'FD');
+                doc.setFont('helvetica', 'bold');
+                doc.setFontSize(8);
+                texto(verdeOscuro);
+                cols.forEach(function (col, i) {
+                    if (i > 0) doc.line(x, y, x, y + h);
+                    doc.text(col.titulo, x + col.w / 2, y + 4.6, { align: 'center' });
+                    x += col.w;
+                });
+                return y + h;
+            }
+            function pie(num) {
+                texto(gris);
+                doc.setFont('helvetica', 'normal');
+                doc.setFontSize(7.5);
+                doc.text('Página ' + num, anchoPag - margen, altoPag - 6, { align: 'right' });
+                doc.text('Conteo físico de bodega', margen, altoPag - 6);
+            }
+            var y = dibujarEncabezado(false);
+            y = dibujarCabecera(y);
+            var pagina = 1;
+            var limite = altoPag - 14;
+            productos.forEach(function (p, idx) {
+                var nombre = formatearNombre(p.nombre || '');
+                doc.setFont('helvetica', 'normal');
+                doc.setFontSize(8);
+                var lineas = doc.splitTextToSize(nombre, cols[1].w - 3);
+                if (!lineas.length) lineas = ['-'];
+                if (lineas.length > 3) {
+                    lineas = lineas.slice(0, 3);
+                    lineas[2] = String(lineas[2]).replace(/\s+$/, '') + '...';
+                }
+                var h = Math.max(8, lineas.length * 3.5 + 2.4);
+                if (y + h > limite) {
+                    pie(pagina);
+                    doc.addPage();
+                    pagina += 1;
+                    y = dibujarEncabezado(true);
+                    y = dibujarCabecera(y);
+                }
+                var fondo = idx % 2 === 0 ? blanco : filaClara;
+                relleno(fondo);
+                trazo(borde);
+                doc.setLineWidth(0.2);
+                doc.rect(margen, y, usable, h, 'FD');
+                var x = margen;
+                cols.forEach(function (col, i) {
+                    if (i > 0) doc.line(x, y, x, y + h);
+                    x += col.w;
+                });
+                texto(tinta);
+                doc.setFont('helvetica', 'normal');
+                doc.setFontSize(8);
+                var xNum = margen;
+                doc.text(String(idx + 1), xNum + cols[0].w / 2, y + h / 2 + 1.2, { align: 'center' });
+                var xProd = margen + cols[0].w;
+                var base = y + (h - lineas.length * 3.5) / 2 + 2.8;
+                lineas.forEach(function (ln, i) {
+                    doc.text(String(ln), xProd + 1.6, base + i * 3.5);
+                });
+                var xUn = xProd + cols[1].w;
+                doc.text(String(p.unidad || 'un'), xUn + cols[2].w / 2, y + h / 2 + 1.2, { align: 'center' });
+                var xSis = xUn + cols[2].w;
+                doc.setFont('helvetica', 'bold');
+                doc.text(String(parseInt(p.existencia, 10) || 0), xSis + cols[3].w / 2, y + h / 2 + 1.2, { align: 'center' });
+                y += h;
+            });
+            var firmaH = 18;
+            if (y + firmaH > limite) {
+                pie(pagina);
+                doc.addPage();
+                pagina += 1;
+                y = dibujarEncabezado(true);
+            }
+            y += 6;
+            texto(tinta);
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(9);
+            doc.text('Contado por: ______________________________', margen, y);
+            doc.text('Fecha del conteo: ____________________', margen + 105, y);
+            y += 8;
+            doc.text('Revisado por: ____________________________', margen, y);
+            doc.text('Firma: ________________________________', margen + 105, y);
+            pie(pagina);
+            var mes = String(ahora.getMonth() + 1).padStart(2, '0');
+            var dia = String(ahora.getDate()).padStart(2, '0');
+            doc.save('Inventario-fisico-bodega-' + ahora.getFullYear() + '-' + mes + '-' + dia + '.pdf');
         };
 
         // Cargar pedido de insumos
