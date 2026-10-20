@@ -8703,11 +8703,16 @@
 
         <!-- MÓDULO 10: PEDIDO DE INSUMOS -->
         <div id="insumos" class="tab-content">
-            <div style="margin-bottom: 1.5rem;">
-                <h2 id="tituloInsumos" style="margin: 0; color: var(--gray-900); font-size: 1.5rem; font-weight: 700; display: flex; align-items: center; gap: 0.75rem;">
-                    <span style="display: inline-flex; align-items: center; width: 1.75rem; height: 1.75rem;"></span> Pedido de Insumos
-                </h2>
-                <p style="color: var(--gray-600); font-size: 0.875rem; margin: 0.5rem 0 0 0;">Gestión de productos y herramientas necesarias para el edificio</p>
+            <div style="margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; flex-wrap: wrap;">
+                <div>
+                    <h2 id="tituloInsumos" style="margin: 0; color: var(--gray-900); font-size: 1.5rem; font-weight: 700; display: flex; align-items: center; gap: 0.75rem;">
+                        <span style="display: inline-flex; align-items: center; width: 1.75rem; height: 1.75rem;"></span> Pedido de Insumos
+                    </h2>
+                    <p style="color: var(--gray-600); font-size: 0.875rem; margin: 0.5rem 0 0 0;">Gestión de productos y herramientas necesarias para el edificio</p>
+                </div>
+                <button type="button" class="btn btn-primary" id="btnAbrirInventarioBodega" onclick="showTab('inventarioBodega')">
+                    Inventario de bodega
+                </button>
             </div>
 
             <!-- PEDIDO ACTUAL -->
@@ -8799,15 +8804,21 @@
                     </div>
                 </div>
             </div>
+        </div>
 
-            <!-- INVENTARIO DE BODEGA -->
-            <div class="form-section" style="margin-top: 2rem;">
-                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 1rem;">
-                    <div>
-                        <h3 style="margin: 0;">Inventario de bodega</h3>
-                        <p style="margin: 0.35rem 0 0; color: var(--gray-600); font-size: 0.8125rem; max-width: 40rem;">Existencia actual de cada producto. Si la cantidad está bajo el mínimo, aparece cuánto conviene pedir este mes. Conserjería registra las salidas y entradas de bodega sobre la misma lista.</p>
-                    </div>
-                    <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+        <!-- INVENTARIO DE BODEGA (página aparte, se abre desde Pedido de insumos) -->
+        <div id="inventarioBodega" class="tab-content">
+            <div style="margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; flex-wrap: wrap;">
+                <div>
+                    <h2 style="margin: 0; color: var(--gray-900); font-size: 1.5rem; font-weight: 700;">Inventario de bodega</h2>
+                    <p style="margin: 0.5rem 0 0; color: var(--gray-600); font-size: 0.875rem; max-width: 42rem;">Existencia actual de cada producto. Si la cantidad está bajo el mínimo, aparece cuánto conviene pedir este mes. Conserjería registra las salidas de bodega sobre la misma lista.</p>
+                </div>
+                <button type="button" class="btn btn-secondary" id="btnVolverPedidoInsumos" onclick="showTab('insumos')">
+                    Volver al pedido
+                </button>
+            </div>
+            <div class="form-section">
+                <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 0.75rem;">
                         <button type="button" class="btn btn-primary" id="btnPdfInventarioFisico" onclick="generarInventarioFisicoPDF()">
                             PDF inventario físico
                         </button>
@@ -8831,7 +8842,6 @@
                             ➕ Agregar Producto
                         </button>
                     </div>
-                </div>
                 <div id="resumenInventarioBodega" style="display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 1rem;"></div>
                 
                 <!-- Formulario para agregar producto (oculto por defecto) -->
@@ -11901,11 +11911,12 @@
                     targetContent.classList.add('active');
                 }
 
-                // Activar el botón correspondiente
+                // Activar el botón correspondiente. El inventario es una página del pedido, sin ítem propio en el menú.
                 if (buttons.length > 0) {
+                    var tabMenu = tabName === 'inventarioBodega' ? 'insumos' : tabName;
                     buttons.forEach(button => {
                         const dataTab = button.getAttribute('data-tab');
-                        if (dataTab === tabName) {
+                        if (dataTab === tabMenu) {
                             button.classList.add('active');
                         }
                     });
@@ -11982,10 +11993,10 @@
                             }
                         }, 200);
                     } else if (tabName === 'insumos') {
-                        if (typeof cargarInsumos === 'function') {
-                            cargarInsumos();
-                            cargarInventario();
-                        }
+                        if (typeof cargarInsumos === 'function') cargarInsumos();
+                        if (typeof cargarInventario === 'function') cargarInventario();
+                    } else if (tabName === 'inventarioBodega') {
+                        if (typeof cargarInventario === 'function') cargarInventario();
                     } else if (tabName === 'ocupacion') {
                         if (typeof cargarUnidadesOcupacion === 'function') cargarUnidadesOcupacion();
                     } else if (tabName === 'conserjeria') {
@@ -34403,7 +34414,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     var tabla = document.getElementById('tablaInventario');
                     if (tabla && document.activeElement && tabla.contains(document.activeElement)) return;
                     window._invBodegaMs = remoto;
-                    if (document.querySelector('#insumos.tab-content.active')) {
+                    if (document.querySelector('#insumos.tab-content.active, #inventarioBodega.tab-content.active')) {
                         cargarInventario();
                     }
                 }, function (err) {
