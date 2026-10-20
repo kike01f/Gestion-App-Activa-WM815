@@ -27721,8 +27721,9 @@ document.getElementById('chatForm').onsubmit = function (e) {
             var ymd = multaYmdIso(n.fecha);
             if (!ymd) return null;
             var mesReg = ymd.slice(0, 7);
-            var num = libroNum != null ? libroNum : (n.numeroLibro != null ? n.numeroLibro : cor);
-            var refHtml = '<p>Novedad <strong>#' + String(num).replace(/</g, '') + '</strong> · ' + (n.fecha || '') + (n.hora ? ' · ' + String(n.hora).slice(0, 5) + ' hrs.' : '') + '</p>';
+            var num = libroNum != null ? libroNum : (n.numeroLibro != null && n.numeroLibro !== '' ? n.numeroLibro : null);
+            var numTxt = num != null ? String(num).replace(/</g, '') : '—';
+            var refHtml = '<p>Novedad <strong>#' + numTxt + '</strong> · ' + (n.fecha || '') + (n.hora ? ' · ' + String(n.hora).slice(0, 5) + ' hrs.' : '') + '</p>';
             var cuerpo = String(texto || '').replace(/</g, '&lt;');
             if (n.notaInterna) cuerpo += '<p><em>Nota interna:</em> ' + String(n.notaInterna).replace(/</g, '&lt;') + '</p>';
             var esEstac = n.origen === 'visita_estacionamiento' || /estacionamiento de visitas/i.test(texto);
@@ -27796,13 +27797,20 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     if (typeof numerosLibroNovedadesGestion === 'function' && rawAll.length) {
                         nums = numerosLibroNovedadesGestion(rawAll);
                     }
+                    function libroDeNovedad(novedad) {
+                        var publicado = novedad && novedad.numeroLibro != null && novedad.numeroLibro !== '' ? Number(novedad.numeroLibro) : NaN;
+                        if (isFinite(publicado) && publicado > 0) return publicado;
+                        var c = Number(novedad && novedad.correlativo);
+                        if (nums[c] != null) return Number(nums[c]);
+                        return null;
+                    }
                     keys.forEach(function (k) {
                         var n = porCor[k];
                         var cor = Number(n.correlativo);
                         if (!isFinite(cor)) return;
                         if (mesActual && !multaNovedadEsDelMes(n, mesActual)) return;
                         var exist = multaBuscarEnLista(lista, cor);
-                        var libro = nums[cor] != null ? nums[cor] : n.numeroLibro;
+                        var libro = libroDeNovedad(n);
                         if (!exist) {
                             if (multaClaveEstaEliminada(tomb, multaIdDesdeNovedad(cor), cor)) return;
                             var neu = multaPayloadDesdeNovedad(n, libro);
@@ -27816,7 +27824,16 @@ document.getElementById('chatForm').onsubmit = function (e) {
                         }
                         if (multaEstaAnulada(exist)) return;
                         var huella = [cor, n.fecha, n.hora, n.categoria, n.texto, n.notaInterna].join('|');
-                        if (exist.novedadHuella === huella) return;
+                        if (exist.novedadHuella === huella) {
+                            if (libro != null && Number(exist.novedadLibro) !== Number(libro)) {
+                                exist.novedadLibro = libro;
+                                if (exist.contenidoHtml) {
+                                    exist.contenidoHtml = String(exist.contenidoHtml).replace(/(Novedad\s*(?:<strong>)?#)\d+/, '$1' + libro);
+                                }
+                                cambiadas = true;
+                            }
+                            return;
+                        }
                         exist.novedadSnapshot = {
                             fecha: n.fecha || exist.fecha,
                             hora: n.hora || '',
@@ -27926,7 +27943,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     tb.innerHTML = pend.sort(function (a, b) {
                         return String(b.fecha || '').localeCompare(String(a.fecha || ''));
                     }).map(function (m) {
-                        var libro = m.novedadLibro != null ? ('#' + m.novedadLibro) : (m.novedadCorrelativo != null ? '#' + m.novedadCorrelativo : '—');
+                        var libro = m.novedadLibro != null && m.novedadLibro !== '' ? ('#' + m.novedadLibro) : '—';
                         return '<tr>' +
                             '<td>' + esc(libro) + '</td>' +
                             '<td>' + (typeof formatearFecha === 'function' ? formatearFecha(m.fecha) : esc(m.fecha)) + (m.novedadHora ? ' · ' + esc(String(m.novedadHora).slice(0, 5)) : '') + '</td>' +
@@ -27961,7 +27978,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
             var body = document.getElementById('multaDetalleCuerpo');
             var sel = document.getElementById('multaDetalleEstado');
             var obs = document.getElementById('multaDetalleObsAdmin');
-            var libro = m.novedadLibro != null ? '#' + m.novedadLibro : (m.novedadCorrelativo != null ? '#' + m.novedadCorrelativo : '—');
+            var libro = m.novedadLibro != null && m.novedadLibro !== '' ? '#' + m.novedadLibro : '—';
             var snap = m.novedadSnapshot || {};
             var texto = snap.texto || m.contenido || '';
             var evidencias = m.evidencias || [];
@@ -27970,7 +27987,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
             if (body) {
                 body.innerHTML =
                     '<div class="multa-detalle-sec"><h4>Origen</h4>' +
-                    '<p><strong>Novedad:</strong> ' + String(libro).replace(/</g, '') + (m.novedadCorrelativo != null ? ' <span style="color:var(--gray-500)">(correlativo ' + m.novedadCorrelativo + ')</span>' : '') + '</p>' +
+                    '<p><strong>Novedad:</strong> ' + String(libro).replace(/</g, '') + '</p>' +
                     '<p><strong>Fecha y hora:</strong> ' + String(m.fecha || snap.fecha || '—').replace(/</g, '') + (m.novedadHora || snap.hora ? ' · ' + String(m.novedadHora || snap.hora).slice(0, 5) : '') + '</p>' +
                     '<p><strong>Conserje:</strong> ' + String(m.novedadConserje || snap.conserje || '—').replace(/</g, '') + '</p>' +
                     '<p><strong>Categoría:</strong> ' + String(m.novedadCategoria || snap.categoria || 'Multa').replace(/</g, '') + '</p>' +
