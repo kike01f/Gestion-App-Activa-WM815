@@ -1948,6 +1948,83 @@
             transition: background-color 0.2s ease;
         }
 
+        /* Inventario de bodega: texto e inputs legibles sobre el tema oscuro */
+        #tablaInventario thead tr {
+            background: #365314;
+        }
+        #tablaInventario thead th {
+            color: #f7fee7;
+            background: transparent;
+            border-bottom: 1px solid #1a2e0a;
+        }
+        #tablaInventario tbody td {
+            color: #111827;
+            background: #ffffff;
+        }
+        #tablaInventario tbody tr:nth-child(even) td {
+            background: #f3f4f6;
+        }
+        #tablaInventario tbody tr:hover td {
+            background: #e5e7eb;
+        }
+        #tablaInventario tbody tr.inv-bajo td {
+            background: #ffedd5;
+            color: #431407;
+        }
+        #tablaInventario tbody tr.inv-bajo:hover td {
+            background: #fed7aa;
+        }
+        #tablaInventario td.inv-pedir {
+            color: #14532d;
+            font-weight: 700;
+        }
+        #tablaInventario tr.inv-bajo td.inv-pedir {
+            color: #9a3412;
+        }
+        #tablaInventario input[type="number"],
+        #tablaInventario select {
+            background: #ffffff !important;
+            color: #111827 !important;
+            border: 1px solid #4b5563 !important;
+            border-radius: 6px;
+            font-weight: 700;
+        }
+        [data-theme="dark"] #tablaInventario tbody td {
+            color: #f9fafb;
+            background: #1f2937;
+        }
+        [data-theme="dark"] #tablaInventario tbody tr:nth-child(even) td {
+            background: #273449;
+        }
+        [data-theme="dark"] #tablaInventario tbody tr:hover td {
+            background: #334155;
+        }
+        [data-theme="dark"] #tablaInventario tbody tr.inv-bajo td {
+            background: #5c3a0a;
+            color: #fff7ed;
+        }
+        [data-theme="dark"] #tablaInventario tbody tr.inv-bajo:hover td {
+            background: #7c4a0c;
+        }
+        [data-theme="dark"] #tablaInventario td.inv-pedir {
+            color: #86efac;
+        }
+        [data-theme="dark"] #tablaInventario tr.inv-bajo td.inv-pedir {
+            color: #fde68a;
+        }
+        [data-theme="dark"] #tablaInventario input[type="number"],
+        [data-theme="dark"] #tablaInventario select {
+            background: #0b1220 !important;
+            color: #f9fafb !important;
+            border-color: #d1d5db !important;
+        }
+        [data-theme="dark"] #tablaInventario tr.inv-bajo input[type="number"],
+        [data-theme="dark"] #tablaInventario tr.inv-bajo select {
+            background: #1c1408 !important;
+            color: #fff7ed !important;
+            border-color: #fbbf24 !important;
+        }
+
         .badge {
             display: inline-flex;
             align-items: center;
@@ -8792,7 +8869,7 @@
                 <div style="overflow-x: auto;">
                     <table id="tablaInventario" style="width: 100%; border-collapse: collapse; background: var(--bg-primary); border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06); transition: background-color 0.3s ease;">
                         <thead>
-                            <tr style="background: linear-gradient(135deg, #75bb21 0%, #5a9219 100%); color: white;">
+                            <tr>
                                 <th style="padding: 0.75rem; text-align: center; font-weight: 600; width: 40px;">
                                     <input type="checkbox" id="selectAllProductos" onchange="toggleSeleccionarTodosProductos()" style="cursor: pointer;">
                                 </th>
@@ -34428,7 +34505,6 @@ document.getElementById('chatForm').onsubmit = function (e) {
             var unidades = ['un', 'caja', 'paquete', 'litro', 'kg', 'rollo'];
             tbody.innerHTML = productos.map(p => {
                 var pedir = cantidadAPedirBodega(p);
-                var fondo = pedir > 0 ? 'background: #FFFBEB;' : '';
                 var opts = unidades.map(function (u) {
                     return '<option value="' + u + '"' + (p.unidad === u ? ' selected' : '') + '>' + u + '</option>';
                 }).join('');
@@ -34436,7 +34512,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     opts = '<option value="' + p.unidad + '" selected>' + p.unidad + '</option>' + opts;
                 }
                 return `
-                    <tr style="${fondo}">
+                    <tr class="${pedir > 0 ? 'inv-bajo' : ''}">
                         <td style="padding: 0.75rem; text-align: center;">
                             <input type="checkbox" class="checkbox-producto" data-producto-id="${p.id}" onchange="actualizarBotonEliminarSeleccionados()" style="cursor: pointer;">
                         </td>
@@ -34447,7 +34523,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                         <td style="padding: 0.5rem; text-align: center;">
                             <input type="number" min="0" step="1" value="${p.minimo}" data-stock="minimo" data-producto-id="${p.id}" style="width: 4.5rem; text-align: center; padding: 0.35rem;">
                         </td>
-                        <td style="padding: 0.75rem; text-align: center; font-weight: 700; color: ${pedir > 0 ? '#92400E' : '#365f14'};">${pedir > 0 ? pedir : '—'}</td>
+                        <td class="inv-pedir" style="padding: 0.75rem; text-align: center;">${pedir > 0 ? pedir : '—'}</td>
                         <td style="padding: 0.5rem; text-align: center;">
                             <select data-stock="unidad" data-producto-id="${p.id}" style="padding: 0.35rem;">${opts}</select>
                         </td>
