@@ -27879,6 +27879,10 @@ document.getElementById('chatForm').onsubmit = function (e) {
                                 return;
                             }
                             if (multaEstaAnulada(got)) return;
+                            if (m.novedadLibro != null && Number(got.novedadLibro) !== Number(m.novedadLibro)) {
+                                got.novedadLibro = m.novedadLibro;
+                                if (m.contenidoHtml) got.contenidoHtml = m.contenidoHtml;
+                            }
                             if (m.novedadHuella && got.novedadHuella !== m.novedadHuella) {
                                 got.novedadSnapshot = m.novedadSnapshot || got.novedadSnapshot;
                                 got.novedadHuella = m.novedadHuella;
