@@ -1956,6 +1956,15 @@
             color: #f7fee7;
             background: transparent;
             border-bottom: 1px solid #1a2e0a;
+            white-space: nowrap;
+        }
+        #inventarioBodega #btnIngresarPedidoBodega {
+            background: #10b981;
+            border-color: #059669;
+            color: #ffffff;
+        }
+        #inventarioBodega #btnIngresarPedidoBodega:hover {
+            background: #059669;
         }
         #tablaInventario tbody td {
             color: #111827;
@@ -2023,6 +2032,206 @@
             background: #1c1408 !important;
             color: #fff7ed !important;
             border-color: #fbbf24 !important;
+        }
+
+        #inventarioBodega .inv-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+        #inventarioBodega .inv-head h2 {
+            margin: 0;
+            font-size: 1.45rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            color: var(--text-primary);
+        }
+        #inventarioBodega .inv-head p {
+            margin: 0.35rem 0 0;
+            max-width: 40rem;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            line-height: 1.45;
+        }
+        #inventarioBodega .inv-kpis {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+        #inventarioBodega .inv-kpi {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 0.85rem 1rem;
+        }
+        #inventarioBodega .inv-kpi strong {
+            display: block;
+            font-size: 1.6rem;
+            line-height: 1.1;
+            font-variant-numeric: tabular-nums;
+            color: var(--text-primary);
+        }
+        #inventarioBodega .inv-kpi span {
+            display: block;
+            margin-top: 0.25rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+        #inventarioBodega .inv-kpi.alerta {
+            background: #fff7ed;
+            border-color: #fdba74;
+        }
+        #inventarioBodega .inv-kpi.alerta strong,
+        #inventarioBodega .inv-kpi.alerta span {
+            color: #9a3412;
+        }
+        [data-theme="dark"] #inventarioBodega .inv-kpi.alerta {
+            background: #5c3a0a;
+            border-color: #fbbf24;
+        }
+        [data-theme="dark"] #inventarioBodega .inv-kpi.alerta strong,
+        [data-theme="dark"] #inventarioBodega .inv-kpi.alerta span {
+            color: #fff7ed;
+        }
+        #inventarioBodega .inv-panel {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1rem 1.1rem 1.15rem;
+        }
+        #inventarioBodega .inv-toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 0.65rem;
+            margin-bottom: 0.9rem;
+        }
+        #inventarioBodega .inv-toolbar-grupo {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.45rem;
+        }
+        #inventarioBodega .inv-toolbar .btn {
+            padding: 0.45rem 0.8rem;
+            font-size: 0.8125rem;
+        }
+        #inventarioBodega .inv-alta {
+            margin-bottom: 0.9rem;
+            padding: 1rem;
+            background: var(--bg-secondary);
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+        }
+        #inventarioBodega .inv-alta h3 {
+            margin: 0 0 0.75rem;
+            font-size: 0.95rem;
+        }
+        #inventarioBodega .inv-tabla-wrap {
+            overflow-x: auto;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+        }
+        #inventarioBodega #tablaInventario {
+            box-shadow: none;
+            border-radius: 0;
+        }
+        #tablaInventario td.inv-pedir {
+            font-variant-numeric: tabular-nums;
+            font-size: 0.95rem;
+        }
+        #inventarioBodega .inv-movs:empty {
+            display: none;
+        }
+        #inventarioBodega .inv-movs {
+            margin-top: 1rem;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 0.9rem 1rem 1rem;
+        }
+        #inventarioBodega .inv-movs h3 {
+            margin: 0 0 0.65rem;
+            font-size: 0.95rem;
+            color: var(--text-primary);
+        }
+        #inventarioBodega .inv-mov-list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+        #inventarioBodega .inv-mov-list li {
+            display: grid;
+            grid-template-columns: 5.5rem 3.2rem minmax(0, 1.4fr) minmax(0, 2fr);
+            gap: 0.55rem;
+            align-items: center;
+            padding: 0.45rem 0.15rem;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.8125rem;
+            color: var(--text-secondary);
+        }
+        #inventarioBodega .inv-mov-list li:last-child {
+            border-bottom: none;
+        }
+        #inventarioBodega .inv-mov-tipo {
+            display: inline-flex;
+            justify-content: center;
+            padding: 0.15rem 0.4rem;
+            border-radius: 999px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            background: #e5e7eb;
+            color: #1f2937;
+        }
+        #inventarioBodega .inv-mov-tipo.salida {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        #inventarioBodega .inv-mov-tipo.entrada {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        #inventarioBodega .inv-mov-tipo.ajuste {
+            background: #e0e7ff;
+            color: #3730a3;
+        }
+        #inventarioBodega .inv-mov-cant {
+            font-weight: 700;
+            font-variant-numeric: tabular-nums;
+            color: var(--text-primary);
+        }
+        #inventarioBodega .inv-mov-nombre {
+            font-weight: 600;
+            color: var(--text-primary);
+            min-width: 0;
+        }
+        #inventarioBodega .inv-mov-meta {
+            min-width: 0;
+        }
+        #inventarioBodega .inv-vacio {
+            margin: 0;
+            padding: 1.25rem 0.5rem;
+            text-align: center;
+            color: var(--text-secondary);
+        }
+        @media (max-width: 720px) {
+            #inventarioBodega .inv-kpis {
+                grid-template-columns: 1fr;
+            }
+            #inventarioBodega .inv-mov-list li {
+                grid-template-columns: auto auto minmax(0, 1fr);
+            }
+            #inventarioBodega .inv-mov-meta {
+                grid-column: 1 / -1;
+            }
         }
 
         .badge {
@@ -8808,44 +9017,47 @@
 
         <!-- INVENTARIO DE BODEGA (página aparte, se abre desde Pedido de insumos) -->
         <div id="inventarioBodega" class="tab-content">
-            <div style="margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; flex-wrap: wrap;">
+            <header class="inv-head">
                 <div>
-                    <h2 style="margin: 0; color: var(--gray-900); font-size: 1.5rem; font-weight: 700;">Inventario de bodega</h2>
-                    <p style="margin: 0.5rem 0 0; color: var(--gray-600); font-size: 0.875rem; max-width: 42rem;">Existencia actual de cada producto. Si la cantidad está bajo el mínimo, aparece cuánto conviene pedir este mes. Conserjería registra las salidas de bodega sobre la misma lista.</p>
+                    <h2>Inventario de bodega</h2>
+                    <p>Existencia de cada producto y cuánto conviene pedir si está bajo el mínimo. Conserjería registra las salidas sobre esta misma lista.</p>
                 </div>
                 <button type="button" class="btn btn-secondary" id="btnVolverPedidoInsumos" onclick="showTab('insumos')">
                     Volver al pedido
                 </button>
-            </div>
-            <div class="form-section">
-                <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 0.75rem;">
+            </header>
+            <div id="resumenInventarioBodega" class="inv-kpis"></div>
+            <div class="inv-panel">
+                <div class="inv-toolbar">
+                    <div class="inv-toolbar-grupo">
                         <button type="button" class="btn btn-primary" id="btnPdfInventarioFisico" onclick="generarInventarioFisicoPDF()">
                             PDF inventario físico
                         </button>
                         <button type="button" class="btn btn-primary" id="btnPedirFaltantesInventario" onclick="agregarFaltantesAlPedido()">
                             Pedir lo que falta
                         </button>
-                        <button type="button" class="btn btn-success" id="btnIngresarPedidoBodega" onclick="ingresarPedidoABodega()" style="background: #10b981; border-color: #10b981;">
+                        <button type="button" class="btn btn-success" id="btnIngresarPedidoBodega" onclick="ingresarPedidoABodega()">
                             Ingresar pedido a bodega
                         </button>
-                        <label class="btn btn-primary" style="cursor: pointer; margin: 0;">
+                    </div>
+                    <div class="inv-toolbar-grupo">
+                        <label class="btn btn-secondary" style="cursor: pointer; margin: 0;">
                             <input type="file" id="inputImportarExcel" accept=".xlsx,.xls,.csv" style="display: none;" onchange="importarProductosDesdeExcel(event)">
-                            📥 Importar desde Excel/CSV
+                            Importar Excel/CSV
                         </label>
-                        <button type="button" class="btn btn-danger" id="btnEliminarSeleccionados" style="display: none;">
-                            🗑️ Eliminar Seleccionados
+                        <button type="button" class="btn btn-secondary" id="btnAgregarProductoInventario">
+                            Agregar producto
                         </button>
                         <button type="button" class="btn btn-secondary" id="btnEliminarDuplicadosInventario">
-                            🔍 Eliminar Duplicados
+                            Quitar duplicados
                         </button>
-                        <button type="button" class="btn btn-secondary" id="btnAgregarProductoInventario">
-                            ➕ Agregar Producto
+                        <button type="button" class="btn btn-danger" id="btnEliminarSeleccionados" style="display: none;">
+                            Eliminar seleccionados
                         </button>
                     </div>
-                <div id="resumenInventarioBodega" style="display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 1rem;"></div>
-                
-                <!-- Formulario para agregar producto (oculto por defecto) -->
-                <div id="formAgregarInventario" style="display: none; margin-bottom: 1rem; padding: 1rem; background: var(--bg-secondary); border-radius: 8px; border: 1px solid var(--border-color); transition: background-color 0.3s ease, border-color 0.3s ease;">
+                </div>
+                <div id="formAgregarInventario" class="inv-alta" style="display: none;">
+                    <h3>Nuevo producto</h3>
                     <form id="formProductoInventario" onsubmit="agregarProductoInventario(event)">
                         <div class="form-row">
                             <div class="form-group" style="flex: 2;">
@@ -8879,8 +9091,8 @@
                     </form>
                 </div>
 
-                <div style="overflow-x: auto;">
-                    <table id="tablaInventario" style="width: 100%; border-collapse: collapse; background: var(--bg-primary); border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06); transition: background-color 0.3s ease;">
+                <div class="inv-tabla-wrap">
+                    <table id="tablaInventario" style="width: 100%; border-collapse: collapse; background: var(--bg-primary);">
                         <thead>
                             <tr>
                                 <th style="padding: 0.75rem; text-align: center; font-weight: 600; width: 40px;">
@@ -8899,8 +9111,8 @@
                         </tbody>
                     </table>
                 </div>
-                <div id="movimientosInventarioBodega" style="margin-top: 1rem;"></div>
             </div>
+            <div id="movimientosInventarioBodega" class="inv-movs"></div>
         </div>
 
         <!-- MÓDULO: CENTRAL DE NOTIFICACIÓN -->
@@ -34439,10 +34651,13 @@ document.getElementById('chatForm').onsubmit = function (e) {
             var lista = productos || [];
             var bajo = lista.filter(function (p) { return cantidadAPedirBodega(p) > 0; }).length;
             var unidades = lista.reduce(function (acc, p) { return acc + (parseInt(p.existencia, 10) || 0); }, 0);
+            function tarjeta(valor, etiqueta, alerta) {
+                return '<div class="inv-kpi' + (alerta ? ' alerta' : '') + '"><strong>' + valor + '</strong><span>' + etiqueta + '</span></div>';
+            }
             host.innerHTML =
-                '<span style="padding: 0.35rem 0.7rem; border-radius: 999px; background: #E8F6D4; color: #365f14; font-size: 0.8rem; font-weight: 700;">' + lista.length + ' productos</span>' +
-                '<span style="padding: 0.35rem 0.7rem; border-radius: 999px; background: #F9FAFB; color: #111827; border: 1px solid #E5E7EB; font-size: 0.8rem; font-weight: 700;">' + unidades + ' en existencia</span>' +
-                '<span style="padding: 0.35rem 0.7rem; border-radius: 999px; background: ' + (bajo ? '#FEF3C7' : '#E8F6D4') + '; color: ' + (bajo ? '#92400E' : '#365f14') + '; font-size: 0.8rem; font-weight: 700;">' + bajo + ' bajo el mínimo</span>';
+                tarjeta(lista.length, 'Productos', false) +
+                tarjeta(unidades, 'En existencia', false) +
+                tarjeta(bajo, 'Bajo el mínimo', bajo > 0);
         }
 
         function pintarMovimientosInventario() {
@@ -34450,28 +34665,28 @@ document.getElementById('chatForm').onsubmit = function (e) {
             if (!host) return;
             var movs = (window._invBodegaMovs || []).slice(-12).reverse();
             if (!movs.length) {
-                host.innerHTML = '';
+                host.innerHTML = '<h3>Últimos movimientos</h3><p class="inv-vacio">Aún no hay movimientos de bodega.</p>';
                 return;
             }
-            host.innerHTML = '<h4 style="margin: 0 0 0.5rem; font-size: 0.9rem;">Últimos movimientos de bodega</h4>' +
-                '<div style="display: flex; flex-direction: column; gap: 0.35rem;">' +
+            host.innerHTML = '<h3>Últimos movimientos</h3><ul class="inv-mov-list">' +
                 movs.map(function (m) {
                     var cuando = '';
                     try { cuando = new Date(m.fecha).toLocaleString('es-CL'); } catch (e) { cuando = ''; }
-                    var signo = m.tipo === 'salida' ? '−' : (m.tipo === 'entrada' ? '+' : '=');
-                    var quienes = '';
+                    var tipo = m.tipo === 'salida' ? 'salida' : (m.tipo === 'entrada' ? 'entrada' : 'ajuste');
+                    var etiqueta = tipo === 'salida' ? 'Salida' : (tipo === 'entrada' ? 'Entrada' : 'Ajuste');
+                    var signo = tipo === 'salida' ? '−' : (tipo === 'entrada' ? '+' : '=');
+                    var meta = 'Queda ' + (m.existencia != null ? m.existencia : '—');
                     if (m.conserje || m.auxiliar) {
-                        quienes = ' · Autoriza: ' + (m.conserje || '—') + ' · Solicita: ' + (m.auxiliar || '—');
+                        meta += ' · Autoriza ' + (m.conserje || '—') + ' · Solicita ' + (m.auxiliar || '—');
                     } else if (m.origen) {
-                        quienes = ' · ' + m.origen;
+                        meta += ' · ' + m.origen;
                     }
-                    return '<div style="font-size: 0.8rem; color: var(--gray-700);">' +
-                        '<strong>' + signo + (m.cantidad || 0) + '</strong> ' + formatearNombre(m.nombre || '') +
-                        ' · queda ' + (m.existencia != null ? m.existencia : '—') +
-                        quienes +
-                        (cuando ? ' · ' + cuando : '') +
-                        '</div>';
-                }).join('') + '</div>';
+                    if (cuando) meta += ' · ' + cuando;
+                    return '<li><span class="inv-mov-tipo ' + tipo + '">' + etiqueta + '</span>' +
+                        '<span class="inv-mov-cant">' + signo + (parseInt(m.cantidad, 10) || 0) + '</span>' +
+                        '<span class="inv-mov-nombre">' + escapeHtml(formatearNombre(m.nombre || '')) + '</span>' +
+                        '<span class="inv-mov-meta">' + escapeHtml(meta) + '</span></li>';
+                }).join('') + '</ul>';
         }
 
         // Cargar inventario y actualizar select
@@ -34501,7 +34716,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
             }
             
             if (productos.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" class="empty-state" style="padding: 2rem; text-align: center; color: var(--gray-500);"><p>No hay productos en el inventario. Importe desde Excel o agregue manualmente.</p></td></tr>';
+                tbody.innerHTML = '<tr><td colspan="7"><p class="inv-vacio">No hay productos en el inventario. Importe un Excel o agregue uno manualmente.</p></td></tr>';
                 const btnEliminarSeleccionados = document.getElementById('btnEliminarSeleccionados');
                 if (btnEliminarSeleccionados) btnEliminarSeleccionados.style.display = 'none';
                 const selectAll = document.getElementById('selectAllProductos');
@@ -34537,15 +34752,15 @@ document.getElementById('chatForm').onsubmit = function (e) {
                         <td style="padding: 0.5rem; text-align: center;">
                             <input type="number" min="0" step="1" value="${p.minimo}" data-stock="minimo" data-producto-id="${p.id}" style="width: 4.5rem; text-align: center; padding: 0.35rem;">
                         </td>
-                        <td class="inv-pedir" style="padding: 0.75rem; text-align: center;">${pedir > 0 ? pedir : '—'}</td>
+                        <td class="${pedir > 0 ? 'inv-pedir' : ''}" style="padding: 0.75rem; text-align: center;">${pedir > 0 ? pedir : '—'}</td>
                         <td style="padding: 0.5rem; text-align: center;">
                             <select data-stock="unidad" data-producto-id="${p.id}" style="padding: 0.35rem;">${opts}</select>
                         </td>
                         <td style="padding: 0.75rem; text-align: center;">
                             <div class="tabla-acciones">
-                            <button class="btn btn-primary btn-sm" onclick="guardarFilaInventario('${p.id}')" style="margin-right: 0.35rem; padding: 0.25rem 0.5rem; font-size: 0.75rem;">Guardar</button>
-                            ${pedir > 0 ? '<button class="btn btn-secondary btn-sm" onclick="pedirProductoDesdeBodega(\'' + p.id + '\')" style="margin-right: 0.35rem; padding: 0.25rem 0.5rem; font-size: 0.75rem;">Pedir</button>' : ''}
-                            <button class="btn btn-danger btn-sm" onclick="eliminarProductoInventario('${p.id}')" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">Eliminar</button>
+                            <button class="btn btn-primary btn-sm" onclick="guardarFilaInventario('${p.id}')">Guardar</button>
+                            ${pedir > 0 ? '<button class="btn btn-secondary btn-sm" onclick="pedirProductoDesdeBodega(\'' + p.id + '\')">Pedir</button>' : ''}
+                            <button class="btn btn-danger btn-sm" onclick="eliminarProductoInventario('${p.id}')">Eliminar</button>
                             </div>
                         </td>
                     </tr>
