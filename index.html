@@ -34157,6 +34157,20 @@ document.getElementById('chatForm').onsubmit = function (e) {
             return min > ex ? (min - ex) : 0;
         }
 
+        function fusionarProductosBodega(preferidos, respaldo) {
+            var porNombre = {};
+            (respaldo || []).forEach(function (p) {
+                var n = normalizarProductoBodega(p);
+                if (n.nombre) porNombre[n.nombre.toLowerCase()] = n;
+            });
+            (preferidos || []).forEach(function (p) {
+                var n = normalizarProductoBodega(p);
+                if (n.nombre) porNombre[n.nombre.toLowerCase()] = n;
+            });
+            return Object.keys(porNombre).map(function (k) { return porNombre[k]; })
+                .sort(function (a, b) { return a.nombre.localeCompare(b.nombre); });
+        }
+
         function anotarMovimientoBodega(producto, tipo, cantidad, nota) {
             window._invBodegaMovs = Array.isArray(window._invBodegaMovs) ? window._invBodegaMovs : [];
             window._invBodegaMovs.push({
@@ -34170,8 +34184,8 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 origen: 'gestion',
                 fecha: new Date().toISOString()
             });
-            if (window._invBodegaMovs.length > 80) {
-                window._invBodegaMovs = window._invBodegaMovs.slice(-80);
+            if (window._invBodegaMovs.length > 200) {
+                window._invBodegaMovs = window._invBodegaMovs.slice(-200);
             }
         }
 
@@ -34220,10 +34234,15 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 }
                 var tRemoto = Number(remoto && remoto.stockActualizadoMs) || 0;
                 var usarRemoto = !!(remoto && tRemoto > admin.stockActualizadoMs);
-                var crudos = (usarRemoto ? remoto.productos : admin.productos) || [];
-                var movimientos = ((usarRemoto ? remoto.movimientos : admin.movimientos) || []).slice(-80);
-                var productos = crudos.map(normalizarProductoBodega).filter(function (p) { return p.nombre; });
-                productos.sort(function (a, b) { return a.nombre.localeCompare(b.nombre); });
+                var preferidos = (usarRemoto ? remoto.productos : admin.productos) || [];
+                var respaldo = (usarRemoto ? admin.productos : (remoto && remoto.productos)) || [];
+                if (!preferidos.length && respaldo.length) {
+                    var tmp = preferidos;
+                    preferidos = respaldo;
+                    respaldo = tmp;
+                }
+                var movimientos = ((usarRemoto ? remoto.movimientos : admin.movimientos) || []).slice(-200);
+                var productos = fusionarProductosBodega(preferidos, respaldo);
                 window._invBodegaMovs = movimientos;
                 window._invBodegaMs = usarRemoto ? tRemoto : admin.stockActualizadoMs;
                 window._invBodegaCache = productos;
@@ -34261,7 +34280,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 productos = (productos || []).map(normalizarProductoBodega).filter(function (p) { return p.nombre; });
                 productos.sort(function (a, b) { return a.nombre.localeCompare(b.nombre); });
                 var movs = Array.isArray(movimientos) ? movimientos : (window._invBodegaMovs || []);
-                movs = movs.slice(-80);
+                movs = movs.slice(-200);
                 var ms = Date.now();
                 window._invBodegaMs = ms;
                 window._invBodegaCache = productos;
@@ -34338,7 +34357,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
         function pintarMovimientosInventario() {
             var host = document.getElementById('movimientosInventarioBodega');
             if (!host) return;
-            var movs = (window._invBodegaMovs || []).slice(-8).reverse();
+            var movs = (window._invBodegaMovs || []).slice(-12).reverse();
             if (!movs.length) {
                 host.innerHTML = '';
                 return;
@@ -34349,11 +34368,16 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     var cuando = '';
                     try { cuando = new Date(m.fecha).toLocaleString('es-CL'); } catch (e) { cuando = ''; }
                     var signo = m.tipo === 'salida' ? '−' : (m.tipo === 'entrada' ? '+' : '=');
+                    var quienes = '';
+                    if (m.conserje || m.auxiliar) {
+                        quienes = ' · Autoriza: ' + (m.conserje || '—') + ' · Solicita: ' + (m.auxiliar || '—');
+                    } else if (m.origen) {
+                        quienes = ' · ' + m.origen;
+                    }
                     return '<div style="font-size: 0.8rem; color: var(--gray-700);">' +
                         '<strong>' + signo + (m.cantidad || 0) + '</strong> ' + formatearNombre(m.nombre || '') +
                         ' · queda ' + (m.existencia != null ? m.existencia : '—') +
-                        (m.nota ? ' · ' + m.nota : '') +
-                        (m.origen ? ' · ' + m.origen : '') +
+                        quienes +
                         (cuando ? ' · ' + cuando : '') +
                         '</div>';
                 }).join('') + '</div>';
