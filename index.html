@@ -2034,219 +2034,270 @@
             border-color: #fbbf24 !important;
         }
 
+        #registroRetirosBodega .inv-head,
         #inventarioBodega .inv-head {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            gap: 1rem;
-            margin-bottom: 1rem;
-            flex-wrap: wrap;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 1rem;
+        margin-bottom: 1rem;
+        flex-wrap: wrap;
         }
+        #registroRetirosBodega .inv-head h2,
         #inventarioBodega .inv-head h2 {
-            margin: 0;
-            font-size: 1.45rem;
-            font-weight: 700;
-            letter-spacing: -0.02em;
-            color: var(--text-primary);
+        margin: 0;
+        font-size: 1.45rem;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        color: var(--text-primary);
         }
+        #registroRetirosBodega .inv-head p,
         #inventarioBodega .inv-head p {
-            margin: 0.35rem 0 0;
-            max-width: 40rem;
-            color: var(--text-secondary);
-            font-size: 0.875rem;
-            line-height: 1.45;
+        margin: 0.35rem 0 0;
+        max-width: 40rem;
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+        line-height: 1.45;
         }
         #inventarioBodega .inv-kpis {
-            display: grid;
-            grid-template-columns: repeat(3, minmax(0, 1fr));
-            gap: 0.75rem;
-            margin-bottom: 1rem;
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 0.75rem;
+        margin-bottom: 1rem;
         }
         #inventarioBodega .inv-kpi {
-            background: var(--bg-primary);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 0.85rem 1rem;
+        background: var(--bg-primary);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 0.85rem 1rem;
         }
         #inventarioBodega .inv-kpi strong {
-            display: block;
-            font-size: 1.6rem;
-            line-height: 1.1;
-            font-variant-numeric: tabular-nums;
-            color: var(--text-primary);
+        display: block;
+        font-size: 1.6rem;
+        line-height: 1.1;
+        font-variant-numeric: tabular-nums;
+        color: var(--text-primary);
         }
         #inventarioBodega .inv-kpi span {
-            display: block;
-            margin-top: 0.25rem;
-            font-size: 0.75rem;
-            font-weight: 600;
-            color: var(--text-secondary);
+        display: block;
+        margin-top: 0.25rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--text-secondary);
         }
         #inventarioBodega .inv-kpi.alerta {
-            background: #fff7ed;
-            border-color: #fdba74;
+        background: #fff7ed;
+        border-color: #fdba74;
         }
         #inventarioBodega .inv-kpi.alerta strong,
         #inventarioBodega .inv-kpi.alerta span {
-            color: #9a3412;
+        color: #9a3412;
         }
         [data-theme="dark"] #inventarioBodega .inv-kpi.alerta {
-            background: #5c3a0a;
-            border-color: #fbbf24;
+        background: #5c3a0a;
+        border-color: #fbbf24;
         }
         [data-theme="dark"] #inventarioBodega .inv-kpi.alerta strong,
         [data-theme="dark"] #inventarioBodega .inv-kpi.alerta span {
-            color: #fff7ed;
+        color: #fff7ed;
         }
         #inventarioBodega .inv-panel {
-            background: var(--bg-primary);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 1rem 1.1rem 1.15rem;
+        background: var(--bg-primary);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 1rem 1.1rem 1.15rem;
         }
         #inventarioBodega .inv-toolbar {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: space-between;
-            align-items: center;
-            gap: 0.65rem;
-            margin-bottom: 0.9rem;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: center;
+        gap: 0.65rem;
+        margin-bottom: 0.9rem;
         }
         #inventarioBodega .inv-toolbar-grupo {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.45rem;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.45rem;
         }
         #inventarioBodega .inv-toolbar .btn {
-            padding: 0.45rem 0.8rem;
-            font-size: 0.8125rem;
+        padding: 0.45rem 0.8rem;
+        font-size: 0.8125rem;
         }
         #inventarioBodega .inv-alta {
-            margin-bottom: 0.9rem;
-            padding: 1rem;
-            background: var(--bg-secondary);
-            border-radius: 10px;
-            border: 1px solid var(--border-color);
+        margin-bottom: 0.9rem;
+        padding: 1rem;
+        background: var(--bg-secondary);
+        border-radius: 10px;
+        border: 1px solid var(--border-color);
         }
         #inventarioBodega .inv-alta h3 {
-            margin: 0 0 0.75rem;
-            font-size: 0.95rem;
+        margin: 0 0 0.75rem;
+        font-size: 0.95rem;
         }
         #inventarioBodega .inv-tabla-wrap {
-            overflow-x: auto;
-            border-radius: 10px;
-            border: 1px solid var(--border-color);
+        overflow-x: auto;
+        border-radius: 10px;
+        border: 1px solid var(--border-color);
         }
         #inventarioBodega #tablaInventario {
-            box-shadow: none;
-            border-radius: 0;
+        box-shadow: none;
+        border-radius: 0;
         }
         #tablaInventario td.inv-pedir {
-            font-variant-numeric: tabular-nums;
-            font-size: 0.95rem;
+        font-variant-numeric: tabular-nums;
+        font-size: 0.95rem;
         }
+        #registroRetirosBodega .inv-movs:empty,
         #inventarioBodega .inv-movs:empty {
-            display: none;
+        display: none;
         }
+        #registroRetirosBodega .inv-movs,
         #inventarioBodega .inv-movs {
-            margin-top: 1rem;
-            background: var(--bg-primary);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 0.9rem 1rem 1rem;
+        margin-top: 1rem;
+        background: var(--bg-primary);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 0.9rem 1rem 1rem;
         }
+        #registroRetirosBodega .inv-movs h3,
         #inventarioBodega .inv-movs h3 {
-            margin: 0 0 0.65rem;
-            font-size: 0.95rem;
-            color: var(--text-primary);
+        margin: 0 0 0.65rem;
+        font-size: 0.95rem;
+        color: var(--text-primary);
         }
+        #registroRetirosBodega .inv-mov-list,
         #inventarioBodega .inv-mov-list {
-            list-style: none;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            gap: 0.4rem;
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
         }
+        #registroRetirosBodega .inv-mov-list li,
         #inventarioBodega .inv-mov-list li {
-            display: grid;
-            grid-template-columns: 5.5rem 3.2rem minmax(0, 1.2fr) minmax(0, 2fr) auto;
-            gap: 0.55rem;
-            align-items: center;
-            padding: 0.45rem 0.15rem;
-            border-bottom: 1px solid var(--border-color);
-            font-size: 0.8125rem;
-            color: var(--text-secondary);
+        display: grid;
+        grid-template-columns: 5.5rem 3.2rem minmax(0, 1.2fr) minmax(0, 2fr) auto;
+        gap: 0.55rem;
+        align-items: center;
+        padding: 0.45rem 0.15rem;
+        border-bottom: 1px solid var(--border-color);
+        font-size: 0.8125rem;
+        color: var(--text-secondary);
         }
+        #registroRetirosBodega .inv-mov-del,
         #inventarioBodega .inv-mov-del {
-            justify-self: end;
+        justify-self: end;
         }
+        #registroRetirosBodega .inv-mov-list li:last-child,
         #inventarioBodega .inv-mov-list li:last-child {
-            border-bottom: none;
+        border-bottom: none;
         }
+        #registroRetirosBodega .inv-mov-tipo,
         #inventarioBodega .inv-mov-tipo {
-            display: inline-flex;
-            justify-content: center;
-            padding: 0.15rem 0.4rem;
-            border-radius: 999px;
-            font-size: 0.7rem;
-            font-weight: 700;
-            background: #e5e7eb;
-            color: #1f2937;
+        display: inline-flex;
+        justify-content: center;
+        padding: 0.15rem 0.4rem;
+        border-radius: 999px;
+        font-size: 0.7rem;
+        font-weight: 700;
+        background: #e5e7eb;
+        color: #1f2937;
         }
+        #registroRetirosBodega .inv-mov-tipo.salida,
         #inventarioBodega .inv-mov-tipo.salida {
-            background: #fee2e2;
-            color: #991b1b;
+        background: #fee2e2;
+        color: #991b1b;
         }
+        #registroRetirosBodega .inv-mov-tipo.entrada,
         #inventarioBodega .inv-mov-tipo.entrada {
-            background: #d1fae5;
-            color: #065f46;
+        background: #d1fae5;
+        color: #065f46;
         }
+        #registroRetirosBodega .inv-mov-tipo.ajuste,
         #inventarioBodega .inv-mov-tipo.ajuste {
-            background: #e0e7ff;
-            color: #3730a3;
+        background: #e0e7ff;
+        color: #3730a3;
         }
+        #registroRetirosBodega .inv-mov-cant,
         #inventarioBodega .inv-mov-cant {
-            font-weight: 700;
-            font-variant-numeric: tabular-nums;
-            color: var(--text-primary);
+        font-weight: 700;
+        font-variant-numeric: tabular-nums;
+        color: var(--text-primary);
         }
+        #registroRetirosBodega .inv-mov-nombre,
         #inventarioBodega .inv-mov-nombre {
-            font-weight: 600;
-            color: var(--text-primary);
-            min-width: 0;
+        font-weight: 600;
+        color: var(--text-primary);
+        min-width: 0;
         }
+        #registroRetirosBodega .inv-mov-meta,
         #inventarioBodega .inv-mov-meta {
-            min-width: 0;
+        min-width: 0;
         }
+        #registroRetirosBodega .inv-vacio,
         #inventarioBodega .inv-vacio {
-            margin: 0;
-            padding: 1.25rem 0.5rem;
-            text-align: center;
-            color: var(--text-secondary);
+        margin: 0;
+        padding: 1.25rem 0.5rem;
+        text-align: center;
+        color: var(--text-secondary);
         }
+        #registroRetirosBodega .inv-uso,
         #inventarioBodega .inv-uso {
-            display: block;
-            margin-top: 0.2rem;
-            font-size: 0.75rem;
-            font-weight: 700;
-            color: #b45309;
+        display: block;
+        margin-top: 0.2rem;
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: #b45309;
         }
+        [data-theme="dark"] #registroRetirosBodega .inv-uso,
         [data-theme="dark"] #inventarioBodega .inv-uso {
-            color: #fbbf24;
+        color: #fbbf24;
         }
         @media (max-width: 720px) {
             #inventarioBodega .inv-kpis {
-                grid-template-columns: 1fr;
-            }
-            #inventarioBodega .inv-mov-list li {
-                grid-template-columns: auto auto minmax(0, 1fr);
-            }
-            #inventarioBodega .inv-mov-meta,
-            #inventarioBodega .inv-mov-del {
-                grid-column: 1 / -1;
-                justify-self: start;
-            }
+            grid-template-columns: 1fr;
+        }
+        #registroRetirosBodega .inv-mov-list li,
+        #inventarioBodega .inv-mov-list li {
+        grid-template-columns: auto auto minmax(0, 1fr);
+        }
+        #registroRetirosBodega .inv-mov-meta,
+        #inventarioBodega .inv-mov-meta,
+        #registroRetirosBodega .inv-mov-del,
+        #inventarioBodega .inv-mov-del {
+        grid-column: 1 / -1;
+        justify-self: start;
+        }
+        }
+
+        #inventarioBodega #btnRegistroMovimientosBodega.inv-btn-retiros {
+            background: #f97316;
+            border-color: #ea580c;
+            color: #fff;
+        }
+        #inventarioBodega #btnRegistroMovimientosBodega.inv-btn-retiros:hover {
+            background: #ea580c;
+            color: #fff;
+        }
+        #insumos .pedido-faltante {
+            display: inline-flex;
+            align-items: center;
+            margin-left: 0.4rem;
+            padding: 0.08rem 0.4rem;
+            border-radius: 999px;
+            background: #ffedd5;
+            color: #9a3412;
+            font-size: 0.68rem;
+            font-weight: 700;
+            line-height: 1.3;
+            white-space: nowrap;
+            vertical-align: middle;
+        }
+        [data-theme="dark"] #insumos .pedido-faltante {
+            background: #5c3a0a;
+            color: #ffedd5;
         }
 
         .badge {
@@ -9054,6 +9105,9 @@
                         <button type="button" class="btn btn-success" id="btnIngresarPedidoBodega" onclick="ingresarPedidoABodega()">
                             Ingresar pedido a bodega
                         </button>
+                        <button type="button" class="btn btn-secondary" id="btnRegistroMovimientosBodega" onclick="showTab('registroRetirosBodega')">
+                            Registro de movimientos
+                        </button>
                     </div>
                     <div class="inv-toolbar-grupo">
                         <label class="btn btn-secondary" style="cursor: pointer; margin: 0;">
@@ -9148,6 +9202,18 @@
                     </table>
                 </div>
             </div>
+        </div>
+
+        <div id="registroRetirosBodega" class="tab-content">
+            <header class="inv-head">
+                <div>
+                    <h2>Registro de movimientos</h2>
+                    <p>Retiros, entradas y ajustes de bodega. Eliminar un retiro lo quita también en conserjería. La existencia no cambia.</p>
+                </div>
+                <button type="button" class="btn btn-secondary" onclick="showTab('inventarioBodega')">
+                    Volver al inventario
+                </button>
+            </header>
             <div id="movimientosInventarioBodega" class="inv-movs"></div>
         </div>
 
@@ -12157,10 +12223,13 @@
                 if (targetContent) {
                     targetContent.classList.add('active');
                 }
+                if (tabName === 'registroRetirosBodega' && typeof pintarMovimientosInventario === 'function') {
+                    pintarMovimientosInventario();
+                }
 
                 // Activar el botón correspondiente. El inventario es una página del pedido, sin ítem propio en el menú.
                 if (buttons.length > 0) {
-                    var tabMenu = tabName === 'inventarioBodega' ? 'insumos' : tabName;
+                    var tabMenu = (tabName === 'inventarioBodega' || tabName === 'registroRetirosBodega') ? 'insumos' : tabName;
                     buttons.forEach(button => {
                         const dataTab = button.getAttribute('data-tab');
                         if (dataTab === tabMenu) {
@@ -34645,6 +34714,34 @@ document.getElementById('chatForm').onsubmit = function (e) {
             return min > ex ? (min - ex) : 0;
         }
 
+        function productoBodegaPorNombre(nombre) {
+            var clave = String(nombre || '').trim().toLowerCase().replace(/\s+/g, ' ');
+            if (!clave) return null;
+            var lista = Array.isArray(window._invBodegaCache) ? window._invBodegaCache : [];
+            for (var i = 0; i < lista.length; i++) {
+                var n = String(lista[i] && lista[i].nombre || '').trim().toLowerCase().replace(/\s+/g, ' ');
+                if (n === clave) return lista[i];
+            }
+            return null;
+        }
+
+        function htmlMiniaturaFaltantePedido(nombre) {
+            var p = productoBodegaPorNombre(nombre);
+            if (!p) return '';
+            var falta = cantidadAPedirBodega(p);
+            if (falta <= 0) return '';
+            var titulo = 'En bodega hay ' + (parseInt(p.existencia, 10) || 0) + ', mínimo ' + (parseInt(p.minimo, 10) || 0);
+            return '<span class="pedido-faltante" title="' + escapeHtml(titulo).replace(/"/g, '&quot;') + '">Falta ' + falta + '</span>';
+        }
+
+        function actualizarMiniaturasFaltantePedido() {
+            document.querySelectorAll('#tbodyInsumos .pedido-faltante-slot').forEach(function (slot) {
+                var nombre = slot.getAttribute('data-producto') || '';
+                try { nombre = decodeURIComponent(nombre); } catch (eNom) {}
+                slot.innerHTML = htmlMiniaturaFaltantePedido(nombre);
+            });
+        }
+
         function fusionarProductosBodega(preferidos, respaldo) {
             var porNombre = {};
             function meter(lista, preferido) {
@@ -34833,7 +34930,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     var tabla = document.getElementById('tablaInventario');
                     if (tabla && document.activeElement && tabla.contains(document.activeElement)) return;
                     window._invBodegaMs = remoto;
-                    if (document.querySelector('#insumos.tab-content.active, #inventarioBodega.tab-content.active')) {
+                    if (document.querySelector('#insumos.tab-content.active, #inventarioBodega.tab-content.active, #registroRetirosBodega.tab-content.active')) {
                         cargarInventario();
                     }
                 }, function (err) {
@@ -34912,6 +35009,11 @@ document.getElementById('chatForm').onsubmit = function (e) {
             var todos = Array.isArray(window._invBodegaMovs) ? window._invBodegaMovs : [];
             var retiros = todos.filter(function (m) { return m && m.tipo === 'salida'; }).slice().reverse();
             var otros = todos.filter(function (m) { return m && m.tipo !== 'salida'; }).slice(-8).reverse();
+            var btnMov = document.getElementById('btnRegistroMovimientosBodega');
+            if (btnMov) {
+                btnMov.textContent = retiros.length ? ('Registro de movimientos (' + retiros.length + ')') : 'Registro de movimientos';
+                btnMov.classList.toggle('inv-btn-retiros', retiros.length > 0);
+            }
             if (!retiros.length && !otros.length) {
                 host.innerHTML = '<h3>Registro de retiros</h3><p class="inv-vacio">Aún no hay retiros de bodega.</p>';
                 return;
@@ -34992,6 +35094,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 if (btnEliminarSeleccionados) btnEliminarSeleccionados.style.display = 'none';
                 const selectAll = document.getElementById('selectAllProductos');
                 if (selectAll) selectAll.checked = false;
+                actualizarMiniaturasFaltantePedido();
                 return;
             }
 
@@ -35071,6 +35174,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
             }).join('');
 
             actualizarBotonEliminarSeleccionados();
+            actualizarMiniaturasFaltantePedido();
         }
 
         window.guardarFilaInventario = async function(id) {
@@ -35471,7 +35575,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 const prioridadColor = i.prioridad === 'Alta' ? '#ef4444' : i.prioridad === 'Media' ? '#f59e0b' : '#10b981';
                 return `
                     <tr>
-                        <td style="padding: 0.75rem;">${formatearNombre(i.nombre)}</td>
+                        <td style="padding: 0.75rem;">${formatearNombre(i.nombre)}<span class="pedido-faltante-slot" data-producto="${encodeURIComponent(i.nombre || '')}"></span></td>
                         <td style="padding: 0.75rem; text-align: center;">${i.cantidad}</td>
                         <td style="padding: 0.75rem; text-align: center;">
                             <span style="padding: 0.25rem 0.5rem; border-radius: 4px; background: ${prioridadColor}20; color: ${prioridadColor}; font-weight: 600; font-size: 0.8125rem;">${i.prioridad}</span>
@@ -35488,6 +35592,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     </tr>
                 `;
             }).join('');
+            actualizarMiniaturasFaltantePedido();
         }
 
         // Agregar producto a la lista
