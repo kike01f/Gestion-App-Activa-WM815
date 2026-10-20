@@ -2222,6 +2222,16 @@
             text-align: center;
             color: var(--text-secondary);
         }
+        #inventarioBodega .inv-uso {
+            display: block;
+            margin-top: 0.2rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #b45309;
+        }
+        [data-theme="dark"] #inventarioBodega .inv-uso {
+            color: #fbbf24;
+        }
         @media (max-width: 720px) {
             #inventarioBodega .inv-kpis {
                 grid-template-columns: 1fr;
@@ -9020,7 +9030,7 @@
             <header class="inv-head">
                 <div>
                     <h2>Inventario de bodega</h2>
-                    <p>Existencia de cada producto y cuánto conviene pedir si está bajo el mínimo. Conserjería registra las salidas sobre esta misma lista.</p>
+                    <p>Existencia, mínimo y días de uso. Mientras el producto siga en uso, conserjería no puede retirarlo de nuevo sin una justificación.</p>
                 </div>
                 <button type="button" class="btn btn-secondary" id="btnVolverPedidoInsumos" onclick="showTab('insumos')">
                     Volver al pedido
@@ -9073,6 +9083,10 @@
                                 <input type="number" id="productoMinimoInventario" min="0" step="1" value="0" title="Cantidad bajo la cual hay que volver a pedir">
                             </div>
                             <div class="form-group" style="flex: 1;">
+                                <label>Uso (días)</label>
+                                <input type="number" id="productoUsoInventario" min="0" step="1" value="0" title="Días que dura en uso. 0 = sin control. Mientras no se cumplan, un nuevo retiro exige justificación.">
+                            </div>
+                            <div class="form-group" style="flex: 1;">
                                 <label>Unidad</label>
                                 <select id="productoUnidadInventario">
                                     <option value="un">un</option>
@@ -9101,6 +9115,7 @@
                                 <th style="padding: 0.75rem; text-align: left; font-weight: 600;">Producto</th>
                                 <th style="padding: 0.75rem; text-align: center; font-weight: 600; width: 110px;">Existencia</th>
                                 <th style="padding: 0.75rem; text-align: center; font-weight: 600; width: 100px;">Mínimo</th>
+                                <th style="padding: 0.75rem; text-align: center; font-weight: 600; width: 110px;">Uso (días)</th>
                                 <th style="padding: 0.75rem; text-align: center; font-weight: 600; width: 90px;">A pedir</th>
                                 <th style="padding: 0.75rem; text-align: center; font-weight: 600; width: 90px;">Unidad</th>
                                 <th style="padding: 0.75rem; text-align: center; font-weight: 600; width: 180px;">Acciones</th>
@@ -11063,8 +11078,7 @@
                 try {
                     db.settings({
                         ignoreUndefinedProperties: true,
-                        experimentalForceLongPolling: false,
-                        experimentalAutoDetectLongPolling: false
+                        experimentalForceLongPolling: true
                     });
                 } catch (eFs) {}
                 storage = firebase.storage();
@@ -34474,6 +34488,37 @@ document.getElementById('chatForm').onsubmit = function (e) {
         // MÓDULO: PEDIDO DE INSUMOS
         // ============================================
 
+        function diasUsoProductoBodega(p) {
+            var n = parseInt(p && p.tiempoUsoDias, 10);
+            if (!isFinite(n) || n < 0) return 0;
+            return Math.min(3660, n);
+        }
+
+        function usoVigenteProductoBodega(producto, movimientos, ahora) {
+            var dias = diasUsoProductoBodega(producto);
+            if (!dias || !producto) return null;
+            var nombre = String(producto.nombre || '').toLowerCase();
+            var id = String(producto.id || '');
+            var ultima = 0;
+            (movimientos || []).forEach(function (m) {
+                if (!m || m.tipo !== 'salida') return;
+                var mismoId = id && m.productoId != null && String(m.productoId) === id;
+                var mismoNombre = nombre && String(m.nombre || '').toLowerCase() === nombre;
+                if (!mismoId && !mismoNombre) return;
+                var t = Date.parse(m.fecha);
+                if (!isFinite(t) || t <= ultima) return;
+                ultima = t;
+            });
+            if (!ultima) return null;
+            var hasta = ultima + dias * 86400000;
+            if ((ahora || Date.now()) >= hasta) return null;
+            return { desde: ultima, hasta: hasta, dias: dias };
+        }
+
+        function textoFechaUsoBodega(ms) {
+            try { return new Date(ms).toLocaleDateString('es-CL'); } catch (e) { return ''; }
+        }
+
         function normalizarProductoBodega(p) {
             var nombre = formatearNombre((p && p.nombre) || '');
             var existencia = parseInt(p && p.existencia, 10);
@@ -34486,6 +34531,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 nombre: nombre,
                 existencia: existencia,
                 minimo: minimo,
+                tiempoUsoDias: diasUsoProductoBodega(p),
                 unidad: unidad
             };
         }
@@ -34498,14 +34544,19 @@ document.getElementById('chatForm').onsubmit = function (e) {
 
         function fusionarProductosBodega(preferidos, respaldo) {
             var porNombre = {};
-            (respaldo || []).forEach(function (p) {
-                var n = normalizarProductoBodega(p);
-                if (n.nombre) porNombre[n.nombre.toLowerCase()] = n;
-            });
-            (preferidos || []).forEach(function (p) {
-                var n = normalizarProductoBodega(p);
-                if (n.nombre) porNombre[n.nombre.toLowerCase()] = n;
-            });
+            function meter(lista, preferido) {
+                (lista || []).forEach(function (p) {
+                    var n = normalizarProductoBodega(p);
+                    if (!n.nombre) return;
+                    var clave = n.nombre.toLowerCase();
+                    var previo = porNombre[clave];
+                    var traeDias = p && p.tiempoUsoDias != null && p.tiempoUsoDias !== '';
+                    if (preferido && previo && !traeDias && previo.tiempoUsoDias > 0) n.tiempoUsoDias = previo.tiempoUsoDias;
+                    porNombre[clave] = n;
+                });
+            }
+            meter(respaldo, false);
+            meter(preferidos, true);
             return Object.keys(porNombre).map(function (k) { return porNombre[k]; })
                 .sort(function (a, b) { return a.nombre.localeCompare(b.nombre); });
         }
@@ -34729,6 +34780,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                         meta += ' · ' + m.origen;
                     }
                     if (cuando) meta += ' · ' + cuando;
+                    if (m.justificacion) meta += ' · Justificación: ' + m.justificacion;
                     return '<li><span class="inv-mov-tipo ' + tipo + '">' + etiqueta + '</span>' +
                         '<span class="inv-mov-cant">' + signo + (parseInt(m.cantidad, 10) || 0) + '</span>' +
                         '<span class="inv-mov-nombre">' + escapeHtml(formatearNombre(m.nombre || '')) + '</span>' +
@@ -34763,7 +34815,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
             }
             
             if (productos.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7"><p class="inv-vacio">No hay productos en el inventario. Importe un Excel o agregue uno manualmente.</p></td></tr>';
+                tbody.innerHTML = '<tr><td colspan="8"><p class="inv-vacio">No hay productos en el inventario. Importe un Excel o agregue uno manualmente.</p></td></tr>';
                 const btnEliminarSeleccionados = document.getElementById('btnEliminarSeleccionados');
                 if (btnEliminarSeleccionados) btnEliminarSeleccionados.style.display = 'none';
                 const selectAll = document.getElementById('selectAllProductos');
@@ -34787,17 +34839,22 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 if (unidades.indexOf(p.unidad) === -1 && p.unidad) {
                     opts = '<option value="' + p.unidad + '" selected>' + p.unidad + '</option>' + opts;
                 }
+                var uso = usoVigenteProductoBodega(p, window._invBodegaMovs);
+                var usoTxt = uso ? '<span class="inv-uso">En uso hasta ' + textoFechaUsoBodega(uso.hasta) + '</span>' : '';
                 return `
                     <tr class="${pedir > 0 ? 'inv-bajo' : ''}">
                         <td style="padding: 0.75rem; text-align: center;">
                             <input type="checkbox" class="checkbox-producto" data-producto-id="${p.id}" onchange="actualizarBotonEliminarSeleccionados()" style="cursor: pointer;">
                         </td>
-                        <td style="padding: 0.75rem; font-weight: 600;">${formatearNombre(p.nombre)}</td>
+                        <td style="padding: 0.75rem; font-weight: 600;">${formatearNombre(p.nombre)}${usoTxt}</td>
                         <td style="padding: 0.5rem; text-align: center;">
                             <input type="number" min="0" step="1" value="${p.existencia}" data-stock="existencia" data-producto-id="${p.id}" style="width: 4.5rem; text-align: center; padding: 0.35rem;">
                         </td>
                         <td style="padding: 0.5rem; text-align: center;">
                             <input type="number" min="0" step="1" value="${p.minimo}" data-stock="minimo" data-producto-id="${p.id}" style="width: 4.5rem; text-align: center; padding: 0.35rem;">
+                        </td>
+                        <td style="padding: 0.5rem; text-align: center;">
+                            <input type="number" min="0" step="1" value="${diasUsoProductoBodega(p)}" data-stock="uso" data-producto-id="${p.id}" title="Días que dura en uso. 0 = sin control." style="width: 4.5rem; text-align: center; padding: 0.35rem;">
                         </td>
                         <td class="${pedir > 0 ? 'inv-pedir' : ''}" style="padding: 0.75rem; text-align: center;">${pedir > 0 ? pedir : '—'}</td>
                         <td style="padding: 0.5rem; text-align: center;">
@@ -34823,10 +34880,12 @@ document.getElementById('chatForm').onsubmit = function (e) {
             if (!producto) return;
             var filaExistencia = document.querySelector('[data-stock="existencia"][data-producto-id="' + id + '"]');
             var filaMinimo = document.querySelector('[data-stock="minimo"][data-producto-id="' + id + '"]');
+            var filaUso = document.querySelector('[data-stock="uso"][data-producto-id="' + id + '"]');
             var filaUnidad = document.querySelector('[data-stock="unidad"][data-producto-id="' + id + '"]');
             var antes = producto.existencia;
             producto.existencia = Math.max(0, parseInt(filaExistencia && filaExistencia.value, 10) || 0);
             producto.minimo = Math.max(0, parseInt(filaMinimo && filaMinimo.value, 10) || 0);
+            producto.tiempoUsoDias = diasUsoProductoBodega({ tiempoUsoDias: filaUso && filaUso.value });
             producto.unidad = (filaUnidad && filaUnidad.value) || producto.unidad || 'un';
             if (producto.existencia !== antes) {
                 anotarMovimientoBodega(producto, 'ajuste', Math.abs(producto.existencia - antes), 'Ajuste desde gestión');
@@ -35233,6 +35292,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
             const nombre = formatearNombre(document.getElementById('productoNombreInventario').value.trim());
             const existencia = Math.max(0, parseInt(document.getElementById('productoExistenciaInventario').value, 10) || 0);
             const minimo = Math.max(0, parseInt(document.getElementById('productoMinimoInventario').value, 10) || 0);
+            const tiempoUsoDias = diasUsoProductoBodega({ tiempoUsoDias: (document.getElementById('productoUsoInventario') || {}).value });
             const unidad = (document.getElementById('productoUnidadInventario') || {}).value || 'un';
 
             if (!nombre) {
@@ -35249,7 +35309,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 return;
             }
             
-            var nuevo = normalizarProductoBodega({ id: generarId(), nombre: nombre, existencia: existencia, minimo: minimo, unidad: unidad });
+            var nuevo = normalizarProductoBodega({ id: generarId(), nombre: nombre, existencia: existencia, minimo: minimo, tiempoUsoDias: tiempoUsoDias, unidad: unidad });
             productos.push(nuevo);
             if (existencia > 0) anotarMovimientoBodega(nuevo, 'entrada', existencia, 'Alta en inventario');
             await guardarInventario(productos, window._invBodegaMovs);
@@ -35296,6 +35356,10 @@ document.getElementById('chatForm').onsubmit = function (e) {
                             <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--gray-700);">Mínimo</label>
                             <input type="number" id="modalEditarMinimoProducto" min="0" step="1" value="${producto.minimo || 0}" style="width: 100%; padding: 0.625rem; border: 1px solid var(--gray-300); border-radius: 8px;">
                         </div>
+                        <div class="form-group" style="flex: 1;">
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--gray-700);">Uso (días)</label>
+                            <input type="number" id="modalEditarUsoProducto" min="0" step="1" value="${diasUsoProductoBodega(producto)}" title="0 = sin control" style="width: 100%; padding: 0.625rem; border: 1px solid var(--gray-300); border-radius: 8px;">
+                        </div>
                     </div>
                     
                     <div style="display: flex; gap: 0.75rem; justify-content: flex-end;">
@@ -35333,6 +35397,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 producto.nombre = nombreFormateado;
                 producto.existencia = Math.max(0, parseInt(document.getElementById('modalEditarExistenciaProducto').value, 10) || 0);
                 producto.minimo = Math.max(0, parseInt(document.getElementById('modalEditarMinimoProducto').value, 10) || 0);
+                producto.tiempoUsoDias = diasUsoProductoBodega({ tiempoUsoDias: document.getElementById('modalEditarUsoProducto').value });
                 if (producto.existencia !== existenciaAntes) {
                     anotarMovimientoBodega(producto, 'ajuste', Math.abs(producto.existencia - existenciaAntes), 'Ajuste desde gestión');
                 }
@@ -41331,7 +41396,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     "import { getAuth, signInAnonymously } from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js';" +
                     "function pcshGetFs(app) {" +
                     "  try {" +
-                    "    return initializeFirestore(app, { ignoreUndefinedProperties: true, experimentalForceLongPolling: false, experimentalAutoDetectLongPolling: false });" +
+                    "    return initializeFirestore(app, { ignoreUndefinedProperties: true, experimentalForceLongPolling: true, useFetchStreams: false });" +
                     "  } catch (eFs) {" +
                     "    return getFirestore(app);" +
                     "  }" +
