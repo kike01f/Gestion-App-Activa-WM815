@@ -8723,11 +8723,20 @@
                 </div>
             </div>
 
-            <!-- LISTA DE PRODUCTOS -->
+            <!-- INVENTARIO DE BODEGA -->
             <div class="form-section" style="margin-top: 2rem;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 1rem;">
-                    <h3 style="margin: 0;">Lista de Productos</h3>
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 1rem;">
+                    <div>
+                        <h3 style="margin: 0;">Inventario de bodega</h3>
+                        <p style="margin: 0.35rem 0 0; color: var(--gray-600); font-size: 0.8125rem; max-width: 40rem;">Existencia actual de cada producto. Si la cantidad está bajo el mínimo, aparece cuánto conviene pedir este mes. Conserjería registra las salidas y entradas de bodega sobre la misma lista.</p>
+                    </div>
                     <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+                        <button type="button" class="btn btn-primary" id="btnPedirFaltantesInventario" onclick="agregarFaltantesAlPedido()">
+                            Pedir lo que falta
+                        </button>
+                        <button type="button" class="btn btn-success" id="btnIngresarPedidoBodega" onclick="ingresarPedidoABodega()" style="background: #10b981; border-color: #10b981;">
+                            Ingresar pedido a bodega
+                        </button>
                         <label class="btn btn-primary" style="cursor: pointer; margin: 0;">
                             <input type="file" id="inputImportarExcel" accept=".xlsx,.xls,.csv" style="display: none;" onchange="importarProductosDesdeExcel(event)">
                             📥 Importar desde Excel/CSV
@@ -8743,14 +8752,34 @@
                         </button>
                     </div>
                 </div>
+                <div id="resumenInventarioBodega" style="display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 1rem;"></div>
                 
                 <!-- Formulario para agregar producto (oculto por defecto) -->
                 <div id="formAgregarInventario" style="display: none; margin-bottom: 1rem; padding: 1rem; background: var(--bg-secondary); border-radius: 8px; border: 1px solid var(--border-color); transition: background-color 0.3s ease, border-color 0.3s ease;">
                     <form id="formProductoInventario" onsubmit="agregarProductoInventario(event)">
                         <div class="form-row">
-                            <div class="form-group" style="flex: 1;">
+                            <div class="form-group" style="flex: 2;">
                                 <label>Nombre del Producto *</label>
                                 <input type="text" id="productoNombreInventario" required placeholder="Ej: Detergente, Escoba, Bombillas LED" style="text-transform: capitalize;">
+                            </div>
+                            <div class="form-group" style="flex: 1;">
+                                <label>Existencia</label>
+                                <input type="number" id="productoExistenciaInventario" min="0" step="1" value="0">
+                            </div>
+                            <div class="form-group" style="flex: 1;">
+                                <label>Mínimo</label>
+                                <input type="number" id="productoMinimoInventario" min="0" step="1" value="0" title="Cantidad bajo la cual hay que volver a pedir">
+                            </div>
+                            <div class="form-group" style="flex: 1;">
+                                <label>Unidad</label>
+                                <select id="productoUnidadInventario">
+                                    <option value="un">un</option>
+                                    <option value="caja">caja</option>
+                                    <option value="paquete">paquete</option>
+                                    <option value="litro">litro</option>
+                                    <option value="kg">kg</option>
+                                    <option value="rollo">rollo</option>
+                                </select>
                             </div>
                             <div class="form-group" style="display: flex; align-items: flex-end; gap: 0.5rem;">
                                 <button type="submit" class="btn btn-primary">Agregar</button>
@@ -8764,11 +8793,15 @@
                     <table id="tablaInventario" style="width: 100%; border-collapse: collapse; background: var(--bg-primary); border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06); transition: background-color 0.3s ease;">
                         <thead>
                             <tr style="background: linear-gradient(135deg, #75bb21 0%, #5a9219 100%); color: white;">
-                                <th style="padding: 0.75rem; text-align: center; font-weight: 600; width: 50px;">
+                                <th style="padding: 0.75rem; text-align: center; font-weight: 600; width: 40px;">
                                     <input type="checkbox" id="selectAllProductos" onchange="toggleSeleccionarTodosProductos()" style="cursor: pointer;">
                                 </th>
                                 <th style="padding: 0.75rem; text-align: left; font-weight: 600;">Producto</th>
-                                <th style="padding: 0.75rem; text-align: center; font-weight: 600; width: 130px;">Acciones</th>
+                                <th style="padding: 0.75rem; text-align: center; font-weight: 600; width: 110px;">Existencia</th>
+                                <th style="padding: 0.75rem; text-align: center; font-weight: 600; width: 100px;">Mínimo</th>
+                                <th style="padding: 0.75rem; text-align: center; font-weight: 600; width: 90px;">A pedir</th>
+                                <th style="padding: 0.75rem; text-align: center; font-weight: 600; width: 90px;">Unidad</th>
+                                <th style="padding: 0.75rem; text-align: center; font-weight: 600; width: 180px;">Acciones</th>
                             </tr>
                         </thead>
                         <tbody id="tbodyInventario">
@@ -8776,6 +8809,7 @@
                         </tbody>
                     </table>
                 </div>
+                <div id="movimientosInventarioBodega" style="margin-top: 1rem;"></div>
             </div>
         </div>
 
@@ -34101,54 +34135,184 @@ document.getElementById('chatForm').onsubmit = function (e) {
         // MÓDULO: PEDIDO DE INSUMOS
         // ============================================
 
-        // Función para obtener inventario (almacenado globalmente, no por mes)
-        async function obtenerInventario() {
-            try {
-                if (firebaseInitialized && db) {
-                    const docRef = db.collection('comunidad').doc('inventario-productos');
-                    const doc = await docRef.get();
-                    if (doc.exists) {
-                        const productos = doc.data().productos || [];
-                        if (productos.length) {
-                            nubeOlvidarLocal('inventario-productos');
-                            return productos;
-                        }
-                    }
-                    const local = nubeLeerLocal('inventario-productos');
-                    if (local && local.length) {
-                        await db.collection('comunidad').doc('inventario-productos').set({
-                            productos: local,
-                            actualizado: firebase.firestore.FieldValue.serverTimestamp()
-                        });
-                        nubeOlvidarLocal('inventario-productos');
-                        return local;
-                    }
-                    return doc.exists ? (doc.data().productos || []) : [];
-                }
-                return [];
-            } catch (error) {
-                console.error('Error al obtener inventario:', error);
-                return [];
+        function normalizarProductoBodega(p) {
+            var nombre = formatearNombre((p && p.nombre) || '');
+            var existencia = parseInt(p && p.existencia, 10);
+            var minimo = parseInt(p && p.minimo, 10);
+            if (!isFinite(existencia) || existencia < 0) existencia = 0;
+            if (!isFinite(minimo) || minimo < 0) minimo = 0;
+            var unidad = String((p && p.unidad) || 'un').trim().toLowerCase() || 'un';
+            return {
+                id: String((p && p.id) || generarId()),
+                nombre: nombre,
+                existencia: existencia,
+                minimo: minimo,
+                unidad: unidad
+            };
+        }
+
+        function cantidadAPedirBodega(p) {
+            var min = parseInt(p && p.minimo, 10) || 0;
+            var ex = parseInt(p && p.existencia, 10) || 0;
+            return min > ex ? (min - ex) : 0;
+        }
+
+        function anotarMovimientoBodega(producto, tipo, cantidad, nota) {
+            window._invBodegaMovs = Array.isArray(window._invBodegaMovs) ? window._invBodegaMovs : [];
+            window._invBodegaMovs.push({
+                id: generarId(),
+                productoId: producto.id,
+                nombre: producto.nombre,
+                tipo: tipo,
+                cantidad: cantidad,
+                existencia: producto.existencia,
+                nota: nota || '',
+                origen: 'gestion',
+                fecha: new Date().toISOString()
+            });
+            if (window._invBodegaMovs.length > 80) {
+                window._invBodegaMovs = window._invBodegaMovs.slice(-80);
             }
         }
 
-        // Función para guardar inventario (siempre ordenado alfabéticamente)
-        async function guardarInventario(productos) {
+        async function escribirEspejoBodegaConserjeria(payload) {
+            if (typeof obtenerDbConserjeriaOperativa !== 'function') return;
+            var sdb = await obtenerDbConserjeriaOperativa();
+            await sdb.collection('pcsh_settings').doc('inventarioBodega').set({
+                productos: payload.productos,
+                movimientos: payload.movimientos,
+                stockActualizadoMs: payload.stockActualizadoMs,
+                origen: 'gestion-wm'
+            });
+        }
+
+        async function leerEspejoBodegaConserjeria() {
+            if (typeof obtenerDbConserjeriaOperativa !== 'function') return null;
+            var sdb = await obtenerDbConserjeriaOperativa();
+            var snap = await sdb.collection('pcsh_settings').doc('inventarioBodega').get();
+            if (!snap.exists) return null;
+            return snap.data() || null;
+        }
+
+        // Inventario de bodega: catálogo + existencia. La misma lista la escribe Conserjería.
+        async function obtenerInventario() {
             try {
-                // Ordenar alfabéticamente antes de guardar
-                productos.sort((a, b) => a.nombre.localeCompare(b.nombre));
-                
+                var admin = { productos: [], movimientos: [], stockActualizadoMs: 0 };
+                if (firebaseInitialized && db) {
+                    var doc = await db.collection('comunidad').doc('inventario-productos').get();
+                    if (doc.exists) {
+                        var data = doc.data() || {};
+                        admin.productos = data.productos || [];
+                        admin.movimientos = data.movimientos || [];
+                        admin.stockActualizadoMs = Number(data.stockActualizadoMs) || 0;
+                        if ((admin.productos || []).length) nubeOlvidarLocal('inventario-productos');
+                    }
+                    if (!admin.productos.length) {
+                        var local = nubeLeerLocal('inventario-productos');
+                        if (local && local.length) admin.productos = local;
+                    }
+                }
+                var remoto = null;
+                try {
+                    remoto = await leerEspejoBodegaConserjeria();
+                } catch (eRemoto) {
+                    console.warn('[inventario-bodega] No se pudo leer la bodega de conserjería:', eRemoto);
+                }
+                var tRemoto = Number(remoto && remoto.stockActualizadoMs) || 0;
+                var usarRemoto = !!(remoto && tRemoto > admin.stockActualizadoMs);
+                var crudos = (usarRemoto ? remoto.productos : admin.productos) || [];
+                var movimientos = ((usarRemoto ? remoto.movimientos : admin.movimientos) || []).slice(-80);
+                var productos = crudos.map(normalizarProductoBodega).filter(function (p) { return p.nombre; });
+                productos.sort(function (a, b) { return a.nombre.localeCompare(b.nombre); });
+                window._invBodegaMovs = movimientos;
+                window._invBodegaMs = usarRemoto ? tRemoto : admin.stockActualizadoMs;
+                window._invBodegaCache = productos;
+                if (usarRemoto && firebaseInitialized && db) {
+                    await db.collection('comunidad').doc('inventario-productos').set({
+                        productos: productos,
+                        movimientos: movimientos,
+                        stockActualizadoMs: tRemoto,
+                        actualizado: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    nubeOlvidarLocal('inventario-productos');
+                } else if (!remoto && productos.length) {
+                    try {
+                        var msInicial = window._invBodegaMs || Date.now();
+                        window._invBodegaMs = msInicial;
+                        await escribirEspejoBodegaConserjeria({
+                            productos: productos,
+                            movimientos: movimientos,
+                            stockActualizadoMs: msInicial
+                        });
+                    } catch (ePush) {
+                        console.warn('[inventario-bodega] No se pudo publicar el inventario en conserjería:', ePush);
+                    }
+                }
+                return productos;
+            } catch (error) {
+                console.error('Error al obtener inventario:', error);
+                return Array.isArray(window._invBodegaCache) ? window._invBodegaCache : [];
+            }
+        }
+
+        // Función para guardar inventario (siempre ordenado alfabéticamente) y el espejo de conserjería
+        async function guardarInventario(productos, movimientos) {
+            try {
+                productos = (productos || []).map(normalizarProductoBodega).filter(function (p) { return p.nombre; });
+                productos.sort(function (a, b) { return a.nombre.localeCompare(b.nombre); });
+                var movs = Array.isArray(movimientos) ? movimientos : (window._invBodegaMovs || []);
+                movs = movs.slice(-80);
+                var ms = Date.now();
+                window._invBodegaMs = ms;
+                window._invBodegaCache = productos;
+                window._invBodegaMovs = movs;
+
                 if (!firebaseInitialized || !db) {
                     throw new Error('No hay conexión con Firestore. El inventario solo se guarda en la nube.');
                 }
                 await db.collection('comunidad').doc('inventario-productos').set({
                     productos: productos,
+                    movimientos: movs,
+                    stockActualizadoMs: ms,
                     actualizado: firebase.firestore.FieldValue.serverTimestamp()
                 });
                 nubeOlvidarLocal('inventario-productos');
+                try {
+                    await escribirEspejoBodegaConserjeria({
+                        productos: productos,
+                        movimientos: movs,
+                        stockActualizadoMs: ms
+                    });
+                } catch (eEspejo) {
+                    console.warn('[inventario-bodega] Guardado en gestión, sin espejo en conserjería:', eEspejo);
+                }
             } catch (error) {
                 console.error('Error al guardar inventario:', error);
+                throw error;
             }
+        }
+
+        function escucharInventarioBodega() {
+            if (window._invBodegaUnsub || typeof obtenerDbConserjeriaOperativa !== 'function') return;
+            obtenerDbConserjeriaOperativa().then(function (sdb) {
+                window._invBodegaUnsub = sdb.collection('pcsh_settings').doc('inventarioBodega').onSnapshot(function (snap) {
+                    if (!snap.exists) return;
+                    var data = snap.data() || {};
+                    var remoto = Number(data.stockActualizadoMs) || 0;
+                    var local = Number(window._invBodegaMs) || 0;
+                    if (remoto <= local) return;
+                    var tabla = document.getElementById('tablaInventario');
+                    if (tabla && document.activeElement && tabla.contains(document.activeElement)) return;
+                    window._invBodegaMs = remoto;
+                    if (document.querySelector('#insumos.tab-content.active')) {
+                        cargarInventario();
+                    }
+                }, function (err) {
+                    console.warn('[inventario-bodega] escucha', err);
+                });
+            }).catch(function (err) {
+                console.warn('[inventario-bodega] escucha', err);
+            });
         }
 
         // Función para formatear texto: primera letra mayúscula, resto minúscula
@@ -34159,13 +34323,52 @@ document.getElementById('chatForm').onsubmit = function (e) {
             ).join(' ');
         }
 
+        function pintarResumenInventario(productos) {
+            var host = document.getElementById('resumenInventarioBodega');
+            if (!host) return;
+            var lista = productos || [];
+            var bajo = lista.filter(function (p) { return cantidadAPedirBodega(p) > 0; }).length;
+            var unidades = lista.reduce(function (acc, p) { return acc + (parseInt(p.existencia, 10) || 0); }, 0);
+            host.innerHTML =
+                '<span style="padding: 0.35rem 0.7rem; border-radius: 999px; background: #E8F6D4; color: #365f14; font-size: 0.8rem; font-weight: 700;">' + lista.length + ' productos</span>' +
+                '<span style="padding: 0.35rem 0.7rem; border-radius: 999px; background: #F9FAFB; color: #111827; border: 1px solid #E5E7EB; font-size: 0.8rem; font-weight: 700;">' + unidades + ' en existencia</span>' +
+                '<span style="padding: 0.35rem 0.7rem; border-radius: 999px; background: ' + (bajo ? '#FEF3C7' : '#E8F6D4') + '; color: ' + (bajo ? '#92400E' : '#365f14') + '; font-size: 0.8rem; font-weight: 700;">' + bajo + ' bajo el mínimo</span>';
+        }
+
+        function pintarMovimientosInventario() {
+            var host = document.getElementById('movimientosInventarioBodega');
+            if (!host) return;
+            var movs = (window._invBodegaMovs || []).slice(-8).reverse();
+            if (!movs.length) {
+                host.innerHTML = '';
+                return;
+            }
+            host.innerHTML = '<h4 style="margin: 0 0 0.5rem; font-size: 0.9rem;">Últimos movimientos de bodega</h4>' +
+                '<div style="display: flex; flex-direction: column; gap: 0.35rem;">' +
+                movs.map(function (m) {
+                    var cuando = '';
+                    try { cuando = new Date(m.fecha).toLocaleString('es-CL'); } catch (e) { cuando = ''; }
+                    var signo = m.tipo === 'salida' ? '−' : (m.tipo === 'entrada' ? '+' : '=');
+                    return '<div style="font-size: 0.8rem; color: var(--gray-700);">' +
+                        '<strong>' + signo + (m.cantidad || 0) + '</strong> ' + formatearNombre(m.nombre || '') +
+                        ' · queda ' + (m.existencia != null ? m.existencia : '—') +
+                        (m.nota ? ' · ' + m.nota : '') +
+                        (m.origen ? ' · ' + m.origen : '') +
+                        (cuando ? ' · ' + cuando : '') +
+                        '</div>';
+                }).join('') + '</div>';
+        }
+
         // Cargar inventario y actualizar select
         async function cargarInventario() {
+            escucharInventarioBodega();
             const productos = await obtenerInventario();
             const tbody = document.getElementById('tbodyInventario');
             const selectProductos = document.getElementById('insumoNombre');
             
             if (!tbody) return;
+            pintarResumenInventario(productos);
+            pintarMovimientosInventario();
             
             // Actualizar select de productos
             if (selectProductos) {
@@ -34175,15 +34378,15 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 productos.sort((a, b) => a.nombre.localeCompare(b.nombre));
                 productos.forEach(p => {
                     const option = document.createElement('option');
+                    const pedir = cantidadAPedirBodega(p);
                     option.value = p.nombre;
-                    option.textContent = formatearNombre(p.nombre);
+                    option.textContent = formatearNombre(p.nombre) + ' · hay ' + p.existencia + (pedir > 0 ? ' · pedir ' + pedir : '');
                     selectProductos.appendChild(option);
                 });
             }
             
             if (productos.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="3" class="empty-state" style="padding: 2rem; text-align: center; color: var(--gray-500);"><p>No hay productos en la lista. Importe desde Excel o agregue manualmente.</p></td></tr>';
-                // Ocultar botón eliminar seleccionados y resetear checkbox
+                tbody.innerHTML = '<tr><td colspan="7" class="empty-state" style="padding: 2rem; text-align: center; color: var(--gray-500);"><p>No hay productos en el inventario. Importe desde Excel o agregue manualmente.</p></td></tr>';
                 const btnEliminarSeleccionados = document.getElementById('btnEliminarSeleccionados');
                 if (btnEliminarSeleccionados) btnEliminarSeleccionados.style.display = 'none';
                 const selectAll = document.getElementById('selectAllProductos');
@@ -34191,19 +34394,43 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 return;
             }
 
-            // Ordenar por nombre
-            productos.sort((a, b) => a.nombre.localeCompare(b.nombre));
+            productos.sort((a, b) => {
+                var pa = cantidadAPedirBodega(a) > 0 ? 0 : 1;
+                var pb = cantidadAPedirBodega(b) > 0 ? 0 : 1;
+                if (pa !== pb) return pa - pb;
+                return a.nombre.localeCompare(b.nombre);
+            });
 
+            var unidades = ['un', 'caja', 'paquete', 'litro', 'kg', 'rollo'];
             tbody.innerHTML = productos.map(p => {
+                var pedir = cantidadAPedirBodega(p);
+                var fondo = pedir > 0 ? 'background: #FFFBEB;' : '';
+                var opts = unidades.map(function (u) {
+                    return '<option value="' + u + '"' + (p.unidad === u ? ' selected' : '') + '>' + u + '</option>';
+                }).join('');
+                if (unidades.indexOf(p.unidad) === -1 && p.unidad) {
+                    opts = '<option value="' + p.unidad + '" selected>' + p.unidad + '</option>' + opts;
+                }
                 return `
-                    <tr>
+                    <tr style="${fondo}">
                         <td style="padding: 0.75rem; text-align: center;">
                             <input type="checkbox" class="checkbox-producto" data-producto-id="${p.id}" onchange="actualizarBotonEliminarSeleccionados()" style="cursor: pointer;">
                         </td>
-                        <td style="padding: 0.75rem;">${formatearNombre(p.nombre)}</td>
+                        <td style="padding: 0.75rem; font-weight: 600;">${formatearNombre(p.nombre)}</td>
+                        <td style="padding: 0.5rem; text-align: center;">
+                            <input type="number" min="0" step="1" value="${p.existencia}" data-stock="existencia" data-producto-id="${p.id}" style="width: 4.5rem; text-align: center; padding: 0.35rem;">
+                        </td>
+                        <td style="padding: 0.5rem; text-align: center;">
+                            <input type="number" min="0" step="1" value="${p.minimo}" data-stock="minimo" data-producto-id="${p.id}" style="width: 4.5rem; text-align: center; padding: 0.35rem;">
+                        </td>
+                        <td style="padding: 0.75rem; text-align: center; font-weight: 700; color: ${pedir > 0 ? '#92400E' : '#365f14'};">${pedir > 0 ? pedir : '—'}</td>
+                        <td style="padding: 0.5rem; text-align: center;">
+                            <select data-stock="unidad" data-producto-id="${p.id}" style="padding: 0.35rem;">${opts}</select>
+                        </td>
                         <td style="padding: 0.75rem; text-align: center;">
                             <div class="tabla-acciones">
-                            <button class="btn btn-primary btn-sm" onclick="editarProductoInventario('${p.id}')" style="margin-right: 0.5rem; padding: 0.25rem 0.5rem; font-size: 0.75rem;">Editar</button>
+                            <button class="btn btn-primary btn-sm" onclick="guardarFilaInventario('${p.id}')" style="margin-right: 0.35rem; padding: 0.25rem 0.5rem; font-size: 0.75rem;">Guardar</button>
+                            ${pedir > 0 ? '<button class="btn btn-secondary btn-sm" onclick="pedirProductoDesdeBodega(\'' + p.id + '\')" style="margin-right: 0.35rem; padding: 0.25rem 0.5rem; font-size: 0.75rem;">Pedir</button>' : ''}
                             <button class="btn btn-danger btn-sm" onclick="eliminarProductoInventario('${p.id}')" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">Eliminar</button>
                             </div>
                         </td>
@@ -34211,9 +34438,132 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 `;
             }).join('');
 
-            // Actualizar estado del botón eliminar seleccionados y checkbox "Seleccionar todos"
             actualizarBotonEliminarSeleccionados();
         }
+
+        window.guardarFilaInventario = async function(id) {
+            var productos = await obtenerInventario();
+            var producto = productos.find(function (p) { return String(p.id) === String(id); });
+            if (!producto) return;
+            var filaExistencia = document.querySelector('[data-stock="existencia"][data-producto-id="' + id + '"]');
+            var filaMinimo = document.querySelector('[data-stock="minimo"][data-producto-id="' + id + '"]');
+            var filaUnidad = document.querySelector('[data-stock="unidad"][data-producto-id="' + id + '"]');
+            var antes = producto.existencia;
+            producto.existencia = Math.max(0, parseInt(filaExistencia && filaExistencia.value, 10) || 0);
+            producto.minimo = Math.max(0, parseInt(filaMinimo && filaMinimo.value, 10) || 0);
+            producto.unidad = (filaUnidad && filaUnidad.value) || producto.unidad || 'un';
+            if (producto.existencia !== antes) {
+                anotarMovimientoBodega(producto, 'ajuste', Math.abs(producto.existencia - antes), 'Ajuste desde gestión');
+            }
+            await guardarInventario(productos, window._invBodegaMovs);
+            mostrarAlerta('Existencia actualizada.', 'Inventario');
+            await cargarInventario();
+        };
+
+        window.pedirProductoDesdeBodega = async function(id) {
+            var productos = await obtenerInventario();
+            var producto = productos.find(function (p) { return String(p.id) === String(id); });
+            if (!producto) return;
+            await agregarProductosAlPedidoMes([{
+                nombre: producto.nombre,
+                cantidad: cantidadAPedirBodega(producto),
+                observaciones: 'Inventario: hay ' + producto.existencia + ', mínimo ' + producto.minimo
+            }]);
+        };
+
+        window.agregarFaltantesAlPedido = async function() {
+            var productos = await obtenerInventario();
+            var faltantes = productos.filter(function (p) { return cantidadAPedirBodega(p) > 0; }).map(function (p) {
+                return {
+                    nombre: p.nombre,
+                    cantidad: cantidadAPedirBodega(p),
+                    observaciones: 'Inventario: hay ' + p.existencia + ', mínimo ' + p.minimo
+                };
+            });
+            if (!faltantes.length) {
+                mostrarAlerta('Ningún producto está bajo el mínimo.', 'Inventario');
+                return;
+            }
+            await agregarProductosAlPedidoMes(faltantes);
+        };
+
+        async function agregarProductosAlPedidoMes(items) {
+            if (window.mesEnConsulta && !window.mesReabierto) {
+                mostrarAlerta('No se pueden agregar productos a un mes archivado.', 'Mes Archivado');
+                return;
+            }
+            var mesActual = obtenerMesActual();
+            if (await verificarPedidoCerrado('insumos', mesActual)) {
+                mostrarAlerta('El pedido está cerrado. Reábralo para agregar productos.', 'Pedido Cerrado');
+                return;
+            }
+            var insumos = await obtenerDatosMes('insumos');
+            var lista = Array.isArray(insumos) ? insumos : [];
+            var agregados = 0;
+            var actualizados = 0;
+            items.forEach(function (item) {
+                var cantidad = parseInt(item.cantidad, 10) || 0;
+                if (cantidad <= 0) return;
+                var nombre = formatearNombre(item.nombre);
+                var existente = lista.find(function (i) { return formatearNombre(i.nombre || '').toLowerCase() === nombre.toLowerCase(); });
+                if (existente) {
+                    if ((parseInt(existente.cantidad, 10) || 0) < cantidad) {
+                        existente.cantidad = cantidad;
+                        existente.observaciones = item.observaciones || existente.observaciones || '';
+                        actualizados++;
+                    }
+                    return;
+                }
+                lista.push({
+                    id: generarId(),
+                    nombre: nombre,
+                    cantidad: cantidad,
+                    prioridad: 'Alta',
+                    observaciones: item.observaciones || '',
+                    mes: mesActual
+                });
+                agregados++;
+            });
+            if (!agregados && !actualizados) {
+                mostrarAlerta('Esos productos ya están en el pedido con la cantidad sugerida.', 'Pedido');
+                return;
+            }
+            await guardarDatosMes('insumos', lista);
+            mostrarAlerta((agregados ? agregados + ' producto(s) agregado(s). ' : '') + (actualizados ? actualizados + ' cantidad(es) actualizada(s).' : ''), 'Pedido');
+            await cargarInsumos();
+        }
+
+        window.ingresarPedidoABodega = async function() {
+            if (!(await confirmarAccion('¿Sumar las cantidades del pedido del mes a la existencia de bodega?'))) return;
+            var insumos = await obtenerDatosMes('insumos');
+            var lista = Array.isArray(insumos) ? insumos : [];
+            if (!lista.length) {
+                mostrarAlerta('El pedido del mes está vacío.', 'Inventario');
+                return;
+            }
+            var productos = await obtenerInventario();
+            var ingresados = 0;
+            lista.forEach(function (item) {
+                var cantidad = parseInt(item.cantidad, 10) || 0;
+                if (cantidad <= 0 || !item.nombre) return;
+                var nombre = formatearNombre(item.nombre);
+                var producto = productos.find(function (p) { return p.nombre.toLowerCase() === nombre.toLowerCase(); });
+                if (!producto) {
+                    producto = normalizarProductoBodega({ id: generarId(), nombre: nombre, existencia: 0, minimo: 0, unidad: 'un' });
+                    productos.push(producto);
+                }
+                producto.existencia = (parseInt(producto.existencia, 10) || 0) + cantidad;
+                anotarMovimientoBodega(producto, 'entrada', cantidad, 'Recepción del pedido del mes');
+                ingresados++;
+            });
+            if (!ingresados) {
+                mostrarAlerta('No hay cantidades para ingresar.', 'Inventario');
+                return;
+            }
+            await guardarInventario(productos, window._invBodegaMovs);
+            mostrarAlerta('Pedido ingresado a bodega. La existencia quedó actualizada.', 'Inventario');
+            await cargarInventario();
+        };
 
         // Cargar pedido de insumos
         async function cargarInsumos() {
@@ -34309,6 +34659,9 @@ document.getElementById('chatForm').onsubmit = function (e) {
             event.preventDefault();
             
             const nombre = formatearNombre(document.getElementById('productoNombreInventario').value.trim());
+            const existencia = Math.max(0, parseInt(document.getElementById('productoExistenciaInventario').value, 10) || 0);
+            const minimo = Math.max(0, parseInt(document.getElementById('productoMinimoInventario').value, 10) || 0);
+            const unidad = (document.getElementById('productoUnidadInventario') || {}).value || 'un';
 
             if (!nombre) {
                 mostrarAlerta('El nombre del producto es requerido.', 'Error');
@@ -34324,8 +34677,10 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 return;
             }
             
-            productos.push({ id: generarId(), nombre: nombre });
-            await guardarInventario(productos);
+            var nuevo = normalizarProductoBodega({ id: generarId(), nombre: nombre, existencia: existencia, minimo: minimo, unidad: unidad });
+            productos.push(nuevo);
+            if (existencia > 0) anotarMovimientoBodega(nuevo, 'entrada', existencia, 'Alta en inventario');
+            await guardarInventario(productos, window._invBodegaMovs);
             mostrarAlerta('Producto agregado exitosamente.', 'Registrado');
             
             document.getElementById('formProductoInventario').reset();
@@ -34356,9 +34711,19 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 <div style="background: var(--bg-primary); padding: 2rem; border-radius: 12px; max-width: 500px; width: 90%; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); transition: background-color 0.3s ease;">
                     <h3 style="margin: 0 0 1.5rem 0; color: var(--gray-900); font-size: 1.25rem; font-weight: 700;">Editar Producto</h3>
                     
-                    <div class="form-group" style="margin-bottom: 1.5rem;">
+                    <div class="form-group" style="margin-bottom: 1rem;">
                         <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--gray-700);">Nombre del Producto *</label>
                         <input type="text" id="modalEditarNombreProducto" value="${producto.nombre}" required style="width: 100%; padding: 0.625rem; border: 1px solid var(--gray-300); border-radius: 8px; font-size: 0.875rem; text-transform: capitalize;">
+                    </div>
+                    <div style="display: flex; gap: 0.75rem; margin-bottom: 1.5rem;">
+                        <div class="form-group" style="flex: 1;">
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--gray-700);">Existencia</label>
+                            <input type="number" id="modalEditarExistenciaProducto" min="0" step="1" value="${producto.existencia || 0}" style="width: 100%; padding: 0.625rem; border: 1px solid var(--gray-300); border-radius: 8px;">
+                        </div>
+                        <div class="form-group" style="flex: 1;">
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--gray-700);">Mínimo</label>
+                            <input type="number" id="modalEditarMinimoProducto" min="0" step="1" value="${producto.minimo || 0}" style="width: 100%; padding: 0.625rem; border: 1px solid var(--gray-300); border-radius: 8px;">
+                        </div>
                     </div>
                     
                     <div style="display: flex; gap: 0.75rem; justify-content: flex-end;">
@@ -34392,8 +34757,14 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     return;
                 }
 
+                var existenciaAntes = producto.existencia;
                 producto.nombre = nombreFormateado;
-                await guardarInventario(productos);
+                producto.existencia = Math.max(0, parseInt(document.getElementById('modalEditarExistenciaProducto').value, 10) || 0);
+                producto.minimo = Math.max(0, parseInt(document.getElementById('modalEditarMinimoProducto').value, 10) || 0);
+                if (producto.existencia !== existenciaAntes) {
+                    anotarMovimientoBodega(producto, 'ajuste', Math.abs(producto.existencia - existenciaAntes), 'Ajuste desde gestión');
+                }
+                await guardarInventario(productos, window._invBodegaMovs);
                 mostrarAlerta('Producto actualizado exitosamente.', 'Actualizado');
                 modal.style.display = 'none';
                 await cargarInventario();
@@ -34841,10 +35212,13 @@ document.getElementById('chatForm').onsubmit = function (e) {
                         const nombreFormateado = formatearNombre(nombre);
                         const existe = productos.find(p => p.nombre.toLowerCase() === nombreFormateado.toLowerCase());
                         if (!existe) {
-                            productos.push({
+                            productos.push(normalizarProductoBodega({
                                 id: generarId(),
-                                nombre: nombreFormateado
-                            });
+                                nombre: nombreFormateado,
+                                existencia: 0,
+                                minimo: 0,
+                                unidad: 'un'
+                            }));
                             nuevosProductos++;
                         }
                     }
@@ -34890,10 +35264,13 @@ document.getElementById('chatForm').onsubmit = function (e) {
                         const nombreFormateado = formatearNombre(nombre);
                         const existe = productos.find(p => p.nombre.toLowerCase() === nombreFormateado.toLowerCase());
                         if (!existe) {
-                            productos.push({
+                            productos.push(normalizarProductoBodega({
                                 id: generarId(),
-                                nombre: nombreFormateado
-                            });
+                                nombre: nombreFormateado,
+                                existencia: 0,
+                                minimo: 0,
+                                unidad: 'un'
+                            }));
                             nuevosProductos++;
                         }
                     }
