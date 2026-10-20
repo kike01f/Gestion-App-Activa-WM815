@@ -9035,7 +9035,7 @@
             <header class="inv-head">
                 <div>
                     <h2>Inventario de bodega</h2>
-                    <p>Por persona: si alguien ya retiró ese producto y sigue dentro de sus días, solo esa persona recibe la alerta al pedirlo de nuevo. Uso común: mientras haya un envase en uso, nadie retira otro sin justificación. Son controles distintos.</p>
+                    <p>Por persona: cada producto tiene sus propios días. El plazo corre desde el último retiro de ese empleado y no afecta a los demás. Uso común es otro control: mientras haya un envase en uso, nadie retira otro sin justificación.</p>
                 </div>
                 <button type="button" class="btn btn-secondary" id="btnVolverPedidoInsumos" onclick="showTab('insumos')">
                     Volver al pedido
@@ -9088,14 +9088,18 @@
                                 <input type="number" id="productoMinimoInventario" min="0" step="1" value="0" title="Cantidad bajo la cual hay que volver a pedir">
                             </div>
                             <div class="form-group" style="flex: 1;">
-                                <label>Uso (días)</label>
-                                <input type="number" id="productoUsoInventario" min="0" step="1" value="0" title="Días de la casilla que esté marcada. 0 = sin alerta.">
+                                <label>Días por persona</label>
+                                <input type="number" id="productoDiasPersonaInventario" min="0" step="1" value="0" title="Días que debe esperar cada empleado antes de retirar de nuevo este producto.">
                             </div>
                             <div class="form-group" style="flex: 1; display: flex; align-items: flex-end;">
-                                <label style="display: flex; align-items: center; gap: 0.4rem; margin: 0 0 0.45rem;" title="Solo alerta a quien ya retiró este producto y sigue dentro de sus días. Los demás pueden retirar.">
+                                <label style="display: flex; align-items: center; gap: 0.4rem; margin: 0 0 0.45rem;" title="Sigue a cada empleado con los días asignados a este producto.">
                                     <input type="checkbox" id="productoIndividualInventario">
                                     Por persona
                                 </label>
+                            </div>
+                            <div class="form-group" style="flex: 1;">
+                                <label>Días uso común</label>
+                                <input type="number" id="productoUsoInventario" min="0" step="1" value="0" title="Días que dura un envase de uso común. 0 = sin alerta.">
                             </div>
                             <div class="form-group" style="flex: 1; display: flex; align-items: flex-end;">
                                 <label style="display: flex; align-items: center; gap: 0.4rem; margin: 0 0 0.45rem;" title="Como el azúcar: si hay uno en uso, nadie retira otro hasta que se cumpla el plazo.">
@@ -9132,7 +9136,7 @@
                                 <th style="padding: 0.75rem; text-align: left; font-weight: 600;">Producto</th>
                                 <th style="padding: 0.75rem; text-align: center; font-weight: 600; width: 110px;">Existencia</th>
                                 <th style="padding: 0.75rem; text-align: center; font-weight: 600; width: 100px;">Mínimo</th>
-                                <th style="padding: 0.75rem; text-align: center; font-weight: 600; width: 210px;">Control</th>
+                                <th style="padding: 0.75rem; text-align: center; font-weight: 600; width: 230px;">Control</th>
                                 <th style="padding: 0.75rem; text-align: center; font-weight: 600; width: 90px;">A pedir</th>
                                 <th style="padding: 0.75rem; text-align: center; font-weight: 600; width: 90px;">Unidad</th>
                                 <th style="padding: 0.75rem; text-align: center; font-weight: 600; width: 180px;">Acciones</th>
@@ -34525,6 +34529,17 @@ document.getElementById('chatForm').onsubmit = function (e) {
             return Math.min(3660, n);
         }
 
+        function diasPorPersonaProductoBodega(p) {
+            if (!p) return 0;
+            if (p.diasPorPersona != null && p.diasPorPersona !== '') {
+                var n = parseInt(p.diasPorPersona, 10);
+                if (!isFinite(n) || n < 0) return 0;
+                return Math.min(3660, n);
+            }
+            if (individualActivoProductoBodega(p)) return diasUsoProductoBodega(p);
+            return 0;
+        }
+
         function personaClaveBodega(nombre) {
             return String(nombre || '').trim().replace(/\s+/g, ' ').toLowerCase();
         }
@@ -34564,7 +34579,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
 
         function usosIndividualesProductoBodega(producto, movimientos, ahora) {
             if (!individualActivoProductoBodega(producto)) return [];
-            var dias = diasUsoProductoBodega(producto);
+            var dias = diasPorPersonaProductoBodega(producto);
             if (!dias || !producto) return [];
             var porPersona = {};
             salidasDeProductoBodega(producto, movimientos).forEach(function (m) {
@@ -34617,6 +34632,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 existencia: existencia,
                 minimo: minimo,
                 tiempoUsoDias: diasUsoProductoBodega(p),
+                diasPorPersona: diasPorPersonaProductoBodega(p),
                 plazoActivo: plazoActivoProductoBodega(p),
                 individualActivo: individualActivoProductoBodega(p),
                 unidad: unidad
@@ -34638,9 +34654,11 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     var clave = n.nombre.toLowerCase();
                     var previo = porNombre[clave];
                     var traeDias = p && p.tiempoUsoDias != null && p.tiempoUsoDias !== '';
+                    var traeDiasPersona = p && p.diasPorPersona != null && p.diasPorPersona !== '';
                     var traePlazo = p && p.plazoActivo != null && p.plazoActivo !== '';
                     var traeIndividual = p && p.individualActivo != null && p.individualActivo !== '';
                     if (preferido && previo && !traeDias && previo.tiempoUsoDias > 0) n.tiempoUsoDias = previo.tiempoUsoDias;
+                    if (preferido && previo && !traeDiasPersona && previo.diasPorPersona > 0) n.diasPorPersona = previo.diasPorPersona;
                     if (preferido && previo && !traePlazo && previo.plazoActivo) n.plazoActivo = true;
                     if (preferido && previo && !traeIndividual && previo.individualActivo) n.individualActivo = true;
                     porNombre[clave] = n;
@@ -35001,6 +35019,8 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     usoPartes.push('Por persona: ' + personas.slice(0, 3).map(function (u) {
                         return u.persona + ' hasta ' + textoFechaUsoBodega(u.hasta);
                     }).join(' · ') + (personas.length > 3 ? ' · +' + (personas.length - 3) : ''));
+                } else if (individualActivoProductoBodega(p) && diasPorPersonaProductoBodega(p) > 0) {
+                    usoPartes.push('Por persona: ' + diasPorPersonaProductoBodega(p) + ' días');
                 }
                 var usoTxt = usoPartes.length ? '<span class="inv-uso">' + escapeHtml(usoPartes.join(' · ')) + '</span>' : '';
                 return `
@@ -35017,15 +35037,22 @@ document.getElementById('chatForm').onsubmit = function (e) {
                         </td>
                         <td style="padding: 0.5rem; text-align: center;">
                             <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 0.2rem;">
-                                <label style="display: inline-flex; align-items: center; gap: 0.3rem; font-size: 0.75rem; font-weight: 600;">
-                                    <input type="checkbox" data-stock="individual" data-producto-id="${p.id}" ${individualActivoProductoBodega(p) ? 'checked' : ''} title="Alerta solo a quien ya retiró este producto y sigue dentro de sus días." style="cursor: pointer;">
-                                    Por persona
-                                </label>
-                                <label style="display: inline-flex; align-items: center; gap: 0.3rem; font-size: 0.75rem; font-weight: 600;">
-                                    <input type="checkbox" data-stock="plazo" data-producto-id="${p.id}" ${plazoActivoProductoBodega(p) ? 'checked' : ''} title="Uso común: mientras haya un envase en uso, nadie retira otro sin justificación." style="cursor: pointer;">
-                                    Uso común
-                                </label>
-                                <input type="number" min="0" step="1" value="${diasUsoProductoBodega(p)}" data-stock="uso" data-producto-id="${p.id}" title="Días de la casilla marcada. 0 = sin alerta." style="width: 4.2rem; text-align: center; padding: 0.35rem;">
+                                <div style="display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.75rem; font-weight: 600;">
+                                    <label style="display: inline-flex; align-items: center; gap: 0.3rem;">
+                                        <input type="checkbox" data-stock="individual" data-producto-id="${p.id}" ${individualActivoProductoBodega(p) ? 'checked' : ''} title="Sigue a cada empleado con los días de este producto." style="cursor: pointer;">
+                                        Por persona
+                                    </label>
+                                    <input type="number" min="0" step="1" value="${diasPorPersonaProductoBodega(p)}" data-stock="dias-persona" data-producto-id="${p.id}" title="Días asignados a este producto para cada empleado" style="width: 3.4rem; text-align: center; padding: 0.25rem;">
+                                    días
+                                </div>
+                                <div style="display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.75rem; font-weight: 600;">
+                                    <label style="display: inline-flex; align-items: center; gap: 0.3rem;">
+                                        <input type="checkbox" data-stock="plazo" data-producto-id="${p.id}" ${plazoActivoProductoBodega(p) ? 'checked' : ''} title="Uso común: mientras haya un envase en uso, nadie retira otro sin justificación." style="cursor: pointer;">
+                                        Uso común
+                                    </label>
+                                    <input type="number" min="0" step="1" value="${diasUsoProductoBodega(p)}" data-stock="uso" data-producto-id="${p.id}" title="Días del envase de uso común. 0 = sin alerta." style="width: 3.4rem; text-align: center; padding: 0.25rem;">
+                                    días
+                                </div>
                             </div>
                         </td>
                         <td class="${pedir > 0 ? 'inv-pedir' : ''}" style="padding: 0.75rem; text-align: center;">${pedir > 0 ? pedir : '—'}</td>
@@ -35053,6 +35080,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
             var filaExistencia = document.querySelector('[data-stock="existencia"][data-producto-id="' + id + '"]');
             var filaMinimo = document.querySelector('[data-stock="minimo"][data-producto-id="' + id + '"]');
             var filaUso = document.querySelector('[data-stock="uso"][data-producto-id="' + id + '"]');
+            var filaDiasPersona = document.querySelector('[data-stock="dias-persona"][data-producto-id="' + id + '"]');
             var filaIndividual = document.querySelector('[data-stock="individual"][data-producto-id="' + id + '"]');
             var filaPlazo = document.querySelector('[data-stock="plazo"][data-producto-id="' + id + '"]');
             var filaUnidad = document.querySelector('[data-stock="unidad"][data-producto-id="' + id + '"]');
@@ -35060,6 +35088,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
             producto.existencia = Math.max(0, parseInt(filaExistencia && filaExistencia.value, 10) || 0);
             producto.minimo = Math.max(0, parseInt(filaMinimo && filaMinimo.value, 10) || 0);
             producto.tiempoUsoDias = diasUsoProductoBodega({ tiempoUsoDias: filaUso && filaUso.value });
+            producto.diasPorPersona = diasPorPersonaProductoBodega({ diasPorPersona: filaDiasPersona && filaDiasPersona.value, individualActivo: false });
             producto.individualActivo = !!(filaIndividual && filaIndividual.checked);
             producto.plazoActivo = !!(filaPlazo && filaPlazo.checked);
             producto.unidad = (filaUnidad && filaUnidad.value) || producto.unidad || 'un';
@@ -35469,6 +35498,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
             const existencia = Math.max(0, parseInt(document.getElementById('productoExistenciaInventario').value, 10) || 0);
             const minimo = Math.max(0, parseInt(document.getElementById('productoMinimoInventario').value, 10) || 0);
             const tiempoUsoDias = diasUsoProductoBodega({ tiempoUsoDias: (document.getElementById('productoUsoInventario') || {}).value });
+            const diasPorPersona = diasPorPersonaProductoBodega({ diasPorPersona: (document.getElementById('productoDiasPersonaInventario') || {}).value, individualActivo: false });
             const individualActivo = !!((document.getElementById('productoIndividualInventario') || {}).checked);
             const plazoActivo = !!((document.getElementById('productoPlazoInventario') || {}).checked);
             const unidad = (document.getElementById('productoUnidadInventario') || {}).value || 'un';
@@ -35487,7 +35517,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 return;
             }
             
-            var nuevo = normalizarProductoBodega({ id: generarId(), nombre: nombre, existencia: existencia, minimo: minimo, tiempoUsoDias: tiempoUsoDias, individualActivo: individualActivo, plazoActivo: plazoActivo, unidad: unidad });
+            var nuevo = normalizarProductoBodega({ id: generarId(), nombre: nombre, existencia: existencia, minimo: minimo, tiempoUsoDias: tiempoUsoDias, diasPorPersona: diasPorPersona, individualActivo: individualActivo, plazoActivo: plazoActivo, unidad: unidad });
             productos.push(nuevo);
             if (existencia > 0) anotarMovimientoBodega(nuevo, 'entrada', existencia, 'Alta en inventario');
             await guardarInventario(productos, window._invBodegaMovs);
@@ -35535,8 +35565,12 @@ document.getElementById('chatForm').onsubmit = function (e) {
                             <input type="number" id="modalEditarMinimoProducto" min="0" step="1" value="${producto.minimo || 0}" style="width: 100%; padding: 0.625rem; border: 1px solid var(--gray-300); border-radius: 8px;">
                         </div>
                         <div class="form-group" style="flex: 1;">
-                            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--gray-700);">Uso (días)</label>
-                            <input type="number" id="modalEditarUsoProducto" min="0" step="1" value="${diasUsoProductoBodega(producto)}" title="Días que dura un envase en uso" style="width: 100%; padding: 0.625rem; border: 1px solid var(--gray-300); border-radius: 8px;">
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--gray-700);">Días por persona</label>
+                            <input type="number" id="modalEditarDiasPersona" min="0" step="1" value="${diasPorPersonaProductoBodega(producto)}" title="Días de seguimiento de cada empleado con este producto" style="width: 100%; padding: 0.625rem; border: 1px solid var(--gray-300); border-radius: 8px;">
+                        </div>
+                        <div class="form-group" style="flex: 1;">
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--gray-700);">Días uso común</label>
+                            <input type="number" id="modalEditarUsoProducto" min="0" step="1" value="${diasUsoProductoBodega(producto)}" title="Días del envase de uso común" style="width: 100%; padding: 0.625rem; border: 1px solid var(--gray-300); border-radius: 8px;">
                         </div>
                     </div>
                     <label style="display: flex; align-items: center; gap: 0.45rem; margin: -0.5rem 0 0.55rem; font-weight: 600; color: var(--gray-700);">
@@ -35584,6 +35618,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 producto.existencia = Math.max(0, parseInt(document.getElementById('modalEditarExistenciaProducto').value, 10) || 0);
                 producto.minimo = Math.max(0, parseInt(document.getElementById('modalEditarMinimoProducto').value, 10) || 0);
                 producto.tiempoUsoDias = diasUsoProductoBodega({ tiempoUsoDias: document.getElementById('modalEditarUsoProducto').value });
+                producto.diasPorPersona = diasPorPersonaProductoBodega({ diasPorPersona: document.getElementById('modalEditarDiasPersona').value, individualActivo: false });
                 producto.individualActivo = !!document.getElementById('modalEditarIndividualProducto').checked;
                 producto.plazoActivo = !!document.getElementById('modalEditarPlazoProducto').checked;
                 if (producto.existencia !== existenciaAntes) {
