@@ -9030,7 +9030,7 @@
             <header class="inv-head">
                 <div>
                     <h2>Inventario de bodega</h2>
-                    <p>Existencia, mínimo y días de uso. Mientras el producto siga en uso, conserjería no puede retirarlo de nuevo sin una justificación.</p>
+                    <p>Existencia y mínimo. Con uso común activo, mientras haya un envase en uso nadie retira otro sin justificación. Cada salida queda registrada con quién la pidió, la fecha y la cantidad.</p>
                 </div>
                 <button type="button" class="btn btn-secondary" id="btnVolverPedidoInsumos" onclick="showTab('insumos')">
                     Volver al pedido
@@ -9084,7 +9084,13 @@
                             </div>
                             <div class="form-group" style="flex: 1;">
                                 <label>Uso (días)</label>
-                                <input type="number" id="productoUsoInventario" min="0" step="1" value="0" title="Días que dura en uso. 0 = sin control. Mientras no se cumplan, un nuevo retiro exige justificación.">
+                                <input type="number" id="productoUsoInventario" min="0" step="1" value="0" title="Días que dura un envase en uso. 0 = sin control.">
+                            </div>
+                            <div class="form-group" style="flex: 1; display: flex; align-items: flex-end;">
+                                <label style="display: flex; align-items: center; gap: 0.4rem; margin: 0 0 0.45rem;" title="Como el azúcar: si hay uno en uso, no se retira otro hasta que se cumpla el plazo.">
+                                    <input type="checkbox" id="productoPlazoInventario">
+                                    Uso común
+                                </label>
                             </div>
                             <div class="form-group" style="flex: 1;">
                                 <label>Unidad</label>
@@ -9115,7 +9121,7 @@
                                 <th style="padding: 0.75rem; text-align: left; font-weight: 600;">Producto</th>
                                 <th style="padding: 0.75rem; text-align: center; font-weight: 600; width: 110px;">Existencia</th>
                                 <th style="padding: 0.75rem; text-align: center; font-weight: 600; width: 100px;">Mínimo</th>
-                                <th style="padding: 0.75rem; text-align: center; font-weight: 600; width: 110px;">Uso (días)</th>
+                                <th style="padding: 0.75rem; text-align: center; font-weight: 600; width: 150px;">Uso común</th>
                                 <th style="padding: 0.75rem; text-align: center; font-weight: 600; width: 90px;">A pedir</th>
                                 <th style="padding: 0.75rem; text-align: center; font-weight: 600; width: 90px;">Unidad</th>
                                 <th style="padding: 0.75rem; text-align: center; font-weight: 600; width: 180px;">Acciones</th>
@@ -34488,6 +34494,13 @@ document.getElementById('chatForm').onsubmit = function (e) {
         // MÓDULO: PEDIDO DE INSUMOS
         // ============================================
 
+        function plazoActivoProductoBodega(p) {
+            if (!p) return false;
+            if (p.plazoActivo === false || p.plazoActivo === 0 || p.plazoActivo === '0' || p.plazoActivo === 'false') return false;
+            if (p.plazoActivo === true || p.plazoActivo === 1 || p.plazoActivo === '1' || p.plazoActivo === 'true') return true;
+            return diasUsoProductoBodega(p) > 0;
+        }
+
         function diasUsoProductoBodega(p) {
             var n = parseInt(p && p.tiempoUsoDias, 10);
             if (!isFinite(n) || n < 0) return 0;
@@ -34495,24 +34508,31 @@ document.getElementById('chatForm').onsubmit = function (e) {
         }
 
         function usoVigenteProductoBodega(producto, movimientos, ahora) {
+            if (!plazoActivoProductoBodega(producto)) return null;
             var dias = diasUsoProductoBodega(producto);
             if (!dias || !producto) return null;
             var nombre = String(producto.nombre || '').toLowerCase();
             var id = String(producto.id || '');
-            var ultima = 0;
+            var ultima = null;
             (movimientos || []).forEach(function (m) {
                 if (!m || m.tipo !== 'salida') return;
                 var mismoId = id && m.productoId != null && String(m.productoId) === id;
                 var mismoNombre = nombre && String(m.nombre || '').toLowerCase() === nombre;
                 if (!mismoId && !mismoNombre) return;
                 var t = Date.parse(m.fecha);
-                if (!isFinite(t) || t <= ultima) return;
-                ultima = t;
+                if (!isFinite(t)) return;
+                if (!ultima || t >= ultima.desde) {
+                    ultima = {
+                        desde: t,
+                        persona: String(m.auxiliar || '').trim().replace(/\s+/g, ' '),
+                        cantidad: parseInt(m.cantidad, 10) || 0
+                    };
+                }
             });
             if (!ultima) return null;
-            var hasta = ultima + dias * 86400000;
+            var hasta = ultima.desde + dias * 86400000;
             if ((ahora || Date.now()) >= hasta) return null;
-            return { desde: ultima, hasta: hasta, dias: dias };
+            return { persona: ultima.persona, desde: ultima.desde, hasta: hasta, dias: dias, cantidad: ultima.cantidad };
         }
 
         function textoFechaUsoBodega(ms) {
@@ -34532,6 +34552,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 existencia: existencia,
                 minimo: minimo,
                 tiempoUsoDias: diasUsoProductoBodega(p),
+                plazoActivo: plazoActivoProductoBodega(p),
                 unidad: unidad
             };
         }
@@ -34551,7 +34572,9 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     var clave = n.nombre.toLowerCase();
                     var previo = porNombre[clave];
                     var traeDias = p && p.tiempoUsoDias != null && p.tiempoUsoDias !== '';
+                    var traePlazo = p && p.plazoActivo != null && p.plazoActivo !== '';
                     if (preferido && previo && !traeDias && previo.tiempoUsoDias > 0) n.tiempoUsoDias = previo.tiempoUsoDias;
+                    if (preferido && previo && !traePlazo && previo.plazoActivo) n.plazoActivo = true;
                     porNombre[clave] = n;
                 });
             }
@@ -34840,7 +34863,9 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     opts = '<option value="' + p.unidad + '" selected>' + p.unidad + '</option>' + opts;
                 }
                 var uso = usoVigenteProductoBodega(p, window._invBodegaMovs);
-                var usoTxt = uso ? '<span class="inv-uso">En uso hasta ' + textoFechaUsoBodega(uso.hasta) + '</span>' : '';
+                var usoTxt = uso
+                    ? '<span class="inv-uso">En uso hasta ' + textoFechaUsoBodega(uso.hasta) + (uso.persona ? ' · lo retiró ' + escapeHtml(uso.persona) : '') + '</span>'
+                    : '';
                 return `
                     <tr class="${pedir > 0 ? 'inv-bajo' : ''}">
                         <td style="padding: 0.75rem; text-align: center;">
@@ -34854,7 +34879,10 @@ document.getElementById('chatForm').onsubmit = function (e) {
                             <input type="number" min="0" step="1" value="${p.minimo}" data-stock="minimo" data-producto-id="${p.id}" style="width: 4.5rem; text-align: center; padding: 0.35rem;">
                         </td>
                         <td style="padding: 0.5rem; text-align: center;">
-                            <input type="number" min="0" step="1" value="${diasUsoProductoBodega(p)}" data-stock="uso" data-producto-id="${p.id}" title="Días que dura en uso. 0 = sin control." style="width: 4.5rem; text-align: center; padding: 0.35rem;">
+                            <label style="display: inline-flex; align-items: center; gap: 0.35rem; justify-content: center;">
+                                <input type="checkbox" data-stock="plazo" data-producto-id="${p.id}" ${plazoActivoProductoBodega(p) ? 'checked' : ''} title="Uso común: mientras haya un envase en uso, nadie retira otro sin justificación." style="cursor: pointer;">
+                                <input type="number" min="0" step="1" value="${diasUsoProductoBodega(p)}" data-stock="uso" data-producto-id="${p.id}" title="Días que dura el envase en uso. 0 = sin control." style="width: 4.2rem; text-align: center; padding: 0.35rem;">
+                            </label>
                         </td>
                         <td class="${pedir > 0 ? 'inv-pedir' : ''}" style="padding: 0.75rem; text-align: center;">${pedir > 0 ? pedir : '—'}</td>
                         <td style="padding: 0.5rem; text-align: center;">
@@ -34881,11 +34909,13 @@ document.getElementById('chatForm').onsubmit = function (e) {
             var filaExistencia = document.querySelector('[data-stock="existencia"][data-producto-id="' + id + '"]');
             var filaMinimo = document.querySelector('[data-stock="minimo"][data-producto-id="' + id + '"]');
             var filaUso = document.querySelector('[data-stock="uso"][data-producto-id="' + id + '"]');
+            var filaPlazo = document.querySelector('[data-stock="plazo"][data-producto-id="' + id + '"]');
             var filaUnidad = document.querySelector('[data-stock="unidad"][data-producto-id="' + id + '"]');
             var antes = producto.existencia;
             producto.existencia = Math.max(0, parseInt(filaExistencia && filaExistencia.value, 10) || 0);
             producto.minimo = Math.max(0, parseInt(filaMinimo && filaMinimo.value, 10) || 0);
             producto.tiempoUsoDias = diasUsoProductoBodega({ tiempoUsoDias: filaUso && filaUso.value });
+            producto.plazoActivo = !!(filaPlazo && filaPlazo.checked);
             producto.unidad = (filaUnidad && filaUnidad.value) || producto.unidad || 'un';
             if (producto.existencia !== antes) {
                 anotarMovimientoBodega(producto, 'ajuste', Math.abs(producto.existencia - antes), 'Ajuste desde gestión');
@@ -35293,6 +35323,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
             const existencia = Math.max(0, parseInt(document.getElementById('productoExistenciaInventario').value, 10) || 0);
             const minimo = Math.max(0, parseInt(document.getElementById('productoMinimoInventario').value, 10) || 0);
             const tiempoUsoDias = diasUsoProductoBodega({ tiempoUsoDias: (document.getElementById('productoUsoInventario') || {}).value });
+            const plazoActivo = !!((document.getElementById('productoPlazoInventario') || {}).checked);
             const unidad = (document.getElementById('productoUnidadInventario') || {}).value || 'un';
 
             if (!nombre) {
@@ -35309,7 +35340,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 return;
             }
             
-            var nuevo = normalizarProductoBodega({ id: generarId(), nombre: nombre, existencia: existencia, minimo: minimo, tiempoUsoDias: tiempoUsoDias, unidad: unidad });
+            var nuevo = normalizarProductoBodega({ id: generarId(), nombre: nombre, existencia: existencia, minimo: minimo, tiempoUsoDias: tiempoUsoDias, plazoActivo: plazoActivo, unidad: unidad });
             productos.push(nuevo);
             if (existencia > 0) anotarMovimientoBodega(nuevo, 'entrada', existencia, 'Alta en inventario');
             await guardarInventario(productos, window._invBodegaMovs);
@@ -35358,9 +35389,13 @@ document.getElementById('chatForm').onsubmit = function (e) {
                         </div>
                         <div class="form-group" style="flex: 1;">
                             <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--gray-700);">Uso (días)</label>
-                            <input type="number" id="modalEditarUsoProducto" min="0" step="1" value="${diasUsoProductoBodega(producto)}" title="0 = sin control" style="width: 100%; padding: 0.625rem; border: 1px solid var(--gray-300); border-radius: 8px;">
+                            <input type="number" id="modalEditarUsoProducto" min="0" step="1" value="${diasUsoProductoBodega(producto)}" title="Días que dura un envase en uso" style="width: 100%; padding: 0.625rem; border: 1px solid var(--gray-300); border-radius: 8px;">
                         </div>
                     </div>
+                    <label style="display: flex; align-items: center; gap: 0.45rem; margin: -0.5rem 0 1.25rem; font-weight: 600; color: var(--gray-700);">
+                        <input type="checkbox" id="modalEditarPlazoProducto" ${plazoActivoProductoBodega(producto) ? 'checked' : ''}>
+                        Uso común
+                    </label>
                     
                     <div style="display: flex; gap: 0.75rem; justify-content: flex-end;">
                         <button type="button" id="btnCancelarEditarProducto" class="btn btn-secondary" style="padding: 0.625rem 1.25rem;">Cancelar</button>
@@ -35398,6 +35433,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 producto.existencia = Math.max(0, parseInt(document.getElementById('modalEditarExistenciaProducto').value, 10) || 0);
                 producto.minimo = Math.max(0, parseInt(document.getElementById('modalEditarMinimoProducto').value, 10) || 0);
                 producto.tiempoUsoDias = diasUsoProductoBodega({ tiempoUsoDias: document.getElementById('modalEditarUsoProducto').value });
+                producto.plazoActivo = !!document.getElementById('modalEditarPlazoProducto').checked;
                 if (producto.existencia !== existenciaAntes) {
                     anotarMovimientoBodega(producto, 'ajuste', Math.abs(producto.existencia - existenciaAntes), 'Ajuste desde gestión');
                 }
