@@ -7914,6 +7914,18 @@
                                 Al marcar esta opción, se generará un sello digital oficial en el comprobante
                             </small>
                         </div>
+                        <div class="form-group" style="margin: 0.75rem 0 0 0;">
+                            <label style="margin-bottom: 0.25rem; font-size: 0.875rem;">Documentos de respaldo</label>
+                            <input type="file" id="mudanzaArchivos" multiple accept=".pdf,.jpg,.jpeg,.png,.gif,.webp,.doc,.docx,.xls,.xlsx" style="padding: 0.5rem; font-size: 0.875rem; width: 100%;">
+                            <small style="color: var(--gray-500); font-size: 0.7rem; margin-top: 0.15rem; display: block;">
+                                Adjunte salvoconducto, recibo de gastos comunes u otros antecedentes. Puede seleccionar varios archivos (PDF, imágenes, Word o Excel).
+                            </small>
+                            <div id="mudanzaArchivosLista" style="margin-top: 0.5rem; display: none;">
+                                <div style="font-size: 0.75rem; color: var(--gray-600); margin-bottom: 0.25rem;">Archivos seleccionados:</div>
+                                <div id="mudanzaArchivosNombres" style="font-size: 0.75rem; color: var(--gray-700);"></div>
+                            </div>
+                            <div id="mudanzaArchivosExistentes" style="margin-top: 0.5rem;"></div>
+                        </div>
                     </div>
 
                     <div id="camposDocsPendiente" style="display: none; margin-top: 1rem; padding: 1rem; background: rgba(217, 119, 6, 0.08); border-radius: 8px; border: 1px solid rgba(217, 119, 6, 0.28);">
@@ -7955,6 +7967,7 @@
                             <th>Monto</th>
                             <th>Corredor</th>
                             <th>Comentarios</th>
+                            <th>Documentos</th>
                             <th>Acciones</th>
                         </tr>
                     </thead>
@@ -12050,6 +12063,10 @@
                     coleccion = 'visitas-extraordinarias';
                     datos = await obtenerDatosMes('visitas-extraordinarias');
                     break;
+                case 'mudanzas':
+                    coleccion = 'mudanzas';
+                    datos = await obtenerDatosMes('mudanzas');
+                    break;
                 default:
                     mostrarAlerta('Módulo no válido.', 'Error');
                     return;
@@ -12124,6 +12141,9 @@
                     break;
                 case 'visitas-extraordinarias':
                     await editarVisitaExtraordinaria(registroId);
+                    break;
+                case 'mudanzas':
+                    await editarMudanza(registroId);
                     break;
             }
             
@@ -24335,12 +24355,48 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 if (selloAutorizado) {
                     selloAutorizado.checked = false;
                 }
+                limpiarSeleccionArchivosMudanza();
+                const archivosExistentes = document.getElementById('mudanzaArchivosExistentes');
+                if (archivosExistentes && !window.editandoMudanza) archivosExistentes.innerHTML = '';
                 toggleMontoGastosComunes(); // Asegurar que el campo de monto esté oculto
             }
             if (typeof toggleCamposDocsPendiente === 'function') toggleCamposDocsPendiente();
         }
         
         // Función para mostrar/ocultar campo de monto de gastos comunes
+        function limpiarSeleccionArchivosMudanza() {
+            const input = document.getElementById('mudanzaArchivos');
+            const lista = document.getElementById('mudanzaArchivosLista');
+            const nombres = document.getElementById('mudanzaArchivosNombres');
+            if (input) input.value = '';
+            if (lista) lista.style.display = 'none';
+            if (nombres) nombres.innerHTML = '';
+        }
+
+        function mostrarArchivosMudanzaEnEdicion(mudanza) {
+            const cont = document.getElementById('mudanzaArchivosExistentes');
+            if (!cont) return;
+            const archivos = (mudanza && mudanza.movimiento === 'salida' && Array.isArray(mudanza.archivos)) ? mudanza.archivos : [];
+            if (!archivos.length || !mudanza || !mudanza.id) {
+                cont.innerHTML = '';
+                return;
+            }
+            cont.innerHTML = typeof window.renderizarArchivosEdicion === 'function'
+                ? window.renderizarArchivosEdicion(archivos, [], mudanza.id, 'mudanzas')
+                : '';
+        }
+
+        function htmlDocumentosAdjuntosMudanza(mudanza) {
+            const archivos = (mudanza && Array.isArray(mudanza.archivos)) ? mudanza.archivos.filter(function (a) { return a && a.url; }) : [];
+            if (!archivos.length) return '';
+            const enlaces = archivos.map(function (a) {
+                const nombre = String(a.nombre || 'Documento').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                const url = String(a.url).replace(/"/g, '&quot;');
+                return '<a href="' + url + '" target="_blank" rel="noopener" style="display:inline-block;margin:0 0.35rem 0.35rem 0;padding:0.2rem 0.5rem;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:4px;color:#166534;text-decoration:none;font-size:0.75rem;font-weight:600;">' + nombre + '</a>';
+            }).join('');
+            return '<div class="info-box"><h3 class="section-title">Documentos adjuntos</h3><div>' + enlaces + '</div></div>';
+        }
+
         function toggleMontoGastosComunes() {
             const tieneGastosComunes = document.getElementById('mudanzaTieneGastosComunes');
             const grupoMontoGastosComunes = document.getElementById('grupoMontoGastosComunes');
@@ -24401,6 +24457,8 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 document.getElementById('mudanzaSalvoconducto').checked = mudanza.salvoconducto || false;
                 document.getElementById('mudanzaSelloAutorizado').checked = mudanza.selloAutorizado || false;
             }
+            limpiarSeleccionArchivosMudanza();
+            mostrarArchivosMudanzaEnEdicion(mudanza);
             if (typeof toggleCamposDocsPendiente === 'function') toggleCamposDocsPendiente();
             window._docsMudanzaEditando = null;
             
@@ -24441,6 +24499,9 @@ document.getElementById('chatForm').onsubmit = function (e) {
             document.getElementById('mudanzaMonto').value = '$0';
             toggleCamposSalida(); // Ocultar campos de salida
             toggleMontoGastosComunes(); // Asegurar que el campo de monto esté oculto
+            limpiarSeleccionArchivosMudanza();
+            const archivosExistentesMudanza = document.getElementById('mudanzaArchivosExistentes');
+            if (archivosExistentesMudanza) archivosExistentesMudanza.innerHTML = '';
             if (typeof toggleCamposDocsPendiente === 'function') toggleCamposDocsPendiente();
             
             const btnSubmit = document.querySelector('#formMudanza button[type="submit"]');
@@ -24548,6 +24609,34 @@ document.getElementById('chatForm').onsubmit = function (e) {
             }
 
             const mudanzas = await obtenerDatosMes('mudanzas');
+            let avisoDocs = '';
+            if (movimiento === 'salida') {
+                const inputArchivos = document.getElementById('mudanzaArchivos');
+                const archivosSeleccionados = inputArchivos ? Array.from(inputArchivos.files || []) : [];
+                const registroId = window.editandoMudanza || generarId();
+                mudanzaData.id = registroId;
+                const existente = window.editandoMudanza ? mudanzas.find(function (m) { return m.id === window.editandoMudanza; }) : null;
+                const archivosPrevios = (existente && Array.isArray(existente.archivos)) ? existente.archivos.slice() : [];
+                let archivosSubidos = [];
+                if (archivosSeleccionados.length) {
+                    if (!storage || !firebaseInitialized || typeof subirArchivosModulo !== 'function') {
+                        mostrarAlerta('No se pudieron adjuntar los documentos porque el almacenamiento no está disponible. La mudanza no se guardó.', 'Error');
+                        return;
+                    }
+                    mostrarAlerta('Subiendo documentos de la mudanza…', 'Procesando');
+                    archivosSubidos = await subirArchivosModulo(archivosSeleccionados, 'mudanzas', registroId);
+                    if (!archivosSubidos.length) {
+                        mostrarAlerta('No se pudo subir ningún documento. La mudanza no se guardó. Revise la conexión e intente de nuevo.', 'Error');
+                        return;
+                    }
+                    avisoDocs = archivosSubidos.length < archivosSeleccionados.length
+                        ? (' Se adjuntaron ' + archivosSubidos.length + ' de ' + archivosSeleccionados.length + ' documentos.')
+                        : (' Se adjuntaron ' + archivosSubidos.length + ' documento' + (archivosSubidos.length === 1 ? '' : 's') + '.');
+                    if (typeof cerrarModalAlert === 'function') cerrarModalAlert();
+                }
+                const combinados = archivosPrevios.concat(archivosSubidos);
+                if (combinados.length) mudanzaData.archivos = combinados;
+            }
             let mudanzaGuardada = null;
             let fueAlta = false;
             
@@ -24568,8 +24657,8 @@ document.getElementById('chatForm').onsubmit = function (e) {
             } else {
                 // Modo creación: agregar nuevo registro
                 const mudanza = {
-                    id: generarId(),
-                    ...mudanzaData
+                    ...mudanzaData,
+                    id: mudanzaData.id || generarId()
                 };
                 mudanzaGuardada = mudanza;
                 fueAlta = true;
@@ -24585,6 +24674,9 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 document.getElementById('mudanzaMonto').value = '$0';
                 const fechaHoy = obtenerFechaHoy();
                 document.getElementById('mudanzaFecha').value = fechaHoy;
+                limpiarSeleccionArchivosMudanza();
+                const archivosNuevosMudanza = document.getElementById('mudanzaArchivosExistentes');
+                if (archivosNuevosMudanza) archivosNuevosMudanza.innerHTML = '';
                 toggleCamposSalida(); // Ocultar campos de salida
             }
             
@@ -24593,13 +24685,14 @@ document.getElementById('chatForm').onsubmit = function (e) {
             if (mudanzaGuardada && mudanzaEstaEnEspera(mudanzaGuardada) && typeof window.enviarCorreoMudanzaPendiente === 'function') {
                 const enviar = await confirmarAccion(
                     (fueAlta ? 'Mudanza pendiente registrada. ' : 'Mudanza pendiente actualizada. ')
-                    + '¿Enviar al residente el comprobante indicando qué documento falta para la autorización?',
+                    + avisoDocs
+                    + ' ¿Enviar al residente el comprobante indicando qué documento falta para la autorización?',
                     'Comprobante de documentos faltantes'
                 );
                 if (enviar) await window.enviarCorreoMudanzaPendiente(mudanzaGuardada.id);
-                else mostrarAlerta('Mudanza pendiente guardada. Use «📧 Docs faltantes» o «📄 Comprobante» cuando quiera notificar al residente qué documento falta.', 'Pendiente de documentación');
+                else mostrarAlerta('Mudanza pendiente guardada. Use «📧 Docs faltantes» o «📄 Comprobante» cuando quiera notificar al residente qué documento falta.' + avisoDocs, 'Pendiente de documentación');
             } else if (mudanzaGuardada) {
-                mostrarAlerta(fueAlta ? 'Mudanza registrada exitosamente.' : 'Mudanza actualizada exitosamente.', fueAlta ? 'Registrado' : 'Actualizado');
+                mostrarAlerta((fueAlta ? 'Mudanza registrada exitosamente.' : 'Mudanza actualizada exitosamente.') + avisoDocs, fueAlta ? 'Registrado' : 'Actualizado');
             }
         }
 
@@ -24611,7 +24704,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
             if (!tbody) return;
 
             if (!Array.isArray(mudanzas) || mudanzas.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="11" class="empty-state"><p>No hay registros de mudanzas</p></td></tr>';
+                tbody.innerHTML = '<tr><td colspan="12" class="empty-state"><p>No hay registros de mudanzas</p></td></tr>';
                 return;
             }
 
@@ -24626,7 +24719,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
             });
 
             if (!mudanzasFiltradas.length) {
-                tbody.innerHTML = '<tr><td colspan="11" class="empty-state"><p>No hay mudanzas con ese estado de autorización</p></td></tr>';
+                tbody.innerHTML = '<tr><td colspan="12" class="empty-state"><p>No hay mudanzas con ese estado de autorización</p></td></tr>';
                 return;
             }
 
@@ -24639,6 +24732,10 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 const cancelada = mudanzaEstaCancelada(m);
                 const pendiente = mudanzaEstaEnEspera(m);
                 const mesArchivado = window.mesEnConsulta && !window.mesReabierto;
+                const archivosSalida = (m.movimiento === 'salida' && Array.isArray(m.archivos)) ? m.archivos : [];
+                const docsHtml = archivosSalida.length && typeof renderizarArchivos === 'function'
+                    ? renderizarArchivos(archivosSalida, [])
+                    : '<span style="color: var(--gray-500);">-</span>';
                 return `
                     <tr${cancelada ? ' style="opacity: 0.78;"' : ''}>
                         <td>${formatearFecha(m.fecha)}</td>
@@ -24653,6 +24750,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                         <td class="columna-observaciones" style="max-width: 150px; min-width: 80px;" title="${m.observaciones || ''}">
                             ${m.observaciones ? `<span style="display: inline-block; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${m.observaciones}</span>` : '-'}
                         </td>
+                        <td style="max-width: 180px;">${docsHtml}</td>
                         <td>
                             <div class="tabla-acciones">
                                 ${htmlBadgeNotificacionCorreo(m)}
@@ -24785,6 +24883,11 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 <tr><td class="data-cell" style="padding: 10px 14px; font-size: 13px; color: #666666; border-bottom: 1px solid #e8eee8;">Salvoconducto o autorización</td><td class="data-cell" style="padding: 10px 14px; font-size: 14px; color: #1a1a1a; border-bottom: 1px solid #e8eee8;">${mudanza.salvoconducto ? 'Sí' : 'No'}</td></tr>`;
             }
 
+            const archivosMail = (Array.isArray(mudanza.archivos) ? mudanza.archivos : []).filter(function (a) { return a && a.url; });
+            const filaDocs = archivosMail.length
+                ? `<tr><td class="data-cell" style="padding: 10px 14px; font-size: 13px; color: #666666; border-bottom: 1px solid #e8eee8;">Documentos adjuntos</td><td class="data-cell" style="padding: 10px 14px; font-size: 14px; color: #1a1a1a; border-bottom: 1px solid #e8eee8;">${archivosMail.map(function (a) { return '<a href="' + linkEsc(a.url) + '" target="_blank" rel="noopener" style="color:#166534;font-weight:700;text-decoration:underline;">' + linkEsc(a.nombre || 'Documento') + '</a>'; }).join('<br>')}</td></tr>`
+                : '';
+
             const filaCorredor = mudanza.corredor
                 ? `<tr><td class="data-cell" style="padding: 10px 14px; font-size: 13px; color: #666666; border-bottom: 1px solid #e8eee8;">Corredor</td><td class="data-cell" style="padding: 10px 14px; font-size: 14px; color: #1a1a1a; border-bottom: 1px solid #e8eee8;">${linkEsc(mudanza.corredor)}</td></tr>`
                 : '';
@@ -24866,6 +24969,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 <tr><td class="data-cell" style="padding: 10px 14px; font-size: 13px; color: #666666; border-bottom: 1px solid #e8eee8;">Movimiento</td><td class="data-cell" style="padding: 10px 14px; font-size: 14px; color: #1a1a1a; border-bottom: 1px solid #e8eee8;">${linkEsc(movimientoTexto)}</td></tr>
                 ${filaCorredor}
                 ${filasSalida}
+                ${filaDocs}
               </table>
             </td>
           </tr>
@@ -40067,6 +40171,8 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     </div>
                     ` : ''}
                     
+                    ${htmlDocumentosAdjuntosMudanza(mudanza)}
+
                     ${mudanza.observaciones ? `
                     <div class="info-box">
                         <h3 class="section-title">Observaciones</h3>
@@ -46947,6 +47053,16 @@ document.getElementById('chatForm').onsubmit = function (e) {
                         html += '}';
                         html += 'if (mudanza.observaciones) {';
                         html += 'htmlComprobante += "<div class=\\"info-box\\"><h3 class=\\"section-title\\">Observaciones</h3><div style=\\"color:#1f2937;font-size:0.8125rem;line-height:1.5\\">" + mudanza.observaciones + "</div></div>";';
+                        html += '}';
+                        html += 'if (mudanza.archivos && mudanza.archivos.length) {';
+                        html += 'var docsHtml = "";';
+                        html += 'mudanza.archivos.forEach(function(a) {';
+                        html += 'if (!a || !a.url) return;';
+                        html += 'var n = String(a.nombre || "Documento").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");';
+                        html += 'var u = String(a.url).replace(/"/g, "&quot;");';
+                        html += 'docsHtml += "<a href=\\"" + u + "\\" target=\\"_blank\\" rel=\\"noopener\\" style=\\"display:inline-block;margin:0 0.35rem 0.35rem 0;padding:0.2rem 0.45rem;border:1px solid #bbf7d0;background:#f0fdf4;border-radius:4px;color:#166534;text-decoration:none;font-size:0.75rem\\">" + n + "</a>";';
+                        html += '});';
+                        html += 'if (docsHtml) htmlComprobante += "<div class=\\"info-box\\"><h3 class=\\"section-title\\">Documentos adjuntos</h3><div>" + docsHtml + "</div></div>";';
                         html += '}';
                         html += 'htmlComprobante += ' + JSON.stringify(htmlNormativaMudanzaMiniatura()) + ';';
                         html += 'var selloHTML = mudanza.selloAutorizado ? "<div class=\\"sello-digital\\"><div class=\\"sello-digital-content\\"><div class=\\"sello-digital-text top\\">AUTORIZADO</div><div class=\\"sello-digital-line\\"></div><div class=\\"sello-digital-text bottom\\">ADMINISTRACIÓN</div></div></div>" : "";';
@@ -56494,6 +56610,24 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 if (typeof window.bindMudanzaPendienteUi === 'function') window.bindMudanzaPendienteUi();
                 else if (typeof toggleCamposDocsPendiente === 'function') toggleCamposDocsPendiente();
                 
+                const mudanzaArchivos = document.getElementById('mudanzaArchivos');
+                if (mudanzaArchivos) {
+                    mudanzaArchivos.addEventListener('change', function() {
+                        const lista = document.getElementById('mudanzaArchivosLista');
+                        const nombres = document.getElementById('mudanzaArchivosNombres');
+                        if (!lista || !nombres) return;
+                        if (this.files && this.files.length > 0) {
+                            lista.style.display = 'block';
+                            nombres.innerHTML = Array.from(this.files).map(function (f) {
+                                return '<div>• ' + String(f.name).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</div>';
+                            }).join('');
+                        } else {
+                            lista.style.display = 'none';
+                            nombres.innerHTML = '';
+                        }
+                    });
+                }
+
                 const mudanzaTieneGastosComunes = document.getElementById('mudanzaTieneGastosComunes');
                 if (mudanzaTieneGastosComunes) {
                     mudanzaTieneGastosComunes.addEventListener('change', function() {
