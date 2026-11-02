@@ -27720,11 +27720,16 @@ document.getElementById('chatForm').onsubmit = function (e) {
             if (/^\d{4}-\d{2}$/.test(mesCampo)) return mesCampo;
             return '';
         }
+        function multaEsRegistroManualGestion(m) {
+            if (!m) return false;
+            if (m.origen === 'conserjeria' || m.novedadCorrelativo != null) return false;
+            return m.origen === 'gestion' || !m.origen;
+        }
         function multaPerteneceAlPeriodo(m, mes) {
             if (!m) return false;
             if (!mes) return true;
             var rm = multaMesDelRegistro(m);
-            if (!rm) return false;
+            if (!rm) return true;
             return rm === mes;
         }
         function multaFiltrarListaDelPeriodo(lista, mes) {
@@ -28065,6 +28070,40 @@ document.getElementById('chatForm').onsubmit = function (e) {
             if (!mes) return;
             await guardarDatosMes('multas', Array.isArray(lista) ? lista : [], mes);
         }
+        async function persistirListaMultasMesSinPerderManuales(mesAnio, lista) {
+            var propuesta = Array.isArray(lista) ? lista.filter(Boolean) : [];
+            var mes = mesAnio || (typeof obtenerMesPeriodoVista === 'function' ? obtenerMesPeriodoVista() : (typeof obtenerMesActual === 'function' ? obtenerMesActual() : ''));
+            var actual = [];
+            try {
+                actual = typeof obtenerDatosMesEspecifico === 'function'
+                    ? await obtenerDatosMesEspecifico('multas', mes)
+                    : [];
+            } catch (eAct) { actual = []; }
+            if (!Array.isArray(actual)) actual = [];
+            var mezclada = typeof multaFusionarListasPorId === 'function'
+                ? multaFusionarListasPorId(propuesta, actual)
+                : propuesta.concat(actual);
+            var tomb = window._multasTombstones || [];
+            mezclada = mezclada.filter(function (m) {
+                return !multaRegistroEstaEliminado(tomb, m);
+            });
+            actual.forEach(function (m) {
+                if (!multaEsRegistroManualGestion(m)) return;
+                if (multaRegistroEstaEliminado(tomb, m)) return;
+                var got = mezclada.filter(function (x) { return x && m && x.id && x.id === m.id; })[0];
+                if (!got) mezclada.unshift(m);
+            });
+            if (typeof window._multasMemoria === 'object' && window._multasMemoria) {
+                Object.keys(window._multasMemoria).forEach(function (id) {
+                    var rec = window._multasMemoria[id];
+                    if (!rec || multaRegistroEstaEliminado(tomb, rec)) return;
+                    var got = mezclada.filter(function (x) { return x && x.id === rec.id; })[0];
+                    if (!got) mezclada.unshift(rec);
+                });
+            }
+            await persistirListaMultasMes(mes, mezclada);
+            return mezclada;
+        }
         function multaFusionarListasPorId(base, extra) {
             return typeof fusionarRegistrosPorId === 'function' ? fusionarRegistrosPorId(base, extra) : (Array.isArray(base) ? base : []);
         }
@@ -28076,7 +28115,8 @@ document.getElementById('chatForm').onsubmit = function (e) {
             var ajenas = {};
             lista.forEach(function (m) {
                 if (!m) return;
-                if (multaPerteneceAlPeriodo(m, mesDoc)) {
+                if (multaPerteneceAlPeriodo(m, mesDoc) || multaEsRegistroManualGestion(m)) {
+                    if (!m.mes) m.mes = mesDoc;
                     propias.push(m);
                     return;
                 }
@@ -28228,11 +28268,12 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     var listaAntes = lista.length;
                     lista = lista.filter(function (m) {
                         if (multaRegistroEstaEliminado(tomb, m)) return false;
+                        if (multaEsRegistroManualGestion(m)) return true;
                         return !mesActual || multaPerteneceAlPeriodo(m, mesActual);
                     });
                     if (lista.length !== listaAntes) cambiadas = true;
                     if (!keys.length) {
-                        if (cambiadas) await persistirListaMultasMes(mesActual, lista);
+                        if (cambiadas) await persistirListaMultasMesSinPerderManuales(mesActual, lista);
                         return 0;
                     }
                     var nums = {};
@@ -28345,6 +28386,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                         latest = multaDeduplicarLista(latest);
                         latest = latest.filter(function (m) {
                             if (multaRegistroEstaEliminado(tomb, m)) return false;
+                            if (multaEsRegistroManualGestion(m)) return true;
                             return !mesActual || multaPerteneceAlPeriodo(m, mesActual);
                         });
                         multaAplicarAnulacionesEnLista(latest);
@@ -28356,10 +28398,11 @@ document.getElementById('chatForm').onsubmit = function (e) {
                             latest = multaDeduplicarLista(latest);
                             latest = latest.filter(function (m) {
                                 if (multaRegistroEstaEliminado(tomb, m)) return false;
-                                return !mesActual || multaPerteneceAlPeriodo(m, mesActual) || (m && m.origen === 'gestion');
+                                if (multaEsRegistroManualGestion(m) || (m && m.origen === 'gestion')) return true;
+                                return !mesActual || multaPerteneceAlPeriodo(m, mesActual);
                             });
                         } catch (eFresco) {}
-                        await persistirListaMultasMes(mesActual, latest);
+                        await persistirListaMultasMesSinPerderManuales(mesActual, latest);
                     }
                     return creadas;
                 } catch (eSync) {
@@ -29401,22 +29444,30 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 mostrarAlerta(multaEsRegistroAnulacion(multa) ? 'Anulación de multa registrada.' : 'Multa registrada exitosamente.', 'Registrado');
             }
 
-            if (typeof persistirListaMultasMes === 'function') {
+            window._multasMemoria = window._multasMemoria || {};
+            if (multa && multa.id) window._multasMemoria[String(multa.id)] = multa;
+            if (typeof persistirListaMultasMesSinPerderManuales === 'function') {
+                await persistirListaMultasMesSinPerderManuales(mesGuardar, multas);
+            } else if (typeof persistirListaMultasMes === 'function') {
                 await persistirListaMultasMes(mesGuardar, multas);
             } else {
                 await guardarDatosMes('multas', multas);
             }
             if (window._multasSyncLock) {
                 try { await window._multasSyncLock; } catch (eLock) {}
-                try {
-                    var listaPost = typeof obtenerDatosMesEspecifico === 'function'
-                        ? await obtenerDatosMesEspecifico('multas', mesGuardar)
-                        : await obtenerDatosMes('multas');
-                    listaPost = multaFusionarListasPorId(listaPost, [multa]);
+            }
+            try {
+                var listaPost = typeof obtenerDatosMesEspecifico === 'function'
+                    ? await obtenerDatosMesEspecifico('multas', mesGuardar)
+                    : await obtenerDatosMes('multas');
+                listaPost = multaFusionarListasPorId(listaPost, [multa]);
+                if (typeof persistirListaMultasMesSinPerderManuales === 'function') {
+                    await persistirListaMultasMesSinPerderManuales(mesGuardar, listaPost);
+                } else {
                     await persistirListaMultasMes(mesGuardar, listaPost);
-                } catch (ePost) {
-                    console.warn('[multas] no se pudo reconfirmar el registro:', ePost);
                 }
+            } catch (ePost) {
+                console.warn('[multas] no se pudo reconfirmar el registro:', ePost);
             }
 
             document.getElementById('formMulta').reset();
@@ -29438,7 +29489,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
             const folioO = document.getElementById('multaFolioMultaOrigen');
             if (folioO) folioO.value = '';
             aplicarTipoRegistroMultaFormulario();
-            await cargarMultas();
+            await cargarMultas({ skipSync: true });
             } catch (errorReg) {
                 console.error('Error al registrar multa:', errorReg);
                 mostrarAlerta('No se pudo registrar la multa. ' + ((errorReg && errorReg.message) ? errorReg.message : 'Intente de nuevo.'), 'Error');
@@ -29583,13 +29634,23 @@ document.getElementById('chatForm').onsubmit = function (e) {
             if (btnCancelar) btnCancelar.style.display = 'none';
         }
 
-        async function cargarMultas() {
+        async function cargarMultas(opts) {
             if (typeof bindUiMultasGestionEstados === 'function') bindUiMultasGestionEstados();
             try {
-                if (typeof sincronizarMultasDesdeConserjeria === 'function') await sincronizarMultasDesdeConserjeria();
+                if (!(opts && opts.skipSync) && typeof sincronizarMultasDesdeConserjeria === 'function') {
+                    await sincronizarMultasDesdeConserjeria();
+                }
             } catch (eSyncC) {}
             const todasRaw = await obtenerDatosMes('multas');
             var todas = multaDeduplicarLista(Array.isArray(todasRaw) ? todasRaw : []);
+            if (typeof window._multasMemoria === 'object' && window._multasMemoria) {
+                Object.keys(window._multasMemoria).forEach(function (id) {
+                    var rec = window._multasMemoria[id];
+                    if (!rec) return;
+                    var got = todas.filter(function (x) { return x && String(x.id) === String(id); })[0];
+                    if (!got) todas.unshift(rec);
+                });
+            }
             var tombUi = window._multasTombstones;
             if ((!tombUi || !tombUi.length) && typeof multaCargarTombstones === 'function') {
                 try { tombUi = await multaCargarTombstones(); } catch (eT) { tombUi = tombUi || []; }
@@ -29606,10 +29667,14 @@ document.getElementById('chatForm').onsubmit = function (e) {
             } else if (mesVista && typeof multaFiltrarListaDelPeriodo === 'function') {
                 todas = multaFiltrarListaDelPeriodo(todas, mesVista);
             }
-            if (stamped || todas.length !== (todasRaw || []).length || todas.length !== nAntesTomb || todas.length !== nAntesPeriodo) {
+            if (stamped || todas.length > (todasRaw || []).length) {
                 try {
                     var mesSave = mesVista;
-                    await persistirListaMultasMes(mesSave, todas);
+                    if (typeof persistirListaMultasMesSinPerderManuales === 'function') {
+                        await persistirListaMultasMesSinPerderManuales(mesSave, todas);
+                    } else {
+                        await persistirListaMultasMes(mesSave, todas);
+                    }
                 } catch (ePers) {}
             }
             var paraAlerta = todas;
