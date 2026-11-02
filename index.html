@@ -4419,11 +4419,11 @@
 
         @media (max-width: 1024px) {
             .tabs {
-                width: 240px;
+                width: min(300px, 90vw);
             }
 
             .main-content {
-                margin-left: 240px;
+                margin-left: 0;
             }
 
             .header {
@@ -4483,11 +4483,11 @@
 
         @media (max-width: 768px) {
             .tabs {
-                width: 200px;
+                width: min(300px, 90vw);
             }
 
             .main-content {
-                margin-left: 200px;
+                margin-left: 0;
             }
             
             .columna-observaciones {
@@ -4813,8 +4813,8 @@
             }
             .tab-content table {
                 display: table;
-                width: max(100%, 36rem);
-                max-width: none;
+                width: 100%;
+                max-width: 100%;
             }
             #checklistTurnos table {
                 width: 100%;
@@ -4914,7 +4914,7 @@
                 width: min(8.2rem, 34vw);
             }
             .tab-content table {
-                width: max(100%, 32rem);
+                width: 100%;
             }
             .header h1 {
                 font-size: 1.15rem;
@@ -4940,7 +4940,7 @@
                 font-size: 1.15rem;
             }
             .tab-content table {
-                width: max(100%, 28rem);
+                width: 100%;
             }
             .bloc-lista {
                 max-height: 22rem;
@@ -7202,6 +7202,147 @@
             display: inline-block;
         }
 
+        /* ========== Capa responsive global: PC, tablet y teléfono ========== */
+        .tabla-scroll {
+            width: 100%;
+            max-width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior-x: contain;
+        }
+        .tabla-scroll table {
+            width: 100%;
+        }
+        @media (min-width: 1025px) and (max-width: 1440px) {
+            :root { --app-fixed-toolbar-w: 15.25rem; }
+            .main-content { max-width: 100%; }
+            .dashboard2-workspace {
+                grid-template-columns: minmax(0, 1fr);
+            }
+        }
+        @media (max-width: 1024px) {
+            :root { --app-fixed-toolbar-h: 3.35rem; }
+            html, body, .container {
+                max-width: 100%;
+                overflow-x: hidden;
+            }
+            .main-content {
+                margin-left: 0 !important;
+                max-width: 100% !important;
+                width: 100% !important;
+            }
+            .header {
+                padding: 0.9rem 0.65rem !important;
+            }
+            .header h1 {
+                font-size: clamp(1.05rem, 4.2vw, 1.35rem);
+                line-height: 1.25;
+            }
+            .tab-content table {
+                width: 100% !important;
+                min-width: 0 !important;
+                max-width: 100%;
+            }
+            .tab-content table th,
+            .tab-content table td {
+                white-space: normal !important;
+                word-break: break-word;
+                overflow-wrap: anywhere;
+            }
+            .tabla-acciones,
+            .moroso-acciones {
+                min-width: 0 !important;
+                width: 100%;
+                max-width: 13rem;
+                display: grid !important;
+                grid-template-columns: repeat(auto-fit, minmax(4.2rem, 1fr)) !important;
+            }
+            .login-box,
+            .login-screen-stack {
+                max-width: 100%;
+                width: 100%;
+            }
+            #loginScreen {
+                padding: max(0.75rem, env(safe-area-inset-top, 0px)) 0.75rem max(0.75rem, env(safe-area-inset-bottom, 0px));
+            }
+            .filtro-inteligente {
+                flex-wrap: wrap;
+            }
+            .filtro-inteligente input {
+                flex: 1 1 10rem;
+                min-width: 0;
+            }
+            .modulo-cabecera-con-mes,
+            .ocupacion-head,
+            .conserjeria-modulo__head {
+                flex-direction: column;
+                align-items: stretch !important;
+            }
+            .modulo-mes-consulta,
+            .modulo-mes-consulta select {
+                max-width: 100%;
+                width: 100%;
+                min-width: 0 !important;
+            }
+            #ocupacion .ocupacion-mapa-scroll {
+                min-height: 16rem;
+            }
+            .notif-bell-wrap {
+                max-width: calc(100vw - 4.6rem);
+            }
+            .tab-content:not(#dashboard) [style*="grid-template-columns"] {
+                grid-template-columns: 1fr !important;
+            }
+            .form-row {
+                grid-template-columns: 1fr !important;
+            }
+        }
+        @media (max-width: 768px) {
+            .consulta-rapida input {
+                width: min(8.8rem, 36vw) !important;
+            }
+            .dashboard2-kpi-row {
+                grid-template-columns: 1fr 1fr !important;
+            }
+            .form-section > .btn,
+            .form-section .form-group > .btn,
+            .form-section .btn-group .btn,
+            .header .btn {
+                width: 100%;
+            }
+            .modal-confirm {
+                width: 100% !important;
+                max-width: 100% !important;
+                margin: 0;
+            }
+            #inventarioBodega .inv-mov-list li {
+                grid-template-columns: auto auto minmax(0, 1fr) !important;
+            }
+        }
+        @media (max-width: 480px) {
+            .dashboard2-kpi-row,
+            #ocupacion .resumen-ocupacion-map {
+                grid-template-columns: 1fr !important;
+            }
+            .consulta-rapida input {
+                width: min(6.4rem, 32vw) !important;
+                font-size: 16px !important;
+            }
+            .notif-bell-wrap {
+                gap: 0.28rem;
+                max-width: calc(100vw - 4.1rem);
+            }
+            .login-box {
+                padding: 1.25rem 1rem;
+                border-radius: 18px;
+            }
+        }
+        @media (max-width: 1024px) and (orientation: landscape) {
+            .consulta-rapida input {
+                width: min(12rem, 40vw) !important;
+            }
+        }
+
     </style>
 </head>
 <body class="app-loading">
@@ -8031,7 +8172,7 @@
                         <div class="form-group" style="grid-column: 1 / -1; margin-bottom: 0.5rem;">
                             <label style="margin-bottom: 0.25rem; font-size: 0.875rem;">Link de Respaldo (cámara, ticket, evidencia)</label>
                             <div class="link-input">
-                                <input type="url" id="aperturaLink" placeholder="https://..." style="padding: 0.5rem; font-size: 0.875rem;">
+                                <input type="text" inputmode="url" id="aperturaLink" placeholder="https://..." style="padding: 0.5rem; font-size: 0.875rem;">
                             </div>
                         </div>
                         <div class="form-group" style="grid-column: 1 / -1; margin-bottom: 0.5rem;">
@@ -8355,7 +8496,7 @@
                             <label style="margin-bottom: 0.25rem; font-size: 0.875rem;">Evidencias (documentos, imágenes, links)</label>
                             <div id="multaEvidencias">
                                 <div class="link-input" style="margin-bottom: 0.375rem;">
-                                    <input type="url" class="evidencia-input" placeholder="https://..." style="padding: 0.5rem; font-size: 0.875rem;">
+                                    <input type="text" inputmode="url" class="evidencia-input" placeholder="https://..." style="padding: 0.5rem; font-size: 0.875rem;">
                                     <button type="button" class="btn btn-secondary btn-sm" data-action="agregar-evidencia" style="padding: 0.5rem 0.75rem; font-size: 0.875rem;">+ Agregar Link</button>
                                 </div>
                             </div>
@@ -8661,7 +8802,7 @@
                 <div class="form-row">
                     <div class="form-group" style="grid-column: 1 / -1;">
                         <label>Link de carpeta de comprobantes del mes</label>
-                        <input type="url" id="carpetaComprobantesCajaChica" placeholder="https://...">
+                        <input type="text" inputmode="url" id="carpetaComprobantesCajaChica" placeholder="https://...">
                         <small style="color: var(--gray-500); font-size: 0.75rem; margin-top: 0.25rem; display: block;">
                             Link a la carpeta (Drive, OneDrive, etc.) donde se almacenan los comprobantes de caja chica del mes (boletas, facturas, vales, etc.).
                         </small>
@@ -8711,7 +8852,7 @@
                 <div class="form-row">
                     <div class="form-group" style="grid-column: 1 / -1;">
                         <label>Link de carpeta de guías del mes</label>
-                        <input type="url" id="carpetaGuiasMantenciones" placeholder="https://...">
+                        <input type="text" inputmode="url" id="carpetaGuiasMantenciones" placeholder="https://...">
                         <small style="color: var(--gray-500); font-size: 0.75rem; margin-top: 0.25rem; display: block;">
                             Link a la carpeta (Drive, OneDrive, etc.) donde se almacenan las guías y respaldos de mantenciones del mes.
                         </small>
@@ -8791,7 +8932,7 @@
                         </div>
                         <div class="form-group" style="grid-column: 1 / -1; margin-bottom: 0.5rem;">
                             <label style="margin-bottom: 0.25rem; font-size: 0.875rem;">Link de Respaldo/Evidencia</label>
-                            <input type="url" id="mantencionLink" placeholder="https://... (opcional)" style="padding: 0.5rem; font-size: 0.875rem;">
+                            <input type="text" inputmode="url" id="mantencionLink" placeholder="https://... (opcional)" style="padding: 0.5rem; font-size: 0.875rem;">
                             <small style="color: var(--gray-500); font-size: 0.7rem; margin-top: 0.15rem; display: block;">
                                 URL de respaldo, evidencia fotográfica, factura, etc.
                             </small>
@@ -9922,7 +10063,7 @@
                                 </div>
                                 <div class="form-group" style="margin: 0;">
                                     <label for="comiteValorLink" style="font-size: 0.7rem; margin-bottom: 0.2rem; display: block;">Link del presupuesto (opcional)</label>
-                                    <input type="url" id="comiteValorLink" class="form-input" placeholder="https://…" style="padding: 0.45rem 0.55rem; font-size: 0.8125rem; width: 100%;">
+                                    <input type="text" inputmode="url" id="comiteValorLink" class="form-input" placeholder="https://…" style="padding: 0.45rem 0.55rem; font-size: 0.8125rem; width: 100%;">
                                 </div>
                             </div>
                         </div>
@@ -9942,7 +10083,7 @@
                                     <div class="form-group" style="margin: 0;"><label style="font-size: 0.7rem;">Proveedor</label><input type="text" id="comiteCot1Proveedor" class="form-input" placeholder="Nombre proveedor" style="padding: 0.4rem 0.5rem; font-size: 0.8125rem; width: 100%;"></div>
                                     <div class="form-group" style="margin: 0;"><label style="font-size: 0.7rem;">Monto ($)</label><input type="number" id="comiteCot1Monto" class="form-input" min="0" step="1" placeholder="0" style="padding: 0.4rem 0.5rem; font-size: 0.8125rem; width: 100%;"></div>
                                     <div class="form-group" style="margin: 0; grid-column: 1 / -1;"><label style="font-size: 0.7rem;">Detalle</label><input type="text" id="comiteCot1Detalle" class="form-input" placeholder="Alcance, plazo, condiciones…" style="padding: 0.4rem 0.5rem; font-size: 0.8125rem; width: 100%;"></div>
-                                    <div class="form-group" style="margin: 0;"><label style="font-size: 0.7rem;">Link</label><input type="url" id="comiteCot1Link" class="form-input" placeholder="https://…" style="padding: 0.4rem 0.5rem; font-size: 0.8125rem; width: 100%;"></div>
+                                    <div class="form-group" style="margin: 0;"><label style="font-size: 0.7rem;">Link</label><input type="text" inputmode="url" id="comiteCot1Link" class="form-input" placeholder="https://…" style="padding: 0.4rem 0.5rem; font-size: 0.8125rem; width: 100%;"></div>
                                     <div class="form-group" style="margin: 0; grid-column: 1 / -1;"><label style="font-size: 0.7rem;">Respaldos (varios archivos)</label><input type="file" id="comiteCot1Archivo" multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg,.webp" style="padding: 0.25rem 0; font-size: 0.75rem; width: 100%;"><div id="comiteCot1ArchivoActual" style="font-size: 0.7rem; color: var(--gray-600); margin-top: 0.2rem;"></div></div>
                                 </div>
                             </div>
@@ -9957,7 +10098,7 @@
                                     <div class="form-group" style="margin: 0;"><label style="font-size: 0.7rem;">Proveedor</label><input type="text" id="comiteCot2Proveedor" class="form-input" placeholder="Nombre proveedor" style="padding: 0.4rem 0.5rem; font-size: 0.8125rem; width: 100%;"></div>
                                     <div class="form-group" style="margin: 0;"><label style="font-size: 0.7rem;">Monto ($)</label><input type="number" id="comiteCot2Monto" class="form-input" min="0" step="1" placeholder="0" style="padding: 0.4rem 0.5rem; font-size: 0.8125rem; width: 100%;"></div>
                                     <div class="form-group" style="margin: 0; grid-column: 1 / -1;"><label style="font-size: 0.7rem;">Detalle</label><input type="text" id="comiteCot2Detalle" class="form-input" placeholder="Alcance, plazo, condiciones…" style="padding: 0.4rem 0.5rem; font-size: 0.8125rem; width: 100%;"></div>
-                                    <div class="form-group" style="margin: 0;"><label style="font-size: 0.7rem;">Link</label><input type="url" id="comiteCot2Link" class="form-input" placeholder="https://…" style="padding: 0.4rem 0.5rem; font-size: 0.8125rem; width: 100%;"></div>
+                                    <div class="form-group" style="margin: 0;"><label style="font-size: 0.7rem;">Link</label><input type="text" inputmode="url" id="comiteCot2Link" class="form-input" placeholder="https://…" style="padding: 0.4rem 0.5rem; font-size: 0.8125rem; width: 100%;"></div>
                                     <div class="form-group" style="margin: 0; grid-column: 1 / -1;"><label style="font-size: 0.7rem;">Respaldos (varios archivos)</label><input type="file" id="comiteCot2Archivo" multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg,.webp" style="padding: 0.25rem 0; font-size: 0.75rem; width: 100%;"><div id="comiteCot2ArchivoActual" style="font-size: 0.7rem; color: var(--gray-600); margin-top: 0.2rem;"></div></div>
                                 </div>
                             </div>
@@ -9972,7 +10113,7 @@
                                     <div class="form-group" style="margin: 0;"><label style="font-size: 0.7rem;">Proveedor</label><input type="text" id="comiteCot3Proveedor" class="form-input" placeholder="Nombre proveedor" style="padding: 0.4rem 0.5rem; font-size: 0.8125rem; width: 100%;"></div>
                                     <div class="form-group" style="margin: 0;"><label style="font-size: 0.7rem;">Monto ($)</label><input type="number" id="comiteCot3Monto" class="form-input" min="0" step="1" placeholder="0" style="padding: 0.4rem 0.5rem; font-size: 0.8125rem; width: 100%;"></div>
                                     <div class="form-group" style="margin: 0; grid-column: 1 / -1;"><label style="font-size: 0.7rem;">Detalle</label><input type="text" id="comiteCot3Detalle" class="form-input" placeholder="Alcance, plazo, condiciones…" style="padding: 0.4rem 0.5rem; font-size: 0.8125rem; width: 100%;"></div>
-                                    <div class="form-group" style="margin: 0;"><label style="font-size: 0.7rem;">Link</label><input type="url" id="comiteCot3Link" class="form-input" placeholder="https://…" style="padding: 0.4rem 0.5rem; font-size: 0.8125rem; width: 100%;"></div>
+                                    <div class="form-group" style="margin: 0;"><label style="font-size: 0.7rem;">Link</label><input type="text" inputmode="url" id="comiteCot3Link" class="form-input" placeholder="https://…" style="padding: 0.4rem 0.5rem; font-size: 0.8125rem; width: 100%;"></div>
                                     <div class="form-group" style="margin: 0; grid-column: 1 / -1;"><label style="font-size: 0.7rem;">Respaldos (varios archivos)</label><input type="file" id="comiteCot3Archivo" multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg,.webp" style="padding: 0.25rem 0; font-size: 0.75rem; width: 100%;"><div id="comiteCot3ArchivoActual" style="font-size: 0.7rem; color: var(--gray-600); margin-top: 0.2rem;"></div></div>
                                 </div>
                             </div>
@@ -9990,7 +10131,7 @@
                             <label style="font-size: 0.75rem; margin-bottom: 0.2rem; display: block;">Enlaces (título + URL)</label>
                             <div style="display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 0.4rem;">
                                 <input type="text" id="comiteLinkTitulo" class="form-input" placeholder="Título del enlace" style="padding: 0.4rem 0.5rem; font-size: 0.8125rem; flex: 1; min-width: 100px;">
-                                <input type="url" id="comiteLinkUrl" class="form-input" placeholder="https://…" style="padding: 0.4rem 0.5rem; font-size: 0.8125rem; flex: 1.4; min-width: 140px;">
+                                <input type="text" inputmode="url" id="comiteLinkUrl" class="form-input" placeholder="https://…" style="padding: 0.4rem 0.5rem; font-size: 0.8125rem; flex: 1.4; min-width: 140px;">
                                 <button type="button" class="btn btn-secondary" id="btnComiteAgregarLink" style="padding: 0.4rem 0.65rem; font-size: 0.75rem;">+ Link</button>
                             </div>
                             <div id="comiteLinksLista" style="font-size: 0.75rem;"></div>
@@ -23850,12 +23991,16 @@ document.getElementById('chatForm').onsubmit = function (e) {
             }
             const mesActual = obtenerMesActual();
             const mesConsulta = window.mesEnConsulta || mesActual;
+            let resultado;
             if (mesConsulta !== mesActual) {
                 const activos = await nubeLeerOMigrar(`${key}_${mesConsulta}`);
-                if (activos.length > 0) return activos;
-                return await nubeLeerOMigrar(`${key}_archivo_${mesConsulta}`);
+                resultado = (Array.isArray(activos) && activos.length > 0)
+                    ? activos
+                    : await nubeLeerOMigrar(`${key}_archivo_${mesConsulta}`);
+            } else {
+                resultado = await nubeLeerOMigrar(`${key}_${mesConsulta}`);
             }
-            return await nubeLeerOMigrar(`${key}_${mesConsulta}`);
+            return Array.isArray(resultado) ? resultado : [];
         }
 
         async function obtenerDatosArchivados(key, mesAnio) {
@@ -23873,9 +24018,10 @@ document.getElementById('chatForm').onsubmit = function (e) {
             return leido.datos;
         }
 
-        async function guardarDatosMes(key, datos) {
+        async function guardarDatosMes(key, datos, mesOverride) {
             const mesActual = obtenerMesActual();
-            const mesAGuardar = (window.mesReabierto && window.mesEnConsulta) ? window.mesEnConsulta : mesActual;
+            let mesAGuardar = (window.mesReabierto && window.mesEnConsulta) ? window.mesEnConsulta : mesActual;
+            if (mesOverride && /^\d{4}-\d{2}$/.test(String(mesOverride))) mesAGuardar = String(mesOverride);
             const docKey = `${key}_${mesAGuardar}`;
             const datosNormalizados = Array.isArray(datos) ? datos : [];
             await nubeEscribir(docKey, datosNormalizados, {
@@ -23891,6 +24037,90 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     if (typeof window.renderPanelControl2 === 'function') window.renderPanelControl2();
                 }).catch(function() {});
             }
+        }
+
+        function listaDatosSegura(datos) {
+            return Array.isArray(datos) ? datos : [];
+        }
+
+        function mesRegistroDesdeFecha(fecha) {
+            if (typeof mesDesdeFechaNovedadGestion === 'function') {
+                var mN = mesDesdeFechaNovedadGestion(fecha);
+                if (mN) return mN;
+            }
+            var s = String(fecha || '').trim();
+            var iso = s.match(/^(\d{4}-\d{2})(?:-\d{2}|T|$)/);
+            if (iso) return iso[1];
+            var dmy = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+            if (dmy) return dmy[3] + '-' + String(dmy[2]).padStart(2, '0');
+            if (typeof obtenerMesPeriodoVista === 'function') return obtenerMesPeriodoVista();
+            return typeof obtenerMesActual === 'function' ? obtenerMesActual() : '';
+        }
+
+        function normalizarLinkRegistro(link) {
+            var s = String(link == null ? '' : link).trim();
+            if (!s) return '';
+            if (/^[a-z][a-z0-9+.-]*:/i.test(s) || s.charAt(0) === '/') return s;
+            return 'https://' + s;
+        }
+
+        async function leerListaModulo(key, mes) {
+            var vista = (typeof obtenerMesPeriodoVista === 'function') ? obtenerMesPeriodoVista() : (typeof obtenerMesActual === 'function' ? obtenerMesActual() : '');
+            var m = mes || vista;
+            var lista;
+            if (m && vista && m !== vista && typeof obtenerDatosMesEspecifico === 'function') {
+                lista = await obtenerDatosMesEspecifico(key, m);
+            } else {
+                lista = await obtenerDatosMes(key);
+            }
+            return listaDatosSegura(lista);
+        }
+
+        async function persistirDatosModuloMes(key, lista, mesAnio) {
+            var datos = listaDatosSegura(lista);
+            var mes = mesAnio || (typeof obtenerMesPeriodoVista === 'function' ? obtenerMesPeriodoVista() : (typeof obtenerMesActual === 'function' ? obtenerMesActual() : ''));
+            await guardarDatosMes(key, datos, mes || undefined);
+        }
+
+        function fusionarRegistrosPorId(base, extra) {
+            var out = listaDatosSegura(base).filter(Boolean);
+            var seen = {};
+            out.forEach(function (m) { if (m && m.id) seen[String(m.id)] = true; });
+            listaDatosSegura(extra).forEach(function (m) {
+                if (!m) return;
+                if (m.id && seen[String(m.id)]) return;
+                if (m.id) seen[String(m.id)] = true;
+                out.unshift(m);
+            });
+            return out;
+        }
+
+        function protegerRegistro(fn, etiqueta) {
+            return async function () {
+                try {
+                    return await fn.apply(this, arguments);
+                } catch (err) {
+                    console.error('[' + (etiqueta || 'registro') + ']', err);
+                    if (typeof mostrarAlerta === 'function') {
+                        mostrarAlerta('No se pudo guardar el registro. ' + ((err && err.message) ? err.message : 'Revise la conexión e intente de nuevo.'), 'Error');
+                    }
+                }
+            };
+        }
+
+        function enlazarSubmitRegistro(form, fn) {
+            if (!form || form.getAttribute('data-reg-bind') === '1') return;
+            form.setAttribute('data-reg-bind', '1');
+            form.addEventListener('submit', function (e) {
+                e.preventDefault();
+                if (typeof fn !== 'function') return;
+                Promise.resolve(fn.call(this, e)).catch(function (err) {
+                    console.error(err);
+                    if (typeof mostrarAlerta === 'function') {
+                        mostrarAlerta('No se pudo guardar el registro. ' + ((err && err.message) ? err.message : 'Revise la conexión e intente de nuevo.'), 'Error');
+                    }
+                });
+            });
         }
 
         window.restaurarUltimoBackupModulo = async function(modulo, mesAnio) {
@@ -24562,7 +24792,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 comentarios: document.getElementById('mudanzaObservaciones').value || '',
                 // Compatibilidad: el resto del sistema usa "observaciones"
                 observaciones: document.getElementById('mudanzaObservaciones').value || '',
-                mes: obtenerMesActual()
+                mes: mesRegistroDesdeFecha(fechaSeleccionada)
             };
             
             // Agregar datos adicionales si es salida
@@ -24608,7 +24838,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 mudanzaData.docsFaltantes = faltan;
             }
 
-            const mudanzas = await obtenerDatosMes('mudanzas');
+            const mudanzas = await leerListaModulo('mudanzas', mudanzaData.mes);
             let avisoDocs = '';
             if (movimiento === 'salida') {
                 const inputArchivos = document.getElementById('mudanzaArchivos');
@@ -24646,7 +24876,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 if (index !== -1) {
                     mudanzas[index] = { ...mudanzas[index], ...mudanzaData };
                     mudanzaGuardada = mudanzas[index];
-                    await guardarDatosMes('mudanzas', mudanzas);
+                    await persistirDatosModuloMes('mudanzas', mudanzas, mudanzaData.mes);
                     if (typeof window.registrarMovimiento === 'function') {
                         const mov = mudanzaData.movimiento === 'ingreso' ? 'Ingreso' : mudanzaData.movimiento === 'salida' ? 'Salida' : 'Mudanza';
                         const montoStr = mudanzaData.aplicaCobro === 'si' && mudanzaData.monto ? formatearMoneda(mudanzaData.monto) : '';
@@ -24663,7 +24893,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 mudanzaGuardada = mudanza;
                 fueAlta = true;
                 mudanzas.unshift(mudanza);
-                await guardarDatosMes('mudanzas', mudanzas);
+                await persistirDatosModuloMes('mudanzas', mudanzas, mudanza.mes || mudanzaData.mes);
                 if (typeof window.registrarMovimiento === 'function') {
                     const mov = mudanza.movimiento === 'ingreso' ? 'Ingreso' : mudanza.movimiento === 'salida' ? 'Salida' : 'Mudanza';
                     const montoStr = mudanza.aplicaCobro === 'si' && mudanza.monto ? formatearMoneda(mudanza.monto) : '';
@@ -25515,13 +25745,11 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 departamento: document.getElementById('aperturaDepto').value,
                 aplicaCobro: document.getElementById('aperturaCobro').value,
                 monto: document.getElementById('aperturaCobro').value === 'si' ? montoApertura : 0,
-                link: document.getElementById('aperturaLink').value || '',
-                mes: (fechaSeleccionada && fechaSeleccionada.length >= 7)
-                    ? fechaSeleccionada.slice(0, 7)
-                    : obtenerMesActual()
+                link: normalizarLinkRegistro(document.getElementById('aperturaLink').value || ''),
+                mes: mesRegistroDesdeFecha(fechaSeleccionada)
             };
 
-            const aperturas = await obtenerDatosMes('aperturas');
+            const aperturas = await leerListaModulo('aperturas', aperturaData.mes);
             let registroId = window.editandoApertura || generarId();
             if (!window.editandoApertura) {
                 aperturaData.folio = getSiguienteFolioApertura(aperturas, aperturaData.mes);
@@ -25545,7 +25773,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                         aperturaData.archivos = archivosExistentes;
                     }
                     aperturas[index] = { ...aperturas[index], ...aperturaData };
-                    await guardarDatosMes('aperturas', aperturas);
+                    await persistirDatosModuloMes('aperturas', aperturas, aperturaData.mes);
                     if (typeof window.registrarMovimiento === 'function') {
                         const montoStr = aperturaData.aplicaCobro === 'si' && aperturaData.monto ? formatearMoneda(aperturaData.monto) : '';
                         window.registrarMovimiento('actualizar', 'aperturas', `Apertura actualizada: Depto ${aperturaData.departamento} - ${aperturaData.nombre} - ${aperturaData.hora || ''}${montoStr ? ' - ' + montoStr : ''}`);
@@ -25556,7 +25784,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
             } else {
                 aperturaData.id = registroId;
                 aperturas.unshift(aperturaData);
-                await guardarDatosMes('aperturas', aperturas);
+                await persistirDatosModuloMes('aperturas', aperturas, aperturaData.mes);
                 if (typeof window.registrarMovimiento === 'function') {
                     const montoStr = aperturaData.aplicaCobro === 'si' && aperturaData.monto ? formatearMoneda(aperturaData.monto) : '';
                     window.registrarMovimiento('crear', 'aperturas', `Apertura registrada: Depto ${aperturaData.departamento} - ${aperturaData.nombre} - ${aperturaData.hora || ''}${montoStr ? ' - ' + montoStr : ''}`);
@@ -26817,16 +27045,16 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 departamento,
                 items: lineas,
                 monto: montoTotal,
-                mes: obtenerMesActual()
+                mes: mesRegistroDesdeFecha(fechaSeleccionada)
             };
 
-            const tarjetas = await obtenerDatosMes('tarjetas');
+            const tarjetas = await leerListaModulo('tarjetas', tarjetaData.mes);
             
             if (window.editandoTarjeta) {
                 const index = tarjetas.findIndex(t => t.id === window.editandoTarjeta);
                 if (index !== -1) {
                     tarjetas[index] = { ...tarjetas[index], ...tarjetaData };
-                    await guardarDatosMes('tarjetas', tarjetas);
+                    await persistirDatosModuloMes('tarjetas', tarjetas, tarjetaData.mes);
                     if (typeof window.registrarMovimiento === 'function') {
                         window.registrarMovimiento('actualizar', 'tarjetas', `Venta actualizada: Depto ${departamento} - ${nombre} - ${lineas.length} línea(s) - ${formatearMoneda(montoTotal)}`);
                     }
@@ -26839,7 +27067,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     tarjeta.folio = getSiguienteFolioTarjeta(tarjetas, tarjeta.mes);
                 }
                 tarjetas.unshift(tarjeta);
-                await guardarDatosMes('tarjetas', tarjetas);
+                await persistirDatosModuloMes('tarjetas', tarjetas, tarjeta.mes);
                 if (typeof window.registrarMovimiento === 'function') {
                     window.registrarMovimiento('crear', 'tarjetas', `Venta: Depto ${departamento} - ${nombre} - ${lineas.length} línea(s) - ${formatearMoneda(montoTotal)}`);
                 }
@@ -27021,16 +27249,16 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 monto: aplicaAseo === 'si' ? 15000 : 0,
                 aplicaCobroEspacio: aplicaCobroUso,
                 montoCobroEspacio: montoCobroUso,
-                mes: obtenerMesActual()
+                mes: mesRegistroDesdeFecha(fechaSeleccionada)
             };
 
-            const espacios = await obtenerDatosMes('espacios');
+            const espacios = await leerListaModulo('espacios', espacioData.mes);
             
             if (window.editandoEspacio) {
                 const index = espacios.findIndex(e => e.id === window.editandoEspacio);
                 if (index !== -1) {
                     espacios[index] = { ...espacios[index], ...espacioData };
-                    await guardarDatosMes('espacios', espacios);
+                    await persistirDatosModuloMes('espacios', espacios, espacioData.mes);
                     if (typeof window.registrarMovimiento === 'function') {
                         const total = (espacioData.aplicaAseo === 'si' ? 15000 : 0) + (espacioData.aplicaCobroEspacio === 'si' ? (parseFloat(espacioData.montoCobroEspacio) || 0) : 0);
                         window.registrarMovimiento('actualizar', 'espacios', `Espacio actualizado: ${espacioData.espacio} - Depto ${espacioData.departamento} - ${espacioData.nombre}${total ? ' - ' + formatearMoneda(total) : ''}`);
@@ -27054,7 +27282,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     espacio.folio = getSiguienteFolioEvento(espacios, espacio.mes);
                 }
                 espacios.unshift(espacio);
-                await guardarDatosMes('espacios', espacios);
+                await persistirDatosModuloMes('espacios', espacios, espacio.mes);
                 if (typeof window.registrarMovimiento === 'function') {
                     const total = (espacio.monto || 0) + (parseFloat(espacio.montoCobroEspacio) || 0);
                     window.registrarMovimiento('crear', 'espacios', `Uso de espacio: ${espacio.espacio} - Depto ${espacio.departamento} - ${espacio.nombre}${total ? ' - ' + formatearMoneda(total) : ''}`);
@@ -27829,18 +28057,16 @@ document.getElementById('chatForm').onsubmit = function (e) {
         }
 
         async function persistirListaMultasMes(mesAnio, lista) {
-            var mes = mesAnio || (typeof obtenerMesActual === 'function' ? obtenerMesActual() : '');
-            if (!mes) return;
-            var datos = Array.isArray(lista) ? lista : [];
-            var mesVista = (window.mesReabierto && window.mesEnConsulta) ? window.mesEnConsulta : (typeof obtenerMesActual === 'function' ? obtenerMesActual() : mes);
-            if (typeof guardarDatosMes === 'function' && mes === mesVista) {
-                await guardarDatosMes('multas', datos);
+            if (typeof persistirDatosModuloMes === 'function') {
+                await persistirDatosModuloMes('multas', lista, mesAnio);
                 return;
             }
-            await nubeEscribir('multas_' + mes, datos, {
-                modulo: 'multas',
-                campos: { mes: mes, modulo: 'multas' }
-            });
+            var mes = mesAnio || (typeof obtenerMesActual === 'function' ? obtenerMesActual() : '');
+            if (!mes) return;
+            await guardarDatosMes('multas', Array.isArray(lista) ? lista : [], mes);
+        }
+        function multaFusionarListasPorId(base, extra) {
+            return typeof fusionarRegistrosPorId === 'function' ? fusionarRegistrosPorId(base, extra) : (Array.isArray(base) ? base : []);
         }
         async function multaReubicarRegistrosAjenos(lista, mesDoc) {
             if (!mesDoc || !Array.isArray(lista) || typeof obtenerDatosMesEspecifico !== 'function') {
@@ -27849,12 +28075,17 @@ document.getElementById('chatForm').onsubmit = function (e) {
             var propias = [];
             var ajenas = {};
             lista.forEach(function (m) {
+                if (!m) return;
                 if (multaPerteneceAlPeriodo(m, mesDoc)) {
                     propias.push(m);
                     return;
                 }
                 var rm = multaMesDelRegistro(m);
-                if (!rm) return;
+                if (!rm) {
+                    m.mes = mesDoc;
+                    propias.push(m);
+                    return;
+                }
                 if (!ajenas[rm]) ajenas[rm] = [];
                 ajenas[rm].push(m);
             });
@@ -28117,6 +28348,17 @@ document.getElementById('chatForm').onsubmit = function (e) {
                             return !mesActual || multaPerteneceAlPeriodo(m, mesActual);
                         });
                         multaAplicarAnulacionesEnLista(latest);
+                        try {
+                            var fresco = typeof obtenerDatosMesEspecifico === 'function'
+                                ? await obtenerDatosMesEspecifico('multas', mesActual)
+                                : [];
+                            latest = multaFusionarListasPorId(latest, fresco);
+                            latest = multaDeduplicarLista(latest);
+                            latest = latest.filter(function (m) {
+                                if (multaRegistroEstaEliminado(tomb, m)) return false;
+                                return !mesActual || multaPerteneceAlPeriodo(m, mesActual) || (m && m.origen === 'gestion');
+                            });
+                        } catch (eFresco) {}
                         await persistirListaMultasMes(mesActual, latest);
                     }
                     return creadas;
@@ -28924,7 +29166,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
             nuevoInput.className = 'link-input';
             nuevoInput.style.marginBottom = '0.5rem';
             nuevoInput.innerHTML = `
-                <input type="url" class="evidencia-input" placeholder="https://...">
+                <input type="text" inputmode="url" class="evidencia-input" placeholder="https://...">
                 <button type="button" class="btn btn-danger btn-sm" onclick="eliminarEvidencia(this)">Eliminar</button>
             `;
             contenedor.appendChild(nuevoInput);
@@ -28945,8 +29187,19 @@ document.getElementById('chatForm').onsubmit = function (e) {
             window.eliminarEvidencia(boton);
         }
 
+        function normalizarLinkEvidenciaMulta(link) {
+            return typeof normalizarLinkRegistro === 'function' ? normalizarLinkRegistro(link) : String(link || '').trim();
+        }
+
         async function registrarMulta(event) {
-            event.preventDefault();
+            if (event && typeof event.preventDefault === 'function') event.preventDefault();
+            const btnSubmitReg = document.querySelector('#formMulta button[type="submit"]');
+            const txtSubmitReg = btnSubmitReg ? btnSubmitReg.textContent : '';
+            if (btnSubmitReg) {
+                btnSubmitReg.disabled = true;
+                btnSubmitReg.textContent = 'Guardando…';
+            }
+            try {
             
             // Validar que no se esté consultando un mes archivado (solo lectura)
             if (window.mesEnConsulta && !window.mesReabierto) {
@@ -28954,17 +29207,25 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 return;
             }
             
-            // Recopilar todas las evidencias (links)
-            const evidenciasInputs = document.querySelectorAll('.evidencia-input');
+            // Recopilar evidencias (links) solo del formulario de multa
+            const evidenciasInputs = document.querySelectorAll('#multaEvidencias .evidencia-input');
             const evidencias = Array.from(evidenciasInputs)
-                .map(input => input.value.trim())
+                .map(input => normalizarLinkEvidenciaMulta(input.value))
                 .filter(link => link !== '');
             
             // Obtener archivos si hay
             const inputArchivos = document.getElementById('multaArchivos');
             const archivosSeleccionados = multaArchivosAcumulados(inputArchivos, multaArchivosPendientes);
             
-            const fechaSeleccionada = document.getElementById('multaFecha').value;
+            const fechaSeleccionada = document.getElementById('multaFecha').value || (typeof obtenerFechaHoy === 'function' ? obtenerFechaHoy() : '');
+            if (!fechaSeleccionada) {
+                mostrarAlerta('Indique la fecha de la multa.', 'Error');
+                return;
+            }
+            if (!String((document.getElementById('multaDepto') || {}).value || '').trim() || !String((document.getElementById('multaNombre') || {}).value || '').trim() || !String((document.getElementById('multaMotivo') || {}).value || '').trim()) {
+                mostrarAlerta('Complete unidad, residente y motivo para registrar la multa.', 'Error');
+                return;
+            }
             const radTipo = document.querySelector('input[name="multaTipoRegistro"]:checked');
             const tipoRegistro = radTipo && radTipo.value === 'anulacion' ? 'anulacion' : 'multa';
             if (tipoRegistro === 'multa') {
@@ -28975,7 +29236,16 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 }
             }
             
-            const multas = await obtenerDatosMes('multas');
+            const mesReg = (typeof multaMesClaveDesdeFecha === 'function' ? multaMesClaveDesdeFecha(fechaSeleccionada) : '')
+                || (typeof obtenerMesPeriodoVista === 'function' ? obtenerMesPeriodoVista() : obtenerMesActual());
+            let multas = [];
+            if (typeof obtenerDatosMesEspecifico === 'function' && mesReg) {
+                try { multas = await obtenerDatosMesEspecifico('multas', mesReg); } catch (eMes) { multas = []; }
+            }
+            if (!Array.isArray(multas)) {
+                try { multas = await obtenerDatosMes('multas'); } catch (eAct) { multas = []; }
+            }
+            if (!Array.isArray(multas)) multas = [];
             let registroId = window.editandoMulta || generarId();
             
             let montoVal = parseFloat(document.getElementById('multaMonto').value);
@@ -28995,7 +29265,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 monto: montoVal,
                 tipoUnidad: document.getElementById('multaTipoUnidad').value || 'UF', // UF por defecto para compatibilidad
                 evidencias: evidencias,
-                mes: (typeof multaMesClaveDesdeFecha === 'function' ? multaMesClaveDesdeFecha(fechaSeleccionada) : '') || (typeof obtenerMesPeriodoVista === 'function' ? obtenerMesPeriodoVista() : obtenerMesActual()),
+                mes: mesReg,
                 tipoRegistro: tipoRegistro
             };
             if (tipoRegistro === 'anulacion') {
@@ -29057,6 +29327,8 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 multa.archivos = [];
             }
             
+            const mesGuardar = multa.mes || mesReg || (typeof obtenerMesActual === 'function' ? obtenerMesActual() : '');
+            let guardada = false;
             if (window.editandoMulta) {
                 const index = multas.findIndex(m => m.id === window.editandoMulta);
                 if (index !== -1) {
@@ -29083,15 +29355,14 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     multa.revisadoAt = prevMulta.revisadoAt;
                     multa.revisadoPor = prevMulta.revisadoPor;
                     if (typeof multaHistorialPush === 'function') multaHistorialPush(multa, 'datos_actualizados');
-                    // Combinar archivos existentes con nuevos
-                    const archivosExistentes = prevMulta.archivos || [];
+                    const archivosExistentesPrev = prevMulta.archivos || [];
                     if (archivosSubidos && archivosSubidos.length > 0) {
-                        multa.archivos = [...archivosExistentes, ...archivosSubidos];
+                        multa.archivos = [...archivosExistentesPrev, ...archivosSubidos];
                     } else {
-                        multa.archivos = archivosExistentes;
+                        multa.archivos = archivosExistentesPrev;
                     }
                     multas[index] = multa;
-                    await guardarDatosMes('multas', multas);
+                    guardada = true;
                     if (typeof window.registrarMovimiento === 'function') {
                         if (multaEsRegistroAnulacion(multa)) {
                             window.registrarMovimiento('actualizar', 'multas', `Anulación de multa actualizada: Depto ${multa.departamento} - ${multa.nombre} - ${multa.motivo}`);
@@ -29103,10 +29374,22 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     mostrarAlerta(multaEsRegistroAnulacion(multa) ? 'Registro de anulación actualizado.' : 'Multa actualizada exitosamente.', 'Actualizado');
                     cancelarEdicionMulta();
                 }
-            } else {
-                // Nuevo registro: agregar archivos al objeto antes de guardar
+            }
+            if (!guardada) {
+                if (window.editandoMulta) window.editandoMulta = null;
+                if (!multa.folio) multa.folio = getSiguienteFolioMulta(multas, multa.mes);
+                if (!multa.origen) multa.origen = 'gestion';
+                if (!multa.estadoGestion) multa.estadoGestion = 'gestionada';
+                if (!Array.isArray(multa.historialEstados) || !multa.historialEstados.length) {
+                    multa.historialEstados = [{
+                        at: new Date().toISOString(),
+                        usuario: (typeof multaOperadorActual === 'function' ? multaOperadorActual() : 'Administración'),
+                        accion: 'creada_manual',
+                        estado: 'gestionada'
+                    }];
+                }
                 multas.unshift(multa);
-                await guardarDatosMes('multas', multas);
+                guardada = true;
                 if (typeof window.registrarMovimiento === 'function') {
                     if (multaEsRegistroAnulacion(multa)) {
                         window.registrarMovimiento('crear', 'multas', `Anulación de multa registrada: Depto ${multa.departamento} - ${multa.nombre} - ${multa.motivo}`);
@@ -29118,18 +29401,34 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 mostrarAlerta(multaEsRegistroAnulacion(multa) ? 'Anulación de multa registrada.' : 'Multa registrada exitosamente.', 'Registrado');
             }
 
+            if (typeof persistirListaMultasMes === 'function') {
+                await persistirListaMultasMes(mesGuardar, multas);
+            } else {
+                await guardarDatosMes('multas', multas);
+            }
+            if (window._multasSyncLock) {
+                try { await window._multasSyncLock; } catch (eLock) {}
+                try {
+                    var listaPost = typeof obtenerDatosMesEspecifico === 'function'
+                        ? await obtenerDatosMesEspecifico('multas', mesGuardar)
+                        : await obtenerDatosMes('multas');
+                    listaPost = multaFusionarListasPorId(listaPost, [multa]);
+                    await persistirListaMultasMes(mesGuardar, listaPost);
+                } catch (ePost) {
+                    console.warn('[multas] no se pudo reconfirmar el registro:', ePost);
+                }
+            }
+
             document.getElementById('formMulta').reset();
             const contenidoPostReset = document.getElementById('multaContenido');
             if (contenidoPostReset) contenidoPostReset.innerHTML = '';
-            // Limpiar evidencias
             document.getElementById('multaEvidencias').innerHTML = `
                 <div class="link-input" style="margin-bottom: 0.5rem;">
-                    <input type="url" class="evidencia-input" placeholder="https://...">
+                    <input type="text" inputmode="url" class="evidencia-input" placeholder="https://...">
                     <button type="button" class="btn btn-secondary btn-sm" onclick="agregarEvidencia()">+ Agregar Link</button>
                 </div>
             `;
             limpiarMultaArchivosPendientes();
-            // Limpiar archivos existentes
             const archivosExistentes = document.getElementById('multaArchivosExistentes');
             if (archivosExistentes) archivosExistentes.innerHTML = '';
             const fechaHoy = obtenerFechaHoy();
@@ -29140,6 +29439,17 @@ document.getElementById('chatForm').onsubmit = function (e) {
             if (folioO) folioO.value = '';
             aplicarTipoRegistroMultaFormulario();
             await cargarMultas();
+            } catch (errorReg) {
+                console.error('Error al registrar multa:', errorReg);
+                mostrarAlerta('No se pudo registrar la multa. ' + ((errorReg && errorReg.message) ? errorReg.message : 'Intente de nuevo.'), 'Error');
+            } finally {
+                if (btnSubmitReg) {
+                    btnSubmitReg.disabled = false;
+                    btnSubmitReg.textContent = window.editandoMulta
+                        ? (txtSubmitReg || 'Actualizar Multa')
+                        : 'Registrar Multa';
+                }
+            }
         }
 
         // Hacer disponible globalmente la función de registrarMulta para compatibilidad
@@ -29196,7 +29506,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
             const evidenciasHTML = evidencias.length > 0
                 ? evidencias.map((ev, idx) => `
                     <div class="link-input" style="margin-bottom: 0.375rem;">
-                        <input type="url" class="evidencia-input" value="${ev}" placeholder="https://..." style="padding: 0.5rem; font-size: 0.875rem;">
+                        <input type="text" inputmode="url" class="evidencia-input" value="${ev}" placeholder="https://..." style="padding: 0.5rem; font-size: 0.875rem;">
                         ${idx === evidencias.length - 1
                             ? '<button type="button" class="btn btn-secondary btn-sm" onclick="agregarEvidencia()" style="padding: 0.5rem 0.75rem; font-size: 0.875rem;">+ Agregar Link</button>'
                             : '<button type="button" class="btn btn-danger btn-sm" onclick="eliminarEvidencia(this)" style="padding: 0.5rem 0.75rem; font-size: 0.875rem;">Eliminar</button>'
@@ -29205,7 +29515,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 `).join('')
                 : `
                     <div class="link-input" style="margin-bottom: 0.375rem;">
-                        <input type="url" class="evidencia-input" placeholder="https://..." style="padding: 0.5rem; font-size: 0.875rem;">
+                                    <input type="text" inputmode="url" class="evidencia-input" placeholder="https://..." style="padding: 0.5rem; font-size: 0.875rem;">
                         <button type="button" class="btn btn-secondary btn-sm" onclick="agregarEvidencia()" style="padding: 0.5rem 0.75rem; font-size: 0.875rem;">+ Agregar Link</button>
                     </div>
                 `;
@@ -29250,7 +29560,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
             // Restaurar evidencias iniciales
             document.getElementById('multaEvidencias').innerHTML = `
                 <div class="link-input" style="margin-bottom: 0.5rem;">
-                    <input type="url" class="evidencia-input" placeholder="https://...">
+                    <input type="text" inputmode="url" class="evidencia-input" placeholder="https://...">
                     <button type="button" class="btn btn-secondary btn-sm" onclick="agregarEvidencia()">+ Agregar Link</button>
                 </div>
             `;
@@ -29279,7 +29589,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 if (typeof sincronizarMultasDesdeConserjeria === 'function') await sincronizarMultasDesdeConserjeria();
             } catch (eSyncC) {}
             const todasRaw = await obtenerDatosMes('multas');
-            var todas = multaDeduplicarLista(todasRaw);
+            var todas = multaDeduplicarLista(Array.isArray(todasRaw) ? todasRaw : []);
             var tombUi = window._multasTombstones;
             if ((!tombUi || !tombUi.length) && typeof multaCargarTombstones === 'function') {
                 try { tombUi = await multaCargarTombstones(); } catch (eT) { tombUi = tombUi || []; }
@@ -30668,10 +30978,10 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 monto: monto,
                 periodosVencidos: periodosVencidos,
                 servicioElectricoSuspendido: document.getElementById('morosoServicioElectricoSuspendido').checked,
-                mes: obtenerMesActual()
+                mes: mesRegistroDesdeFecha(fechaSeleccionada)
             };
 
-            const morosos = await obtenerDatosMes('morosos');
+            const morosos = await leerListaModulo('morosos', morosoData.mes);
             
             if (window.editandoMoroso) {
                 const index = morosos.findIndex(m => m.id === window.editandoMoroso);
@@ -30682,7 +30992,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                         actualizado.estado = 'regularizado';
                     }
                     morosos[index] = actualizado;
-                    await guardarDatosMes('morosos', morosos);
+                    await persistirDatosModuloMes('morosos', morosos, actualizado.mes || morosoData.mes);
                     if (typeof window.registrarMovimiento === 'function') {
                         window.registrarMovimiento('actualizar', 'morosos', `Moroso actualizado: Depto ${morosoData.departamento} - ${morosoData.estado} - ${formatearMoneda(morosoData.monto || 0)}`);
                     }
@@ -30695,7 +31005,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     moroso.folio = getSiguienteFolioMoroso(morosos, moroso.mes);
                 }
                 morosos.unshift(moroso);
-                await guardarDatosMes('morosos', morosos);
+                await persistirDatosModuloMes('morosos', morosos, moroso.mes);
                 if (typeof window.registrarMovimiento === 'function') {
                     window.registrarMovimiento('crear', 'morosos', `Moroso registrado: Depto ${moroso.departamento} - ${moroso.estado} - ${formatearMoneda(moroso.monto || 0)}`);
                 }
@@ -33418,14 +33728,14 @@ document.getElementById('chatForm').onsubmit = function (e) {
             const consumo = Math.max(0, actualNum - anteriorNum);
             const observaciones = (document.getElementById('aguaObservaciones').value || '').trim();
             const fechaRegistro = obtenerFechaHoy();
-            const mes = obtenerMesActual();
+            const mes = mesDestino || mesRegistroDesdeFecha(fechaRegistro);
             
             if (!unidad) {
                 mostrarAlerta('Debe especificar la unidad o departamento.', 'Datos incompletos');
                 return;
             }
             
-            const lecturas = await obtenerDatosMes('lecturasAguaCaliente');
+            const lecturas = await leerListaModulo('lecturasAguaCaliente', mes);
             const unidadKey = unidad.toLowerCase();
             if (window.editandoLecturaAgua) {
                 const index = lecturas.findIndex(l => l.id === window.editandoLecturaAgua);
@@ -33440,7 +33750,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                         fechaRegistro,
                         mes
                     };
-                    await guardarDatosMes('lecturasAguaCaliente', lecturas);
+                    await persistirDatosModuloMes('lecturasAguaCaliente', lecturas, mes);
                     if (typeof window.registrarMovimiento === 'function') {
                         window.registrarMovimiento('actualizar', 'lecturasAguaCaliente', `Lectura agua actualizada: Unidad ${unidad} - consumo ${consumo}`);
                     }
@@ -33469,7 +33779,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 } else {
                     lecturas.unshift(nuevaLectura);
                 }
-                await guardarDatosMes('lecturasAguaCaliente', lecturas);
+                await persistirDatosModuloMes('lecturasAguaCaliente', lecturas, mes);
                 if (typeof window.registrarMovimiento === 'function') {
                     window.registrarMovimiento('crear', 'lecturasAguaCaliente', `Lectura agua: Unidad ${unidad} - consumo ${consumo}`);
                 }
@@ -34606,10 +34916,10 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 numeroDocumento: (document.getElementById('cajaNumeroDocumento').value || '').trim(),
                 descripcion: document.getElementById('cajaDescripcion').value,
                 monto: parseFloat(document.getElementById('cajaMonto').value),
-                mes: obtenerMesActual()
+                mes: mesRegistroDesdeFecha(fechaSeleccionada)
             };
 
-            const movimientos = await obtenerDatosMes('caja');
+            const movimientos = await leerListaModulo('caja', movimientoData.mes);
             let registroId = window.editandoCaja || generarId();
             
             let archivosSubidos = [];
@@ -34634,7 +34944,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                             ? [...archivosExistentes, ...archivosSubidos]
                             : archivosExistentes;
                         movimientos[index] = { ...movimientos[index], ...movimientoData };
-                        await guardarDatosMes('caja', movimientos);
+                        await persistirDatosModuloMes('caja', movimientos, movimientoData.mes);
                         if (typeof window.registrarMovimiento === 'function') {
                             window.registrarMovimiento('actualizar', 'caja', `Gasto actualizado: ${movimientoData.descripcion || 'Sin descripción'} - ${formatearMoneda(movimientoData.monto)}`);
                         }
@@ -34651,7 +34961,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     movimientoData.folio = getSiguienteFolioCaja(movimientos, movimientoData.mes);
                     movimientoData.archivos = archivosSubidos && archivosSubidos.length > 0 ? archivosSubidos : [];
                     movimientos.unshift(movimientoData);
-                    await guardarDatosMes('caja', movimientos);
+                    await persistirDatosModuloMes('caja', movimientos, movimientoData.mes);
                     if (typeof window.registrarMovimiento === 'function') {
                         window.registrarMovimiento('crear', 'caja', `Gasto: ${movimientoData.descripcion || 'Sin descripción'} - ${formatearMoneda(movimientoData.monto)}`);
                     }
@@ -37638,8 +37948,9 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 tipoVisita: tipoVisita,
                 fechaUltima: document.getElementById('mantencionFecha').value,
                 plazo: (esNormal && plazo) ? plazo : null, // Solo las normales tienen plazo, sin-plazo no tiene plazo
-                link: document.getElementById('mantencionLink').value.trim() || '',
-                observaciones: document.getElementById('mantencionObservaciones').value
+                link: normalizarLinkRegistro(document.getElementById('mantencionLink').value.trim() || ''),
+                observaciones: document.getElementById('mantencionObservaciones').value,
+                mes: mesRegistroDesdeFecha(document.getElementById('mantencionFecha').value)
             };
             
             // Subir archivos si hay
@@ -37651,7 +37962,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
 
             if (esNormal || esSinPlazo) {
                 // Mantención normal o sin plazo - guardar en mantenciones
-                const mantenciones = await obtenerDatosMes('mantenciones');
+                const mantenciones = await leerListaModulo('mantenciones', registro.mes);
                 
                 if (mantencionId) {
                     // Editar
@@ -37671,7 +37982,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     mantenciones.unshift(registro);
                 }
                 
-                await guardarDatosMes('mantenciones', mantenciones);
+                await persistirDatosModuloMes('mantenciones', mantenciones, registro.mes);
                 if (typeof window.registrarMovimiento === 'function') {
                     window.registrarMovimiento(mantencionId ? 'actualizar' : 'crear', 'mantenciones', `Mantención: ${registro.proveedor} - ${registro.servicio || registro.tipoVisita || 'Normal'}`);
                 }
@@ -37686,7 +37997,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
             } else {
                 // Visita extraordinaria/emergencia/reparación - guardar en visitas-extraordinarias
                 // NO actualizar la fecha del proveedor porque no son mantenciones programadas
-                const visitasExtraordinarias = await obtenerDatosMes('visitas-extraordinarias');
+                const visitasExtraordinarias = await leerListaModulo('visitas-extraordinarias', registro.mes);
                 
                 if (mantencionId) {
                     // Editar
@@ -37706,7 +38017,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     visitasExtraordinarias.unshift(registro);
                 }
                 
-                await guardarDatosMes('visitas-extraordinarias', visitasExtraordinarias);
+                await persistirDatosModuloMes('visitas-extraordinarias', visitasExtraordinarias, registro.mes);
                 if (typeof window.registrarMovimiento === 'function') {
                     window.registrarMovimiento(mantencionId ? 'actualizar' : 'crear', 'visitas-extraordinarias', `Visita extraordinaria: ${registro.proveedor} - ${registro.servicio || registro.tipoVisita || ''}`);
                 }
@@ -38680,7 +38991,8 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 return;
             }
             
-            const pagos = await obtenerDatosMes('pagosAseo');
+            const mesPago = mesRegistroDesdeFecha(fechaAseo);
+            const pagos = await leerListaModulo('pagosAseo', mesPago);
             
             if (pagoId) {
                 // Editar pago existente
@@ -38698,7 +39010,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                         modalidad: modalidad,
                         observaciones: observaciones
                     };
-                    await guardarDatosMes('pagosAseo', pagos);
+                    await persistirDatosModuloMes('pagosAseo', pagos, mesPago);
                     if (typeof window.registrarMovimiento === 'function') {
                         window.registrarMovimiento('actualizar', 'pagosAseo', `Pago aseo actualizado: ${personalSeleccionado.nombre} - ${areaComun} - ${formatearMoneda(monto)}`);
                     }
@@ -38717,10 +39029,11 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     modalidad: modalidad,
                     observaciones: observaciones,
                     fechaRegistro: obtenerFechaHoy(),
+                    mes: mesPago,
                     estado: 'pendiente' // pendiente, pagado, cancelado
                 };
                 pagos.unshift(pago);
-                await guardarDatosMes('pagosAseo', pagos);
+                await persistirDatosModuloMes('pagosAseo', pagos, mesPago);
                 if (typeof window.registrarMovimiento === 'function') {
                     window.registrarMovimiento('crear', 'pagosAseo', `Pago aseo: ${pago.personalNombre} - ${pago.areaComun} - ${formatearMoneda(pago.monto)}`);
                 }
@@ -42699,7 +43012,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 if (!postventaListenersBound) {
                     postventaListenersBound = true;
                     var form = document.getElementById('formPostventa');
-                    if (form) form.addEventListener('submit', function (e) { e.preventDefault(); window.guardarRegistroPostventa(); });
+                    if (form) enlazarSubmitRegistro(form, function () { return window.guardarRegistroPostventa(); });
                     var bx = document.getElementById('btnExportarExcelPostventa');
                     if (bx) bx.addEventListener('click', function () { window.exportarExcelPostventa(); });
                     var bc = document.getElementById('btnCancelarEdicionPostventa');
@@ -43819,7 +44132,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 if (comiteListenersBound) return;
                 comiteListenersBound = true;
                 var form = document.getElementById('formComite');
-                if (form) form.addEventListener('submit', function (e) { window.guardarPropuestaComite(e); });
+                if (form) enlazarSubmitRegistro(form, function (e) { return window.guardarPropuestaComite(e); });
                 var btnCancel = document.getElementById('btnCancelarEdicionComite');
                 if (btnCancel) btnCancel.addEventListener('click', function () { limpiarFormComite(); });
                 var rc = document.getElementById('comiteRequiereCotizacion');
@@ -55873,8 +56186,9 @@ document.getElementById('chatForm').onsubmit = function (e) {
         async function obtenerDatosMesEspecifico(key, mes) {
             if (!firebaseInitialized || !db) return [];
             const activos = await nubeLeerOMigrar(`${key}_${mes}`);
-            if (activos.length > 0) return activos;
-            return await nubeLeerOMigrar(`${key}_archivo_${mes}`);
+            if (Array.isArray(activos) && activos.length > 0) return activos;
+            const arch = await nubeLeerOMigrar(`${key}_archivo_${mes}`);
+            return Array.isArray(arch) ? arch : [];
         }
         
         // Función para obtener el nombre del mes en español
@@ -56431,6 +56745,52 @@ document.getElementById('chatForm').onsubmit = function (e) {
             });
         }
 
+        function envolverSiExiste(fn, etiqueta) {
+            if (typeof fn !== 'function' || fn._protegidoRegistro) return fn;
+            var wrapped = protegerRegistro(fn, etiqueta);
+            wrapped._protegidoRegistro = true;
+            return wrapped;
+        }
+        registrarMudanza = window.registrarMudanza = envolverSiExiste(typeof registrarMudanza === 'function' ? registrarMudanza : window.registrarMudanza, 'mudanzas');
+        registrarApertura = window.registrarApertura = envolverSiExiste(typeof registrarApertura === 'function' ? registrarApertura : window.registrarApertura, 'aperturas');
+        registrarTarjeta = window.registrarTarjeta = envolverSiExiste(typeof registrarTarjeta === 'function' ? registrarTarjeta : window.registrarTarjeta, 'tarjetas');
+        registrarEspacio = window.registrarEspacio = envolverSiExiste(typeof registrarEspacio === 'function' ? registrarEspacio : window.registrarEspacio, 'espacios');
+        registrarMulta = window.registrarMulta = envolverSiExiste(typeof registrarMulta === 'function' ? registrarMulta : window.registrarMulta, 'multas');
+        registrarMoroso = window.registrarMoroso = envolverSiExiste(typeof registrarMoroso === 'function' ? registrarMoroso : window.registrarMoroso, 'morosos');
+        registrarLecturaAgua = window.registrarLecturaAgua = envolverSiExiste(typeof registrarLecturaAgua === 'function' ? registrarLecturaAgua : window.registrarLecturaAgua, 'lecturasAguaCaliente');
+        registrarCaja = window.registrarCaja = envolverSiExiste(typeof registrarCaja === 'function' ? registrarCaja : window.registrarCaja, 'caja');
+        registrarProveedor = window.registrarProveedor = envolverSiExiste(typeof registrarProveedor === 'function' ? registrarProveedor : window.registrarProveedor, 'proveedores');
+        registrarMantencion = window.registrarMantencion = envolverSiExiste(typeof registrarMantencion === 'function' ? registrarMantencion : window.registrarMantencion, 'mantenciones');
+        registrarPagoAseo = window.registrarPagoAseo = envolverSiExiste(typeof registrarPagoAseo === 'function' ? registrarPagoAseo : window.registrarPagoAseo, 'pagosAseo');
+        if (typeof window.registrarInsumo === 'function') window.registrarInsumo = envolverSiExiste(window.registrarInsumo, 'insumos');
+        if (typeof window.guardarRegistroPostventa === 'function') window.guardarRegistroPostventa = envolverSiExiste(window.guardarRegistroPostventa, 'postventa');
+        if (typeof window.guardarPropuestaComite === 'function') window.guardarPropuestaComite = envolverSiExiste(window.guardarPropuestaComite, 'comite');
+
+        function envolverTablasParaScroll() {
+            document.querySelectorAll('.tab-content table, .modal-overlay table, .modal-confirm table').forEach(function (table) {
+                if (!table || table.closest('.tabla-scroll, .ocupacion-mapa-scroll, #checklistTurnos')) return;
+                var parent = table.parentElement;
+                if (!parent) return;
+                var wrap = document.createElement('div');
+                wrap.className = 'tabla-scroll';
+                parent.insertBefore(wrap, table);
+                wrap.appendChild(table);
+            });
+        }
+
+        function iniciarObservadorTablasScroll() {
+            envolverTablasParaScroll();
+            var root = document.getElementById('mainContent') || document.body;
+            if (!root || root._obsTablasScroll) return;
+            var t;
+            var obs = new MutationObserver(function () {
+                clearTimeout(t);
+                t = setTimeout(envolverTablasParaScroll, 80);
+            });
+            obs.observe(root, { childList: true, subtree: true });
+            root._obsTablasScroll = obs;
+        }
+
         async function inicializarApp() {
             // Misma secuencia que index: menú e iconos en el siguiente frame; visibilidad en paralelo
             requestAnimationFrame(function() {
@@ -56445,6 +56805,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
             inicializarIconosMenu();
             inicializarIconosTitulosModulos();
             if (typeof montarSelectoresMesEnModulos === 'function') montarSelectoresMesEnModulos();
+            iniciarObservadorTablasScroll();
             try {
                 const menuToggleBtn = document.getElementById('menuToggleBtn');
                 const tabsMenu = document.getElementById('tabsMenu');
@@ -56579,12 +56940,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 // Agregar event listeners a formularios
                 const formMudanza = document.getElementById('formMudanza');
                 if (formMudanza) {
-                    formMudanza.addEventListener('submit', function(e) {
-                        e.preventDefault();
-                        if (typeof registrarMudanza === 'function') {
-                            registrarMudanza(e);
-                        }
-                    });
+                    enlazarSubmitRegistro(formMudanza, window.registrarMudanza || registrarMudanza);
                 }
                 
                 const mudanzaMovimiento = document.getElementById('mudanzaMovimiento');
@@ -56700,12 +57056,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 
                 const formApertura = document.getElementById('formApertura');
                 if (formApertura) {
-                    formApertura.addEventListener('submit', function(e) {
-                        e.preventDefault();
-                        if (typeof registrarApertura === 'function') {
-                            registrarApertura(e);
-                        }
-                    });
+                    enlazarSubmitRegistro(formApertura, window.registrarApertura || registrarApertura);
                 }
                 
                 // Event listeners para mostrar nombres de archivos seleccionados
@@ -56774,12 +57125,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 
                 const formTarjeta = document.getElementById('formTarjeta');
                 if (formTarjeta) {
-                    formTarjeta.addEventListener('submit', function(e) {
-                        e.preventDefault();
-                        if (typeof registrarTarjeta === 'function') {
-                            registrarTarjeta(e);
-                        }
-                    });
+                    enlazarSubmitRegistro(formTarjeta, window.registrarTarjeta || registrarTarjeta);
                 }
                 const btnAgregarLineaTarjeta = document.getElementById('btnAgregarLineaTarjeta');
                 if (btnAgregarLineaTarjeta) {
@@ -56811,22 +57157,12 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 
                 const formEspacio = document.getElementById('formEspacio');
                 if (formEspacio) {
-                    formEspacio.addEventListener('submit', function(e) {
-                        e.preventDefault();
-                        if (typeof registrarEspacio === 'function') {
-                            registrarEspacio(e);
-                        }
-                    });
+                    enlazarSubmitRegistro(formEspacio, window.registrarEspacio || registrarEspacio);
                 }
                 
                 const formMulta = document.getElementById('formMulta');
                 if (formMulta) {
-                    formMulta.addEventListener('submit', function(e) {
-                        e.preventDefault();
-                        if (typeof registrarMulta === 'function') {
-                            registrarMulta(e);
-                        }
-                    });
+                    enlazarSubmitRegistro(formMulta, window.registrarMulta || registrarMulta);
                     document.querySelectorAll('input[name="multaTipoRegistro"]').forEach(function (r) {
                         r.addEventListener('change', function () {
                             if (typeof aplicarTipoRegistroMultaFormulario === 'function') aplicarTipoRegistroMultaFormulario();
@@ -56840,12 +57176,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 
                 const formMoroso = document.getElementById('formMoroso');
                 if (formMoroso) {
-                    formMoroso.addEventListener('submit', function(e) {
-                        e.preventDefault();
-                        if (typeof registrarMoroso === 'function') {
-                            registrarMoroso(e);
-                        }
-                    });
+                    enlazarSubmitRegistro(formMoroso, window.registrarMoroso || registrarMoroso);
                 }
                 const modalAbonarMoroso = document.getElementById('modalAbonarMoroso');
                 if (modalAbonarMoroso) {
@@ -56862,12 +57193,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 
                 const formLecturaAgua = document.getElementById('formLecturaAgua');
                 if (formLecturaAgua) {
-                    formLecturaAgua.addEventListener('submit', function(e) {
-                        e.preventDefault();
-                        if (typeof registrarLecturaAgua === 'function') {
-                            registrarLecturaAgua(e);
-                        }
-                    });
+                    enlazarSubmitRegistro(formLecturaAgua, window.registrarLecturaAgua || registrarLecturaAgua);
                 }
                 
                 // Botón agregar evidencia
@@ -56889,12 +57215,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 // Agregar event listeners a formularios restantes
                 const formCaja = document.getElementById('formCaja');
                 if (formCaja) {
-                    formCaja.addEventListener('submit', function(e) {
-                        e.preventDefault();
-                        if (typeof registrarCaja === 'function') {
-                            registrarCaja(e);
-                        }
-                    });
+                    enlazarSubmitRegistro(formCaja, window.registrarCaja || registrarCaja);
                 }
 
                 // Guardar link de carpeta de comprobantes de caja chica del mes actual
@@ -56939,34 +57260,17 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 
                 const formProveedor = document.getElementById('formProveedor');
                 if (formProveedor) {
-                    formProveedor.addEventListener('submit', function(e) {
-                        e.preventDefault();
-                        if (typeof registrarProveedor === 'function') {
-                            registrarProveedor(e);
-                        }
-                    });
+                    enlazarSubmitRegistro(formProveedor, window.registrarProveedor || registrarProveedor);
                 }
                 
                 const formMantencion = document.getElementById('formMantencion');
                 if (formMantencion) {
-                    formMantencion.addEventListener('submit', function(e) {
-                        e.preventDefault();
-                        if (typeof registrarMantencion === 'function') {
-                            registrarMantencion(e);
-                        }
-                    });
+                    enlazarSubmitRegistro(formMantencion, window.registrarMantencion || registrarMantencion);
                 }
 
                 const formInsumo = document.getElementById('formInsumo');
                 if (formInsumo) {
-                    formInsumo.addEventListener('submit', function(e) {
-                        e.preventDefault();
-                        if (typeof window.registrarInsumo === 'function') {
-                            window.registrarInsumo(e);
-                        } else {
-                            console.error('registrarInsumo no está disponible');
-                        }
-                    });
+                    enlazarSubmitRegistro(formInsumo, window.registrarInsumo);
                 }
 
                 const btnDescargarPedidoInsumos = document.getElementById('btnDescargarPedidoInsumos');
@@ -57344,12 +57648,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 
                 const formPagoAseo = document.getElementById('formPagoAseo');
                 if (formPagoAseo) {
-                    formPagoAseo.addEventListener('submit', function(e) {
-                        e.preventDefault();
-                        if (typeof registrarPagoAseo === 'function') {
-                            registrarPagoAseo(e);
-                        }
-                    });
+                    enlazarSubmitRegistro(formPagoAseo, window.registrarPagoAseo || registrarPagoAseo);
                 }
                 
                 const pagoRegistroEspacio = document.getElementById('pagoRegistroEspacio');
