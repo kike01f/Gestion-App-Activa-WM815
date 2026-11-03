@@ -45540,6 +45540,15 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     rowAlt: '#f0fdf4',
                     label: '✅ Aprobada'
                 },
+                realizada: {
+                    titulo: '🏁 Trabajos realizados',
+                    color: '#047857',
+                    headerBg: '#0f766e',
+                    border: '#99f6e4',
+                    emptyBg: '#f0fdfa',
+                    rowAlt: '#f0fdfa',
+                    label: '🏁 Realizada'
+                },
                 en_revision: {
                     titulo: '🔄 Propuestas y avances en revisión',
                     color: '#b45309',
@@ -45570,6 +45579,113 @@ document.getElementById('chatForm').onsubmit = function (e) {
             };
 
             const textoCorreo = (t) => linkEsc(t).replace(/\n/g, '<br>');
+            const enlaceDocCorreo = (d) => {
+                const nombre = linkEsc(d && (d.nombre || 'Documento'));
+                const url = d && d.url ? normUrl(d.url) : '';
+                return url
+                    ? `<a href="${linkEsc(url)}" target="_blank" rel="noopener noreferrer" style="display:inline-block;margin:2px 4px 2px 0;padding:3px 8px;background:#ecfdf5;border:1px solid #a7f3d0;border-radius:4px;color:#047857;font-size:11px;font-weight:700;text-decoration:none;">📄 ${nombre}</a>`
+                    : `<span style="display:inline-block;margin:2px 4px 2px 0;font-size:11px;color:#374151;">${nombre}</span>`;
+            };
+            const filaFicha = (label, valueHtml) => `
+                <tr>
+                    <td style="padding: 8px 12px; width: 132px; vertical-align: top; font-size: 12px; font-weight: 700; color: #64748b; background: #f8fafc; border-bottom: 1px solid #eef2f7;">${label}</td>
+                    <td style="padding: 8px 14px; vertical-align: top; font-size: 14px; color: #1f2937; line-height: 1.55; word-wrap: break-word; border-bottom: 1px solid #eef2f7;">${valueHtml}</td>
+                </tr>`;
+            const cotizacionConDatosMail = (c) => !!(c && (
+                (c.proveedor && String(c.proveedor).trim()) ||
+                (c.monto != null && c.monto !== '') ||
+                (c.detalle && String(c.detalle).trim()) ||
+                (c.link && String(c.link).trim()) ||
+                (Array.isArray(c.documentos) && c.documentos.length) ||
+                (c.documento && (c.documento.url || c.documento.nombre))
+            ));
+            const construirFichaPropuesta = (p, idx, totalItems, metaFicha) => {
+                if (!p) return '';
+                const estadoKey = metaEstado[p.estado] ? p.estado : 'borrador';
+                const meta = metaFicha || metaEstado[estadoKey] || metaEstado.borrador;
+                const info = resolverMontoLink(p);
+                const nro = (idx != null && totalItems) ? ('Propuesta ' + (idx + 1) + ' de ' + totalItems) : 'Propuesta';
+                const reqs = [];
+                if (p.requiereCotizacion) reqs.push('Cotización');
+                if (p.requiereAprobacion) reqs.push('Aprobación del comité');
+                else reqs.push('Sin aprobación de comité');
+                const cots = (Array.isArray(p.cotizaciones) ? p.cotizaciones : []).filter(cotizacionConDatosMail);
+                let htmlCots = '<span style="color:#9ca3af;">Sin cotizaciones</span>';
+                if (cots.length) {
+                    htmlCots = cots.map((c) => {
+                        const n = c.n != null ? String(c.n) : '';
+                        const elegida = p.cotizacionElegida != null && Number(p.cotizacionElegida) === Number(c.n);
+                        const docsCot = (Array.isArray(c.documentos) && c.documentos.length) ? c.documentos : (c.documento ? [c.documento] : []);
+                        const linkCot = c.link ? normUrl(c.link) : '';
+                        return `
+                            <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:0 0 8px 0;border:1px solid ${elegida ? '#86efac' : '#e5e7eb'};border-radius:6px;background:${elegida ? '#f0fdf4' : '#ffffff'};">
+                                <tr>
+                                    <td style="padding:8px 10px;">
+                                        <div style="font-size:13px;font-weight:700;color:#111827;">
+                                            Cotización ${linkEsc(n || '')}${elegida ? ' <span style="display:inline-block;margin-left:6px;padding:1px 7px;border-radius:999px;background:#047857;color:#fff;font-size:10px;letter-spacing:0.02em;">ELEGIDA</span>' : ''}
+                                        </div>
+                                        <div style="margin-top:4px;font-size:13px;color:#374151;line-height:1.5;">
+                                            <strong>Proveedor:</strong> ${linkEsc(c.proveedor || '—')}<br>
+                                            <strong>Monto:</strong> ${linkEsc(fmtMonto(c.monto))}
+                                            ${c.detalle ? '<br><strong>Detalle:</strong> ' + textoCorreo(c.detalle) : ''}
+                                        </div>
+                                        ${linkCot ? '<div style="margin-top:6px;"><a href="' + linkEsc(linkCot) + '" target="_blank" rel="noopener noreferrer" style="display:inline-block;padding:3px 9px;background:#eff6ff;border:1px solid #93c5fd;border-radius:4px;color:#1d4ed8;font-size:11px;font-weight:700;text-decoration:none;">📎 Ver cotización</a></div>' : ''}
+                                        ${docsCot.length ? '<div style="margin-top:6px;">' + docsCot.map(enlaceDocCorreo).join('') + '</div>' : ''}
+                                    </td>
+                                </tr>
+                            </table>`;
+                    }).join('');
+                } else if (!p.requiereAprobacion && (p.valor != null && p.valor !== '')) {
+                    htmlCots = '<strong>Presupuesto (sin aprobación):</strong> ' + linkEsc(fmtMonto(p.valor)) +
+                        (p.valorProveedor ? '<br><strong>Proveedor:</strong> ' + linkEsc(p.valorProveedor) : '') +
+                        (p.valorLink ? '<br><a href="' + linkEsc(normUrl(p.valorLink)) + '" target="_blank" rel="noopener noreferrer" style="color:#1d4ed8;font-weight:700;">Ver presupuesto</a>' : '');
+                }
+                const linksNombrados = (Array.isArray(p.links) ? p.links : []).filter((lk) => lk && lk.url);
+                const htmlLinksNombrados = linksNombrados.length
+                    ? linksNombrados.map((lk) => {
+                        const u = normUrl(lk.url);
+                        const tit = lk.titulo || u;
+                        return `<a href="${linkEsc(u)}" target="_blank" rel="noopener noreferrer" style="display:inline-block;margin:2px 4px 2px 0;padding:3px 8px;background:#eff6ff;border:1px solid #93c5fd;border-radius:4px;color:#1d4ed8;font-size:11px;font-weight:700;text-decoration:none;">🔗 ${linkEsc(tit)}</a>`;
+                    }).join('')
+                    : '';
+                const docsProp = Array.isArray(p.documentos) ? p.documentos.filter((d) => d && (d.url || d.nombre)) : [];
+                const obs = String(p.observaciones || '').trim();
+                const desc = String(p.descripcion || '').trim();
+                let cierreHtml = '';
+                if (p.cierre && (p.cierre.fechaRealizacion || p.cierre.comentario || (Array.isArray(p.cierre.documentos) && p.cierre.documentos.length))) {
+                    const docsCierre = Array.isArray(p.cierre.documentos) ? p.cierre.documentos : [];
+                    cierreHtml = filaFicha('Cierre / realización',
+                        '<strong>Fecha:</strong> ' + linkEsc(fechaDMY(p.cierre.fechaRealizacion)) +
+                        (p.cierre.comentario ? '<br><strong>Comentario:</strong> ' + textoCorreo(p.cierre.comentario) : '') +
+                        (docsCierre.length ? '<div style="margin-top:6px;">' + docsCierre.map(enlaceDocCorreo).join('') + '</div>' : '')
+                    );
+                }
+                const filas = [
+                    filaFicha('Estado', '<span style="color:' + meta.color + ';font-weight:700;">' + meta.label + '</span>'),
+                    filaFicha('Fecha', linkEsc(fechaDMY(p.fechaDecision || p.fecha))),
+                    filaFicha('Categoría', linkEsc(cats[p.categoria] || p.categoria || '—')),
+                    filaFicha('Requisitos', linkEsc(reqs.join(' · ') || '—')),
+                    filaFicha('Descripción', desc ? textoCorreo(desc) : '<span style="color:#9ca3af;">Sin descripción</span>'),
+                    filaFicha('Cotizaciones', htmlCots),
+                    filaFicha('Monto de referencia', '<strong style="color:' + meta.color + ';">' + linkEsc(fmtMonto(info.monto)) + '</strong>' + (info.proveedor ? ' · ' + linkEsc(info.proveedor) : '')),
+                    obs ? filaFicha('Observaciones', textoCorreo(obs)) : '',
+                    (htmlLinksNombrados || info.linksExtra && info.linksExtra.length)
+                        ? filaFicha('Enlaces', (htmlLinksNombrados || '') + (htmlLinksNombrados ? '<div style="margin-top:6px;">' : '') + renderLinksPresupuesto(info) + (htmlLinksNombrados ? '</div>' : ''))
+                        : '',
+                    docsProp.length ? filaFicha('Documentos', docsProp.map(enlaceDocCorreo).join('')) : '',
+                    cierreHtml
+                ].join('');
+                return `
+                    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border:1px solid ${meta.border};border-radius:10px;background:#ffffff;overflow:hidden;">
+                        <tr>
+                            <td style="padding:12px 16px;background:${meta.headerBg};">
+                                <div style="font-size:11px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:#ffffff;opacity:0.9;">${linkEsc(nro)}</div>
+                                <div style="margin-top:3px;font-size:17px;font-weight:800;color:#ffffff;line-height:1.3;word-wrap:break-word;">${linkEsc(p.titulo || 'Sin título')}</div>
+                            </td>
+                        </tr>
+                        ${filas}
+                    </table>`;
+            };
             const construirTablaEstado = (estadoKey, items) => {
                 const meta = metaEstado[estadoKey];
                 let filas = '';
@@ -45582,39 +45698,10 @@ document.getElementById('chatForm').onsubmit = function (e) {
                         </tr>`;
                 } else {
                     items.forEach((p, i) => {
-                        const info = resolverMontoLink(p);
-                        const bg = i % 2 === 0 ? '#ffffff' : meta.rowAlt;
-                        const fechaShow = fechaDMY(p.fechaDecision || p.fecha);
-                        const desc = String(p.descripcion || '').trim();
-                        const det = String(info.detalle || p.observaciones || '').trim();
-                        const bloquesTexto = [];
-                        if (desc) bloquesTexto.push('<div style="margin: 8px 0 0 0; font-size: 14px; color: #1f2937; line-height: 1.55; word-wrap: break-word;">' + textoCorreo(desc) + '</div>');
-                        if (det && det !== desc) bloquesTexto.push('<div style="margin: 8px 0 0 0; font-size: 13px; color: #4b5563; line-height: 1.5; word-wrap: break-word;"><strong>Detalle de cotización:</strong> ' + textoCorreo(det) + '</div>');
                         filas += `
                             <tr>
-                                <td style="padding: 0 0 10px 0;">
-                                    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border: 1px solid ${meta.border}; border-radius: 8px; background: ${bg};">
-                                        <tr>
-                                            <td style="padding: 14px 16px 6px 16px;">
-                                                <div style="font-size: 16px; font-weight: 700; color: #111827; line-height: 1.35; word-wrap: break-word;">${linkEsc(p.titulo || 'Sin título')}</div>
-                                                <div style="margin-top: 4px; font-size: 13px; color: #6b7280;">${linkEsc(cats[p.categoria] || p.categoria || '')}</div>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td style="padding: 4px 16px 8px 16px; font-size: 14px; color: #374151; line-height: 1.5;">
-                                                <strong>Fecha:</strong> ${linkEsc(fechaShow)}
-                                                &nbsp;·&nbsp; <strong>Proveedor:</strong> ${linkEsc(info.proveedor || '—')}
-                                                &nbsp;·&nbsp; <strong style="color:${meta.color};">Monto:</strong> <span style="color:${meta.color}; font-weight:700;">${linkEsc(fmtMonto(info.monto))}</span>
-                                                &nbsp;·&nbsp; <span style="color:${meta.color}; font-weight:700;">${meta.label}</span>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td style="padding: 0 16px 14px 16px;">
-                                                ${bloquesTexto.join('') || '<div style="font-size:13px;color:#9ca3af;">Sin detalle</div>'}
-                                                <div style="margin-top: 10px;">${renderLinksPresupuesto(info)}</div>
-                                            </td>
-                                        </tr>
-                                    </table>
+                                <td style="padding: 0 0 14px 0;">
+                                    ${construirFichaPropuesta(p, i, items.length, meta)}
                                 </td>
                             </tr>`;
                     });
@@ -45650,41 +45737,12 @@ document.getElementById('chatForm').onsubmit = function (e) {
             const realizadas = ordenar(lista.filter((p) => p && p.estado === 'realizada'));
             const enRevision = ordenar(lista.filter((p) => p && p.estado === 'en_revision'));
             const rechazadas = ordenar(lista.filter((p) => p && p.estado === 'rechazada'));
-            const enlaceDocCorreo = (d) => {
-                const nombre = linkEsc(d && (d.nombre || 'Documento'));
-                const url = d && d.url ? normUrl(d.url) : '';
-                return url
-                    ? `<a href="${linkEsc(url)}" target="_blank" rel="noopener noreferrer" style="display:inline-block;margin:2px 4px 2px 0;padding:3px 8px;background:#ecfdf5;border:1px solid #a7f3d0;border-radius:4px;color:#047857;font-size:11px;font-weight:700;text-decoration:none;">📄 ${nombre}</a>`
-                    : `<span style="font-size:11px;color:#374151;">${nombre}</span>`;
-            };
-            const filasRealizadas = realizadas.map((p) => {
-                const docs = (p.cierre && Array.isArray(p.cierre.documentos)) ? p.cierre.documentos : [];
-                const respaldos = Array.isArray(p.documentos) ? p.documentos : [];
-                const docsHtml = (docs.length || respaldos.length)
-                    ? (docs.length ? '<div style="font-size:11px;color:#065f46;font-weight:700;margin-bottom:2px;">Cierre</div>' + docs.map(enlaceDocCorreo).join('') : '')
-                        + (respaldos.length ? '<div style="font-size:11px;color:#065f46;font-weight:700;margin:6px 0 2px;">Respaldos</div>' + respaldos.map(enlaceDocCorreo).join('') : '')
-                    : '<span style="color:#9ca3af;">Sin documentos</span>';
-                const comentario = String((p.cierre && p.cierre.comentario) || '').trim();
-                return `
+            const filasRealizadas = realizadas.map((p, i) => `
                     <tr>
-                        <td style="padding: 0 0 10px 0;">
-                            <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border: 1px solid #a7f3d0; border-radius: 8px; background: #f0fdf4;">
-                                <tr>
-                                    <td style="padding: 14px 16px 4px 16px; font-size: 16px; font-weight: 700; color: #111827; line-height: 1.35; word-wrap: break-word;">${linkEsc(p.titulo || 'Sin título')}</td>
-                                </tr>
-                                <tr>
-                                    <td style="padding: 4px 16px 8px 16px; font-size: 14px; color: #065f46;"><strong>Fecha de realización:</strong> ${linkEsc(fechaDMY(p.cierre && p.cierre.fechaRealizacion))}</td>
-                                </tr>
-                                <tr>
-                                    <td style="padding: 0 16px 8px 16px; font-size: 14px; color: #1f2937; line-height: 1.55; word-wrap: break-word;">${comentario ? textoCorreo(comentario) : '—'}</td>
-                                </tr>
-                                <tr>
-                                    <td style="padding: 0 16px 14px 16px; font-size: 13px; line-height: 1.5;">${docsHtml}</td>
-                                </tr>
-                            </table>
+                        <td style="padding: 0 0 14px 0;">
+                            ${construirFichaPropuesta(p, i, realizadas.length, metaEstado.realizada)}
                         </td>
-                    </tr>`;
-            }).join('');
+                    </tr>`).join('');
             const bloqueRealizadas = realizadas.length ? `
                 <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin: 8px 0 6px 0;">
                     <tr><td style="font-size: 16px; font-weight: 700; color: #047857;">🏁 Trabajos realizados</td></tr>
@@ -45719,25 +45777,40 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 const saludoSel = (introSel.saludo && String(introSel.saludo).trim()) || 'Estimado/a,';
                 const cuerpoSel = (introSel.cuerpo && String(introSel.cuerpo).trim()) || 'Junto con saludar, se informan los requerimientos seleccionados para su revisión.';
                 const aHtml = (t) => linkEsc(t).replace(/\n/g, '<br>');
-                const borradoresSel = ordenar(lista.filter((p) => p && p.estado === 'borrador'));
-                const bloquesSel = [];
-                if (aprobadas.length) bloquesSel.push(construirTablaEstado('aprobada', aprobadas));
-                if (realizadas.length) bloquesSel.push(bloqueRealizadas);
-                if (enRevision.length) bloquesSel.push(construirTablaEstado('en_revision', enRevision));
-                if (rechazadas.length) bloquesSel.push(construirTablaEstado('rechazada', rechazadas));
-                if (borradoresSel.length) bloquesSel.push(construirTablaEstado('borrador', borradoresSel));
+                const listaSel = ordenar(lista.filter(Boolean));
+                const indiceSel = listaSel.length ? `
+                    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin: 0 0 16px 0; border: 1px solid #e5e7eb; border-radius: 8px; background: #f8fafc;">
+                        <tr><td style="padding: 10px 14px 4px 14px; font-size: 12px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em;">Contenido de este correo</td></tr>
+                        <tr><td style="padding: 0 14px 12px 14px;">
+                            <ol style="margin: 0; padding-left: 1.2rem; color: #1f2937; font-size: 14px; line-height: 1.55;">
+                                ${listaSel.map((p, i) => {
+                                    const infoI = resolverMontoLink(p);
+                                    const estI = metaEstado[p.estado] || metaEstado.borrador;
+                                    return '<li style="margin: 4px 0;"><strong>' + linkEsc(p.titulo || 'Sin título') + '</strong> · ' +
+                                        linkEsc(estI.label) +
+                                        (infoI.monto != null && !isNaN(infoI.monto) ? ' · ' + linkEsc(fmtMonto(infoI.monto)) : '') +
+                                        '</li>';
+                                }).join('')}
+                            </ol>
+                        </td></tr>
+                    </table>` : '';
+                const fichasSel = listaSel.map((p, i) => `
+                    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin: 0 0 16px 0;">
+                        <tr><td>${construirFichaPropuesta(p, i, listaSel.length)}</td></tr>
+                    </table>`).join('');
                 const contenidoSel = `
                 <p style="margin: 0 0 10px 0; font-size: 15px; color: #1a1a1a; line-height: 1.5;">${aHtml(saludoSel)}</p>
                 <p style="margin: 0 0 8px 0; font-size: 14px; color: #333333; line-height: 1.55;">${aHtml(cuerpoSel)}</p>
-                <p style="margin: 0 0 8px 0; font-size: 13px; color: #6b7280; line-height: 1.5;">
-                    ${linkEsc(String(lista.length))} requerimiento${lista.length !== 1 ? 's' : ''} de <strong>${linkEsc(nombreComunidad)}</strong>${nombreMes ? ' · ' + linkEsc(nombreMes) : ''}.
-                    Este aviso va aparte del reporte completo del comité.
+                <p style="margin: 0 0 12px 0; font-size: 13px; color: #6b7280; line-height: 1.5;">
+                    ${linkEsc(String(listaSel.length))} propuesta${listaSel.length !== 1 ? 's' : ''} de <strong>${linkEsc(nombreComunidad)}</strong>${nombreMes ? ' · ' + linkEsc(nombreMes) : ''},
+                    cada una con su detalle individual.
                 </p>
-                ${bloquesSel.join('') || '<p style="font-size:13px;color:#6b7280;">No hay requerimientos en esta selección.</p>'}
+                ${indiceSel}
+                ${fichasSel || '<p style="font-size:13px;color:#6b7280;">No hay propuestas en esta selección.</p>'}
                 <p style="margin: 14px 0 0 0; font-size: 13px; color: #555; line-height: 1.5;">
-                    Los respaldos van adjuntos a este correo cuando el tamaño lo permite. El Excel adjunto contiene solo estos requerimientos.
+                    Los respaldos van adjuntos a este correo cuando el tamaño lo permite. El Excel adjunto contiene el mismo detalle.
                 </p>`;
-                return generarPlantillaCorreoNotificacion('Comité — Requerimientos', nombreComunidad, nombreMes, contenidoSel, true, false, 960);
+                return generarPlantillaCorreoNotificacion('Comité — Propuestas', nombreComunidad, nombreMes, contenidoSel, true, false, 960);
             }
 
             let contenido = `
