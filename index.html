@@ -45627,7 +45627,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                                         <div style="margin-top:4px;font-size:13px;color:#374151;line-height:1.5;">
                                             <strong>Proveedor:</strong> ${linkEsc(c.proveedor || '—')}<br>
                                             <strong>Monto:</strong> ${linkEsc(fmtMonto(c.monto))}
-                                            ${c.detalle ? '<br><strong>Detalle:</strong> ' + textoCorreo(c.detalle) : ''}
+                                            ${(c.detalle && String(c.detalle).replace(/\s+/g, ' ').trim().toLowerCase() !== String(p.titulo || '').replace(/\s+/g, ' ').trim().toLowerCase()) ? '<br><strong>Detalle:</strong> ' + textoCorreo(c.detalle) : ''}
                                         </div>
                                         ${linkCot ? '<div style="margin-top:6px;"><a href="' + linkEsc(linkCot) + '" target="_blank" rel="noopener noreferrer" style="display:inline-block;padding:3px 9px;background:#eff6ff;border:1px solid #93c5fd;border-radius:4px;color:#1d4ed8;font-size:11px;font-weight:700;text-decoration:none;">📎 Ver cotización</a></div>' : ''}
                                         ${docsCot.length ? '<div style="margin-top:6px;">' + docsCot.map(enlaceDocCorreo).join('') + '</div>' : ''}
@@ -45660,12 +45660,14 @@ document.getElementById('chatForm').onsubmit = function (e) {
                         (docsCierre.length ? '<div style="margin-top:6px;">' + docsCierre.map(enlaceDocCorreo).join('') + '</div>' : '')
                     );
                 }
+                const tituloNorm = String(p.titulo || '').replace(/\s+/g, ' ').trim().toLowerCase();
+                const descMostrar = desc && desc.replace(/\s+/g, ' ').trim().toLowerCase() !== tituloNorm ? desc : '';
                 const filas = [
                     filaFicha('Estado', '<span style="color:' + meta.color + ';font-weight:700;">' + meta.label + '</span>'),
                     filaFicha('Fecha', linkEsc(fechaDMY(p.fechaDecision || p.fecha))),
                     filaFicha('Categoría', linkEsc(cats[p.categoria] || p.categoria || '—')),
                     filaFicha('Requisitos', linkEsc(reqs.join(' · ') || '—')),
-                    filaFicha('Descripción', desc ? textoCorreo(desc) : '<span style="color:#9ca3af;">Sin descripción</span>'),
+                    descMostrar ? filaFicha('Descripción', textoCorreo(descMostrar)) : '',
                     filaFicha('Cotizaciones', htmlCots),
                     obs ? filaFicha('Observaciones', textoCorreo(obs)) : '',
                     (htmlLinksNombrados || info.linksExtra && info.linksExtra.length)
@@ -45675,16 +45677,11 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     cierreHtml
                 ].join('');
                 const nroHtml = (totalItems > 1)
-                    ? '<div style="margin-bottom:4px;font-size:11px;font-weight:600;color:#64748b;">' + linkEsc(nro) + '</div>'
+                    ? '<div style="padding:8px 16px 0 16px;font-size:11px;font-weight:600;color:#64748b;">' + linkEsc(nro) + '</div>'
                     : '';
                 return `
                     <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border:1px solid #e5e7eb;border-left:4px solid ${meta.color};background:#ffffff;">
-                        <tr>
-                            <td style="padding:14px 16px 10px 16px;background:#ffffff;border-bottom:1px solid #f1f5f9;">
-                                ${nroHtml}
-                                <div style="font-size:17px;font-weight:700;color:#111827;line-height:1.35;word-wrap:break-word;">${linkEsc(p.titulo || 'Sin título')}</div>
-                            </td>
-                        </tr>
+                        ${nroHtml ? '<tr><td>' + nroHtml + '</td></tr>' : ''}
                         ${filas}
                     </table>`;
             };
