@@ -3454,7 +3454,7 @@
         }
         #ocupacion .resumen-ocupacion-map {
             display: grid;
-            grid-template-columns: repeat(4, minmax(0, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(8.2rem, 1fr));
             gap: 0.65rem;
             margin-bottom: 0.85rem;
         }
@@ -3685,6 +3685,34 @@
             border: 2px solid #ffa502 !important;
             outline: 1.5px solid rgba(255, 165, 2, 0.6);
             outline-offset: -1px;
+        }
+        #ocupacion .building-map-edificio .unit-cell.con-multa-vigente {
+            box-shadow: 0 0 0 2px #ef4444, 0 0 0 4px rgba(239, 68, 68, 0.28);
+            z-index: 2;
+        }
+        #ocupacion .building-map-edificio .unit-cell.con-multa-hist {
+            box-shadow: 0 0 0 2px #d97706, 0 0 0 4px rgba(217, 119, 6, 0.22);
+        }
+        #ocupacion .building-map-edificio .unit-cell-multa {
+            position: absolute;
+            top: -3px;
+            right: -3px;
+            min-width: 0.95rem;
+            height: 0.95rem;
+            padding: 0 0.2rem;
+            border-radius: 999px;
+            background: #ef4444;
+            color: #fff;
+            font-size: 0.52rem;
+            font-weight: 800;
+            line-height: 0.95rem;
+            text-align: center;
+            pointer-events: none;
+            z-index: 4;
+            box-shadow: 0 0 0 1px var(--bg-primary);
+        }
+        #ocupacion .building-map-edificio .unit-cell-multa.es-hist {
+            background: #d97706;
         }
         #ocupacion .building-map-edificio .unit-cell.is-dim { opacity: 0.18; filter: grayscale(0.35); }
         #ocupacion .building-map-edificio .unit-cell.is-hit {
@@ -9510,6 +9538,10 @@
                     <div id="ocupacionPorcentaje" class="valor" style="color: var(--primary);">0%</div>
                     <div class="etiqueta">Ocupación actual</div>
                 </div>
+                <div class="resumen-item" style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.28);">
+                    <div id="ocupacionUnidadesMulta" class="valor" style="color: #dc2626;">0</div>
+                    <div class="etiqueta">Unidades con multa</div>
+                </div>
             </div>
             <section class="ocupacion-mapa-sec" aria-label="Mapa del edificio">
                 <h3>Mapa del edificio</h3>
@@ -9523,6 +9555,7 @@
                         <button type="button" class="ocupacion-vista-btn" data-vista="vacia">Vacías</button>
                         <button type="button" class="ocupacion-vista-btn" data-vista="nuevas">Nuevas</button>
                         <button type="button" class="ocupacion-vista-btn" data-vista="bienvenida">Bienvenida pendiente</button>
+                        <button type="button" class="ocupacion-vista-btn" data-vista="multas">Con multa</button>
                     </div>
                 </div>
                 <div class="leyenda-mapa-edificio">
@@ -9535,6 +9568,8 @@
                     <div class="leyenda-item"><span style="color: #059669;">✉</span><span>Bienvenida enviada</span></div>
                     <div class="leyenda-item"><span style="color: #2563eb;">✉</span><span>En cola</span></div>
                     <div class="leyenda-item"><span style="color: #d97706;">✉</span><span>Pendiente</span></div>
+                    <div class="leyenda-item"><div class="leyenda-cuadro" style="background: #ef4444;"></div><span>Con multa vigente</span></div>
+                    <div class="leyenda-item"><div class="leyenda-cuadro" style="background: #d97706;"></div><span>Historial de multa</span></div>
                 </div>
                 <p class="ocupacion-mapa-hint" id="ocupacionMapaHint" aria-live="polite"></p>
                 <div class="ocupacion-mapa-shell">
@@ -29490,6 +29525,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
             if (folioO) folioO.value = '';
             aplicarTipoRegistroMultaFormulario();
             await cargarMultas({ skipSync: true });
+            if (typeof programarRefrescoHistorialMultasMapa === 'function') programarRefrescoHistorialMultasMapa();
             } catch (errorReg) {
                 console.error('Error al registrar multa:', errorReg);
                 mostrarAlerta('No se pudo registrar la multa. ' + ((errorReg && errorReg.message) ? errorReg.message : 'Intente de nuevo.'), 'Error');
@@ -29757,6 +29793,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     </tr>
                 `;
             }).join('');
+            if (typeof programarRefrescoHistorialMultasMapa === 'function') programarRefrescoHistorialMultasMapa();
         }
 
         /** Obtiene el siguiente folio correlativo para multas del mes (formato MUL-YYYYMM-NNN). */
@@ -30202,6 +30239,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     }
                 }
                 await cargarMultas();
+                if (typeof programarRefrescoHistorialMultasMapa === 'function') programarRefrescoHistorialMultasMapa();
             }
         }
 
@@ -45867,6 +45905,9 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 var metricas = await obtenerMetricasVinculacion();
                 if (!window.vinculacionUnits) window.vinculacionUnits = [];
                 updateBuildingMapOcupacion();
+                if (typeof cargarHistorialMultasUnidades === 'function') {
+                    cargarHistorialMultasUnidades().catch(function () {});
+                }
                 // Actualizar resumen KPIs (mismo diseño que activa-entre-cerros)
                 var total = (metricas && metricas.totalUnidades) ? metricas.totalUnidades : 259;
                 var ocupadas = (metricas && typeof metricas.ocupacionActual === 'number') ? metricas.ocupacionActual : 0;
@@ -46565,6 +46606,176 @@ document.getElementById('chatForm').onsubmit = function (e) {
             });
         }
 
+        function claveUnidadHistorialMultas(valor) {
+            if (typeof ocupacionClaveNumero === 'function') return ocupacionClaveNumero(valor);
+            if (typeof claveNumeroUnidadReporte === 'function') return claveNumeroUnidadReporte(valor);
+            return String(valor == null ? '' : valor).replace(/\D/g, '');
+        }
+        function historialMultasDeUnidad(unitNumber) {
+            var key = claveUnidadHistorialMultas(unitNumber);
+            var map = window._historialMultasPorUnidad || {};
+            return (key && map[key]) ? map[key] : { total: 0, vigentes: 0, items: [] };
+        }
+        function unidadTieneHistorialMultas(unitNumber) {
+            return historialMultasDeUnidad(unitNumber).total > 0;
+        }
+        function unidadTieneMultaVigente(unitNumber) {
+            return historialMultasDeUnidad(unitNumber).vigentes > 0;
+        }
+        function pintarKpiUnidadesConMulta() {
+            var el = document.getElementById('ocupacionUnidadesMulta');
+            if (!el) return;
+            var map = window._historialMultasPorUnidad || {};
+            var n = 0;
+            Object.keys(map).forEach(function (k) {
+                if (map[k] && map[k].vigentes > 0) n += 1;
+            });
+            el.textContent = n;
+        }
+        function itemHistorialDesdeMulta(m, mes) {
+            var est = (typeof multaEstadoRegistro === 'function') ? multaEstadoRegistro(m) : (m && m.estadoGestion) || '';
+            var anul = typeof multaEstaAnulada === 'function' ? multaEstaAnulada(m) : (est === 'anulada');
+            var esAnulReg = typeof multaEsRegistroAnulacion === 'function' && multaEsRegistroAnulacion(m);
+            return {
+                id: m && m.id ? String(m.id) : '',
+                fecha: m && m.fecha ? String(m.fecha) : '',
+                mes: mes || (m && m.mes) || '',
+                folio: (m && m.folio) || '',
+                nombre: (m && m.nombre) || '',
+                motivo: (m && m.motivo) || '',
+                monto: m && m.monto != null ? Number(m.monto) : 0,
+                tipoUnidad: (m && m.tipoUnidad) || 'UF',
+                estado: anul || esAnulReg ? 'anulada' : (est || 'gestionada'),
+                vigente: !(anul || esAnulReg)
+            };
+        }
+        function incorporarMultasEnHistorial(lista, mes, destino) {
+            var out = destino || window._historialMultasPorUnidad || {};
+            (Array.isArray(lista) ? lista : []).forEach(function (m) {
+                if (!m) return;
+                var key = claveUnidadHistorialMultas(m.departamento || m.depto || m.unidad);
+                if (!key) return;
+                if (!out[key]) out[key] = { total: 0, vigentes: 0, ultimaFecha: '', items: [] };
+                var item = itemHistorialDesdeMulta(m, mes);
+                var prev = out[key].items.filter(function (x) { return x && item.id && x.id === item.id; })[0];
+                if (prev) {
+                    Object.assign(prev, item);
+                } else {
+                    out[key].items.push(item);
+                }
+            });
+            Object.keys(out).forEach(function (k) {
+                var u = out[k];
+                u.items.sort(function (a, b) { return String(b.fecha || '').localeCompare(String(a.fecha || '')); });
+                if (u.items.length > 40) u.items = u.items.slice(0, 40);
+                u.total = u.items.length;
+                u.vigentes = u.items.filter(function (x) { return x && x.vigente; }).length;
+                u.ultimaFecha = (u.items[0] && u.items[0].fecha) || '';
+            });
+            window._historialMultasPorUnidad = out;
+            return out;
+        }
+        async function persistirHistorialMultasUnidades() {
+            if (!firebaseInitialized || !db) return;
+            try {
+                var compacto = {};
+                var src = window._historialMultasPorUnidad || {};
+                Object.keys(src).forEach(function (k) {
+                    var u = src[k];
+                    if (!u || !u.total) return;
+                    compacto[k] = {
+                        total: u.total,
+                        vigentes: u.vigentes,
+                        ultimaFecha: u.ultimaFecha || '',
+                        items: (u.items || []).slice(0, 20)
+                    };
+                });
+                await db.collection('comunidad').doc('multas_historial_unidades').set({
+                    unidades: compacto,
+                    modulo: 'multas_historial_unidades',
+                    actualizado: firebase.firestore.FieldValue.serverTimestamp()
+                }, { merge: true });
+            } catch (ePers) {
+                console.warn('[ocupación] historial de multas:', ePers);
+            }
+        }
+        async function cargarHistorialMultasUnidades() {
+            if (window._historialMultasCargando) return window._historialMultasCargando;
+            var job = (async function () {
+                var out = {};
+                try {
+                    if (firebaseInitialized && db) {
+                        var doc = await db.collection('comunidad').doc('multas_historial_unidades').get();
+                        if (doc.exists) {
+                            var data = doc.data() || {};
+                            var u = data.unidades;
+                            if (u && typeof u === 'object') out = u;
+                        }
+                    }
+                } catch (eDoc) {}
+                window._historialMultasPorUnidad = out;
+                var meses = [];
+                try {
+                    if (typeof listarMesesSelectorModulo === 'function') meses = listarMesesSelectorModulo();
+                } catch (eM) { meses = []; }
+                if (!meses.length && typeof obtenerMesActual === 'function') meses = [obtenerMesActual()];
+                for (var i = 0; i < meses.length; i++) {
+                    try {
+                        var lista = typeof obtenerDatosMesEspecifico === 'function'
+                            ? await obtenerDatosMesEspecifico('multas', meses[i])
+                            : [];
+                        incorporarMultasEnHistorial(lista, meses[i], out);
+                    } catch (eMes) {}
+                }
+                pintarKpiUnidadesConMulta();
+                persistirHistorialMultasUnidades().catch(function () {});
+                if (typeof updateBuildingMapOcupacion === 'function' && document.getElementById('buildingMapOcupacion')) {
+                    updateBuildingMapOcupacion();
+                }
+                return out;
+            })();
+            window._historialMultasCargando = job;
+            try { await job; } finally {
+                if (window._historialMultasCargando === job) window._historialMultasCargando = null;
+            }
+            return window._historialMultasPorUnidad || {};
+        }
+        function programarRefrescoHistorialMultasMapa() {
+            clearTimeout(window._tmHistorialMultasMapa);
+            window._tmHistorialMultasMapa = setTimeout(function () {
+                cargarHistorialMultasUnidades().catch(function () {});
+            }, 350);
+        }
+        function htmlHistorialMultasUnidad(unitNumber) {
+            var h = historialMultasDeUnidad(unitNumber);
+            if (!h.total) {
+                return '<div style="margin:6px 0;padding:6px 8px;background:var(--bg-secondary);border-radius:6px;border:1px solid var(--border-color);"><span style="font-size:0.8rem;color:var(--gray-600);">Sin multas registradas en esta unidad.</span></div>';
+            }
+            var fmtFecha = function (f) {
+                if (typeof formatearFecha === 'function') return formatearFecha(f);
+                var m = String(f || '').match(/^(\d{4})-(\d{2})-(\d{2})/);
+                return m ? (m[3] + '-' + m[2] + '-' + m[1]) : String(f || '—');
+            };
+            var fmtMonto = function (item) {
+                var n = Number(item && item.monto);
+                if (isNaN(n)) n = 0;
+                return n.toFixed(2) + ' ' + ((item && item.tipoUnidad) || 'UF');
+            };
+            var filas = (h.items || []).map(function (it) {
+                var est = it.vigente ? 'Vigente' : 'Anulada / histórica';
+                var col = it.vigente ? '#b91c1c' : '#92400e';
+                var bg = it.vigente ? 'rgba(239,68,68,0.1)' : 'rgba(217,119,6,0.12)';
+                return '<div style="padding:6px 8px;margin:0 0 4px 0;border-radius:6px;background:' + bg + ';border:1px solid ' + (it.vigente ? 'rgba(239,68,68,0.28)' : 'rgba(217,119,6,0.28)') + ';">' +
+                    '<div style="font-size:0.78rem;font-weight:700;color:var(--text-primary);">' + String(it.motivo || 'Multa').replace(/</g, '&lt;') + '</div>' +
+                    '<div style="font-size:0.72rem;color:var(--gray-600);margin-top:2px;">' + fmtFecha(it.fecha) +
+                    (it.folio ? ' · ' + String(it.folio).replace(/</g, '&lt;') : '') +
+                    (it.nombre ? ' · ' + String(it.nombre).replace(/</g, '&lt;') : '') +
+                    ' · ' + fmtMonto(it) +
+                    ' · <span style="color:' + col + ';font-weight:700;">' + est + '</span></div></div>';
+            }).join('');
+            return '<div style="margin:8px 0 0 0;"><div style="color:var(--gray-600);font-size:0.75rem;margin-bottom:4px;font-weight:600;">⚠ Historial de multas (' + h.total + (h.vigentes ? ', ' + h.vigentes + ' vigente' + (h.vigentes === 1 ? '' : 's') : '') + ')</div>' + filas + '</div>';
+        }
+
         function ocupacionColumnaDesdeNumero(unitNumber) {
             var digits = String(unitNumber || '').replace(/\D/g, '');
             if (!digits) return 0;
@@ -46606,6 +46817,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
             if (vista === 'vacia') return ocupacionUnidadEstaVacia(unit);
             if (vista === 'nuevas') return !!(unit && ocupacionUnidadEsNueva(unit, now, weekMs));
             if (vista === 'bienvenida') return estB === 'pendiente' || estB === 'en-cola';
+            if (vista === 'multas') return unidadTieneHistorialMultas(unitNumber);
             if (!unit) return false;
             var use = String(unit.unitUse || '').toLowerCase();
             var hasTenants = Array.isArray(unit.residents) && unit.residents.some(function (r) {
@@ -46754,26 +46966,49 @@ document.getElementById('chatForm').onsubmit = function (e) {
                             marcaB = '<span class="unit-cell-bienvenida ok" title="' + (titEnv ? ('Bienvenida enviada el ' + titEnv.replace(/"/g, '&quot;')) : 'Bienvenida enviada') + '">✉</span>';
                         } else if (estB === 'en-cola') marcaB = '<span class="unit-cell-bienvenida cola" title="Bienvenida en cola (aún no enviada)">✉</span>';
                         else if (estB === 'pendiente') marcaB = '<span class="unit-cell-bienvenida no" title="Bienvenida pendiente (no enviada)">✉</span>';
-                        if (tieneNota || tieneContrato || tieneMascota || marcaB) {
+                        var histM = historialMultasDeUnidad(unitNumber);
+                        var marcaMulta = '';
+                        if (histM.total) {
+                            cell.classList.add(histM.vigentes ? 'con-multa-vigente' : 'con-multa-hist');
+                            marcaMulta = '<span class="unit-cell-multa' + (histM.vigentes ? '' : ' es-hist') + '" title="' + histM.total + ' multa' + (histM.total === 1 ? '' : 's') + (histM.vigentes ? ' (' + histM.vigentes + ' vigente' + (histM.vigentes === 1 ? '' : 's') + ')' : '') + '">' + (histM.vigentes || histM.total) + '</span>';
+                        }
+                        if (tieneNota || tieneContrato || tieneMascota || marcaB || marcaMulta) {
                             var indicadores = '';
                             if (tieneNota) indicadores += '<span class="unit-cell-nota" style="position:absolute;top:1px;right:1px;color:#f59e0b;font-size:0.7rem;line-height:1;pointer-events:none;">&#8226;</span>';
                             if (tieneContrato) indicadores += '<span class="unit-cell-contrato" style="position:absolute;top:1px;left:1px;font-size:0.6rem;line-height:1;pointer-events:none;" title="Contrato de arriendo">&#128196;</span>';
                             if (tieneMascota) indicadores += '<span class="unit-cell-mascota" style="position:absolute;bottom:1px;right:1px;font-size:0.6rem;line-height:1;pointer-events:none;" title="Unidad con mascota">&#128062;</span>';
-                            cell.innerHTML = '<div style="position:relative;width:100%;height:100%;display:flex;align-items:center;justify-content:center;"><span>' + String(unitNumber).replace(/</g, '&lt;') + '</span>' + indicadores + marcaB + '</div>';
+                            cell.innerHTML = '<div style="position:relative;width:100%;height:100%;display:flex;align-items:center;justify-content:center;"><span>' + String(unitNumber).replace(/</g, '&lt;') + '</span>' + indicadores + marcaB + marcaMulta + '</div>';
                         } else {
                             cell.textContent = unitNumber;
                         }
                         var titB = estB === 'enviada' ? (titEnv ? (' - Bienvenida enviada el ' + titEnv) : ' - Bienvenida enviada') : (estB === 'en-cola' ? ' - Bienvenida en cola (aún no enviada)' : (estB === 'pendiente' ? ' - Bienvenida pendiente (no enviada)' : (estB === 'sin-correo' ? ' - Sin correo' : '')));
-                        cell.title = 'Unidad ' + unitNumber + ' - ' + (unit.unitUse || '') + ' - ' + (unit.residents ? unit.residents.length : 0) + ' residentes' + (unit.hasPet ? ' - Mascota' : '') + titB + ' (clic para ver detalle)';
+                        var titM = histM.total ? (' - ' + histM.total + ' multa' + (histM.total === 1 ? '' : 's') + (histM.vigentes ? ', ' + histM.vigentes + ' vigente' + (histM.vigentes === 1 ? '' : 's') : '')) : '';
+                        cell.title = 'Unidad ' + unitNumber + ' - ' + (unit.unitUse || '') + ' - ' + (unit.residents ? unit.residents.length : 0) + ' residentes' + (unit.hasPet ? ' - Mascota' : '') + titB + titM + ' (clic para ver detalle)';
                         cell.style.cursor = 'pointer';
                         (function(u) {
                             cell.addEventListener('click', function(e) { e.stopPropagation(); showUnitDetailModalOcupacion(u); });
                         })(unit);
                     } else {
                         cell.classList.add('vacia');
-                        cell.textContent = unitNumber;
-                        cell.title = 'Unidad ' + unitNumber + ' - Disponible';
-                        cell.style.cursor = 'default';
+                        var histVacia = historialMultasDeUnidad(unitNumber);
+                        var marcaVacia = '';
+                        if (histVacia.total) {
+                            cell.classList.add(histVacia.vigentes ? 'con-multa-vigente' : 'con-multa-hist');
+                            marcaVacia = '<span class="unit-cell-multa' + (histVacia.vigentes ? '' : ' es-hist') + '">' + (histVacia.vigentes || histVacia.total) + '</span>';
+                            cell.innerHTML = '<div style="position:relative;width:100%;height:100%;display:flex;align-items:center;justify-content:center;"><span>' + String(unitNumber).replace(/</g, '&lt;') + '</span>' + marcaVacia + '</div>';
+                            cell.title = 'Unidad ' + unitNumber + ' - Disponible - ' + histVacia.total + ' multa' + (histVacia.total === 1 ? '' : 's') + ' (clic para ver historial)';
+                            cell.style.cursor = 'pointer';
+                            (function (num) {
+                                cell.addEventListener('click', function (e) {
+                                    e.stopPropagation();
+                                    showUnitDetailModalOcupacion({ unitNumber: num, unitUse: 'Vacía', residents: [] });
+                                });
+                            })(unitNumber);
+                        } else {
+                            cell.textContent = unitNumber;
+                            cell.title = 'Unidad ' + unitNumber + ' - Disponible';
+                            cell.style.cursor = 'default';
+                        }
                     }
                     floorDiv.appendChild(cell);
                 }
@@ -46783,7 +47018,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
             var hint = document.getElementById('ocupacionMapaHint');
             if (hint) {
                 if (filterValue || vista) {
-                    var vistaNombres = { habitacional: 'Habitacional', arriendo: 'Arriendo', vacia: 'Vacías', nuevas: 'Nuevas', bienvenida: 'Bienvenida pendiente' };
+                    var vistaNombres = { habitacional: 'Habitacional', arriendo: 'Arriendo', vacia: 'Vacías', nuevas: 'Nuevas', bienvenida: 'Bienvenida pendiente', multas: 'Con multa' };
                     var vistaTxt = vista ? ('vista «' + (vistaNombres[vista] || vista) + '»') : '';
                     var busTxt = filterValue ? ('búsqueda «' + filterValue + '»') : '';
                     var sep = (vistaTxt && busTxt) ? ' + ' : '';
@@ -46793,6 +47028,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 }
             }
 
+            if (typeof pintarKpiUnidadesConMulta === 'function') pintarKpiUnidadesConMulta();
             var filterEl = document.getElementById('buildingMapFilterOcupacion');
             if (filterEl && !filterEl._ocupacionBound) {
                 filterEl._ocupacionBound = true;
@@ -46864,6 +47100,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 '<div style="padding:6px 8px;background:var(--bg-secondary);border-radius:6px;border:1px solid var(--border-color);"><div style="color:var(--gray-600);font-size:0.7rem;">Uso</div><div style="font-weight:600;font-size:0.82rem;">' + esc(unit.unitUse) + '</div></div>' +
                 '<div style="padding:6px 8px;background:var(--bg-secondary);border-radius:6px;border:1px solid var(--border-color);"><div style="color:var(--gray-600);font-size:0.7rem;">Residentes</div><div style="font-weight:600;font-size:0.82rem;">' + (unit.residents ? unit.residents.length : 0) + '</div></div></div>' +
                 parkingHtml + rentalParkingHtml + storageHtml + bikeHtml + contratoHtml + mascotaHtml + bienvenidaHtml + noteHtml +
+                htmlHistorialMultasUnidad(unit.unitNumber) +
                 '<div style="margin-top:8px;"><div style="color:var(--gray-600);font-size:0.75rem;margin-bottom:3px;font-weight:600;">👥 Residentes:</div><div style="max-height:280px;overflow-y:auto;padding:6px 8px;background:var(--bg-secondary);border-radius:6px;border:1px solid var(--border-color);">' + residentsHtml + '</div></div>' +
                 '<p style="margin:12px 0 0 0;font-size:0.75rem;color:var(--gray-500);">Para editar residentes, notas o imprimir la ficha, use el panel Conserjería.</p>' +
                 '<button type="button" class="btn btn-primary btn-enviar-bienvenida-unidad" style="margin-top:10px;width:100%;padding:8px;font-size:0.8rem;">📧 Enviar correo de bienvenida</button>' +
