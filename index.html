@@ -8299,6 +8299,10 @@
                             <input type="text" id="tarjetaMonto" value="$0" readonly style="padding: 0.35rem 0.5rem; font-size: 1rem; font-weight: 700; width: 7rem; border: 1px solid var(--border-color); border-radius: 6px;">
                         </div>
                     </div>
+                    <div class="form-group" style="margin: 0.75rem 0 0.25rem 0;">
+                        <label for="tarjetaObservaciones" style="margin-bottom: 0.25rem; font-size: 0.875rem;">Comentario / observación</label>
+                        <textarea id="tarjetaObservaciones" rows="2" placeholder="Notas internas, detalle de entrega, número de TAG, motivo del cambio…" style="width: 100%; padding: 0.5rem 0.6rem; font-size: 0.8125rem; line-height: 1.4; resize: vertical; min-height: 3.2rem; box-sizing: border-box;"></textarea>
+                    </div>
                     <button type="submit" class="btn btn-primary" style="padding: 0.5rem 1rem; font-size: 0.875rem; margin-top: 0.5rem;">Registrar Venta</button>
                 </form>
             </div>
@@ -8314,6 +8318,7 @@
                             <th>Tipo</th>
                             <th>Cantidad</th>
                             <th>Monto</th>
+                            <th>Observación</th>
                             <th>Acciones</th>
                         </tr>
                     </thead>
@@ -26729,6 +26734,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 <tr><td class="data-cell" style="padding: 8px 14px; font-size: 12px; color: #666666; border-bottom: 1px solid #e8eee8;">Tipo</td><td class="data-cell" style="padding: 8px 14px; font-size: 12px; color: #666666; border-bottom: 1px solid #e8eee8;">Cantidad</td><td class="data-cell" style="padding: 8px 14px; font-size: 12px; color: #666666; border-bottom: 1px solid #e8eee8;">Monto</td></tr>
                 ${filasItems}
                 <tr><td class="data-cell" style="padding: 10px 14px; font-size: 13px; color: #666666; font-weight: 700;" colspan="2">Monto total</td><td class="data-cell" style="padding: 10px 14px; font-size: 14px; color: #1a1a1a; font-weight: 700;">${linkEsc(montoStr)}</td></tr>
+                ${String(tarjeta.observaciones || tarjeta.comentario || '').trim() ? `<tr><td class="data-cell" style="padding: 10px 14px; font-size: 13px; color: #666666; border-top: 1px solid #e8eee8;">Observación</td><td class="data-cell" colspan="2" style="padding: 10px 14px; font-size: 14px; color: #1a1a1a; border-top: 1px solid #e8eee8; white-space: pre-wrap;">${linkEsc(String(tarjeta.observaciones || tarjeta.comentario).trim())}</td></tr>` : ''}
               </table>
             </td>
           </tr>
@@ -27013,6 +27019,8 @@ document.getElementById('chatForm').onsubmit = function (e) {
             document.getElementById('tarjetaDepto').value = tarjeta.departamento || '';
             window.tarjetaLineasTemp = normalizarTarjetaItems(tarjeta).map(it => ({ tipo: it.tipo, cantidad: it.cantidad != null ? it.cantidad : 1, monto: parseFloat(it.monto) || 0 }));
             renderTarjetaLineasLista();
+            var obsEl = document.getElementById('tarjetaObservaciones');
+            if (obsEl) obsEl.value = tarjeta.observaciones || tarjeta.comentario || '';
             
             const btnSubmit = document.querySelector('#formTarjeta button[type="submit"]');
             if (btnSubmit) btnSubmit.textContent = 'Actualizar Venta';
@@ -27074,12 +27082,14 @@ document.getElementById('chatForm').onsubmit = function (e) {
             }
             
             const montoTotal = lineas.reduce((s, l) => s + (parseFloat(l.monto) || 0), 0);
+            const observaciones = String((document.getElementById('tarjetaObservaciones') || {}).value || '').trim();
             const tarjetaData = {
                 nombre,
                 fecha: fechaSeleccionada,
                 departamento,
                 items: lineas,
                 monto: montoTotal,
+                observaciones,
                 mes: mesRegistroDesdeFecha(fechaSeleccionada)
             };
 
@@ -27125,7 +27135,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
             const tbody = document.getElementById('tbodyTarjetas');
             
             if (tarjetas.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" class="empty-state"><p>No hay registros de ventas</p></td></tr>';
+                tbody.innerHTML = '<tr><td colspan="8" class="empty-state"><p>No hay registros de ventas</p></td></tr>';
                 return;
             }
 
@@ -27141,6 +27151,11 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 return `Varios (${items.length} ítems)`;
             };
 
+            const escObsTarjeta = (v) => String(v == null ? '' : v)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
             tbody.innerHTML = tarjetas.map(t => `
                 <tr>
                     <td>${formatearFecha(t.fecha)}</td>
@@ -27149,6 +27164,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     <td>${tipoDisplay(t)}</td>
                     <td>${totalCantidadRegistro(t)}</td>
                     <td>${formatearMoneda(montoRegistro(t))}</td>
+                    <td style="max-width:12rem;font-size:0.78rem;white-space:normal;word-break:break-word;">${escObsTarjeta(t.observaciones || t.comentario || '') || '—'}</td>
                     <td>
                         <div class="tabla-acciones">
                             ${htmlBadgeNotificacionCorreo(t)}
@@ -46773,7 +46789,13 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     ' · ' + fmtMonto(it) +
                     ' · <span style="color:' + col + ';font-weight:700;">' + est + '</span></div></div>';
             }).join('');
-            return '<div style="margin:8px 0 0 0;"><div style="color:var(--gray-600);font-size:0.75rem;margin-bottom:4px;font-weight:600;">⚠ Historial de multas (' + h.total + (h.vigentes ? ', ' + h.vigentes + ' vigente' + (h.vigentes === 1 ? '' : 's') : '') + ')</div>' + filas + '</div>';
+            var resumen = h.total + ' registro' + (h.total === 1 ? '' : 's') +
+                (h.vigentes ? ' · ' + h.vigentes + ' vigente' + (h.vigentes === 1 ? '' : 's') : '');
+            return '<div class="ocupacion-hist-multas" style="margin:8px 0 0 0;">' +
+                '<button type="button" class="btn btn-secondary ocupacion-hist-multas-btn" aria-expanded="false" style="width:100%;padding:8px 10px;font-size:0.8rem;font-weight:700;display:flex;align-items:center;justify-content:space-between;gap:0.5rem;text-align:left;">' +
+                '<span>⚠ Historial de multas <span style="font-weight:600;color:var(--gray-600);">(' + resumen + ')</span></span>' +
+                '<span class="ocupacion-hist-multas-chevron" aria-hidden="true" style="font-size:0.75rem;">▾</span></button>' +
+                '<div class="ocupacion-hist-multas-panel" hidden style="margin-top:6px;max-height:220px;overflow-y:auto;">' + filas + '</div></div>';
         }
 
         function ocupacionColumnaDesdeNumero(unitNumber) {
@@ -47113,6 +47135,20 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     if (typeof enviarCorreoBienvenidaManualUnidad === 'function') {
                         enviarCorreoBienvenidaManualUnidad(unit);
                     }
+                });
+            }
+            var btnHist = modal.querySelector('.ocupacion-hist-multas-btn');
+            if (btnHist) {
+                btnHist.addEventListener('click', function () {
+                    var wrap = btnHist.closest('.ocupacion-hist-multas');
+                    var panel = wrap && wrap.querySelector('.ocupacion-hist-multas-panel');
+                    var chev = wrap && wrap.querySelector('.ocupacion-hist-multas-chevron');
+                    if (!panel) return;
+                    var abierto = panel.hasAttribute('hidden');
+                    if (abierto) panel.removeAttribute('hidden');
+                    else panel.setAttribute('hidden', '');
+                    btnHist.setAttribute('aria-expanded', abierto ? 'true' : 'false');
+                    if (chev) chev.textContent = abierto ? '▴' : '▾';
                 });
             }
             modal.onclick = function(e) { if (e.target === modal) modal.remove(); };
