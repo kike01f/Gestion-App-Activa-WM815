@@ -13528,7 +13528,7 @@
         }
         
         // Función auxiliar: genera Excel .xlsx (ExcelJS) para Postventa con estilo
-        async function generarExcelPostventaComoAdjunto(registros) {
+        async function generarExcelPostventaXLSX(registros) {
             try {
                 var ExcelJSLib = typeof ExcelJS !== 'undefined' ? ExcelJS : (typeof window !== 'undefined' ? window.ExcelJS : null);
                 if (!ExcelJSLib) {
@@ -13767,13 +13767,68 @@
                     } catch (eP) {}
                 }
 
+                var shR = wb.addWorksheet('Resumen', { views: [{ showGridLines: false }] });
+                shR.columns = [{ width: 44 }, { width: 18 }, { width: 18 }];
+                var t1 = shR.addRow(['Postventa']);
+                t1.height = 26;
+                t1.getCell(1).font = { name: 'Calibri', size: fs(18), bold: true, color: { argb: 'FF5A9219' } };
+                var t2 = shR.addRow([comunidad]);
+                t2.getCell(1).font = { name: 'Calibri', size: fs(12), color: { argb: 'FF374151' } };
+                shR.addRow([]);
+                function metaRow(k, v) {
+                    var rr = shR.addRow([k, v]);
+                    rr.getCell(1).font = { name: 'Calibri', size: fs(10), bold: true, color: { argb: 'FF6B7280' } };
+                    rr.getCell(2).font = { name: 'Calibri', size: fs(11) };
+                    return rr;
+                }
+                metaRow('Fecha de emisión', fechaEmision);
+                metaRow('Total registros', total);
+                metaRow('Ítems abiertos', abiertos);
+                if (mesVistaAdmin) metaRow('Referencia vista administrativa (mes)', mesVistaAdmin);
+                shR.addRow([]);
+                var hEst = shR.addRow(['Estado', 'Cantidad', '% del total']);
+                hEst.eachCell(function (cell) {
+                    cell.font = { name: 'Calibri', size: fs(11), bold: true, color: { argb: 'FFFFFFFF' } };
+                    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF5A9219' } };
+                    cell.border = borderAll('FF4A7A15');
+                });
+                function pctTxt(n) { return total ? (Math.round(1000 * n / total) / 10) + '%' : '0%'; }
+                [
+                    ['Pendiente', st.pendiente],
+                    ['En proceso', st.en_proceso],
+                    ['Terminado', st.terminado],
+                    ['No aplica', st.no_aplica]
+                ].forEach(function (pair) {
+                    var rr = shR.addRow([pair[0], pair[1], pctTxt(pair[1])]);
+                    rr.eachCell(function (cell) {
+                        cell.font = { name: 'Calibri', size: fs(11) };
+                        cell.border = borderAll('FFE5E7EB');
+                    });
+                });
+                shR.addRow([]);
+                var cump = shR.addRow(['Cumplimiento']);
+                cump.getCell(1).font = { name: 'Calibri', size: fs(12), bold: true, color: { argb: 'FF3F6212' } };
+                shR.addRow(['Terminado / total', pctTotal + '%', st.terminado + ' de ' + total]);
+                shR.addRow(['Terminado / aplicables (sin «No aplica»)', pctApl + '%', st.terminado + ' de ' + aplicables]);
+                shR.addRow(['Pendientes o en proceso', abiertos, '']);
+                try {
+                    shR.pageSetup = shR.pageSetup || {};
+                    shR.pageSetup.printArea = 'A1:C' + String(shR.rowCount);
+                } catch (ePr) {}
+
                 var nombreArchivo = 'Postventa_' + limpiarNombreArchivo(comunidad) + '_' + fechaArchivo + '.xlsx';
                 var buffer = await wb.xlsx.writeBuffer();
-                return adjuntoXlsxBufferComoMail(buffer, nombreArchivo);
+                return { buffer: buffer, nombreArchivo: nombreArchivo };
             } catch (error) {
                 console.error('Error al generar Excel .xlsx de postventa:', error);
                 return null;
             }
+        }
+
+        async function generarExcelPostventaComoAdjunto(registros) {
+            var pack = await generarExcelPostventaXLSX(registros);
+            if (!pack || !pack.buffer) return null;
+            return adjuntoXlsxBufferComoMail(pack.buffer, pack.nombreArchivo);
         }
 
         // Función auxiliar para obtener datos de postventa (no usa sistema de meses)
@@ -43273,128 +43328,36 @@ document.getElementById('chatForm').onsubmit = function (e) {
             };
 
             window.exportarExcelPostventa = async function () {
-                var st = { pendiente: 0, en_proceso: 0, terminado: 0, no_aplica: 0 };
-                registrosPostventa.forEach(function (r) {
-                    var k = r.estado;
-                    if (k !== 'pendiente' && k !== 'en_proceso' && k !== 'terminado' && k !== 'no_aplica') k = 'pendiente';
-                    st[k]++;
-                });
-                var total = registrosPostventa.length;
-                var aplicables = total - st.no_aplica;
-                var pctTotal = total ? Math.round(100 * st.terminado / total) : 0;
-                var pctApl = aplicables > 0 ? Math.round(100 * st.terminado / aplicables) : 0;
-                var abiertos = st.pendiente + st.en_proceso;
-
-                var comunidad = 'Comunidad';
                 try {
-                    if (typeof obtenerPersonalizacion === 'function') {
-                        var pers = await obtenerPersonalizacion();
-                        if (pers && pers.comunidad) comunidad = pers.comunidad;
+                    if (typeof mostrarProgreso === 'function') mostrarProgreso('Generando reporte Excel (.xlsx)...');
+                    var pack = await generarExcelPostventaXLSX(registrosPostventa);
+                    if (typeof ocultarProgreso === 'function') ocultarProgreso();
+                    if (!pack || !pack.buffer) {
+                        mostrarAlerta('No se pudo generar el Excel (.xlsx). Recargue la página e intente de nuevo.', 'Error');
+                        return;
                     }
-                } catch (e1) { /* ignore */ }
-                if (!comunidad || comunidad === 'Comunidad') {
-                    try { comunidad = localStorage.getItem(lsKey('nombreComunidad')) || comunidad; } catch (e2) { /* ignore */ }
-                }
-
-                function escXml(s) {
-                    return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
-                }
-                function postventaFechaReporteDMY(f) {
-                    if (f == null || f === '') return '';
-                    var str = String(f).trim();
-                    var iso = str.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
-                    if (iso) return String(iso[3]).padStart(2, '0') + '-' + String(iso[2]).padStart(2, '0') + '-' + iso[1];
-                    var dmy = str.match(/^(\d{1,2})[\/.\-](\d{1,2})[\/.\-](\d{4})/);
-                    if (dmy) return String(dmy[1]).padStart(2, '0') + '-' + String(dmy[2]).padStart(2, '0') + '-' + dmy[3];
-                    var d = new Date(str);
-                    if (!isNaN(d.getTime())) {
-                        return String(d.getDate()).padStart(2, '0') + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + d.getFullYear();
+                    var mime = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+                    if (typeof _descargarBlobComoArchivo === 'function') {
+                        _descargarBlobComoArchivo(pack.buffer, pack.nombreArchivo, mime);
+                    } else {
+                        var blob = new Blob([pack.buffer], { type: mime });
+                        var url = window.URL.createObjectURL(blob);
+                        var link = document.createElement('a');
+                        link.href = url;
+                        link.download = pack.nombreArchivo;
+                        link.style.display = 'none';
+                        document.body.appendChild(link);
+                        link.click();
+                        setTimeout(function () {
+                            if (link.parentNode) link.parentNode.removeChild(link);
+                            window.URL.revokeObjectURL(url);
+                        }, 150);
                     }
-                    return str;
-                }
-                var hoy = new Date();
-                var fechaEmision = String(hoy.getDate()).padStart(2, '0') + '-' + String(hoy.getMonth() + 1).padStart(2, '0') + '-' + hoy.getFullYear();
-                var fechaArchivo = hoy.getFullYear() + '-' + String(hoy.getMonth() + 1).padStart(2, '0') + '-' + String(hoy.getDate()).padStart(2, '0');
-                var mesVistaAdmin = (typeof obtenerMesPeriodoVista === 'function' && typeof obtenerNombreMes === 'function')
-                    ? obtenerNombreMes(obtenerMesPeriodoVista()) : '';
-                var limpiarNombre = function (str) {
-                    return String(str || '').replace(/[^a-zA-Z0-9_-]/g, '_').replace(/_+/g, '_');
-                };
-
-                var list = registrosPostventa.slice().sort(function (a, b) {
-                    return (b.fecha || '').localeCompare(a.fecha || '') || String(b.id || '').localeCompare(String(a.id || ''));
-                });
-                var filasDetalle = '';
-                list.forEach(function (r) {
-                    var urls = (r.evidencias || []).map(function (e) { return e.url; }).join(' | ');
-                    filasDetalle += '<tr><td>' + escXml(postventaFechaReporteDMY(r.fecha)) + '</td><td>' + escXml(postventaCorregirOrtografiaObservacion(r.observacion)) + '</td><td class="postv-estado-td">' + escXml(postventaEstadoExcelLabel(r.estado)) + '</td><td style="font-size:10px;word-break:break-all;">' + escXml(urls) + '</td></tr>';
-                });
-                if (!filasDetalle) {
-                    filasDetalle = '<tr><td colspan="4" class="text-center" style="padding:24px;color:#6b7280;">No hay registros en el módulo Postventa.</td></tr>';
-                }
-
-                var htmlExcel = '<!DOCTYPE html><html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40" lang="es"><head><meta charset="UTF-8"><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><title>Postventa - ' + escXml(comunidad) + '</title><style>' +
-                    '@page{margin:1.2cm}body{font-family:Calibri,Arial,sans-serif;margin:0;padding:18px 20px;color:#1f2937;background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact}' +
-                    '.band-title{font-size:11px;letter-spacing:2px;text-transform:uppercase;opacity:0.92}' +
-                    '.band-main{font-size:24px;font-weight:700;margin:6px 0 4px}' +
-                    '.band-sub{font-size:14px;font-weight:400;opacity:0.95}' +
-                    '.sec{font-size:14px;font-weight:700;color:#3f6212;margin:26px 0 10px;padding-bottom:6px;border-bottom:2px solid #75BB21}' +
-                    '.tbl{width:100%;border-collapse:collapse;font-size:11px}' +
-                    '.tbl th{background:#5a9219;color:#fff;padding:10px 10px;text-align:left;font-weight:600;border:1px solid #4a7a15}' +
-                    '.tbl th.c,.tbl td.c{text-align:center}' +
-                    '.tbl td{padding:9px 10px;border:1px solid #d1d5db;vertical-align:top}' +
-                    '.tbl tbody tr:nth-child(even) td{background:#f9fafb}' +
-                    '.meta td{background:#f3f4f6;font-size:12px;padding:12px 14px;border:1px solid #d1d5db}' +
-                    '.meta b{display:block;color:#374151;font-size:10px;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px}' +
-                    '.cumpl td{background:#ecfccb;border:1px solid #84cc16;padding:14px 16px;font-size:12px;line-height:1.65;color:#365314}' +
-                    '.foot{margin-top:24px;padding-top:12px;border-top:1px solid #e5e7eb;font-size:10px;color:#6b7280;line-height:1.5}' +
-                    '.postv-estado-th,.postv-estado-td{min-width:118px;max-width:200px;text-align:left!important;vertical-align:middle!important;padding:8px 10px!important;font-size:11px;mso-number-format:\\@;font-family:Calibri,Arial,sans-serif}' +
-                    '</style></head><body>' +
-                    '<table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;margin-bottom:20px"><tr><td style="background:#5a9219;color:#fff;padding:20px 24px;border:1px solid #4a7a15">' +
-                    '<div class="band-title">Reporte</div><div class="band-main">Postventa</div><div class="band-sub">' + escXml(comunidad) + '</div></td></tr></table>' +
-                    '<table width="100%" class="meta" cellpadding="0" cellspacing="0" style="border-collapse:collapse;margin-bottom:22px"><tr>' +
-                    '<td width="34%" style="vertical-align:top"><b>Fecha de emisión</b>' + escXml(fechaEmision) + '</td>' +
-                    '<td width="33%" style="vertical-align:top"><b>Total registros</b>' + total + '</td>' +
-                    '<td width="33%" style="vertical-align:top"><b>Ítems abiertos</b>' + abiertos + '</td></tr>' +
-                    (mesVistaAdmin ? '<tr><td colspan="3" style="vertical-align:top;padding-top:10px"><b>Referencia vista administrativa (mes)</b>' + escXml(mesVistaAdmin) + '</td></tr>' : '') +
-                    '</table>' +
-                    '<div class="sec">Estadísticas por estado</div>' +
-                    '<table class="tbl" style="margin-bottom:18px;max-width:560px"><thead><tr><th>Estado</th><th class="c" style="width:90px">Cantidad</th><th class="c" style="width:100px">% del total</th></tr></thead><tbody>' +
-                    '<tr><td>⚠️ pendiente</td><td class="c">' + st.pendiente + '</td><td class="c">' + (total ? ((100 * st.pendiente / total).toFixed(1)) : '0') + '%</td></tr>' +
-                    '<tr><td>🔄 en proceso</td><td class="c">' + st.en_proceso + '</td><td class="c">' + (total ? ((100 * st.en_proceso / total).toFixed(1)) : '0') + '%</td></tr>' +
-                    '<tr><td>✅ terminado</td><td class="c">' + st.terminado + '</td><td class="c">' + (total ? ((100 * st.terminado / total).toFixed(1)) : '0') + '%</td></tr>' +
-                    '<tr><td>❌ no aplica</td><td class="c">' + st.no_aplica + '</td><td class="c">' + (total ? ((100 * st.no_aplica / total).toFixed(1)) : '0') + '%</td></tr>' +
-                    '</tbody></table>' +
-                    '<table width="100%" class="cumpl" cellpadding="0" cellspacing="0" style="border-collapse:collapse;margin-bottom:22px"><tr><td>' +
-                    '<strong style="color:#3f6212">Cumplimiento</strong><br>' +
-                    'Terminado / total: <strong>' + pctTotal + '%</strong> (' + st.terminado + ' de ' + total + ')<br>' +
-                    'Terminado / aplicables (sin «No aplica»): <strong>' + pctApl + '%</strong> (' + st.terminado + ' de ' + aplicables + ')<br>' +
-                    'Pendientes o en proceso: <strong>' + abiertos + '</strong></td></tr></table>' +
-                    '<div class="sec">Detalle de registros</div>' +
-                    '<table class="tbl"><thead><tr><th style="width:96px">Fecha</th><th>Observación</th><th class="postv-estado-th">Estado</th><th style="min-width:220px">URLs evidencia</th></tr></thead><tbody>' +
-                    filasDetalle + '</tbody></table>' +
-                    '<div class="foot"><strong>Gestión de Comunidad</strong> · Generado el ' + escXml(fechaEmision) + '. Importación sugerida: Fecha, Observación, Estado (opcional), URLs evidencia.</div>' +
-                    '</body></html>';
-
-                var nombreArchivo = 'Postventa_' + limpiarNombre(comunidad) + '_' + fechaArchivo + '.xls';
-                try {
-                    var BOM = '\uFEFF';
-                    var blob = new Blob([BOM + htmlExcel], { type: 'application/vnd.ms-excel;charset=utf-8' });
-                    var url = window.URL.createObjectURL(blob);
-                    var link = document.createElement('a');
-                    link.href = url;
-                    link.download = nombreArchivo;
-                    link.style.display = 'none';
-                    document.body.appendChild(link);
-                    link.click();
-                    setTimeout(function () {
-                        document.body.removeChild(link);
-                        window.URL.revokeObjectURL(url);
-                    }, 150);
-                    mostrarAlerta('Reporte Excel descargado.', 'Postventa');
+                    mostrarAlerta('Reporte Excel (.xlsx) descargado.', 'Postventa');
                 } catch (err) {
+                    if (typeof ocultarProgreso === 'function') ocultarProgreso();
                     console.error(err);
-                    mostrarAlerta('Error al generar el archivo.', 'Error');
+                    mostrarAlerta('Error al generar el archivo .xlsx.', 'Error');
                 }
             };
 
