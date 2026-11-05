@@ -9452,7 +9452,28 @@
             <!-- Correos de consejería: CCO en comprobantes de apertura -->
             <div class="form-section" style="margin-bottom: 2rem;">
                 <h3 style="margin: 0 0 0.75rem 0; font-size: 1rem; font-weight: 700;">Correos de consejería</h3>
-                <p style="color: var(--text-tertiary); font-size: 0.8125rem; margin: 0 0 0.75rem 0; line-height: 1.45;">Además del buzón fijo de conserjería del edificio (<strong>conserjeria.wm815@gmail.com</strong>), estas direcciones reciben <strong>copia oculta (CCO)</strong> al enviar el comprobante de <strong>apertura de puerta</strong> y la <strong>confirmación de mudanza</strong> al residente, y <strong>copia (CC)</strong> al enviar la <strong>confirmación de reserva de espacio / evento</strong>.</p>
+                <p style="color: var(--text-tertiary); font-size: 0.8125rem; margin: 0 0 0.75rem 0; line-height: 1.45;">Programe aquí el buzón de conserjería y copias adicionales. Reciben <strong>copia oculta (CCO)</strong> en apertura de puerta, mudanzas y reservas de espacios, y <strong>copia (CC)</strong> en bienvenida. Puede desactivar el buzón del edificio o desmarcarlo en cada envío.</p>
+                <div style="margin: 0 0 1rem 0; padding: 0.85rem 1rem; border: 1px solid var(--border-color); border-radius: 10px; background: var(--bg-secondary);">
+                    <p style="margin: 0 0 0.65rem 0; font-size: 0.8125rem; font-weight: 700; color: var(--text-primary);">Buzón de conserjería del edificio</p>
+                    <label style="display: flex; align-items: flex-start; gap: 0.5rem; margin-bottom: 0.65rem; cursor: pointer; font-size: 0.8125rem; color: var(--text-secondary);">
+                        <input type="checkbox" id="correoConsejeriaBuzonActivo" checked style="margin-top: 0.15rem; flex-shrink: 0;">
+                        <span>Incluir este correo en las copias automáticas (puede desmarcarlo también al enviar)</span>
+                    </label>
+                    <div class="form-row" style="gap: 0.5rem; margin-bottom: 0;">
+                        <div class="form-group" style="flex: 1; margin-bottom: 0.5rem;">
+                            <label for="correoConsejeriaBuzonNombre" style="margin-bottom: 0.25rem; font-size: 0.8125rem;">Nombre</label>
+                            <input type="text" id="correoConsejeriaBuzonNombre" placeholder="Conserjería" style="padding: 0.5rem; font-size: 0.875rem; width: 100%; box-sizing: border-box;">
+                        </div>
+                        <div class="form-group" style="flex: 1.4; margin-bottom: 0.5rem;">
+                            <label for="correoConsejeriaBuzonEmail" style="margin-bottom: 0.25rem; font-size: 0.8125rem;">Correo</label>
+                            <input type="email" id="correoConsejeriaBuzonEmail" placeholder="conserjeria.wm815@gmail.com" style="padding: 0.5rem; font-size: 0.875rem; width: 100%; box-sizing: border-box;">
+                        </div>
+                        <div class="form-group" style="display: flex; align-items: flex-end; margin-bottom: 0.5rem;">
+                            <button type="button" class="btn btn-primary" id="btnGuardarBuzonConsejeria" style="padding: 0.5rem 1rem; font-size: 0.875rem;">Guardar buzón</button>
+                        </div>
+                    </div>
+                </div>
+                <p style="color: var(--text-tertiary); font-size: 0.8125rem; margin: 0 0 0.5rem 0;">Copias adicionales (turnos, reemplazos, etc.):</p>
                 <form id="formCorreoConsejeria">
                     <div class="form-row" style="gap: 0.5rem; margin-bottom: 0.5rem;">
                         <div class="form-group" style="flex: 1; margin-bottom: 0.5rem;">
@@ -12524,6 +12545,11 @@
                         if (typeof window.cargarPostventa === 'function') window.cargarPostventa();
                     } else if (tabName === 'comite') {
                         if (typeof window.cargarComite === 'function') window.cargarComite();
+                    } else if (tabName === 'notificaciones') {
+                        if (typeof cargarCorreosAdministrativos === 'function') cargarCorreosAdministrativos();
+                        if (typeof cargarCorreosConsejeria === 'function') cargarCorreosConsejeria();
+                        if (typeof cargarFormBuzonConsejeria === 'function') cargarFormBuzonConsejeria();
+                        if (typeof refrescarEditorPlantillasCorreoModulos === 'function') refrescarEditorPlantillasCorreoModulos();
                     } else if (tabName === 'personalizacion') {
                         if (typeof cargarPersonalizacion === 'function') {
                             cargarPersonalizacion();
@@ -15225,7 +15251,7 @@
                             <span style="word-break: break-all;">${escAttr(correoStr)}</span>
                         </div>`;
                 }
-                htmlBloqueDest += renderListaDestinatarios(listaDestCco, 'Conserjería (copia oculta)', 'data-mcc-dest-cco-chk', true, 'copia oculta, siempre incluida');
+                htmlBloqueDest += renderListaDestinatarios(listaDestCco, 'Conserjería (copia oculta)', 'data-mcc-dest-cco-chk', true, 'copia oculta; puede desmarcar');
 
                 modal.innerHTML = `
                 <div style="background: var(--bg-primary); border-radius: 12px; max-width: 560px; width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);">
@@ -15341,13 +15367,16 @@
                         .filter(Boolean)
                         .map((d) => String(d.correo || '').trim())
                         .filter(Boolean);
+                    const usaListaCco = Array.isArray(destinatariosCco);
                     const emailsCco = typeof normalizarListaCorreosDestino === 'function'
-                        ? normalizarListaCorreosDestino([].concat(
-                            enviarOpciones && enviarOpciones.bcc ? enviarOpciones.bcc : [],
-                            emailsCcoSel,
-                            Array.from(correosFijosSet)
-                        ))
-                        : emailsCcoSel.concat(Array.from(correosFijosSet));
+                        ? normalizarListaCorreosDestino(usaListaCco
+                            ? emailsCcoSel
+                            : [].concat(
+                                enviarOpciones && enviarOpciones.bcc ? enviarOpciones.bcc : [],
+                                emailsCcoSel,
+                                Array.from(correosFijosSet)
+                            ))
+                        : (usaListaCco ? emailsCcoSel : emailsCcoSel.concat(Array.from(correosFijosSet)));
                     const enviarOpcionesFinal = Object.assign({}, enviarOpciones || {});
                     if (emailsCco.length === 1) enviarOpcionesFinal.bcc = emailsCco[0];
                     else if (emailsCco.length > 1) enviarOpcionesFinal.bcc = emailsCco;
@@ -22367,6 +22396,9 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 var jobs = Array.isArray(data.queue) ? data.queue.slice() : [];
                 var pendientes = jobs.filter(function (j) { return j && j.status === 'pending'; });
                 if (!pendientes.length) return;
+                if (typeof obtenerConfigCorreosConsejeria === 'function') {
+                    try { await obtenerConfigCorreosConsejeria(); } catch (eCfgQ) {}
+                }
                 var html = typeof htmlCorreoBienvenidaNuevoResidente === 'function' ? htmlCorreoBienvenidaNuevoResidente() : '';
                 var textoDefault = 'Estimado Residente, es un gusto darle la bienvenida de parte del equipo de administración a su nuevo hogar.';
                 var huellas = parseHuellasDesdeWelcomeDoc(data);
@@ -22379,11 +22411,11 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     var texto = job.texto || textoDefault;
                     var para = job.to;
                     var bcc = job.bcc;
-                    var opciones = {
+                    var opciones = opcionesEnvioConCcConsejeria({
                         silencioso: true,
-                        permitirSinLogin: false,
-                        cc: job.cc || correoCcBienvenidaConserjeria()
-                    };
+                        permitirSinLogin: false
+                    });
+                    if (!opciones.cc) delete opciones.cc;
                     if (bcc && ((Array.isArray(bcc) && bcc.length) || (typeof bcc === 'string' && bcc))) {
                         opciones.bcc = bcc;
                     }
@@ -22809,6 +22841,9 @@ document.getElementById('chatForm').onsubmit = function (e) {
         }
 
         async function enviarCorreoBienvenidaAUnidad(unit, correos) {
+            if (typeof obtenerConfigCorreosConsejeria === 'function') {
+                try { await obtenerConfigCorreosConsejeria(); } catch (eCfgA) {}
+            }
             const lista = Array.isArray(correos) ? correos.filter(Boolean) : [];
             if (!lista.length) return { exito: false, error: 'Sin correos' };
             const unidad = String((unit && (unit.unitNumber || unit.departamento)) || '').trim();
@@ -22822,7 +22857,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 texto,
                 html,
                 null,
-                { silencioso: true, permitirSinLogin: false, cc: correoCcBienvenidaConserjeria() }
+                opcionesEnvioConCcConsejeria({ silencioso: true, permitirSinLogin: false })
             );
         }
 
@@ -22877,7 +22912,28 @@ document.getElementById('chatForm').onsubmit = function (e) {
         }
 
         function correoCcBienvenidaConserjeria() {
-            return 'conserjeria.wm815@gmail.com';
+            const cfg = window._configCorreosConsejeriaCache;
+            if (cfg) {
+                if (cfg.activo === false) return '';
+                const e = String(cfg.correo || '').trim();
+                return e || '';
+            }
+            return (typeof CORREO_CONSEJERIA_SUGERIDO !== 'undefined' ? CORREO_CONSEJERIA_SUGERIDO : 'conserjeria.wm815@gmail.com');
+        }
+
+        function opcionesEnvioConCcConsejeria(base) {
+            const o = Object.assign({}, base || {});
+            const cc = correoCcBienvenidaConserjeria();
+            if (cc) o.cc = cc;
+            else delete o.cc;
+            return o;
+        }
+
+        function textoCopiaConsejeriaBienvenida() {
+            const cc = correoCcBienvenidaConserjeria();
+            return cc
+                ? ('Conserjería recibe copia (CC): ' + cc + '.')
+                : 'No hay copia a conserjería (buzón desasignado en Central de Notificación).';
         }
 
         async function enviarCorreoBienvenidaMasivaOcupacion() {
@@ -22887,9 +22943,12 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 mostrarAlerta('No hay correos de residentes en Ocupación para enviar la bienvenida masiva.', 'Sin destinatarios');
                 return { exito: false, error: 'Sin destinatarios' };
             }
+            if (typeof obtenerConfigCorreosConsejeria === 'function') {
+                try { await obtenerConfigCorreosConsejeria(); } catch (eCfg) {}
+            }
             const paraVisible = correoVisibleBienvenidaMasiva();
             const ok = await confirmarAccion(
-                'Se enviará el correo de bienvenida a ' + rec.correos.length + ' direcciones de ' + rec.unidadesConCorreo + ' unidades, en copia oculta (CCO). El destinatario visible será ' + paraVisible + '. Conserjería recibe copia (CC): ' + correoCcBienvenidaConserjeria() + '. Ningún residente verá el correo de otro.\n\nIncluye propietarios, arrendatarios y familiares. Las visitas frecuentes/autorizadas quedan fuera.\n\n¿Enviar ahora?',
+                'Se enviará el correo de bienvenida a ' + rec.correos.length + ' direcciones de ' + rec.unidadesConCorreo + ' unidades, en copia oculta (CCO). El destinatario visible será ' + paraVisible + '. ' + textoCopiaConsejeriaBienvenida() + ' Ningún residente verá el correo de otro.\n\nIncluye propietarios, arrendatarios y familiares. Las visitas frecuentes/autorizadas quedan fuera.\n\n¿Enviar ahora?',
                 'Bienvenida masiva (CCO)'
             );
             if (!ok) return { exito: false, cancelado: true };
@@ -22918,7 +22977,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                         texto,
                         html,
                         null,
-                        { bcc: lotes[i], silencioso: true, permitirSinLogin: false, cc: correoCcBienvenidaConserjeria() }
+                        opcionesEnvioConCcConsejeria({ bcc: lotes[i], silencioso: true, permitirSinLogin: false })
                     );
                     if (resultado && resultado.exito && resultado.docId) {
                         okLotes += 1;
@@ -22971,8 +23030,11 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 mostrarAlerta('La unidad ' + unidad + ' no tiene correos registrados. No se puede enviar la bienvenida.', 'Sin correos');
                 return { exito: false, error: 'Sin correos' };
             }
+            if (typeof obtenerConfigCorreosConsejeria === 'function') {
+                try { await obtenerConfigCorreosConsejeria(); } catch (eCfgU) {}
+            }
             const ok = await confirmarAccion(
-                'Se enviará el correo de bienvenida de la unidad ' + unidad + ' a: ' + destinatarios.join(', ') + '.\n\nCopia (CC) a conserjería: ' + correoCcBienvenidaConserjeria() + '.\n\nIncluye propietarios, arrendatarios y familiares. Las visitas frecuentes/autorizadas no reciben este correo.\n\n¿Enviar ahora?',
+                'Se enviará el correo de bienvenida de la unidad ' + unidad + ' a: ' + destinatarios.join(', ') + '.\n\n' + textoCopiaConsejeriaBienvenida() + '\n\nIncluye propietarios, arrendatarios y familiares. Las visitas frecuentes/autorizadas no reciben este correo.\n\n¿Enviar ahora?',
                 'Enviar correo de bienvenida'
             );
             if (!ok) return { exito: false, cancelado: true };
@@ -23094,7 +23156,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                         id: 'gwm_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8),
                         unidad: unidad,
                         to: item.correos.length === 1 ? item.correos[0] : item.correos,
-                        cc: correoCcBienvenidaConserjeria(),
+                        cc: correoCcBienvenidaConserjeria() || '',
                         asunto: 'Te damos la bienvenida a la Comunidad WM 815 - Unidad ' + unidad,
                         texto: 'Estimado Residente, es un gusto darle la bienvenida de parte del equipo de administración a su nuevo hogar.',
                         huellas: item.huellas,
@@ -25346,29 +25408,14 @@ document.getElementById('chatForm').onsubmit = function (e) {
         }
 
         async function prepararCorreoMudanzaConsejeria() {
-            await cargarCorreosConsejeria();
-            const correoFijoConsejeria = (typeof CORREOS_BCC_APERTURA_CONSEJERIA_FIJOS !== 'undefined' && CORREOS_BCC_APERTURA_CONSEJERIA_FIJOS[0])
-                ? CORREOS_BCC_APERTURA_CONSEJERIA_FIJOS[0]
-                : 'conserjeria.wm815@gmail.com';
-            const desdeCentral = (correosConsejeria || []).map(c => c.correo).filter(Boolean);
-            const emailsBccConsejeria = typeof normalizarListaCorreosDestino === 'function'
-                ? normalizarListaCorreosDestino([correoFijoConsejeria].concat(desdeCentral))
-                : [correoFijoConsejeria];
-            const enviarOpciones = emailsBccConsejeria.length
-                ? { bcc: emailsBccConsejeria.length === 1 ? emailsBccConsejeria[0] : emailsBccConsejeria }
-                : { bcc: correoFijoConsejeria };
-            const destinatariosCco = [{
-                nombre: 'Conserjería',
-                correo: correoFijoConsejeria,
-                tipo: 'CCO',
-                fijo: true
-            }].concat((correosConsejeria || [])
-                .filter((c) => c && c.correo && String(c.correo).trim().toLowerCase() !== correoFijoConsejeria.toLowerCase())
-                .map((c) => ({
-                    nombre: c.nombre || 'Conserjería',
-                    correo: String(c.correo).trim(),
-                    tipo: 'CCO'
-                })));
+            const destinatariosCco = await obtenerDestinatariosCcoConsejeria();
+            const emails = typeof normalizarListaCorreosDestino === 'function'
+                ? normalizarListaCorreosDestino(destinatariosCco.map((d) => d.correo))
+                : destinatariosCco.map((d) => d.correo).filter(Boolean);
+            const enviarOpciones = emails.length
+                ? { bcc: emails.length === 1 ? emails[0] : emails }
+                : null;
+            const correoFijoConsejeria = (destinatariosCco[0] && destinatariosCco[0].correo) || '';
             return { correoFijoConsejeria, destinatariosCco, enviarOpciones };
         }
 
@@ -25511,7 +25558,6 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     destinatariosUnidad,
                     destinatariosDirectorio,
                     destinatariosCco,
-                    correosSiempreSeleccionados: [correoFijoConsejeria],
                     etiquetaDestino: 'Residentes de la unidad',
                     enviarOpciones
                 });
@@ -25596,7 +25642,6 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     destinatariosUnidad,
                     destinatariosDirectorio,
                     destinatariosCco,
-                    correosSiempreSeleccionados: [correoFijoConsejeria],
                     etiquetaDestino: 'Residentes de la unidad',
                     enviarOpciones
                 });
@@ -25670,7 +25715,6 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     destinatariosUnidad,
                     destinatariosDirectorio,
                     destinatariosCco,
-                    correosSiempreSeleccionados: [correoFijoConsejeria],
                     etiquetaDestino: 'Residentes de la unidad',
                     enviarOpciones
                 });
@@ -26226,8 +26270,83 @@ document.getElementById('chatForm').onsubmit = function (e) {
 </html>`;
         }
 
-        /** Buzón de conserjería en CCO para comprobantes de apertura (siempre, salvo duplicado con el Para). Se unen los de Central → Correos de consejería. */
-        const CORREOS_BCC_APERTURA_CONSEJERIA_FIJOS = ['conserjeria.wm815@gmail.com'];
+        const CORREO_CONSEJERIA_SUGERIDO = 'conserjeria.wm815@gmail.com';
+        window._configCorreosConsejeriaCache = window._configCorreosConsejeriaCache || null;
+
+        async function obtenerConfigCorreosConsejeria() {
+            const def = {
+                activo: true,
+                correo: CORREO_CONSEJERIA_SUGERIDO,
+                nombre: 'Conserjería'
+            };
+            try {
+                if (!firebaseInitialized || !db) {
+                    window._configCorreosConsejeriaCache = def;
+                    return def;
+                }
+                const snap = await db.collection('comunidad').doc('configCorreosConsejeria').get();
+                if (!snap.exists) {
+                    window._configCorreosConsejeriaCache = def;
+                    return def;
+                }
+                const d = snap.data() || {};
+                const cfg = {
+                    activo: d.activo !== false,
+                    correo: String(d.correo != null ? d.correo : def.correo).trim(),
+                    nombre: String(d.nombre || def.nombre).trim() || def.nombre
+                };
+                window._configCorreosConsejeriaCache = cfg;
+                return cfg;
+            } catch (e) {
+                console.warn('obtenerConfigCorreosConsejeria:', e);
+                window._configCorreosConsejeriaCache = def;
+                return def;
+            }
+        }
+
+        async function guardarConfigCorreosConsejeria(cfg) {
+            const next = {
+                activo: !!(cfg && cfg.activo),
+                correo: String((cfg && cfg.correo) || '').trim(),
+                nombre: String((cfg && cfg.nombre) || 'Conserjería').trim() || 'Conserjería'
+            };
+            window._configCorreosConsejeriaCache = next;
+            if (!firebaseInitialized || !db) {
+                throw new Error('No hay conexión con Firestore.');
+            }
+            await db.collection('comunidad').doc('configCorreosConsejeria').set({
+                activo: next.activo,
+                correo: next.correo,
+                nombre: next.nombre,
+                actualizado: firebase.firestore.FieldValue.serverTimestamp()
+            }, { merge: true });
+            return next;
+        }
+
+        async function obtenerDestinatariosCcoConsejeria() {
+            await cargarCorreosConsejeria();
+            const cfg = await obtenerConfigCorreosConsejeria();
+            const out = [];
+            const seen = new Set();
+            const add = function (nombre, correo) {
+                const e = String(correo || '').trim();
+                if (!e || e.indexOf('@') < 0) return;
+                const k = e.toLowerCase();
+                if (seen.has(k)) return;
+                seen.add(k);
+                out.push({
+                    nombre: nombre || 'Conserjería',
+                    correo: e,
+                    tipo: 'CCO'
+                });
+            };
+            if (cfg.activo && cfg.correo) add(cfg.nombre, cfg.correo);
+            (correosConsejeria || []).forEach(function (c) {
+                if (c && c.correo) add(c.nombre, c.correo);
+            });
+            return out;
+        }
+        window.obtenerDestinatariosCcoConsejeria = obtenerDestinatariosCcoConsejeria;
 
         /** Envía el comprobante de apertura por correo */
         window.enviarCorreoApertura = async function(id) {
@@ -26248,11 +26367,8 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     return;
                 }
 
-                await cargarCorreosConsejeria();
-                const desdeCentral = (correosConsejeria || []).map(c => c.correo).filter(Boolean);
-                const emailsBccConsejeria = normalizarListaCorreosDestino(
-                    CORREOS_BCC_APERTURA_CONSEJERIA_FIJOS.concat(desdeCentral)
-                );
+                const destinatariosCcoApertura = await obtenerDestinatariosCcoConsejeria();
+                const emailsBccConsejeria = normalizarListaCorreosDestino(destinatariosCcoApertura.map((d) => d.correo));
                 const enviarOpcionesApertura = emailsBccConsejeria.length
                     ? { bcc: emailsBccConsejeria.length === 1 ? emailsBccConsejeria[0] : emailsBccConsejeria }
                     : null;
@@ -26272,6 +26388,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     mensajeInicialPrefill: resolverCuerpoInicioPlantillaCorreo(bloqueAp, ctxAp),
                     htmlBase: htmlComprobante,
                     residente: residenteInfo,
+                    destinatariosCco: destinatariosCcoApertura,
                     enviarOpciones: enviarOpcionesApertura
                 });
                 if (resultado === null) return;
@@ -26609,13 +26726,10 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     return;
                 }
 
-                await cargarCorreosConsejeria();
-                const desdeCentralEvento = (correosConsejeria || []).map(c => c.correo).filter(Boolean);
-                const emailsCcConsejeriaEvento = normalizarListaCorreosDestino(
-                    CORREOS_BCC_APERTURA_CONSEJERIA_FIJOS.concat(desdeCentralEvento)
-                );
-                const enviarOpcionesEvento = emailsCcConsejeriaEvento.length
-                    ? { cc: emailsCcConsejeriaEvento.length === 1 ? emailsCcConsejeriaEvento[0] : emailsCcConsejeriaEvento }
+                const destinatariosCcoEvento = await obtenerDestinatariosCcoConsejeria();
+                const emailsBccConsejeriaEvento = normalizarListaCorreosDestino(destinatariosCcoEvento.map((d) => d.correo));
+                const enviarOpcionesEvento = emailsBccConsejeriaEvento.length
+                    ? { bcc: emailsBccConsejeriaEvento.length === 1 ? emailsBccConsejeriaEvento[0] : emailsBccConsejeriaEvento }
                     : null;
 
                 const mapPlantEv = await obtenerPlantillasCorreoModulosMap();
@@ -26636,6 +26750,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     residente: residenteInfo,
                     destinatariosUnidad,
                     destinatariosDirectorio,
+                    destinatariosCco: destinatariosCcoEvento,
                     etiquetaDestino: 'Residentes de la unidad',
                     enviarOpciones: enviarOpcionesEvento
                 });
@@ -26687,13 +26802,10 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     return;
                 }
 
-                await cargarCorreosConsejeria();
-                const desdeCentralEvento = (correosConsejeria || []).map(c => c.correo).filter(Boolean);
-                const emailsCcConsejeriaEvento = normalizarListaCorreosDestino(
-                    CORREOS_BCC_APERTURA_CONSEJERIA_FIJOS.concat(desdeCentralEvento)
-                );
-                const enviarOpcionesEvento = emailsCcConsejeriaEvento.length
-                    ? { cc: emailsCcConsejeriaEvento.length === 1 ? emailsCcConsejeriaEvento[0] : emailsCcConsejeriaEvento }
+                const destinatariosCcoEvento = await obtenerDestinatariosCcoConsejeria();
+                const emailsBccConsejeriaEvento = normalizarListaCorreosDestino(destinatariosCcoEvento.map((d) => d.correo));
+                const enviarOpcionesEvento = emailsBccConsejeriaEvento.length
+                    ? { bcc: emailsBccConsejeriaEvento.length === 1 ? emailsBccConsejeriaEvento[0] : emailsBccConsejeriaEvento }
                     : null;
 
                 const mapPlantEv = await obtenerPlantillasCorreoModulosMap();
@@ -26714,6 +26826,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     residente: residenteInfo,
                     destinatariosUnidad,
                     destinatariosDirectorio,
+                    destinatariosCco: destinatariosCcoEvento,
                     etiquetaDestino: 'Residentes de la unidad',
                     enviarOpciones: enviarOpcionesEvento
                 });
@@ -32153,6 +32266,47 @@ document.getElementById('chatForm').onsubmit = function (e) {
         let correosAdministrativos = [];
         let correosConsejeria = [];
 
+        async function cargarFormBuzonConsejeria() {
+            const act = document.getElementById('correoConsejeriaBuzonActivo');
+            const nom = document.getElementById('correoConsejeriaBuzonNombre');
+            const em = document.getElementById('correoConsejeriaBuzonEmail');
+            if (!act && !nom && !em) return;
+            const cfg = await obtenerConfigCorreosConsejeria();
+            if (act) act.checked = cfg.activo !== false;
+            if (nom) nom.value = cfg.nombre || 'Conserjería';
+            if (em) em.value = cfg.correo || CORREO_CONSEJERIA_SUGERIDO;
+        }
+
+        async function guardarBuzonConsejeriaDesdeForm() {
+            const act = document.getElementById('correoConsejeriaBuzonActivo');
+            const nom = document.getElementById('correoConsejeriaBuzonNombre');
+            const em = document.getElementById('correoConsejeriaBuzonEmail');
+            const correo = em ? String(em.value || '').trim() : '';
+            const activo = !!(act && act.checked);
+            if (activo) {
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!correo || !emailRegex.test(correo)) {
+                    mostrarAlerta('Ingrese un correo válido para el buzón, o desactive la casilla para no enviarle copias.', 'Error');
+                    return;
+                }
+            }
+            try {
+                await guardarConfigCorreosConsejeria({
+                    activo: activo,
+                    correo: correo || CORREO_CONSEJERIA_SUGERIDO,
+                    nombre: nom ? String(nom.value || '').trim() : 'Conserjería'
+                });
+                mostrarAlerta(
+                    activo
+                        ? 'Buzón de conserjería guardado. Recibirá copias en los envíos (puede desmarcarlo en cada correo).'
+                        : 'Buzón de conserjería desasignado. Ya no se incluye en las copias automáticas.',
+                    'Central de Notificación'
+                );
+            } catch (e) {
+                mostrarAlerta('No se pudo guardar el buzón: ' + (e && e.message ? e.message : 'error'), 'Error');
+            }
+        }
+
         async function cargarCorreosConsejeria() {
             try {
                 const datos = await obtenerDatos('correosConsejeria');
@@ -32170,7 +32324,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
             if (!tbody) return;
 
             if (correosConsejeria.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="3" style="padding: 2rem; text-align: center; color: var(--text-tertiary); font-style: italic; background: var(--bg-primary);"><p>No hay correos de consejería registrados (no se enviará CCO en aperturas)</p></td></tr>';
+                tbody.innerHTML = '<tr><td colspan="3" style="padding: 2rem; text-align: center; color: var(--text-tertiary); font-style: italic; background: var(--bg-primary);"><p>No hay copias adicionales. El buzón del edificio se programa arriba.</p></td></tr>';
                 return;
             }
 
@@ -33574,6 +33728,12 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 if (formCorreoConsejeria) {
                     formCorreoConsejeria.addEventListener('submit', agregarCorreoConsejeria);
                 }
+                const btnGuardarBuzonConsejeria = document.getElementById('btnGuardarBuzonConsejeria');
+                if (btnGuardarBuzonConsejeria) {
+                    btnGuardarBuzonConsejeria.addEventListener('click', function () {
+                        guardarBuzonConsejeriaDesdeForm();
+                    });
+                }
                 
                 // Cargar correos al mostrar el módulo
                 const tabNotificaciones = document.querySelector('.tab-button[data-tab="notificaciones"]');
@@ -33582,6 +33742,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                         setTimeout(() => {
                             cargarCorreosAdministrativos();
                             cargarCorreosConsejeria();
+                            cargarFormBuzonConsejeria();
                             refrescarEditorPlantillasCorreoModulos();
                         }, 100);
                     });
