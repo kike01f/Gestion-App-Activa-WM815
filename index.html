@@ -14506,6 +14506,7 @@
             { id: 'mudanzaPendienteDocs', label: 'Mudanzas — Pendiente: documentos faltantes' },
             { id: 'cancelacionMudanza', label: 'Mudanzas — Cancelación de reserva' },
             { id: 'comprobanteReservaEspacio', label: 'Comprobante — Confirmación reserva espacio' },
+            { id: 'cancelacionReservaEspacio', label: 'Espacios — Cancelación de reserva' },
             { id: 'comprobanteTarjetaTag', label: 'Comprobante — Tarjeta / TAG' },
             { id: 'comprobanteMulta', label: 'Comprobante — Multa' },
             { id: 'comprobanteAnulacionMulta', label: 'Comprobante — Anulación de multa' },
@@ -18208,7 +18209,7 @@
             if (!docId) return { ok: false, error: 'Sin identificador de espacio' };
             var sdb = await obtenerDbConserjeriaOperativa();
             var ref = sdb.collection('reservas').doc(docId);
-            if (accion === 'eliminar') {
+            if (accion === 'eliminar' || espacioEstaCancelado(espacio)) {
                 await ref.delete();
                 return { ok: true, id: docId, eliminado: true };
             }
@@ -26317,6 +26318,11 @@ document.getElementById('chatForm').onsubmit = function (e) {
         /** Espacios con horario extendido viernes y sábado (12:00 – 01:00). */
         const ESPACIOS_EVENTO_HORARIO_VIE_SAB = ['Salón Gourmet', 'Salón Lounge', 'Quincho 3', 'Quincho 4'];
 
+        function espacioEstaCancelado(e) {
+            return !!(e && (e.cancelada === true || e.estado === 'cancelado' || e.estado === 'cancelada'));
+        }
+        window.espacioEstaCancelado = espacioEstaCancelado;
+
         function _normalizarFechaIsoEspacio(fecha) {
             if (!fecha) return '';
             if (typeof fecha === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(fecha)) return fecha;
@@ -26477,6 +26483,75 @@ document.getElementById('chatForm').onsubmit = function (e) {
 </html>`;
         }
 
+        function generarCorreoCancelacionEventoHtml(reg, nombreComunidad) {
+            const linkEsc = (v) => String(v || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+            const comunidad = linkEsc(nombreComunidad || 'Comunidad');
+            const nom = linkEsc(reg.nombre || '');
+            const depto = linkEsc(reg.departamento || '');
+            const espacio = linkEsc(reg.espacio || '');
+            const fechaIso = _normalizarFechaIsoEspacio(reg.fecha) || reg.fecha;
+            const fechaStr = reg.fecha ? (typeof formatearFechaParaCorreo === 'function' ? formatearFechaParaCorreo(fechaIso || reg.fecha) : (fechaIso || reg.fecha)) : '-';
+            const fechaCancel = reg.fechaCancelacion
+                ? (typeof formatearFechaParaCorreo === 'function' ? formatearFechaParaCorreo(reg.fechaCancelacion) : reg.fechaCancelacion)
+                : (typeof fechaEmisionCorreoHoy === 'function' ? fechaEmisionCorreoHoy() : '');
+            const folioStr = reg.folio || '—';
+            return `<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cancelación de reserva — Espacio común</title>
+  <style type="text/css">
+    body, p, h1, h2, a, td, span { font-family: Arial, Helvetica, sans-serif; }
+    body { margin: 0; padding: 0; -webkit-text-size-adjust: 100%; }
+    table { border-collapse: collapse; }
+  </style>
+</head>
+<body style="margin:0;padding:0;background:#ffffff;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#ffffff;"><tr><td align="center" style="padding:8px 6px;">
+    <table role="presentation" width="600" style="max-width:600px;width:100%;background:#fff;border-radius:10px;">
+      <tr>
+        <td style="padding:12px 20px 10px;border-bottom:3px solid #dc2626;background-color:#ffffff;border-radius:10px 10px 0 0;text-align:center;">
+          <div style="margin-bottom:6px;"><img src="https://img.mailinblue.com/8323725/images/content_library/original/6844749040dd0f16c5341248.png" alt="" style="max-width:112px;height:auto;"></div>
+          <p style="margin:0 0 2px;font-size:11px;font-weight:700;letter-spacing:.06em;color:#dc2626;text-transform:uppercase;">Cancelación de reserva</p>
+          ${htmlTituloCorreoConIcono('Evento — espacio común', 'cancel')}
+          <p style="margin:4px 0 0;font-size:13px;color:#555;line-height:1.35;">${comunidad}</p>
+          <p style="margin:2px 0 0;font-size:12px;color:#666;line-height:1.35;"><strong>Folio:</strong> <span style="font-family:monospace;letter-spacing:.04em;color:#1a1a1a;">${linkEsc(folioStr)}</span></p>
+        </td>
+      </tr>
+      <tr><td style="padding:12px 20px 6px;">
+        <p style="margin:0 0 6px;font-size:15px;color:#1a1a1a;line-height:1.4;">Estimado/a <strong>${nom}</strong>,</p>
+        <p style="margin:0 0 8px;font-size:14px;color:#333;line-height:1.45;">Informamos que la reserva de <strong>${espacio}</strong> para el <strong>${fechaStr}</strong> ha sido <strong>cancelada</strong> por la administración. El espacio queda disponible y el evento no se realizará en esa fecha.</p>
+      </td></tr>
+      <tr><td style="padding:0 20px 10px;">
+        <table role="presentation" width="100%" style="background:#fee2e2;border:1px solid #fca5a5;border-radius:8px;">
+          <tr><td style="padding:12px 16px;text-align:center;">
+            <p style="margin:0 0 2px;font-size:12px;color:#991b1b;text-transform:uppercase;letter-spacing:.04em;font-weight:700;">Estado</p>
+            <p style="margin:0;font-size:20px;font-weight:700;color:#991b1b;">RESERVA CANCELADA</p>
+          </td></tr>
+        </table>
+      </td></tr>
+      <tr><td style="padding:0 20px 10px;">
+        <table role="presentation" width="100%" style="background:#f8faf8;border:1px solid #e8eee8;border-radius:8px;">
+          <tr><td style="padding:7px 12px;font-size:13px;color:#666;border-bottom:1px solid #e8eee8;width:36%;">Residente</td><td style="padding:7px 12px;font-size:14px;font-weight:600;color:#1a1a1a;border-bottom:1px solid #e8eee8;">${nom}</td></tr>
+          <tr><td style="padding:7px 12px;font-size:13px;color:#666;border-bottom:1px solid #e8eee8;">Departamento</td><td style="padding:7px 12px;font-size:14px;color:#1a1a1a;border-bottom:1px solid #e8eee8;">${depto}</td></tr>
+          <tr><td style="padding:7px 12px;font-size:13px;color:#666;border-bottom:1px solid #e8eee8;">Fecha reservada</td><td style="padding:7px 12px;font-size:14px;color:#1a1a1a;border-bottom:1px solid #e8eee8;">${fechaStr}</td></tr>
+          <tr><td style="padding:7px 12px;font-size:13px;color:#666;border-bottom:1px solid #e8eee8;">Espacio</td><td style="padding:7px 12px;font-size:14px;color:#1a1a1a;border-bottom:1px solid #e8eee8;">${espacio}</td></tr>
+          <tr><td style="padding:7px 12px;font-size:13px;color:#666;">Fecha de cancelación</td><td style="padding:7px 12px;font-size:14px;color:#1a1a1a;">${linkEsc(fechaCancel)}</td></tr>
+        </table>
+      </td></tr>
+      <tr><td style="padding:0 20px 12px;">
+        <p style="margin:0;padding:10px 12px;background:#f7faf2;border:1px solid #d4e8b8;border-radius:8px;font-size:13px;color:#333;line-height:1.5;">Los cobros de aseo y uso asociados a esta reserva, si existían, quedan <strong>anulados</strong>. Para un nuevo evento debe registrarse otra reserva.</p>
+      </td></tr>
+      <tr><td style="padding:10px 20px 12px;text-align:center;border-top:1px solid #eee;background:#fafafa;border-radius:0 0 10px 10px;">
+        <p style="margin:0;font-size:11px;color:#888;line-height:1.35;">Comunicación oficial de administración.</p>
+      </td></tr>
+    </table>
+  </td></tr></table>
+</body>
+</html>`;
+        }
+
         async function abrirCorreoConfirmacionEvento(id) {
             const espacios = await obtenerDatosMes('espacios');
             const reg = espacios.find(e => e.id === id);
@@ -26484,12 +26559,28 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 mostrarAlerta('No se encontró el registro.', 'Error');
                 return;
             }
+            if (espacioEstaCancelado(reg)) {
+                return abrirCorreoCancelacionEvento(id);
+            }
             const nombreComunidad = typeof obtenerNombreComunidad === 'function' ? await obtenerNombreComunidad() : (localStorage.getItem(lsKey('nombreComunidad')) || 'Comunidad');
             const personalizacion = await obtenerPersonalizacion();
             const html = generarCorreoConfirmacionEventoHtml(reg, nombreComunidad, personalizacion)
                 .split(MCC_PLACEHOLDER_NOTAS_HORARIO_EVENTO).join('');
             abrirHTMLEnNuevaVentana(html, 'Correo de Confirmación de Evento');
         }
+
+        async function abrirCorreoCancelacionEvento(id) {
+            const espacios = await obtenerDatosMes('espacios');
+            const reg = espacios.find(e => e.id === id);
+            if (!reg) {
+                mostrarAlerta('No se encontró el registro.', 'Error');
+                return;
+            }
+            const nombreComunidad = typeof obtenerNombreComunidad === 'function' ? await obtenerNombreComunidad() : (localStorage.getItem(lsKey('nombreComunidad')) || 'Comunidad');
+            const html = generarCorreoCancelacionEventoHtml(reg, nombreComunidad);
+            abrirHTMLEnNuevaVentana(html, 'Correo de Cancelación de Reserva');
+        }
+        window.abrirCorreoCancelacionEvento = abrirCorreoCancelacionEvento;
 
         /** Envía el correo de confirmación de evento por correo */
         window.enviarCorreoEvento = async function(id) {
@@ -26499,6 +26590,9 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 if (!espacio) {
                     mostrarAlerta('No se encontró el registro.', 'Error');
                     return;
+                }
+                if (espacioEstaCancelado(espacio)) {
+                    return window.enviarCorreoCancelacionEvento(id);
                 }
                 
                 const nombreComunidad = typeof obtenerNombreComunidad === 'function' ? await obtenerNombreComunidad() : (localStorage.getItem(lsKey('nombreComunidad')) || 'Comunidad');
@@ -26566,6 +26660,130 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 mostrarAlerta('Error al enviar correo: ' + (error.message || 'Error desconocido'), 'Error');
             }
         }
+
+        window.enviarCorreoCancelacionEvento = async function(id) {
+            try {
+                const espacios = await obtenerDatosMes('espacios');
+                const espacio = espacios.find(e => e.id === id);
+                if (!espacio) {
+                    mostrarAlerta('No se encontró el registro.', 'Error');
+                    return;
+                }
+                if (!espacioEstaCancelado(espacio)) {
+                    mostrarAlerta('Esta reserva aún no está cancelada. Use «Cancelar» para anularla y notificar.', 'Reserva vigente');
+                    return;
+                }
+
+                const nombreComunidad = typeof obtenerNombreComunidad === 'function' ? await obtenerNombreComunidad() : (localStorage.getItem(lsKey('nombreComunidad')) || 'Comunidad');
+                const htmlCancelacion = generarCorreoCancelacionEventoHtml(espacio, nombreComunidad);
+                const {
+                    destinatariosUnidad,
+                    destinatariosDirectorio,
+                    residente: residenteInfo
+                } = await obtenerDestinatariosCorreoUnidad(espacio.departamento, espacio.nombre);
+
+                if (!residenteInfo || !residenteInfo.correo) {
+                    mostrarAlerta('No se encontraron correos para esta unidad ni en el directorio administrativo. Verifique Ocupación, Conserjería o Central de Notificación.', 'Correo no encontrado');
+                    return;
+                }
+
+                await cargarCorreosConsejeria();
+                const desdeCentralEvento = (correosConsejeria || []).map(c => c.correo).filter(Boolean);
+                const emailsCcConsejeriaEvento = normalizarListaCorreosDestino(
+                    CORREOS_BCC_APERTURA_CONSEJERIA_FIJOS.concat(desdeCentralEvento)
+                );
+                const enviarOpcionesEvento = emailsCcConsejeriaEvento.length
+                    ? { cc: emailsCcConsejeriaEvento.length === 1 ? emailsCcConsejeriaEvento[0] : emailsCcConsejeriaEvento }
+                    : null;
+
+                const mapPlantEv = await obtenerPlantillasCorreoModulosMap();
+                const bloqueEv = obtenerBloquePlantillaModulo(mapPlantEv, 'cancelacionReservaEspacio');
+                const ctxEv = {
+                    nombreComunidad,
+                    nombreEspacio: espacio.espacio,
+                    departamento: espacio.departamento,
+                    nombreResidente: espacio.nombre,
+                    fechaEmision: fechaEmisionCorreoHoy()
+                };
+                const asuntoEvBase = `Cancelación de Reserva - ${espacio.espacio} - ${nombreComunidad}`;
+                const resultado = await mostrarModalPersonalizarCorreoYEnviar({
+                    titulo: 'Enviar cancelación de reserva',
+                    asuntoDefecto: resolverAsuntoPlantillaCorreo(bloqueEv, asuntoEvBase, ctxEv),
+                    mensajeInicialPrefill: resolverCuerpoInicioPlantillaCorreo(bloqueEv, ctxEv),
+                    htmlBase: htmlCancelacion,
+                    residente: residenteInfo,
+                    destinatariosUnidad,
+                    destinatariosDirectorio,
+                    etiquetaDestino: 'Residentes de la unidad',
+                    enviarOpciones: enviarOpcionesEvento
+                });
+                if (resultado === null) return;
+
+                if (resultado.exito) {
+                    await persistirNotificacionCorreoTrasEnvio(
+                        'espacios',
+                        id,
+                        'cancelacion-espacio',
+                        resultado,
+                        `Cancelación de reserva enviada: ${espacio.espacio} - Depto ${espacio.departamento}`
+                    );
+                    mostrarAlerta(resultado.mensaje || 'Correo de cancelación enviado correctamente', 'Éxito');
+                    await cargarEspacios();
+                } else {
+                    mostrarAlerta('Error al enviar correo: ' + (resultado.error || 'Error desconocido'), 'Error');
+                }
+            } catch (error) {
+                ocultarProgreso();
+                console.error('Error al enviar cancelación de espacio:', error);
+                mostrarAlerta('Error al enviar correo: ' + (error.message || 'Error desconocido'), 'Error');
+            }
+        };
+
+        window.cancelarReservaEspacio = async function(id) {
+            if (window.mesEnConsulta && !window.mesReabierto) {
+                mostrarAlerta('No se pueden cancelar reservas de meses archivados. Vuelva al mes actual o reabra el mes para editarlo.', 'Registro Archivado');
+                return;
+            }
+            const espacios = await obtenerDatosMes('espacios');
+            const espacio = espacios.find(e => e.id === id);
+            if (!espacio) {
+                mostrarAlerta('No se encontró el registro.', 'Error');
+                return;
+            }
+            if (espacioEstaCancelado(espacio)) {
+                return window.enviarCorreoCancelacionEvento(id);
+            }
+            const fechaTxt = typeof formatearFecha === 'function' ? formatearFecha(espacio.fecha) : (espacio.fecha || '');
+            const confirmado = await confirmarAccion(
+                `¿Cancelar la reserva de ${espacio.espacio || 'espacio común'} de ${espacio.nombre || 'residente'} (Depto ${espacio.departamento || '-'}) para el ${fechaTxt}? El espacio quedará libre, no se aplicarán cobros y se enviará un correo de cancelación.`,
+                'Cancelar reserva'
+            );
+            if (!confirmado) return;
+
+            const index = espacios.findIndex(e => e.id === id);
+            if (index === -1) return;
+            const hoy = typeof obtenerFechaHoy === 'function' ? obtenerFechaHoy() : new Date().toISOString().slice(0, 10);
+            espacios[index] = {
+                ...espacios[index],
+                estado: 'cancelado',
+                cancelada: true,
+                fechaCancelacion: hoy
+            };
+            await guardarDatosMes('espacios', espacios);
+            try {
+                await sincronizarEspacioAReservaConserjeria(espacios[index], 'eliminar');
+            } catch (eDelRes) {
+                console.warn('[espacios] No se pudo quitar la reserva cancelada en Conserjería WM:', eDelRes);
+            }
+            if (typeof window.registrarMovimiento === 'function') {
+                window.registrarMovimiento('actualizar', 'espacios', `Reserva cancelada: ${espacio.espacio} - Depto ${espacio.departamento} - ${espacio.nombre}`);
+            }
+            try {
+                if (typeof cargarEstadisticasDashboard === 'function') await cargarEstadisticasDashboard();
+            } catch (eDash) {}
+            await cargarEspacios();
+            await window.enviarCorreoCancelacionEvento(id);
+        };
 
         /** Obtiene el siguiente folio correlativo para tarjetas del mes (formato TAR-YYYYMM-NNN). */
         function getSiguienteFolioTarjeta(tarjetas, mesAnio) {
@@ -27271,6 +27489,10 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 mostrarAlerta('No se encontró el registro a editar.', 'Error');
                 return;
             }
+            if (espacioEstaCancelado(espacio)) {
+                mostrarAlerta('Esta reserva está cancelada. No se puede editar.', 'Reserva cancelada');
+                return;
+            }
             
             window.editandoEspacio = id;
             
@@ -27439,7 +27661,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
             espacios.sort((a, b) => compararRegistrosMasRecientePrimero(a, b));
 
             (function publicarReservasEspaciosPendientes() {
-                var pend = espacios.filter(function (e) { return e && e.id && !e.reservaConserjeriaId; });
+                var pend = espacios.filter(function (e) { return e && e.id && !e.reservaConserjeriaId && !espacioEstaCancelado(e); });
                 if (!pend.length) return;
                 Promise.all(pend.map(function (e) {
                     return sincronizarEspacioAReservaConserjeria(e, 'actualizar').then(function (r) {
@@ -27464,29 +27686,34 @@ document.getElementById('chatForm').onsubmit = function (e) {
             })();
 
             tbody.innerHTML = espacios.map(e => {
+                const cancelada = espacioEstaCancelado(e);
                 const montoAseo = parseFloat(e.monto) || 0;
                 const cobroUso = e.aplicaCobroEspacio || 'no';
                 const montoUso = parseFloat(e.montoCobroEspacio) || 0;
                 const total = montoAseo + montoUso;
                 return `
-                <tr>
+                <tr${cancelada ? ' style="opacity:0.72;"' : ''}>
                     <td>${formatearFecha(e.fecha)}</td>
                     <td>${e.nombre}</td>
                     <td>${e.departamento}</td>
-                    <td>${e.espacio}</td>
+                    <td>${e.espacio}${cancelada ? '<br><span class="badge badge-danger">Cancelada</span>' : ''}</td>
                     <td><span class="badge ${e.aplicaAseo === 'si' ? 'badge-success' : 'badge-secondary'}">${e.aplicaAseo === 'si' ? 'Sí' : 'No'}</span></td>
                     <td>${formatearMoneda(montoAseo)}</td>
                     <td><span class="badge ${cobroUso === 'si' ? 'badge-success' : 'badge-secondary'}">${cobroUso === 'si' ? 'Sí' : 'No'}</span></td>
                     <td>${formatearMoneda(montoUso)}</td>
-                    <td style="font-weight: 700;">${formatearMoneda(total)}</td>
+                    <td style="font-weight: 700;">${cancelada ? formatearMoneda(0) : formatearMoneda(total)}</td>
                     <td>
                         <div class="tabla-acciones">
                             ${htmlBadgeNotificacionCorreo(e)}
-                            <button type="button" class="btn btn-secondary btn-sm" onclick="abrirCorreoConfirmacionEvento('${e.id}')" title="Ver correo de confirmación" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">📄 Confirmación</button>
-                            <button type="button" class="btn btn-info btn-sm" onclick="enviarCorreoEvento('${e.id}')" title="Enviar correo de confirmación" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; background: #06b6d4; color: white; border: none;">📧 Enviar</button>
-                            ${htmlBotonTrasladarCargo('espacios', e)}
+                            ${cancelada
+                                ? `<button type="button" class="btn btn-secondary btn-sm" onclick="abrirCorreoCancelacionEvento('${e.id}')" title="Ver correo de cancelación" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">📄 Cancelación</button>
+                            <button type="button" class="btn btn-info btn-sm" onclick="enviarCorreoCancelacionEvento('${e.id}')" title="Enviar correo de cancelación" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; background: #dc2626; color: white; border: none;">📧 Enviar cancelación</button>`
+                                : `<button type="button" class="btn btn-secondary btn-sm" onclick="abrirCorreoConfirmacionEvento('${e.id}')" title="Ver correo de confirmación" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">📄 Confirmación</button>
+                            <button type="button" class="btn btn-info btn-sm" onclick="enviarCorreoEvento('${e.id}')" title="Enviar correo de confirmación" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; background: #06b6d4; color: white; border: none;">📧 Enviar</button>`}
+                            ${cancelada ? '' : htmlBotonTrasladarCargo('espacios', e)}
                             ${(window.mesEnConsulta && !window.mesReabierto) ? '<span style="color: var(--gray-500); font-size: 0.7rem;">Solo lectura</span>' : `
-                                <button class="btn btn-primary btn-sm" onclick="editarEspacio('${e.id}')" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">Editar</button>
+                                ${cancelada ? '' : `<button type="button" class="btn btn-sm" onclick="cancelarReservaEspacio('${e.id}')" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; background: #f59e0b; color: white; border: none;" title="Cancelar reserva y notificar por correo">✖ Cancelar</button>
+                                <button class="btn btn-primary btn-sm" onclick="editarEspacio('${e.id}')" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">Editar</button>`}
                                 <button class="btn btn-danger btn-sm" onclick="eliminarEspacio('${e.id}')" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">Eliminar</button>
                             `}
                         </div>
@@ -30343,6 +30570,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 return m > 0;
             }
             if (modulo === 'espacios') {
+                if (typeof espacioEstaCancelado === 'function' && espacioEstaCancelado(registro)) return false;
                 const aseo = registro.aplicaAseo === 'si' ? (parseFloat(registro.monto) || 15000) : 0;
                 const uso = registro.aplicaCobroEspacio === 'si' ? (parseFloat(registro.montoCobroEspacio) || 0) : 0;
                 return aseo + uso > 0;
@@ -33113,10 +33341,10 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     ? aperturas.filter(a => a && a.aplicaCobro === 'si').reduce((sum, a) => sum + (parseFloat(a.monto) || 0), 0)
                     : 0;
                 const ingresosEspaciosAseo = Array.isArray(espacios)
-                    ? espacios.filter(e => e && e.aplicaAseo === 'si').reduce((sum, e) => sum + (parseFloat(e.monto) || 0), 0)
+                    ? espacios.filter(e => e && !espacioEstaCancelado(e) && e.aplicaAseo === 'si').reduce((sum, e) => sum + (parseFloat(e.monto) || 0), 0)
                     : 0;
                 const ingresosEspaciosUso = Array.isArray(espacios)
-                    ? espacios.filter(e => e && e.aplicaCobroEspacio === 'si').reduce((sum, e) => sum + (parseFloat(e.montoCobroEspacio) || 0), 0)
+                    ? espacios.filter(e => e && !espacioEstaCancelado(e) && e.aplicaCobroEspacio === 'si').reduce((sum, e) => sum + (parseFloat(e.montoCobroEspacio) || 0), 0)
                     : 0;
                 const ingresosEspacios = ingresosEspaciosAseo + ingresosEspaciosUso;
                 
@@ -39053,7 +39281,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
             
             // Filtrar espacios que tienen cobro de aseo y no han sido asignados
             // Extraer directamente de la tabla de espacios comunes
-            const espaciosConAseo = espacios.filter(e => e.aplicaAseo === 'si' && (e.monto > 0 || e.monto === 15000));
+            const espaciosConAseo = espacios.filter(e => !espacioEstaCancelado(e) && e.aplicaAseo === 'si' && (e.monto > 0 || e.monto === 15000));
             const idsAsignados = new Set(pagosAseo.map(p => p.idRegistroEspacio).filter(id => id));
             const pendientes = espaciosConAseo.filter(e => !idsAsignados.has(e.id));
             
@@ -47243,8 +47471,8 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 const totalTarjetas = Array.isArray(tarjetas) ? tarjetas.length : 0;
                 const totalLineasTarjetas = Array.isArray(tarjetas) ? tarjetas.reduce((s, t) => s + normalizarTarjetaItems(t).length, 0) : 0;
                 const totalEspacios = Array.isArray(espacios) ? espacios.length : 0;
-                const espaciosConAseo = Array.isArray(espacios) ? espacios.filter(e => e && e.aplicaAseo === 'si').length : 0;
-                const espaciosConCobroUso = Array.isArray(espacios) ? espacios.filter(e => e && e.aplicaCobroEspacio === 'si').length : 0;
+                const espaciosConAseo = Array.isArray(espacios) ? espacios.filter(e => e && !espacioEstaCancelado(e) && e.aplicaAseo === 'si').length : 0;
+                const espaciosConCobroUso = Array.isArray(espacios) ? espacios.filter(e => e && !espacioEstaCancelado(e) && e.aplicaCobroEspacio === 'si').length : 0;
                 const totalMultas = Array.isArray(multas) ? multas.length : 0;
                 const totalMorosos = Array.isArray(morosos) ? morosos.length : 0;
                 
@@ -47259,10 +47487,10 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     ? aperturas.filter(a => a && a.aplicaCobro === 'si').reduce((sum, a) => sum + (parseFloat(a.monto) || 0), 0)
                     : 0;
                 const ingresosEspaciosAseo = Array.isArray(espacios)
-                    ? espacios.filter(e => e && e.aplicaAseo === 'si').reduce((sum, e) => sum + (parseFloat(e.monto) || 0), 0)
+                    ? espacios.filter(e => e && !espacioEstaCancelado(e) && e.aplicaAseo === 'si').reduce((sum, e) => sum + (parseFloat(e.monto) || 0), 0)
                     : 0;
                 const ingresosEspaciosUso = Array.isArray(espacios)
-                    ? espacios.filter(e => e && e.aplicaCobroEspacio === 'si').reduce((sum, e) => sum + (parseFloat(e.montoCobroEspacio) || 0), 0)
+                    ? espacios.filter(e => e && !espacioEstaCancelado(e) && e.aplicaCobroEspacio === 'si').reduce((sum, e) => sum + (parseFloat(e.montoCobroEspacio) || 0), 0)
                     : 0;
                 const ingresosEspacios = ingresosEspaciosAseo + ingresosEspaciosUso;
                 const totalDeudaOriginalMorosos = typeof sumarDeudaOriginalMorosos === 'function' ? sumarDeudaOriginalMorosos(morosos) : (Array.isArray(morosos) ? morosos.reduce((sum, m) => sum + (parseFloat(m && m.monto) || 0), 0) : 0);
@@ -47319,8 +47547,8 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     prevTotalTarjetas = Array.isArray(prevTarjetasReporte) ? prevTarjetasReporte.length : 0;
                     prevIngresosTarjetas = Array.isArray(prevTarjetasReporte) ? prevTarjetasReporte.reduce((s, t) => s + (parseFloat(t && t.monto) || 0), 0) : 0;
                     prevTotalEspacios = Array.isArray(prevEspacios) ? prevEspacios.length : 0;
-                    const prevIngresosEspaciosAseo = Array.isArray(prevEspacios) ? prevEspacios.filter(e => e && e.aplicaAseo === 'si').reduce((s, e) => s + (parseFloat(e.monto) || 0), 0) : 0;
-                    const prevIngresosEspaciosUso = Array.isArray(prevEspacios) ? prevEspacios.filter(e => e && e.aplicaCobroEspacio === 'si').reduce((s, e) => s + (parseFloat(e.montoCobroEspacio) || 0), 0) : 0;
+                    const prevIngresosEspaciosAseo = Array.isArray(prevEspacios) ? prevEspacios.filter(e => e && !espacioEstaCancelado(e) && e.aplicaAseo === 'si').reduce((s, e) => s + (parseFloat(e.monto) || 0), 0) : 0;
+                    const prevIngresosEspaciosUso = Array.isArray(prevEspacios) ? prevEspacios.filter(e => e && !espacioEstaCancelado(e) && e.aplicaCobroEspacio === 'si').reduce((s, e) => s + (parseFloat(e.montoCobroEspacio) || 0), 0) : 0;
                     prevIngresosEspacios = prevIngresosEspaciosAseo + prevIngresosEspaciosUso;
                     prevTotalMultas = Array.isArray(prevMultas) ? prevMultas.length : 0;
                     prevTotalMorosos = Array.isArray(prevMorosos) ? prevMorosos.length : 0;
@@ -47888,8 +48116,8 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 
                 // Detalle de Espacios Comunes - Formato idéntico a módulo
                 if (modulosVisibles.includes('espacios')) {
-                    const espaciosConAseo = Array.isArray(espacios) ? espacios.filter(e => e && e.aplicaAseo === 'si').length : 0;
-                    const espaciosConCobroUso = Array.isArray(espacios) ? espacios.filter(e => e && e.aplicaCobroEspacio === 'si').length : 0;
+                    const espaciosConAseo = Array.isArray(espacios) ? espacios.filter(e => e && !espacioEstaCancelado(e) && e.aplicaAseo === 'si').length : 0;
+                    const espaciosConCobroUso = Array.isArray(espacios) ? espacios.filter(e => e && !espacioEstaCancelado(e) && e.aplicaCobroEspacio === 'si').length : 0;
                     html += `
                     <div class="reporte-section">
                         <h2 style="display: flex; align-items: center; gap: 0.5rem;">
@@ -48895,10 +49123,10 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     : 0;
                 const totalEspacios = Array.isArray(espacios) ? espacios.length : 0;
                 const ingresosEspaciosAseo = Array.isArray(espacios)
-                    ? espacios.filter(e => e && e.aplicaAseo === 'si').reduce((sum, e) => sum + (parseFloat(e.monto) || 0), 0)
+                    ? espacios.filter(e => e && !espacioEstaCancelado(e) && e.aplicaAseo === 'si').reduce((sum, e) => sum + (parseFloat(e.monto) || 0), 0)
                     : 0;
                 const ingresosEspaciosUso = Array.isArray(espacios)
-                    ? espacios.filter(e => e && e.aplicaCobroEspacio === 'si').reduce((sum, e) => sum + (parseFloat(e.montoCobroEspacio) || 0), 0)
+                    ? espacios.filter(e => e && !espacioEstaCancelado(e) && e.aplicaCobroEspacio === 'si').reduce((sum, e) => sum + (parseFloat(e.montoCobroEspacio) || 0), 0)
                     : 0;
                 const ingresosEspacios = ingresosEspaciosAseo + ingresosEspaciosUso;
                 const totalMultas = Array.isArray(multas) ? multas.length : 0;
@@ -49250,10 +49478,10 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 : 0;
             const totalEspacios = Array.isArray(espacios) ? espacios.length : 0;
             const ingresosEspaciosAseo = Array.isArray(espacios)
-                ? espacios.filter(e => e && e.aplicaAseo === 'si').reduce((sum, e) => sum + (parseFloat(e.monto) || 0), 0)
+                ? espacios.filter(e => e && !espacioEstaCancelado(e) && e.aplicaAseo === 'si').reduce((sum, e) => sum + (parseFloat(e.monto) || 0), 0)
                 : 0;
             const ingresosEspaciosUso = Array.isArray(espacios)
-                ? espacios.filter(e => e && e.aplicaCobroEspacio === 'si').reduce((sum, e) => sum + (parseFloat(e.montoCobroEspacio) || 0), 0)
+                ? espacios.filter(e => e && !espacioEstaCancelado(e) && e.aplicaCobroEspacio === 'si').reduce((sum, e) => sum + (parseFloat(e.montoCobroEspacio) || 0), 0)
                 : 0;
             const ingresosEspacios = ingresosEspaciosAseo + ingresosEspaciosUso;
             const totalMultas = Array.isArray(multas) ? multas.length : 0;
@@ -49447,10 +49675,10 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 ]);
             });
             
-            const espaciosConAseo = espaciosOrdenados.filter(e => e && e.aplicaAseo === 'si').length;
-            const espaciosConCobroUso = espaciosOrdenados.filter(e => e && e.aplicaCobroEspacio === 'si').length;
-            const ingresosAseo = espaciosOrdenados.filter(e => e && e.aplicaAseo === 'si').reduce((sum, e) => sum + (parseFloat(e.monto) || 0), 0);
-            const ingresosUso = espaciosOrdenados.filter(e => e && e.aplicaCobroEspacio === 'si').reduce((sum, e) => sum + (parseFloat(e.montoCobroEspacio) || 0), 0);
+            const espaciosConAseo = espaciosOrdenados.filter(e => e && !espacioEstaCancelado(e) && e.aplicaAseo === 'si').length;
+            const espaciosConCobroUso = espaciosOrdenados.filter(e => e && !espacioEstaCancelado(e) && e.aplicaCobroEspacio === 'si').length;
+            const ingresosAseo = espaciosOrdenados.filter(e => e && !espacioEstaCancelado(e) && e.aplicaAseo === 'si').reduce((sum, e) => sum + (parseFloat(e.monto) || 0), 0);
+            const ingresosUso = espaciosOrdenados.filter(e => e && !espacioEstaCancelado(e) && e.aplicaCobroEspacio === 'si').reduce((sum, e) => sum + (parseFloat(e.montoCobroEspacio) || 0), 0);
             const ingresosTotales = ingresosAseo + ingresosUso;
             
             datos.push([]);
@@ -50409,8 +50637,8 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 var ingresosMudanzas = (mudanzas || []).filter(mudanzaConCobroVigente).reduce(function (s, m) { return s + (parseFloat(m.monto) || 0); }, 0);
                 var ingresosAperturas = (aperturas || []).filter(function (a) { return a && a.aplicaCobro === 'si'; }).reduce(function (s, a) { return s + (parseFloat(a.monto) || 0); }, 0);
                 var ingresosTarjetas = (tarjetas || []).reduce(function (s, t) { return s + (parseFloat(t && t.monto) || 0); }, 0);
-                var ingresosEspaciosAseo = (espacios || []).filter(function (e) { return e && e.aplicaAseo === 'si'; }).reduce(function (s, e) { return s + (parseFloat(e.monto) || 0); }, 0);
-                var ingresosEspaciosUso = (espacios || []).filter(function (e) { return e && e.aplicaCobroEspacio === 'si'; }).reduce(function (s, e) { return s + (parseFloat(e.montoCobroEspacio) || 0); }, 0);
+                var ingresosEspaciosAseo = (espacios || []).filter(function (e) { return e && !espacioEstaCancelado(e) && e.aplicaAseo === 'si'; }).reduce(function (s, e) { return s + (parseFloat(e.monto) || 0); }, 0);
+                var ingresosEspaciosUso = (espacios || []).filter(function (e) { return e && !espacioEstaCancelado(e) && e.aplicaCobroEspacio === 'si'; }).reduce(function (s, e) { return s + (parseFloat(e.montoCobroEspacio) || 0); }, 0);
                 var ingresosEspacios = ingresosEspaciosAseo + ingresosEspaciosUso;
                 var ingresosTotales = 0;
                 if (modulosVisibles.indexOf('mudanzas') !== -1) ingresosTotales += ingresosMudanzas;
@@ -53936,7 +54164,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
             const tarjetasConCobro = tarjetas.filter(t => (parseFloat(t.monto) || 0) > 0);
             
             const espaciosConCobro = espacios.filter(e => {
-                if (!e) return false;
+                if (!e || espacioEstaCancelado(e)) return false;
                 const flagAseo = (e.aplicaAseo !== undefined && e.aplicaAseo !== null)
                     ? e.aplicaAseo
                     : e.aplicaCobro;
@@ -54227,7 +54455,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
             // En el módulo de espacios comunes el campo correcto es "aplicaAseo" y el monto viene en "monto"
             // pero hay compatibilidad con datos antiguos que usaban "aplicaCobro" y sin monto explícito.
             const espaciosConCobro = espacios.filter(e => {
-                if (!e) return false;
+                if (!e || espacioEstaCancelado(e)) return false;
                 const flagAseo = (e.aplicaAseo !== undefined && e.aplicaAseo !== null)
                     ? e.aplicaAseo
                     : e.aplicaCobro;
@@ -56598,7 +56826,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
             const tarjetasConCobro = tarjetas.filter(t => (parseFloat(t.monto) || 0) > 0);
             
             const espaciosConCobro = espacios.filter(e => {
-                if (!e) return false;
+                if (!e || espacioEstaCancelado(e)) return false;
                 const flagAseo = (e.aplicaAseo !== undefined && e.aplicaAseo !== null)
                     ? e.aplicaAseo
                     : e.aplicaCobro;
