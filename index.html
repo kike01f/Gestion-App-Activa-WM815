@@ -13009,13 +13009,18 @@
                                 continue;
                             }
                             
-                            // AGREGAR ADJUNTO DIRECTO (SIEMPRE, incluso si falla Storage)
-                            const adjuntoParaAgregar = {
-                                filename: adj.filename,
-                                content: contentBase64, // Base64 sin prefijo
-                                contentType: adj.contentType || 'application/pdf',
-                                encoding: 'base64' // Especificar encoding para Firebase Trigger Email
-                            };
+                            const adjuntoLimpio = typeof sanitizarAdjuntoParaGmail === 'function'
+                                ? sanitizarAdjuntoParaGmail({
+                                    filename: adj.filename,
+                                    content: contentBase64,
+                                    contentType: adj.contentType || 'application/pdf'
+                                })
+                                : null;
+                            if (!adjuntoLimpio) {
+                                console.warn('⚠️ Adjunto omitido (Gmail lo marcaría como no seguro):', adj.filename, adj.contentType);
+                                continue;
+                            }
+                            const adjuntoParaAgregar = adjuntoLimpio;
                             
                             // Asegurar que el adjunto tenga todos los campos requeridos
                             if (!adjuntoParaAgregar.filename || !adjuntoParaAgregar.content) {
@@ -32714,6 +32719,89 @@ document.getElementById('chatForm').onsubmit = function (e) {
             }
         }
 
+        function urlHttpsSeguraCorreo(u) {
+            var s = String(u == null ? '' : u).trim();
+            if (!s) return '';
+            if (/^(javascript|data|file|vbscript|mhtml|ms-its):/i.test(s)) return '';
+            if (!/^https?:\/\//i.test(s)) {
+                if (/^[a-z0-9][a-z0-9.-]*\.[a-z]{2,}([/:?#]|$)/i.test(s)) s = 'https://' + s;
+                else return '';
+            }
+            if (!/^https:\/\//i.test(s)) return '';
+            if (/\.(exe|bat|cmd|scr|js|vbs|jar|hta|html|htm|svg|xml)(\?|#|$)/i.test(s)) return '';
+            return s;
+        }
+
+        function nombreArchivoCorreoSeguro(nombre, extForzada) {
+            var n = String(nombre || 'archivo').replace(/\\/g, '/').split('/').pop();
+            n = n.replace(/[^\w.\-]+/g, '_').replace(/_+/g, '_').replace(/^\.+/, '');
+            if (!n) n = 'archivo';
+            if (extForzada) {
+                var ext = String(extForzada).replace(/^\./, '').toLowerCase();
+                if (!new RegExp('\\.' + ext.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$', 'i').test(n)) {
+                    n = n.replace(/\.[a-z0-9]{1,8}$/i, '') + '.' + ext;
+                }
+            }
+            if (n.length > 80) {
+                var e2 = (n.match(/(\.[a-z0-9]{1,8})$/i) || [''])[0];
+                n = n.slice(0, Math.max(12, 80 - e2.length)) + e2;
+            }
+            return n;
+        }
+
+        function clasificarBytesAdjuntoCorreo(bytes, filename, tipoHint) {
+            var u8 = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes || []);
+            if (!u8.length) return null;
+            var name = String(filename || '').toLowerCase();
+            var hint = String(tipoHint || '').toLowerCase();
+            var head = '';
+            var n = Math.min(24, u8.length);
+            for (var i = 0; i < n; i++) head += String.fromCharCode(u8[i]);
+            if (/^\s*</.test(head) || /<!doctype|html|script/i.test(head)) return null;
+            if (head.indexOf('%PDF') === 0) return { ext: 'pdf', type: 'application/pdf' };
+            if (u8[0] === 0xFF && u8[1] === 0xD8 && u8[2] === 0xFF) return { ext: 'jpg', type: 'image/jpeg' };
+            if (u8[0] === 0x89 && u8[1] === 0x50 && u8[2] === 0x4E && u8[3] === 0x47) return { ext: 'png', type: 'image/png' };
+            if (head.indexOf('RIFF') === 0) return { ext: 'webp', type: 'image/webp' };
+            if (u8[0] === 0x50 && u8[1] === 0x4B) {
+                if (/\.xlsx$/i.test(name) || hint.indexOf('spreadsheetml') !== -1) {
+                    return { ext: 'xlsx', type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' };
+                }
+                if (/\.docx$/i.test(name) || hint.indexOf('wordprocessingml') !== -1) {
+                    return { ext: 'docx', type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' };
+                }
+                if (/\.pptx$/i.test(name) || hint.indexOf('presentationml') !== -1) {
+                    return { ext: 'pptx', type: 'application/vnd.openxmlformats-officedocument.presentationml.presentation' };
+                }
+                return null;
+            }
+            return null;
+        }
+
+        function sanitizarAdjuntoParaGmail(adj) {
+            if (!adj || !adj.content) return null;
+            var content = adj.content;
+            if (typeof content === 'string' && content.indexOf(',') !== -1) content = content.split(',')[1];
+            if (typeof content !== 'string' || !/^[A-Za-z0-9+/=]+$/.test(content)) return null;
+            var raw;
+            try {
+                var sample = String(content).slice(0, 96);
+                while (sample.length % 4) sample += '=';
+                var bin = atob(sample);
+                raw = new Uint8Array(bin.length);
+                for (var i = 0; i < bin.length; i++) raw[i] = bin.charCodeAt(i);
+            } catch (eB64) {
+                return null;
+            }
+            var cls = clasificarBytesAdjuntoCorreo(raw, adj.filename, adj.contentType);
+            if (!cls) return null;
+            return {
+                filename: nombreArchivoCorreoSeguro(adj.filename, cls.ext),
+                content: content,
+                contentType: cls.type,
+                encoding: 'base64'
+            };
+        }
+
         /** Convierte un .xlsx (ArrayBuffer de ExcelJS) al formato de adjunto que usa `enviarCorreo`. */
         function adjuntoXlsxBufferComoMail(buffer, nombreArchivo) {
             try {
@@ -32730,6 +32818,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     return null;
                 }
                 var fn = String(nombreArchivo).endsWith('.xlsx') ? nombreArchivo : nombreArchivo + '.xlsx';
+                fn = typeof nombreArchivoCorreoSeguro === 'function' ? nombreArchivoCorreoSeguro(fn, 'xlsx') : fn;
                 return {
                     filename: fn,
                     content: b64,
@@ -44904,22 +44993,16 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     return '';
                 }
                 function comiteLinkCell(cell, url, label) {
-                    var u = String(url || '').trim();
+                    var u = typeof urlHttpsSeguraCorreo === 'function' ? urlHttpsSeguraCorreo(url) : String(url || '').trim();
                     if (!u) {
                         cell.value = '—';
                         cell.font = { name: 'Calibri', size: 10, color: { argb: 'FF9CA3AF' } };
                         cell.alignment = { vertical: 'middle', horizontal: 'center' };
                         return;
                     }
-                    if (!/^https?:\/\//i.test(u)) u = 'https://' + u;
-                    var txt = String(label || 'Abrir link').trim() || 'Abrir link';
-                    try {
-                        cell.value = { text: txt, hyperlink: u };
-                    } catch (e) {
-                        cell.value = u;
-                    }
-                    cell.font = { name: 'Calibri', size: 10, color: { argb: 'FF1D4ED8' }, underline: true, bold: true };
-                    cell.alignment = { vertical: 'middle', horizontal: 'center' };
+                    cell.value = u;
+                    cell.font = { name: 'Calibri', size: 9, color: { argb: 'FF1D4ED8' } };
+                    cell.alignment = { vertical: 'top', wrapText: true, horizontal: 'left' };
                 }
                 function comiteDocCell(cell, doc) {
                     if (!doc) {
@@ -44929,14 +45012,9 @@ document.getElementById('chatForm').onsubmit = function (e) {
                         return;
                     }
                     var nombre = doc.nombre || 'Documento';
-                    if (doc.url) {
-                        try { cell.value = { text: nombre, hyperlink: doc.url }; }
-                        catch (e) { cell.value = nombre; }
-                        cell.font = { name: 'Calibri', size: 10, color: { argb: 'FF047857' }, underline: true };
-                    } else {
-                        cell.value = nombre;
-                        cell.font = { name: 'Calibri', size: 10 };
-                    }
+                    var urlDoc = typeof urlHttpsSeguraCorreo === 'function' ? urlHttpsSeguraCorreo(doc.url) : String(doc.url || '').trim();
+                    cell.value = urlDoc ? (nombre + '\n' + urlDoc) : nombre;
+                    cell.font = { name: 'Calibri', size: 10, color: { argb: urlDoc ? 'FF047857' : 'FF374151' } };
                     cell.alignment = { vertical: 'middle', wrapText: true };
                 }
 
@@ -45178,9 +45256,9 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     } else {
                         var nombreDocs = docsCierre.map(function (d) { return d.nombre || 'Documento'; }).join('\n');
                         if (docsCierre[0].url) {
-                            try { cellCierreDocs.value = { text: nombreDocs, hyperlink: docsCierre[0].url }; }
-                            catch (eCierre) { cellCierreDocs.value = nombreDocs; }
-                            cellCierreDocs.font = { name: 'Calibri', size: 9, color: { argb: 'FF047857' }, underline: true };
+                            var urlCierre = typeof urlHttpsSeguraCorreo === 'function' ? urlHttpsSeguraCorreo(docsCierre[0].url) : String(docsCierre[0].url || '');
+                            cellCierreDocs.value = urlCierre ? (nombreDocs + '\n' + urlCierre) : nombreDocs;
+                            cellCierreDocs.font = { name: 'Calibri', size: 9, color: { argb: 'FF047857' } };
                         } else {
                             cellCierreDocs.value = nombreDocs;
                             cellCierreDocs.font = { name: 'Calibri', size: 9 };
@@ -45327,9 +45405,9 @@ document.getElementById('chatForm').onsubmit = function (e) {
                             } else {
                                 var nombresCot = docsCotExcel.map(function (d) { return d.nombre || 'Documento'; }).join('\n');
                                 if (docsCotExcel[0].url) {
-                                    try { cells[3].value = { text: nombresCot, hyperlink: docsCotExcel[0].url }; }
-                                    catch (eDocsCot) { cells[3].value = nombresCot; }
-                                    cells[3].font = { name: 'Calibri', size: 9, color: { argb: 'FF047857' }, underline: true };
+                                    var urlCotDocs = typeof urlHttpsSeguraCorreo === 'function' ? urlHttpsSeguraCorreo(docsCotExcel[0].url) : String(docsCotExcel[0].url || '');
+                                    cells[3].value = urlCotDocs ? (nombresCot + '\n' + urlCotDocs) : nombresCot;
+                                    cells[3].font = { name: 'Calibri', size: 9, color: { argb: 'FF047857' } };
                                 } else {
                                     cells[3].value = nombresCot;
                                     cells[3].font = { name: 'Calibri', size: 9 };
@@ -45416,7 +45494,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                         wsA.getCell(rAdj, 2).value = 'Documento';
                         wsA.getCell(rAdj, 3).value = d.nombre || '';
                         if (d.url) {
-                            try { wsA.getCell(rAdj, 4).value = { text: d.url, hyperlink: d.url }; } catch (e) { wsA.getCell(rAdj, 4).value = d.url; }
+                            wsA.getCell(rAdj, 4).value = (typeof urlHttpsSeguraCorreo === 'function' ? urlHttpsSeguraCorreo(d.url) : d.url) || '';
                         }
                         for (var c = 1; c <= 4; c++) { wsA.getCell(rAdj, c).border = borderThin(); wsA.getCell(rAdj, c).font = { name: 'Calibri', size: 10 }; }
                         rAdj++;
@@ -45428,7 +45506,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                             wsA.getCell(rAdj, 2).value = 'Realización';
                             wsA.getCell(rAdj, 3).value = d.nombre || '';
                             if (d.url) {
-                                try { wsA.getCell(rAdj, 4).value = { text: d.url, hyperlink: d.url }; } catch (eC) { wsA.getCell(rAdj, 4).value = d.url; }
+                                wsA.getCell(rAdj, 4).value = (typeof urlHttpsSeguraCorreo === 'function' ? urlHttpsSeguraCorreo(d.url) : d.url) || '';
                             }
                             for (var cCierre = 1; cCierre <= 4; cCierre++) {
                                 wsA.getCell(rAdj, cCierre).border = borderThin();
@@ -45443,7 +45521,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                         wsA.getCell(rAdj, 2).value = 'Enlace';
                         wsA.getCell(rAdj, 3).value = l.titulo || '';
                         if (l.url) {
-                            try { wsA.getCell(rAdj, 4).value = { text: l.url, hyperlink: l.url }; } catch (e) { wsA.getCell(rAdj, 4).value = l.url; }
+                            wsA.getCell(rAdj, 4).value = (typeof urlHttpsSeguraCorreo === 'function' ? urlHttpsSeguraCorreo(l.url) : l.url) || '';
                         }
                         for (var c2 = 1; c2 <= 4; c2++) { wsA.getCell(rAdj, c2).border = borderThin(); wsA.getCell(rAdj, c2).font = { name: 'Calibri', size: 10 }; }
                         rAdj++;
@@ -45455,8 +45533,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                             wsA.getCell(rAdj, 1).value = p.titulo || '';
                             wsA.getCell(rAdj, 2).value = 'Cotización';
                             wsA.getCell(rAdj, 3).value = 'Link presupuesto (sin aprobación)' + (p.valor != null ? ' · $' + Number(p.valor).toLocaleString('es-CL') : '');
-                            try { wsA.getCell(rAdj, 4).value = { text: String(p.valorLink), hyperlink: String(p.valorLink) }; }
-                            catch (e3) { wsA.getCell(rAdj, 4).value = String(p.valorLink); }
+                            wsA.getCell(rAdj, 4).value = (typeof urlHttpsSeguraCorreo === 'function' ? urlHttpsSeguraCorreo(p.valorLink) : String(p.valorLink)) || '';
                             for (var c3 = 1; c3 <= 4; c3++) {
                                 wsA.getCell(rAdj, c3).border = borderThin();
                                 wsA.getCell(rAdj, c3).font = { name: 'Calibri', size: 10 };
@@ -45473,7 +45550,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                             wsA.getCell(rAdj, 2).value = 'Respaldo cotización';
                             wsA.getCell(rAdj, 3).value = d.nombre || '';
                             if (d.url) {
-                                try { wsA.getCell(rAdj, 4).value = { text: d.url, hyperlink: d.url }; } catch (eCotD) { wsA.getCell(rAdj, 4).value = d.url; }
+                                wsA.getCell(rAdj, 4).value = (typeof urlHttpsSeguraCorreo === 'function' ? urlHttpsSeguraCorreo(d.url) : d.url) || '';
                             }
                             for (var cCotD = 1; cCotD <= 4; cCotD++) {
                                 wsA.getCell(rAdj, cCotD).border = borderThin();
@@ -45485,8 +45562,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                         wsA.getCell(rAdj, 1).value = p.titulo || '';
                         wsA.getCell(rAdj, 2).value = 'Cotización';
                         wsA.getCell(rAdj, 3).value = 'Presupuesto #' + (cot.n || '') + (cot.proveedor ? ' · ' + cot.proveedor : '');
-                        try { wsA.getCell(rAdj, 4).value = { text: String(cot.link), hyperlink: String(cot.link) }; }
-                        catch (e4) { wsA.getCell(rAdj, 4).value = String(cot.link); }
+                        wsA.getCell(rAdj, 4).value = (typeof urlHttpsSeguraCorreo === 'function' ? urlHttpsSeguraCorreo(cot.link) : String(cot.link)) || '';
                         for (var c4 = 1; c4 <= 4; c4++) { wsA.getCell(rAdj, c4).border = borderThin(); wsA.getCell(rAdj, c4).font = { name: 'Calibri', size: 10 }; }
                         rAdj++;
                     });
@@ -45570,15 +45646,21 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 var buf = await blob.arrayBuffer();
                 if (!buf || buf.byteLength > 6 * 1024 * 1024) return null;
                 var bytes = new Uint8Array(buf);
+                var cls = typeof clasificarBytesAdjuntoCorreo === 'function'
+                    ? clasificarBytesAdjuntoCorreo(bytes, nombre, tipo || (blob && blob.type))
+                    : null;
+                if (!cls) return null;
                 var binary = '';
                 var chunk = 0x8000;
                 for (var i = 0; i < bytes.length; i += chunk) {
                     binary += String.fromCharCode.apply(null, bytes.subarray(i, Math.min(i + chunk, bytes.length)));
                 }
                 return {
-                    filename: nombre || 'respaldo',
+                    filename: typeof nombreArchivoCorreoSeguro === 'function'
+                        ? nombreArchivoCorreoSeguro(nombre || 'respaldo', cls.ext)
+                        : (nombre || 'respaldo'),
                     content: btoa(binary),
-                    contentType: tipo || blob.type || 'application/octet-stream',
+                    contentType: cls.type,
                     encoding: 'base64'
                 };
             }
@@ -45863,10 +45945,12 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 return String(f);
             };
             const normUrl = (u) => {
+                if (typeof urlHttpsSeguraCorreo === 'function') return urlHttpsSeguraCorreo(u);
                 let s = String(u || '').trim();
                 if (!s) return '';
+                if (/^(javascript|data|file|vbscript):/i.test(s)) return '';
                 if (!/^https?:\/\//i.test(s)) s = 'https://' + s;
-                return s;
+                return /^https:\/\//i.test(s) ? s : '';
             };
             const cats = { mantencion: 'Mantención', mejora: 'Mejora', servicio: 'Servicio', compra: 'Compra', otro: 'Otro' };
             const resolverMontoLink = (p) => {
