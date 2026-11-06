@@ -9449,15 +9449,15 @@
                 </div>
             </div>
 
-            <!-- Correos de consejería: CCO en comprobantes de apertura -->
+            <!-- Correos de consejería: CCO en todos los módulos -->
             <div class="form-section" style="margin-bottom: 2rem;">
                 <h3 style="margin: 0 0 0.75rem 0; font-size: 1rem; font-weight: 700;">Correos de consejería</h3>
-                <p style="color: var(--text-tertiary); font-size: 0.8125rem; margin: 0 0 0.75rem 0; line-height: 1.45;">Programe aquí el buzón de conserjería y copias adicionales. Reciben <strong>copia oculta (CCO)</strong> en apertura de puerta, mudanzas y reservas de espacios, y <strong>copia (CC)</strong> en bienvenida. Puede desactivar el buzón del edificio o desmarcarlo en cada envío.</p>
+                <p style="color: var(--text-tertiary); font-size: 0.8125rem; margin: 0 0 0.75rem 0; line-height: 1.45;">Estas direcciones reciben <strong>copia oculta (CCO)</strong> en <strong>todos los correos de todos los módulos</strong> (reportes, comprobantes, mudanzas, aperturas, espacios, comité, etc.). Puede desactivar el buzón del edificio o desmarcarlo en cada envío.</p>
                 <div style="margin: 0 0 1rem 0; padding: 0.85rem 1rem; border: 1px solid var(--border-color); border-radius: 10px; background: var(--bg-secondary);">
                     <p style="margin: 0 0 0.65rem 0; font-size: 0.8125rem; font-weight: 700; color: var(--text-primary);">Buzón de conserjería del edificio</p>
                     <label style="display: flex; align-items: flex-start; gap: 0.5rem; margin-bottom: 0.65rem; cursor: pointer; font-size: 0.8125rem; color: var(--text-secondary);">
                         <input type="checkbox" id="correoConsejeriaBuzonActivo" checked style="margin-top: 0.15rem; flex-shrink: 0;">
-                        <span>Incluir este correo en las copias automáticas (puede desmarcarlo también al enviar)</span>
+                        <span>Incluir este correo en CCO de todos los módulos (puede desmarcarlo también al enviar)</span>
                     </label>
                     <div class="form-row" style="gap: 0.5rem; margin-bottom: 0;">
                         <div class="form-group" style="flex: 1; margin-bottom: 0.5rem;">
@@ -13146,6 +13146,20 @@
 
                 const enParaSet = new Set(listaCorreos.map(e => String(e).toLowerCase()));
 
+                if (!(opciones && opciones.aplicarCcoGlobal === false) && typeof obtenerDestinatariosCcoConsejeria === 'function') {
+                    try {
+                        const ccoGlob = await obtenerDestinatariosCcoConsejeria();
+                        const extraCco = (ccoGlob || []).map(function (d) { return d && d.correo ? String(d.correo).trim() : ''; }).filter(Boolean);
+                        if (extraCco.length) {
+                            opciones = Object.assign({}, opciones || {});
+                            const bccPrev = opciones.bcc == null || opciones.bcc === ''
+                                ? []
+                                : (Array.isArray(opciones.bcc) ? opciones.bcc : [opciones.bcc]);
+                            opciones.bcc = normalizarListaCorreosDestino(bccPrev.concat(extraCco));
+                        }
+                    } catch (eCcoEnv) { /* sin CCO global */ }
+                }
+
                 // CC (copia): no repetir direcciones que ya están en Para
                 if (opciones && opciones.cc != null && opciones.cc !== '') {
                     const ccBruto = Array.isArray(opciones.cc)
@@ -15048,6 +15062,11 @@
             htmlModal += `
                             </div>
                         </div>
+                        <div id="modalCcoReporteWrap" style="margin-bottom: 1rem; display: none;">
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--text-primary);">Copia oculta (CCO)</label>
+                            <p style="margin: 0 0 0.45rem 0; font-size: 0.75rem; color: var(--text-tertiary); line-height: 1.4;">Configurado en Central de Notificación. Puede desmarcar para este envío.</p>
+                            <div id="modalCcoReporteLista" style="max-height: 160px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: 8px; padding: 0.65rem;"></div>
+                        </div>
                         <div style="display: flex; gap: 0.75rem; justify-content: flex-end; margin-top: 1.5rem;">
                             <button onclick="this.closest('div[style*=\\'position: fixed\\']').remove()" class="btn btn-secondary" style="padding: 0.75rem 1.5rem;">Cancelar</button>
                             <button id="btnEnviarReporteModal" class="btn btn-primary" style="padding: 0.75rem 1.5rem;">📧 Enviar</button>
@@ -15062,10 +15081,27 @@
             if (taPref && opcionesModal.mensajeInicialPrefill) {
                 taPref.value = opcionesModal.mensajeInicialPrefill;
             }
+            let listaCcoReporte = [];
+            try {
+                listaCcoReporte = typeof obtenerDestinatariosCcoConsejeria === 'function'
+                    ? (await obtenerDestinatariosCcoConsejeria()) : [];
+            } catch (eCcoR) { listaCcoReporte = []; }
+            const wrapCco = modal.querySelector('#modalCcoReporteWrap');
+            const listaCcoEl = modal.querySelector('#modalCcoReporteLista');
+            if (wrapCco && listaCcoEl && listaCcoReporte.length) {
+                wrapCco.style.display = 'block';
+                listaCcoEl.innerHTML = listaCcoReporte.map((d, i) => {
+                    const em = String(d.correo || '').replace(/"/g, '&quot;');
+                    const nm = String(d.nombre || 'CCO').replace(/</g, '&lt;');
+                    return '<label style="display:flex;align-items:flex-start;gap:0.5rem;margin-bottom:0.4rem;cursor:pointer;font-size:0.8125rem;">' +
+                        '<input type="checkbox" data-modal-cco-idx="' + i + '" checked style="margin-top:0.15rem;flex-shrink:0;">' +
+                        '<span><strong>' + nm + '</strong><br><span style="color:var(--text-secondary);word-break:break-all;">' + em + '</span></span></label>';
+                }).join('');
+            }
             
             // Event listener para enviar
             document.getElementById('btnEnviarReporteModal').addEventListener('click', async function() {
-                const checkboxes = modal.querySelectorAll('input[type="checkbox"]:checked');
+                const checkboxes = modal.querySelectorAll('input[id^="dest_"]:checked');
                 if (checkboxes.length === 0) {
                     mostrarAlerta('Seleccione al menos un destinatario', 'Error');
                     return;
@@ -15095,8 +15131,20 @@
                         correo: emailsUnicos.length === 1 ? emailsUnicos[0] : emailsUnicos,
                         nombre: destinatarios.map(d => d.nombre || d.correo).filter(Boolean).join(', ')
                     };
+                    const emailsToSet = new Set(emailsUnicos.map((e) => String(e).toLowerCase()));
+                    const emailsCcoSel = Array.from(modal.querySelectorAll('[data-modal-cco-idx]:checked'))
+                        .map((c) => listaCcoReporte[parseInt(c.getAttribute('data-modal-cco-idx'), 10)])
+                        .filter(Boolean)
+                        .map((d) => String(d.correo || '').trim())
+                        .filter((e) => e && !emailsToSet.has(e.toLowerCase()));
+                    const emailsCcoNorm = typeof normalizarListaCorreosDestino === 'function'
+                        ? normalizarListaCorreosDestino(emailsCcoSel)
+                        : emailsCcoSel;
+                    const optsEnvio = { aplicarCcoGlobal: false };
+                    if (emailsCcoNorm.length === 1) optsEnvio.bcc = emailsCcoNorm[0];
+                    else if (emailsCcoNorm.length > 1) optsEnvio.bcc = emailsCcoNorm;
                     
-                    const resultado = await enviarCorreoHTML(payload, asuntoFinal, htmlFinal, adjuntos);
+                    const resultado = await enviarCorreoHTML(payload, asuntoFinal, htmlFinal, adjuntos, optsEnvio);
                     ocultarProgreso();
 
                     if (!resultado || !resultado.exito) {
@@ -15139,7 +15187,7 @@
          * Modal para editar asunto y mensaje inicial antes de enviar comprobantes al residente.
          * @returns {Promise<object|null>} Resultado de enviarCorreo, o null si canceló.
          */
-        function mostrarModalPersonalizarCorreoYEnviar(opciones) {
+        async function mostrarModalPersonalizarCorreoYEnviar(opciones) {
             const {
                 titulo = 'Enviar por correo',
                 asuntoDefecto = '',
@@ -15154,9 +15202,21 @@
                 mensajeInicialPrefill = '',
                 destinatariosUnidad = null,
                 destinatariosDirectorio = null,
-                destinatariosCco = null,
                 correosSiempreSeleccionados = null
             } = opciones || {};
+            let destinatariosCco = Array.isArray(opciones && opciones.destinatariosCco) ? opciones.destinatariosCco.slice() : [];
+            try {
+                const glob = typeof obtenerDestinatariosCcoConsejeria === 'function'
+                    ? await obtenerDestinatariosCcoConsejeria()
+                    : [];
+                const seenCco = new Set(destinatariosCco.map((d) => String((d && d.correo) || '').trim().toLowerCase()).filter(Boolean));
+                (glob || []).forEach((d) => {
+                    const k = String((d && d.correo) || '').trim().toLowerCase();
+                    if (!k || seenCco.has(k)) return;
+                    seenCco.add(k);
+                    destinatariosCco.push(d);
+                });
+            } catch (eCcoG) { /* sin CCO global */ }
 
             const listaDestUnidad = Array.isArray(destinatariosUnidad)
                 ? destinatariosUnidad.filter((d) => d && d.correo && String(d.correo).trim())
@@ -15383,6 +15443,7 @@
                             ))
                         : (usaListaCco ? emailsCcoSel : emailsCcoSel.concat(Array.from(correosFijosSet)));
                     const enviarOpcionesFinal = Object.assign({}, enviarOpciones || {});
+                    enviarOpcionesFinal.aplicarCcoGlobal = false;
                     if (emailsCco.length === 1) enviarOpcionesFinal.bcc = emailsCco[0];
                     else if (emailsCco.length > 1) enviarOpcionesFinal.bcc = emailsCco;
                     else delete enviarOpcionesFinal.bcc;
@@ -32543,7 +32604,10 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 const documentoHtmlCompleto = adjuntoOpciones && adjuntoOpciones.documentoHtmlCompleto === true;
                 
                 // Crear HTML completo con estilos (o usar tal cual si ya es documento completo, p. ej. previsualización mensual)
-                const htmlCompleto = documentoHtmlCompleto ? htmlReporte : `
+                const htmlBaseSeguro = typeof htmlSeguroParaAdjuntoCorreo === 'function'
+                    ? htmlSeguroParaAdjuntoCorreo(htmlReporte)
+                    : htmlReporte;
+                const htmlCompleto = documentoHtmlCompleto ? htmlBaseSeguro : `
                     <!DOCTYPE html>
                     <html lang="es">
                     <head>
@@ -32648,7 +32712,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                         </style>
                     </head>
                     <body>
-                        ${htmlReporte}
+                        ${htmlBaseSeguro}
                     </body>
                     </html>
                 `;
@@ -32676,10 +32740,13 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     esBase64Valido: base64Valido
                 });
                 
+                const fnHtml = typeof nombreArchivoCorreoSeguro === 'function'
+                    ? nombreArchivoCorreoSeguro(nombreArchivo.endsWith('.html') ? nombreArchivo : String(nombreArchivo || 'reporte').replace(/\.(pdf|xlsx)$/i, '') + '.html', 'html')
+                    : (nombreArchivo.endsWith('.html') ? nombreArchivo : String(nombreArchivo || 'reporte.html'));
                 return {
-                    filename: nombreArchivo.endsWith('.html') ? nombreArchivo : nombreArchivo.replace(/\.(pdf|xlsx)$/, '.html'),
+                    filename: fnHtml,
                     content: htmlBase64,
-                    contentType: 'text/html',
+                    contentType: 'text/html; charset=utf-8',
                     encoding: 'base64'
                 };
             } catch (error) {
@@ -32749,6 +32816,20 @@ document.getElementById('chatForm').onsubmit = function (e) {
             return n;
         }
 
+        function htmlSeguroParaAdjuntoCorreo(html) {
+            var s = String(html || '');
+            s = s.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
+            s = s.replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, '');
+            s = s.replace(/<object\b[^>]*>[\s\S]*?<\/object>/gi, '');
+            s = s.replace(/<embed\b[^>]*>/gi, '');
+            s = s.replace(/<form\b[^>]*>[\s\S]*?<\/form>/gi, '');
+            s = s.replace(/\son[a-z]+\s*=\s*("[^"]*"|'[^']*'|[^\s>]+)/gi, '');
+            s = s.replace(/javascript\s*:/gi, '');
+            s = s.replace(/vbscript\s*:/gi, '');
+            s = s.replace(/data:text\/html/gi, 'data:text/plain');
+            return s;
+        }
+
         function clasificarBytesAdjuntoCorreo(bytes, filename, tipoHint) {
             var u8 = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes || []);
             if (!u8.length) return null;
@@ -32757,7 +32838,12 @@ document.getElementById('chatForm').onsubmit = function (e) {
             var head = '';
             var n = Math.min(24, u8.length);
             for (var i = 0; i < n; i++) head += String.fromCharCode(u8[i]);
-            if (/^\s*</.test(head) || /<!doctype|html|script/i.test(head)) return null;
+            if (/^\s*</.test(head) || /<!doctype|html/i.test(head)) {
+                if (/\.html?$/i.test(name) || hint.indexOf('html') !== -1) {
+                    return { ext: 'html', type: 'text/html; charset=utf-8' };
+                }
+                return null;
+            }
             if (head.indexOf('%PDF') === 0) return { ext: 'pdf', type: 'application/pdf' };
             if (u8[0] === 0xFF && u8[1] === 0xD8 && u8[2] === 0xFF) return { ext: 'jpg', type: 'image/jpeg' };
             if (u8[0] === 0x89 && u8[1] === 0x50 && u8[2] === 0x4E && u8[3] === 0x47) return { ext: 'png', type: 'image/png' };
@@ -32782,6 +32868,24 @@ document.getElementById('chatForm').onsubmit = function (e) {
             var content = adj.content;
             if (typeof content === 'string' && content.indexOf(',') !== -1) content = content.split(',')[1];
             if (typeof content !== 'string' || !/^[A-Za-z0-9+/=]+$/.test(content)) return null;
+            var nameHint = String(adj.filename || '');
+            var typeHint = String(adj.contentType || '');
+            if (/\.html?$/i.test(nameHint) || /text\/html/i.test(typeHint)) {
+                try {
+                    var htmlTxt = decodeURIComponent(escape(atob(content)));
+                    htmlTxt = htmlSeguroParaAdjuntoCorreo(htmlTxt);
+                    if (!htmlTxt || /<script\b/i.test(htmlTxt)) return null;
+                    var htmlB64 = btoa(unescape(encodeURIComponent(htmlTxt)));
+                    return {
+                        filename: nombreArchivoCorreoSeguro(nameHint || 'reporte.html', 'html'),
+                        content: htmlB64,
+                        contentType: 'text/html; charset=utf-8',
+                        encoding: 'base64'
+                    };
+                } catch (eHtml) {
+                    return null;
+                }
+            }
             var raw;
             try {
                 var sample = String(content).slice(0, 96);
@@ -32793,7 +32897,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 return null;
             }
             var cls = clasificarBytesAdjuntoCorreo(raw, adj.filename, adj.contentType);
-            if (!cls) return null;
+            if (!cls || cls.ext === 'html') return null;
             return {
                 filename: nombreArchivoCorreoSeguro(adj.filename, cls.ext),
                 content: content,
@@ -45633,7 +45737,14 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     var ctxTpl = { nombreComunidad: nombreComunidad, nombreMes: nombreMes, fechaEmision: fechaEmisionCorreoHoy() };
                     var asuntoEnv = resolverAsuntoPlantillaCorreo(bloqueTpl, asunto, ctxTpl);
                     var cuerpoIni = resolverCuerpoInicioPlantillaCorreo(bloqueTpl, ctxTpl);
-                    await mostrarModalSeleccionDestinatarios(asuntoEnv, html, [xlsxRes.adjunto], { mensajeInicialPrefill: cuerpoIni });
+                    var adjuntosComite = [];
+                    var nombreHtmlComite = 'Reporte_Comite_' + String(nombreComunidad || 'Comunidad').replace(/[^a-zA-Z0-9_-]/g, '_') + '.html';
+                    if (typeof generarReporteHTMLComoAdjunto === 'function') {
+                        var adjHtmlComite = await generarReporteHTMLComoAdjunto(html, nombreHtmlComite, { documentoHtmlCompleto: true });
+                        if (adjHtmlComite) adjuntosComite.push(adjHtmlComite);
+                    }
+                    if (xlsxRes.adjunto) adjuntosComite.push(xlsxRes.adjunto);
+                    await mostrarModalSeleccionDestinatarios(asuntoEnv, html, adjuntosComite, { mensajeInicialPrefill: cuerpoIni });
                 } catch (error) {
                     console.error('Error al enviar correo de comité:', error);
                     mostrarAlerta('Ocurrió un error al preparar el correo. Intente nuevamente.', 'Error');
@@ -45716,6 +45827,10 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     { soloSeleccion: true, textoIntro: textoIntro || null }
                 );
                 var adjuntos = [];
+                if (typeof generarReporteHTMLComoAdjunto === 'function') {
+                    var adjHtmlSel = await generarReporteHTMLComoAdjunto(html, 'Reporte_Comite.html', { documentoHtmlCompleto: true });
+                    if (adjHtmlSel) adjuntos.push(adjHtmlSel);
+                }
                 if (xlsxRes && xlsxRes.adjunto) adjuntos.push(xlsxRes.adjunto);
                 var archivos = await comiteAdjuntosDeMejoras(seleccionados);
                 adjuntos = adjuntos.concat(archivos);
@@ -45904,6 +46019,10 @@ document.getElementById('chatForm').onsubmit = function (e) {
                         { soloCerradas: true }
                     );
                     var adjuntos = [];
+                    if (typeof generarReporteHTMLComoAdjunto === 'function') {
+                        var adjHtmlCerr = await generarReporteHTMLComoAdjunto(html, 'Reporte_Mejoras_Cerradas.html', { documentoHtmlCompleto: true });
+                        if (adjHtmlCerr) adjuntos.push(adjHtmlCerr);
+                    }
                     if (xlsxRes && xlsxRes.adjunto) adjuntos.push(xlsxRes.adjunto);
                     var archivos = await comiteAdjuntosDeMejoras(cerradas);
                     adjuntos = adjuntos.concat(archivos);
