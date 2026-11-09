@@ -989,7 +989,17 @@
         .checklist-dash-alerta { display: none; margin: 0 0 1rem; padding: 0.8rem 1rem; border-radius: 12px; border: 1px solid rgba(239,68,68,0.4); background: rgba(239,68,68,0.1); }
         .checklist-dash-alerta.is-on { display: block; }
         .checklist-dash-alerta h3 { margin: 0 0 0.35rem; font-size: 0.9rem; font-weight: 800; }
-        .checklist-dash-alerta ul { margin: 0; padding-left: 1.1rem; font-size: 0.8rem; line-height: 1.45; }
+        .checklist-dash-alerta-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.45rem 0.75rem; margin: 0 0 0.45rem; }
+        .checklist-dash-alerta-head h3 { margin: 0; }
+        .checklist-dash-alerta-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem 0.65rem; margin: 0 0 0.45rem; font-size: 0.75rem; }
+        .checklist-dash-alerta-bar label { display: inline-flex; align-items: center; gap: 0.3rem; cursor: pointer; font-weight: 700; }
+        .checklist-dash-alerta ul { margin: 0; padding: 0; list-style: none; font-size: 0.8rem; line-height: 1.45; max-height: 14rem; overflow: auto; }
+        .checklist-dash-alerta li { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 0.35rem 0.5rem; margin: 0 0 0.4rem; }
+        .checklist-dash-alerta li label.chk-dash-item { display: flex; flex: 1; min-width: 12rem; align-items: flex-start; gap: 0.4rem; cursor: pointer; }
+        .chk-bulk-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem 0.65rem; margin: 0 0 0.55rem; font-size: 0.78rem; }
+        .chk-bulk-bar .chk-bulk-count { font-weight: 700; color: var(--gray-700); }
+        #checklistTurnos th.chk-sel, #checklistTurnos td.chk-sel { width: 1%; text-align: center; padding-left: 0.35rem; padding-right: 0.25rem; }
+        #checklistTurnos td.chk-sel input { vertical-align: middle; }
         .chk-turnos-kpis { display: grid; grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr)); gap: 0.4rem; margin: 0; }
         .chk-turnos-kpi { border: 1px solid var(--border-color); border-radius: 10px; padding: 0.45rem 0.55rem; background: var(--bg-secondary, var(--bg-primary)); }
         .chk-turnos-kpi .val { font-size: 1.35rem; font-weight: 800; line-height: 1.1; }
@@ -9871,11 +9881,17 @@
                     </div>
                     <button type="button" class="btn btn-secondary" id="chkFiltroLimpiar" style="padding:0.4rem 0.7rem;font-size:0.78rem;">Limpiar</button>
                 </div>
+                <div id="chkTurnosBulkBar" class="chk-bulk-bar">
+                    <span id="chkTurnosBulkCount" class="chk-bulk-count">0 seleccionados</span>
+                    <button type="button" class="btn btn-primary" id="chkTurnosBulkGestionar" style="padding:0.35rem 0.7rem;font-size:0.75rem;" disabled>Gestionar seleccionados</button>
+                    <button type="button" class="btn btn-secondary" id="chkTurnosBulkIncidencias" style="padding:0.35rem 0.7rem;font-size:0.75rem;">Seleccionar incidencias visibles</button>
+                </div>
                 <div class="table-section" style="padding:0; box-shadow:none; border:none;">
                     <div style="overflow-x:auto;">
                         <table>
                             <thead>
                                 <tr>
+                                    <th class="chk-sel"><input type="checkbox" id="chkTurnosSelAll" title="Seleccionar todas las filas visibles"></th>
                                     <th>Fecha</th>
                                     <th>Conserje</th>
                                     <th>Tipo</th>
@@ -9889,7 +9905,7 @@
                                 </tr>
                             </thead>
                             <tbody id="chkTurnosTbody">
-                                <tr><td colspan="10" class="empty-state"><p>Cargando checklists…</p></td></tr>
+                                <tr><td colspan="11" class="empty-state"><p>Cargando checklists…</p></td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -11125,6 +11141,29 @@
                 <button type="button" class="btn btn-secondary" id="chkDetalleEditar">Gestionar</button>
                 <button type="button" class="btn btn-primary" id="chkDetalleQuitarIncidencia" hidden>Quitar incidencia</button>
                 <button type="button" class="btn btn-primary" id="chkDetalleGuardar" hidden>Guardar cambios</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modalChecklistTurnoMasiva" class="modal-overlay">
+        <div class="modal-confirm" style="max-width: 520px; width: 100%; text-align: left;">
+            <h3 style="margin: 0 0 0.35rem 0;">Gestionar alertas de checklist</h3>
+            <p id="chkMasivaResumen" style="margin: 0 0 0.75rem; font-size: 0.85rem; color: var(--gray-600); line-height: 1.4;"></p>
+            <div class="form-group">
+                <label for="chkMasivaEstado">Estado a aplicar *</label>
+                <select id="chkMasivaEstado">
+                    <option value="ok">Todo correcto (quitar incidencia)</option>
+                    <option value="observaciones">Con observaciones</option>
+                    <option value="incidencia">Mantener incidencia</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="chkMasivaMotivo">Motivo de la gestión *</label>
+                <textarea id="chkMasivaMotivo" rows="3" style="width:100%;box-sizing:border-box;" placeholder="Obligatorio. Se registra en el historial de cada checklist seleccionado."></textarea>
+            </div>
+            <div class="modal-buttons">
+                <button type="button" class="btn btn-secondary" id="chkMasivaCerrar">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="chkMasivaAplicar">Aplicar a seleccionados</button>
             </div>
         </div>
     </div>
@@ -19262,6 +19301,7 @@
         window._chkTurnosTurnoAbierto = null;
         window._chkTurnosSelId = '';
         window._chkTurnosUiBound = false;
+        window._chkTurnosBulkIds = [];
 
         function chkEsc(s) {
             return typeof escaparHtmlModuloConserjeria === 'function' ? escaparHtmlModuloConserjeria(s) : String(s == null ? '' : s);
@@ -19295,6 +19335,169 @@
                 if (String(obs[i] || '').trim()) return 'observaciones';
             }
             return 'ok';
+        }
+        function chkTurnosMsgsAlertasRojas(r) {
+            var msgs = [];
+            var seen = {};
+            (r && r.alertas || []).forEach(function (a) {
+                if (!a || chkAlertaEsEncomiendas(a) || a.resuelta) return;
+                if (a.nivel !== 'roja') return;
+                var t = String(a.mensaje || a.codigo || '').trim();
+                if (!t || seen[t]) return;
+                seen[t] = true;
+                msgs.push(t);
+            });
+            if (r && r.llavesCompletas === 'no' && !seen['Llaves incompletas']) msgs.unshift('Llaves incompletas');
+            return msgs;
+        }
+        function chkTurnosListarIncidencias(list) {
+            return (list || []).filter(function (r) {
+                return r && chkEstadoOperativo(r) === 'incidencia';
+            }).map(function (r) {
+                var msgs = chkTurnosMsgsAlertasRojas(r);
+                return {
+                    id: r.id,
+                    tipo: r.tipo,
+                    conserje: r.conserje || '',
+                    fecha: r.fecha || r.ymd || '',
+                    ymd: r.ymd || '',
+                    hora: r.hora || '',
+                    msgs: msgs.length ? msgs : ['Incidencia']
+                };
+            });
+        }
+        function chkTurnosIdsSeleccionadosTabla() {
+            var ids = [];
+            var tb = document.getElementById('chkTurnosTbody');
+            if (!tb) return ids;
+            tb.querySelectorAll('input[data-chk-sel]:checked').forEach(function (el) {
+                var id = el.getAttribute('data-chk-sel');
+                if (id && ids.indexOf(id) < 0) ids.push(id);
+            });
+            return ids;
+        }
+        function chkTurnosActualizarBulkUi() {
+            var ids = chkTurnosIdsSeleccionadosTabla();
+            var countEl = document.getElementById('chkTurnosBulkCount');
+            var btn = document.getElementById('chkTurnosBulkGestionar');
+            var selAll = document.getElementById('chkTurnosSelAll');
+            var tb = document.getElementById('chkTurnosTbody');
+            var visibles = tb ? tb.querySelectorAll('input[data-chk-sel]') : [];
+            if (countEl) countEl.textContent = ids.length + ' seleccionado' + (ids.length === 1 ? '' : 's');
+            if (btn) btn.disabled = !ids.length;
+            if (selAll) {
+                selAll.checked = visibles.length > 0 && ids.length === visibles.length;
+                selAll.indeterminate = ids.length > 0 && ids.length < visibles.length;
+            }
+        }
+        function chkTurnosPatchEstadoGestion(r, estadoSel, motivo) {
+            var now = new Date();
+            var hora = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0') + ':' + String(now.getSeconds()).padStart(2, '0');
+            var alertas = (r.alertas || []).map(function (a) {
+                if (!a || chkAlertaEsEncomiendas(a) || a.nivel !== 'roja') return a;
+                if (estadoSel === 'ok' || estadoSel === 'observaciones') {
+                    return Object.assign({}, a, { resuelta: true, resueltaMotivo: motivo });
+                }
+                return Object.assign({}, a, { resuelta: false });
+            });
+            var hist = Array.isArray(r.historialEdiciones) ? r.historialEdiciones.slice() : [];
+            hist.push({
+                quien: typeof multaOperadorActual === 'function' ? multaOperadorActual() : 'Administración',
+                fecha: r.fecha || chkHoyYmd(),
+                hora: hora,
+                motivo: motivo,
+                cambios: [{
+                    campo: 'estadoGestion',
+                    anterior: r.estadoGestion || chkEstadoOperativo(r),
+                    nuevo: estadoSel
+                }],
+                at: now.toISOString()
+            });
+            return {
+                alertas: alertas,
+                estado: estadoSel,
+                estadoGestion: estadoSel,
+                estadoGestionMotivo: motivo,
+                estadoGestionQuien: typeof multaOperadorActual === 'function' ? multaOperadorActual() : 'Administración',
+                estadoGestionAt: now.toISOString(),
+                historialEdiciones: hist
+            };
+        }
+        async function chkTurnosAplicarGestionMasiva(ids, estadoSel, motivo) {
+            var unicos = [];
+            (ids || []).forEach(function (id) {
+                if (id && unicos.indexOf(id) < 0) unicos.push(id);
+            });
+            if (!unicos.length) return 0;
+            var sdb = await obtenerDbConserjeriaOperativa();
+            var lista = window._chkTurnosLista || [];
+            var n = 0;
+            var i = 0;
+            while (i < unicos.length) {
+                var chunk = unicos.slice(i, i + 400);
+                var batch = sdb.batch();
+                chunk.forEach(function (id) {
+                    var r = lista.filter(function (x) { return x && x.id === id; })[0];
+                    if (!r) return;
+                    batch.set(sdb.collection('pcsh_turno_checklists').doc(id), chkTurnosPatchEstadoGestion(r, estadoSel, motivo), { merge: true });
+                    n += 1;
+                });
+                await batch.commit();
+                i += 400;
+            }
+            return n;
+        }
+        function chkTurnosAbrirMasiva(ids) {
+            var unicos = [];
+            (ids || []).forEach(function (id) {
+                if (id && unicos.indexOf(id) < 0) unicos.push(id);
+            });
+            if (!unicos.length) {
+                if (typeof mostrarAlerta === 'function') mostrarAlerta('Seleccione al menos una alerta o checklist.', 'Checklist');
+                return;
+            }
+            window._chkTurnosBulkIds = unicos;
+            var res = document.getElementById('chkMasivaResumen');
+            if (res) {
+                res.textContent = 'Se aplicará el mismo estado y motivo a ' + unicos.length +
+                    ' checklist' + (unicos.length === 1 ? '' : 's') +
+                    ' con alerta. El historial de cada uno quedará registrado.';
+            }
+            var est = document.getElementById('chkMasivaEstado');
+            if (est) est.value = 'ok';
+            var mot = document.getElementById('chkMasivaMotivo');
+            if (mot) mot.value = '';
+            abrirOverlayGestion('modalChecklistTurnoMasiva');
+            if (mot) setTimeout(function () { mot.focus(); }, 80);
+        }
+        async function chkTurnosConfirmarMasiva() {
+            var ids = window._chkTurnosBulkIds || [];
+            var estadoSel = String((document.getElementById('chkMasivaEstado') || {}).value || '').trim();
+            var motivo = String((document.getElementById('chkMasivaMotivo') || {}).value || '').trim();
+            if (estadoSel !== 'ok' && estadoSel !== 'observaciones' && estadoSel !== 'incidencia') {
+                if (typeof mostrarAlerta === 'function') mostrarAlerta('Seleccione el estado a aplicar.', 'Checklist');
+                return;
+            }
+            if (!motivo) {
+                if (typeof mostrarAlerta === 'function') mostrarAlerta('Indique el motivo de la gestión masiva.', 'Checklist');
+                return;
+            }
+            var btn = document.getElementById('chkMasivaAplicar');
+            if (btn) { btn.disabled = true; btn.textContent = 'Aplicando…'; }
+            try {
+                var n = await chkTurnosAplicarGestionMasiva(ids, estadoSel, motivo);
+                cerrarOverlayGestion('modalChecklistTurnoMasiva');
+                window._chkTurnosBulkIds = [];
+                await window.cargarChecklistTurnosGestion({ forzar: true });
+                if (typeof mostrarAlerta === 'function') {
+                    mostrarAlerta('Se gestionaron ' + n + ' checklist' + (n === 1 ? '' : 's') + '.', 'Checklist');
+                }
+            } catch (eMas) {
+                console.warn('[checklist] gestión masiva:', eMas);
+                if (typeof mostrarAlerta === 'function') mostrarAlerta('No se pudieron guardar todas las gestiones. Intente de nuevo.', 'Checklist');
+            } finally {
+                if (btn) { btn.disabled = false; btn.textContent = 'Aplicar a seleccionados'; }
+            }
         }
         function chkObsResumen(r) {
             var parts = [];
@@ -19386,7 +19589,8 @@
             if (!tb) return;
             var rows = chkTurnosFiltrar(window._chkTurnosLista || []);
             if (!rows.length) {
-                tb.innerHTML = '<tr><td colspan="10" class="empty-state"><p>No hay checklists con esos filtros.</p></td></tr>';
+                tb.innerHTML = '<tr><td colspan="11" class="empty-state"><p>No hay checklists con esos filtros.</p></td></tr>';
+                chkTurnosActualizarBulkUi();
                 return;
             }
             tb.innerHTML = rows.map(function (r) {
@@ -19400,6 +19604,7 @@
                     '<span class="lbl">Dif</span><span>' + (diff > 0 ? '+' : '') + diff + '</span>' +
                     '</div>';
                 return '<tr>' +
+                    '<td class="chk-sel"><input type="checkbox" data-chk-sel="' + chkEsc(r.id) + '" aria-label="Seleccionar checklist"></td>' +
                     '<td><div class="chk-fh"><strong>' + chkEsc(r.fecha || r.ymd || '') + '</strong><span>' + chkEsc(hora) + '</span></div></td>' +
                     '<td>' + chkEsc(r.conserje || '') + '</td>' +
                     '<td>' + (r.tipo === 'cierre' ? 'Cierre' : 'Apertura') + '</td>' +
@@ -19412,34 +19617,45 @@
                     '<td class="chk-act"><button type="button" class="btn btn-primary btn-sm" data-chk-id="' + chkEsc(r.id) + '">Ver</button></td>' +
                     '</tr>';
             }).join('');
+            chkTurnosActualizarBulkUi();
         }
         function chkTurnosPintarAlertasDashboard() {
             var wrap = document.getElementById('dashboardChecklistTurnosWrap');
             if (!wrap) return;
             var hoy = chkHoyYmd();
-            var alertas = [];
-            (window._chkTurnosLista || []).forEach(function (r) {
-                if (r.ymd !== hoy) return;
-                if (chkEstadoOperativo(r) !== 'incidencia') return;
-                (r.alertas || []).forEach(function (a) {
-                    if (!a || chkAlertaEsEncomiendas(a) || a.resuelta) return;
-                    if (a.nivel !== 'roja') return;
-                    alertas.push({
-                        msg: (r.tipo === 'cierre' ? 'Cierre' : 'Apertura') + ' · ' + (r.conserje || '') + ': ' + (a.mensaje || a.codigo),
-                        id: r.id
-                    });
-                });
+            var items = chkTurnosListarIncidencias(window._chkTurnosLista || []).filter(function (it) {
+                return it.ymd === hoy;
             });
-            if (!alertas.length) {
+            if (!items.length) {
                 wrap.className = 'checklist-dash-alerta';
                 wrap.innerHTML = '';
                 return;
             }
             wrap.className = 'checklist-dash-alerta is-on';
-            wrap.innerHTML = '<h3>🔴 Alertas de checklist de turno</h3><ul>' +
-                alertas.slice(0, 8).map(function (a) {
-                    return '<li><button type="button" class="btn btn-secondary btn-sm" data-chk-dash="' + chkEsc(a.id) + '" style="padding:0.15rem 0.45rem;font-size:0.75rem;">Revisar</button> ' + chkEsc(a.msg) + '</li>';
-                }).join('') + '</ul>';
+            wrap.innerHTML =
+                '<div class="checklist-dash-alerta-head">' +
+                '<h3>🔴 Alertas de checklist de turno (' + items.length + ')</h3>' +
+                '</div>' +
+                '<div class="checklist-dash-alerta-bar">' +
+                '<label data-chk-dash-sel-all-wrap><input type="checkbox" data-chk-dash-sel-all> Seleccionar todas</label>' +
+                '<button type="button" class="btn btn-primary btn-sm" data-chk-dash-bulk style="padding:0.2rem 0.55rem;font-size:0.75rem;">Gestionar seleccionadas</button>' +
+                '<button type="button" class="btn btn-secondary btn-sm" data-chk-dash-bulk-all style="padding:0.2rem 0.55rem;font-size:0.75rem;">Gestionar todas</button>' +
+                '</div>' +
+                '<ul>' +
+                items.map(function (it) {
+                    var tipo = it.tipo === 'cierre' ? 'Cierre' : 'Apertura';
+                    var hora = String(it.hora || '').replace(/:\d{2}$/, '');
+                    var detalle = it.msgs.join(' · ');
+                    return '<li>' +
+                        '<label class="chk-dash-item">' +
+                        '<input type="checkbox" data-chk-dash-sel="' + chkEsc(it.id) + '">' +
+                        '<span><strong>' + chkEsc(tipo) + ' · ' + chkEsc(it.conserje) + '</strong>' +
+                        (hora ? ' <span style="opacity:0.85;">' + chkEsc(hora) + '</span>' : '') +
+                        '<br>' + chkEsc(detalle) + '</span></label>' +
+                        '<button type="button" class="btn btn-secondary btn-sm" data-chk-dash="' + chkEsc(it.id) + '" style="padding:0.15rem 0.45rem;font-size:0.75rem;">Revisar</button>' +
+                        '</li>';
+                }).join('') +
+                '</ul>';
         }
         function chkTurnosHtmlDetalle(r) {
             var v = r.variacionesAnterior;
@@ -19662,14 +19878,81 @@
                 chkTurnosPintarTabla();
             });
             var tb = document.getElementById('chkTurnosTbody');
-            if (tb) tb.addEventListener('click', function (ev) {
-                var b = ev.target.closest('[data-chk-id]');
-                if (!b) return;
-                chkTurnosAbrirDetalle(b.getAttribute('data-chk-id'));
+            if (tb) {
+                tb.addEventListener('click', function (ev) {
+                    var b = ev.target.closest('[data-chk-id]');
+                    if (!b) return;
+                    chkTurnosAbrirDetalle(b.getAttribute('data-chk-id'));
+                });
+                tb.addEventListener('change', function (ev) {
+                    if (ev.target && ev.target.matches && ev.target.matches('input[data-chk-sel]')) chkTurnosActualizarBulkUi();
+                });
+            }
+            var selAll = document.getElementById('chkTurnosSelAll');
+            if (selAll) selAll.addEventListener('change', function () {
+                var on = !!selAll.checked;
+                var box = document.getElementById('chkTurnosTbody');
+                if (box) box.querySelectorAll('input[data-chk-sel]').forEach(function (el) { el.checked = on; });
+                chkTurnosActualizarBulkUi();
+            });
+            var bulkBtn = document.getElementById('chkTurnosBulkGestionar');
+            if (bulkBtn) bulkBtn.addEventListener('click', function () {
+                chkTurnosAbrirMasiva(chkTurnosIdsSeleccionadosTabla());
+            });
+            var bulkInc = document.getElementById('chkTurnosBulkIncidencias');
+            if (bulkInc) bulkInc.addEventListener('click', function () {
+                var box = document.getElementById('chkTurnosTbody');
+                if (!box) return;
+                box.querySelectorAll('input[data-chk-sel]').forEach(function (el) {
+                    var id = el.getAttribute('data-chk-sel');
+                    var r = (window._chkTurnosLista || []).filter(function (x) { return x && x.id === id; })[0];
+                    el.checked = !!(r && chkEstadoOperativo(r) === 'incidencia');
+                });
+                chkTurnosActualizarBulkUi();
             });
             var dash = document.getElementById('dashboardChecklistTurnosWrap');
+            if (dash) dash.addEventListener('change', function (ev) {
+                var t = ev.target;
+                if (!t || !t.matches) return;
+                if (t.matches('input[data-chk-dash-sel-all]')) {
+                    var onDash = !!t.checked;
+                    dash.querySelectorAll('input[data-chk-dash-sel]').forEach(function (el) { el.checked = onDash; });
+                    return;
+                }
+                if (t.matches('input[data-chk-dash-sel]')) {
+                    var allDash = dash.querySelectorAll('input[data-chk-dash-sel]');
+                    var chkDash = dash.querySelectorAll('input[data-chk-dash-sel]:checked');
+                    var master = dash.querySelector('input[data-chk-dash-sel-all]');
+                    if (master) {
+                        master.checked = allDash.length > 0 && chkDash.length === allDash.length;
+                        master.indeterminate = chkDash.length > 0 && chkDash.length < allDash.length;
+                    }
+                }
+            });
             if (dash) dash.addEventListener('click', function (ev) {
-                var b = ev.target.closest('[data-chk-dash]');
+                var t = ev.target;
+                if (!t || !t.closest) return;
+                var bulkAll = t.closest('[data-chk-dash-bulk-all]');
+                if (bulkAll) {
+                    var idsAll = [];
+                    dash.querySelectorAll('input[data-chk-dash-sel]').forEach(function (el) {
+                        var id = el.getAttribute('data-chk-dash-sel');
+                        if (id && idsAll.indexOf(id) < 0) idsAll.push(id);
+                    });
+                    chkTurnosAbrirMasiva(idsAll);
+                    return;
+                }
+                var bulk = t.closest('[data-chk-dash-bulk]');
+                if (bulk) {
+                    var idsSel = [];
+                    dash.querySelectorAll('input[data-chk-dash-sel]:checked').forEach(function (el) {
+                        var id = el.getAttribute('data-chk-dash-sel');
+                        if (id && idsSel.indexOf(id) < 0) idsSel.push(id);
+                    });
+                    chkTurnosAbrirMasiva(idsSel);
+                    return;
+                }
+                var b = t.closest('[data-chk-dash]');
                 if (!b) return;
                 if (typeof window.showTab === 'function') window.showTab('checklistTurnos');
                 setTimeout(function () { chkTurnosAbrirDetalle(b.getAttribute('data-chk-dash')); }, 80);
@@ -19686,13 +19969,21 @@
             if (modal) modal.addEventListener('click', function (e) {
                 if (e.target === modal) cerrarOverlayGestion('modalChecklistTurnoGestion');
             });
+            var masCerrar = document.getElementById('chkMasivaCerrar');
+            if (masCerrar) masCerrar.addEventListener('click', function () { cerrarOverlayGestion('modalChecklistTurnoMasiva'); });
+            var masAplicar = document.getElementById('chkMasivaAplicar');
+            if (masAplicar) masAplicar.addEventListener('click', function () { chkTurnosConfirmarMasiva(); });
+            var modalMas = document.getElementById('modalChecklistTurnoMasiva');
+            if (modalMas) modalMas.addEventListener('click', function (e) {
+                if (e.target === modalMas) cerrarOverlayGestion('modalChecklistTurnoMasiva');
+            });
         }
         window.cargarChecklistTurnosGestion = async function (opts) {
             opts = opts || {};
             chkTurnosBindUi();
             var tb = document.getElementById('chkTurnosTbody');
             if (tb && !(window._chkTurnosLista || []).length) {
-                tb.innerHTML = '<tr><td colspan="10" class="empty-state"><p>Cargando checklists…</p></td></tr>';
+                tb.innerHTML = '<tr><td colspan="11" class="empty-state"><p>Cargando checklists…</p></td></tr>';
             }
             try {
                 await chkTurnosLeerLista();
@@ -19700,7 +19991,7 @@
                 chkTurnosPintarTabla();
                 chkTurnosPintarAlertasDashboard();
             } catch (eL) {
-                if (tb) tb.innerHTML = '<tr><td colspan="10" class="empty-state"><p>No se pudieron leer los checklists de Conserjería WM.</p></td></tr>';
+                if (tb) tb.innerHTML = '<tr><td colspan="11" class="empty-state"><p>No se pudieron leer los checklists de Conserjería WM.</p></td></tr>';
             }
         };
         setTimeout(function () {
