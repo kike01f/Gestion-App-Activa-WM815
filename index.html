@@ -11200,7 +11200,7 @@
     <div id="modalDetalleMulta" class="modal-overlay">
         <div class="modal-confirm" style="max-width: 720px; width: 100%; max-height: 90vh; overflow: auto;">
             <h3 style="margin: 0 0 0.35rem 0;">Detalle de multa</h3>
-            <p style="margin: 0 0 0.75rem 0; color: var(--gray-600); font-size: 0.82rem;">Capa administrativa sobre la novedad original. La bitácora de Conserjería no se modifica desde aquí.</p>
+            <p style="margin: 0 0 0.75rem 0; color: var(--gray-600); font-size: 0.82rem;">Capa administrativa sobre la novedad original. El estado, la anulación y las observaciones se reflejan en Conserjería WM.</p>
             <div id="multaDetalleCuerpo"></div>
             <div class="form-group" style="margin: 0.75rem 0 0.5rem;">
                 <label for="multaDetalleEstado" style="margin-bottom: 0.25rem; font-size: 0.875rem;">Estado de gestión</label>
@@ -28041,6 +28041,8 @@ document.getElementById('chatForm').onsubmit = function (e) {
             multaAplicarAnulacionesEnLista(src);
             var mes = mesAnio || '';
             return src.filter(function (m) {
+                if (!m) return false;
+                if (typeof multaEsRegistroAnulacion === 'function' && multaEsRegistroAnulacion(m)) return false;
                 if (multaEstaAnulada(m)) return false;
                 if (mes && typeof multaPerteneceAlPeriodo === 'function') return multaPerteneceAlPeriodo(m, mes);
                 return true;
@@ -28708,6 +28710,97 @@ document.getElementById('chatForm').onsubmit = function (e) {
             m.historialEstados = hist;
             return m;
         }
+        function multaCorrelativoCola(m) {
+            var cor = m && m.novedadCorrelativo != null ? Number(m.novedadCorrelativo) : NaN;
+            return isFinite(cor) ? cor : NaN;
+        }
+        function multaAplicarEstadoDesdeCola(exist, n) {
+            if (!exist || !n) return false;
+            var changed = false;
+            if (n.observacionAdmin != null && String(n.observacionAdmin) !== String(exist.observacionAdmin || '')) {
+                exist.observacionAdmin = n.observacionAdmin;
+                changed = true;
+            }
+            if (n.folio && !exist.folio) {
+                exist.folio = n.folio;
+                changed = true;
+            }
+            var estCola = String(n.estadoGestion || '').toLowerCase();
+            if (n.anulada === true || n.anulada === 'si' || n.anulada === 'sí' || estCola === 'anulada') {
+                if (!multaEstaAnulada(exist)) {
+                    multaMarcarAnulada(exist);
+                    changed = true;
+                }
+                return changed;
+            }
+            if (estCola && typeof MULTA_ESTADOS_GESTION !== 'undefined' && MULTA_ESTADOS_GESTION[estCola] && exist.estadoGestion !== estCola) {
+                var orden = { pendiente_tratamiento: 0, pendiente: 0, en_revision: 1, pendiente_antecedentes: 1, gestionada: 2, rechazada: 2, cerrada: 2, anulada: 3 };
+                var rankCola = orden[estCola] != null ? orden[estCola] : 0;
+                var rankEx = orden[String(exist.estadoGestion || '').toLowerCase()] != null ? orden[String(exist.estadoGestion || '').toLowerCase()] : 0;
+                if (rankCola >= rankEx || n.revisadoAt || n.alertaConserjeriaAt) {
+                    exist.estadoGestion = estCola;
+                    changed = true;
+                }
+            }
+            return changed;
+        }
+        async function multaPersistirEnCola(m) {
+            var cor = multaCorrelativoCola(m);
+            if (!isFinite(cor)) return;
+            try {
+                var sdb = typeof obtenerDbConserjeriaOperativa === 'function' ? await obtenerDbConserjeriaOperativa() : null;
+                if (!sdb) return;
+                var est = typeof multaEstadoRegistro === 'function' ? multaEstadoRegistro(m) : (m.estadoGestion || '');
+                var anulada = typeof multaEstaAnulada === 'function' ? multaEstaAnulada(m) : (est === 'anulada');
+                await sdb.collection('multas_desde_novedad').doc(String(cor)).set({
+                    correlativo: cor,
+                    estadoGestion: est || 'pendiente_tratamiento',
+                    anulada: !!anulada,
+                    observacionAdmin: m.observacionAdmin || '',
+                    folio: m.folio || '',
+                    motivo: m.motivo || '',
+                    departamento: m.departamento || m.depto || '',
+                    monto: m.monto != null ? m.monto : null,
+                    tipoUnidad: m.tipoUnidad || '',
+                    revisadoAt: m.revisadoAt || new Date().toISOString(),
+                    revisadoPor: 'Admin',
+                    alertaConserjeria: true,
+                    alertaConserjeriaAt: m.revisadoAt || new Date().toISOString(),
+                    updatedAt: new Date().toISOString()
+                }, { merge: true });
+            } catch (eFs) {
+                console.warn('[multas] persistir cola:', eFs);
+            }
+        }
+        async function multaPersistirAnulacionOrigen(orig, mesReg, listaMes) {
+            if (!orig) return;
+            multaMarcarAnulada(orig);
+            if (typeof multaHistorialPush === 'function') multaHistorialPush(orig, 'anulada', { estado: 'anulada' });
+            var mesOrig = orig.mes || (typeof multaMesDelRegistro === 'function' ? multaMesDelRegistro(orig) : '') || mesReg;
+            var idxLocal = Array.isArray(listaMes) ? listaMes.findIndex(function (x) { return x && String(x.id) === String(orig.id); }) : -1;
+            if (mesOrig && mesReg && mesOrig !== mesReg) {
+                try {
+                    var listaO = typeof obtenerDatosMesEspecifico === 'function'
+                        ? await obtenerDatosMesEspecifico('multas', mesOrig)
+                        : [];
+                    if (!Array.isArray(listaO)) listaO = [];
+                    var iO = listaO.findIndex(function (x) { return x && String(x.id) === String(orig.id); });
+                    if (iO >= 0) listaO[iO] = orig;
+                    else listaO.unshift(orig);
+                    if (typeof persistirListaMultasMes === 'function') await persistirListaMultasMes(mesOrig, listaO);
+                    else if (typeof guardarDatosMes === 'function') await guardarDatosMes('multas', listaO);
+                } catch (eOrigMes) {
+                    console.warn('[multas] persistir anulación en mes de origen:', eOrigMes);
+                    if (idxLocal < 0 && Array.isArray(listaMes)) listaMes.unshift(orig);
+                }
+            } else if (idxLocal >= 0) {
+                listaMes[idxLocal] = orig;
+            } else if (Array.isArray(listaMes)) {
+                listaMes.unshift(orig);
+            }
+            await multaPersistirEnCola(orig);
+            return orig;
+        }
         function multaPayloadDesdeNovedad(n, libroNum) {
             var cor = Number(n.correlativo);
             var texto = n.texto || '';
@@ -28813,10 +28906,14 @@ document.getElementById('chatForm').onsubmit = function (e) {
                             if (!neu) return;
                             if (!neu.folio) neu.folio = getSiguienteFolioMulta(lista, mesActual);
                             multaHistorialPush(neu, 'creada_desde_novedad', { estado: 'pendiente_tratamiento' });
+                            if (typeof multaAplicarEstadoDesdeCola === 'function') multaAplicarEstadoDesdeCola(neu, n);
                             lista.unshift(neu);
                             creadas += 1;
                             cambiadas = true;
                             return;
+                        }
+                        if (typeof multaAplicarEstadoDesdeCola === 'function' && multaAplicarEstadoDesdeCola(exist, n)) {
+                            cambiadas = true;
                         }
                         if (multaEstaAnulada(exist)) return;
                         var huella = [cor, n.fecha, n.hora, n.categoria, n.texto, n.notaInterna].join('|');
@@ -28874,6 +28971,8 @@ document.getElementById('chatForm').onsubmit = function (e) {
                                 latest.unshift(m);
                                 return;
                             }
+                            if (typeof multaAplicarEstadoDesdeCola === 'function') multaAplicarEstadoDesdeCola(got, m);
+                            if (multaEstaAnulada(m) && !multaEstaAnulada(got)) multaMarcarAnulada(got);
                             if (multaEstaAnulada(got)) return;
                             if (m.novedadLibro != null && Number(got.novedadLibro) !== Number(m.novedadLibro)) {
                                 got.novedadLibro = m.novedadLibro;
@@ -29054,13 +29153,16 @@ document.getElementById('chatForm').onsubmit = function (e) {
             lista[idx] = m;
             var mes = m.mes || (typeof obtenerMesActual === 'function' ? obtenerMesActual() : '');
             await persistirListaMultasMes(mes, lista);
+            if (typeof multaPersistirEnCola === 'function') {
+                try { await multaPersistirEnCola(m); } catch (eColaDet) {}
+            }
             if (typeof window.registrarMovimiento === 'function') {
                 window.registrarMovimiento('actualizar', 'multas', 'Estado de multa ' + (m.novedadLibro != null ? '#' + m.novedadLibro : m.id) + ': ' + (MULTA_ESTADOS_GESTION[nuevo] || {}).label);
             }
             cerrarDetalleMulta();
             if (typeof cargarMultas === 'function') await cargarMultas();
             pintarAlertasMultasPendientes(lista);
-            if (typeof mostrarToast === 'function') mostrarToast('Gestión de la multa actualizada.', 'success');
+            if (typeof mostrarToast === 'function') mostrarToast('Gestión de la multa actualizada. El estado ya es visible en Conserjería.', 'success');
         }
         function irANovedadDesdeMulta(m) {
             if (!m) return;
@@ -29783,6 +29885,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
             }
             const radTipo = document.querySelector('input[name="multaTipoRegistro"]:checked');
             const tipoRegistro = radTipo && radTipo.value === 'anulacion' ? 'anulacion' : 'multa';
+            let origAnulada = null;
             if (tipoRegistro === 'multa') {
                 const montoCheck = parseFloat(document.getElementById('multaMonto').value);
                 if (isNaN(montoCheck) || montoCheck < 0) {
@@ -29830,13 +29933,24 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     mostrarAlerta('Seleccione la multa que desea anular.', 'Anulación');
                     return;
                 }
-                const orig = (multas || []).find(function (x) { return x && String(x.id) === origId; });
+                let orig = (multas || []).find(function (x) { return x && String(x.id) === origId; });
+                if (!orig) {
+                    try {
+                        const listaVista = typeof obtenerDatosMes === 'function' ? await obtenerDatosMes('multas') : [];
+                        orig = (listaVista || []).find(function (x) { return x && String(x.id) === origId; }) || null;
+                    } catch (eOrigVista) { orig = orig || null; }
+                }
                 if (!orig || multaEsRegistroAnulacion(orig)) {
                     mostrarAlerta('No se encontró la multa a anular. Actualice la lista e inténtelo de nuevo.', 'Anulación');
                     return;
                 }
-                multaMarcarAnulada(orig);
-                if (typeof multaHistorialPush === 'function') multaHistorialPush(orig, 'anulada', { estado: 'anulada' });
+                origAnulada = orig;
+                if (typeof multaPersistirAnulacionOrigen === 'function') {
+                    await multaPersistirAnulacionOrigen(orig, mesReg, multas);
+                } else {
+                    multaMarcarAnulada(orig);
+                    if (typeof multaHistorialPush === 'function') multaHistorialPush(orig, 'anulada', { estado: 'anulada' });
+                }
                 multa.originalId = orig.id;
                 multa.folioMultaOrigen = orig.folio || '';
                 if (!multa.motivo) multa.motivo = 'Anulación de multa' + (orig.folio ? ' ' + orig.folio : '');
@@ -29980,6 +30094,14 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 }
             } catch (ePost) {
                 console.warn('[multas] no se pudo reconfirmar el registro:', ePost);
+            }
+            try {
+                if (typeof multaPersistirEnCola === 'function') {
+                    if (origAnulada) await multaPersistirEnCola(origAnulada);
+                    await multaPersistirEnCola(multa);
+                }
+            } catch (eColaReg) {
+                console.warn('[multas] no se pudo reflejar el cambio en Conserjería:', eColaReg);
             }
 
             document.getElementById('formMulta').reset();
@@ -30189,6 +30311,12 @@ document.getElementById('chatForm').onsubmit = function (e) {
                         await persistirListaMultasMes(mesSave, todas);
                     }
                 } catch (ePers) {}
+            }
+            if (stamped && typeof multaPersistirEnCola === 'function') {
+                (todas || []).forEach(function (mStamp) {
+                    if (!mStamp || !multaEstaAnulada(mStamp) || multaEsRegistroAnulacion(mStamp)) return;
+                    multaPersistirEnCola(mStamp).catch(function () {});
+                });
             }
             var paraAlerta = todas;
             try {
@@ -30642,6 +30770,9 @@ document.getElementById('chatForm').onsubmit = function (e) {
                         multaMarcarAnulada(datosAn[idxAn]);
                         if (typeof multaHistorialPush === 'function') multaHistorialPush(datosAn[idxAn], 'anulada', { estado: 'anulada' });
                         await guardarDatosMes('multas', datosAn);
+                        if (typeof multaPersistirEnCola === 'function') {
+                            try { await multaPersistirEnCola(datosAn[idxAn]); } catch (eColaAn) {}
+                        }
                     }
                     await persistirNotificacionCorreoTrasEnvio(
                         'multas',
