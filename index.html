@@ -8331,10 +8331,10 @@
             width: auto !important;
             min-height: 1.95rem !important;
             padding: 0.3rem 0.6rem !important;
-            border: 1px solid var(--m-line) !important;
+            border: 1px solid color-mix(in srgb, var(--acc-tono) 38%, transparent) !important;
             border-radius: 8px !important;
-            background: transparent !important;
-            color: var(--text-secondary) !important;
+            background: color-mix(in srgb, var(--acc-tono) 12%, transparent) !important;
+            color: var(--acc-tono) !important;
             font-size: 0.74rem !important;
             font-weight: 550 !important;
             line-height: 1 !important;
@@ -8343,15 +8343,23 @@
             white-space: nowrap;
             transition: color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease !important;
         }
-        .tab-content .btn.btn-acc--peligro { --acc-tono: #ef4444; }
+        .tab-content .btn.btn-acc--azul { --acc-tono: #3b82f6; }
+        .tab-content .btn.btn-acc--rojo { --acc-tono: #ef4444; }
+        .tab-content .btn.btn-acc--cian { --acc-tono: #06b6d4; }
+        .tab-content .btn.btn-acc--violeta { --acc-tono: #8b5cf6; }
+        .tab-content .btn.btn-acc--verde { --acc-tono: #10b981; }
+        .tab-content .btn.btn-acc--ambar { --acc-tono: #f59e0b; }
+        .tab-content .btn.btn-acc--naranja { --acc-tono: #f97316; }
+        .tab-content .btn.btn-acc--indigo { --acc-tono: #6366f1; }
+        .tab-content .btn.btn-acc--gris { --acc-tono: #94a3b8; }
         .tab-content .btn.btn-acc--solo {
             width: 1.95rem !important;
             padding: 0 !important;
         }
         .tab-content .btn.btn-acc:hover:not(:disabled) {
-            color: var(--acc-tono) !important;
-            border-color: color-mix(in srgb, var(--acc-tono) 45%, transparent) !important;
-            background: color-mix(in srgb, var(--acc-tono) 10%, transparent) !important;
+            color: #fff !important;
+            border-color: var(--acc-tono) !important;
+            background: var(--acc-tono) !important;
             transform: none !important;
         }
         .tab-content .btn.btn-acc:focus-visible {
@@ -8360,8 +8368,8 @@
         }
         .tab-content .btn.btn-acc:active:not(:disabled) { transform: scale(0.95) !important; }
         .btn-acc-ico {
-            width: 0.95rem;
-            height: 0.95rem;
+            width: 1.05rem;
+            height: 1.05rem;
             flex-shrink: 0;
             fill: none;
             stroke: currentColor;
@@ -27364,48 +27372,55 @@ document.getElementById('chatForm').onsubmit = function (e) {
 
         (function botonesAccionConIcono() {
             var I = {
-                editar: '<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/>',
-                eliminar: '<path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/>',
-                enviar: '<path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4Z"/>',
-                correo: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/>',
-                documento: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/><path d="M8 13h8M8 17h5"/>',
+                editar: '<path d="M11 4H5a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2h13a2 2 0 0 0 2-2v-6"/><path d="M18.4 2.6a2 2 0 0 1 2.9 2.9L12 14.8 8 16l1.2-4Z"/>',
+                eliminar: '<path d="M3 6h18"/><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/>',
+                enviarCorreo: '<path d="M22 12V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h9"/><path d="m22 7-10 6L2 7"/><path d="M16 19h6M19 16l3 3-3 3"/>',
+                correoX: '<path d="M22 12V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10"/><path d="m22 7-10 6L2 7"/><path d="m17 17 4 4M21 17l-4 4"/>',
+                correoCheck: '<path d="M22 12V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h9"/><path d="m22 7-10 6L2 7"/><path d="m16 19 2 2 4-4"/>',
+                recibo: '<path d="M4 2v20l2.5-1.5L9 22l3-1.5 3 1.5 2.5-1.5L20 22V2l-2.5 1.5L15 2l-3 1.5L9 2 6.5 3.5Z"/><path d="M8 8h8M8 12h8M8 16h5"/>',
+                documentoX: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/><path d="m9.5 12.5 5 5M14.5 12.5l-5 5"/>',
+                documentoCheck: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/><path d="m9 15 2 2 4-4"/>',
                 ver: '<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/>',
-                cancelar: '<circle cx="12" cy="12" r="9"/><path d="m15 9-6 6M9 9l6 6"/>',
-                check: '<path d="M20 6 9 17l-5-5"/>',
-                rayo: '<path d="M13 2 3 14h9l-1 8 10-12h-9Z"/>',
-                mover: '<path d="M17 3l4 4-4 4"/><path d="M3 7h18"/><path d="M7 21l-4-4 4-4"/><path d="M21 17H3"/>',
-                dinero: '<rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M6 10v4M18 10v4"/>',
+                revisar: '<rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="m9 14 2 2 4-4"/>',
+                calendarioX: '<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="m10 14 4 4M14 14l-4 4"/>',
+                calendarioMover: '<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="M8 16h8M13 13l3 3-3 3"/>',
+                guardar: '<path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z"/><path d="M17 21v-8H7v8M7 3v5h8"/>',
+                checkCirculo: '<circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/>',
+                ampolleta: '<path d="M9 18h6M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7V16h8v-1.3A7 7 0 0 0 12 2Z"/><path d="m13 6-2.5 4h3L11 14"/>',
+                monedas: '<circle cx="12" cy="12" r="9"/><path d="M15 9.5a2.5 2.5 0 0 0-2.5-1.5h-1a2 2 0 0 0 0 4h1a2 2 0 0 1 0 4h-1A2.5 2.5 0 0 1 9 14.5M12 6.5v1.5M12 16v1.5"/>',
                 carro: '<circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/><path d="M2 3h3l2.6 12.4a2 2 0 0 0 2 1.6h8.8a2 2 0 0 0 2-1.6L22 7H6"/>',
-                mas: '<path d="M12 5v14M5 12h14"/>',
-                reloj: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
-                mensaje: '<path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 21l2.1-5.6A8.5 8.5 0 1 1 21 11.5Z"/>',
+                mas: '<circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/>',
+                posponer: '<circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 1.5M5 3 2 6M19 3l3 3"/>',
+                whatsapp: '<path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 21l2.1-5.6A8.5 8.5 0 1 1 21 11.5Z"/><path d="M9 9.5c0 3 2.5 5.5 5.5 5.5l1-1.5-2-1-1 .8a3.5 3.5 0 0 1-1.8-1.8l.8-1-1-2Z"/>',
                 imprimir: '<path d="M6 9V2h12v7"/><rect x="3" y="9" width="18" height="8" rx="2"/><path d="M6 14h12v8H6z"/>',
                 descargar: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/>',
                 restaurar: '<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/>'
             };
             var REGLAS = [
-                { re: /^editar$/, ico: 'editar', solo: true },
-                { re: /^(eliminar|quitar|borrar)$/, ico: 'eliminar', solo: true, peligro: true },
-                { re: /^enviar$/, ico: 'enviar', solo: true },
-                { re: /^(comprobante|recibo|pdf)$/, ico: 'documento', solo: true },
-                { re: /^(ver|revisar|detalle|ver detalle)$/, ico: 'ver', solo: true },
-                { re: /^cancelar$/, ico: 'cancelar', solo: true, peligro: true },
-                { re: /^guardar$/, ico: 'check', solo: true },
-                { re: /cancelacion|anulacion/, ico: 'documento', peligro: true },
-                { re: /confirmacion|faltantes/, ico: 'documento' },
-                { re: /corte|luz/, ico: 'rayo' },
-                { re: /^mes$|traslad/, ico: 'mover' },
-                { re: /abonar|pagar|pago/, ico: 'dinero' },
-                { re: /pedir/, ico: 'carro' },
-                { re: /agregar|anadir|nuevo/, ico: 'mas' },
-                { re: /gestionad|aprobar|confirmar/, ico: 'check' },
-                { re: /dia|posponer/, ico: 'reloj' },
-                { re: /whatsapp|mensaje/, ico: 'mensaje' },
-                { re: /imprimir/, ico: 'imprimir' },
-                { re: /descargar|excel/, ico: 'descargar' },
-                { re: /restaurar|reactivar|reabrir/, ico: 'restaurar' },
-                { re: /enviar|reenviar|correo/, ico: 'enviar' }
+                { re: /^editar$/, ico: 'editar', solo: true, tono: 'azul' },
+                { re: /^(eliminar|quitar|borrar)$/, ico: 'eliminar', solo: true, tono: 'rojo' },
+                { re: /^enviar$/, ico: 'enviarCorreo', solo: true, tono: 'cian' },
+                { re: /^(comprobante|recibo|pdf)$/, ico: 'recibo', solo: true, tono: 'violeta' },
+                { re: /^(ver|detalle|ver detalle)$/, ico: 'ver', solo: true, tono: 'indigo' },
+                { re: /^revisar$/, ico: 'revisar', solo: true, tono: 'indigo' },
+                { re: /^cancelar$/, ico: 'calendarioX', solo: true, tono: 'naranja' },
+                { re: /^guardar$/, ico: 'guardar', solo: true, tono: 'verde' },
+                { re: /cancelacion|anulacion/, ico: 'documentoX', correo: 'correoX', tono: 'rojo' },
+                { re: /confirmacion|faltantes/, ico: 'documentoCheck', correo: 'correoCheck', tono: 'cian' },
+                { re: /corte|luz/, ico: 'ampolleta', tono: 'ambar' },
+                { re: /^mes$|traslad/, ico: 'calendarioMover', tono: 'indigo' },
+                { re: /abonar|pagar|pago/, ico: 'monedas', tono: 'verde' },
+                { re: /pedir/, ico: 'carro', tono: 'naranja' },
+                { re: /agregar|anadir|nuevo/, ico: 'mas', tono: 'verde' },
+                { re: /gestionad|aprobar|confirmar/, ico: 'checkCirculo', tono: 'verde' },
+                { re: /dia|posponer/, ico: 'posponer', tono: 'gris' },
+                { re: /whatsapp|mensaje/, ico: 'whatsapp', tono: 'verde' },
+                { re: /imprimir/, ico: 'imprimir', tono: 'gris' },
+                { re: /descargar|excel/, ico: 'descargar', tono: 'verde' },
+                { re: /restaurar|reactivar|reabrir/, ico: 'restaurar', tono: 'azul' },
+                { re: /enviar|reenviar|correo/, ico: 'enviarCorreo', tono: 'cian' }
             ];
+            var TONOS = ['azul', 'rojo', 'cian', 'violeta', 'verde', 'ambar', 'naranja', 'indigo', 'gris'];
             var SEL = '.tab-content td .btn, .tab-content .tabla-acciones .btn, .tab-content .moroso-acciones .btn';
             function normalizar(t) {
                 return String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '')
@@ -27422,7 +27437,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 }
                 if (!regla) return;
                 var ico = regla.ico;
-                if (ico === 'documento' && /📧|enviar|correo/.test(original + ' ' + norm)) ico = 'correo';
+                if (regla.correo && /📧|enviar|correo/.test(original + ' ' + norm)) ico = regla.correo;
                 var etiqueta = original.replace(/^[^\p{L}\p{N}+]+/u, '').trim() || original;
                 var span = document.createElement('span');
                 span.className = 'btn-acc-txt';
@@ -27431,7 +27446,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 btn.appendChild(span);
                 btn.classList.add('btn-acc');
                 btn.classList.toggle('btn-acc--solo', !!regla.solo);
-                btn.classList.toggle('btn-acc--peligro', !!regla.peligro);
+                TONOS.forEach(function (t) { btn.classList.toggle('btn-acc--' + t, t === regla.tono); });
                 if (!btn.getAttribute('title')) btn.setAttribute('title', etiqueta);
             }
             function recorrer() {
