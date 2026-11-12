@@ -9676,37 +9676,27 @@
                     </table>
                 </div>
 
-                <details class="notif-details">
-                    <summary>Ajustar CCO por tipo de correo</summary>
-                    <p class="notif-hint" style="margin-top: 0;">Elija un reporte o comprobante para activar, heredar el CCO global o agregar copias solo a ese envío.</p>
+                <div class="notif-card" style="margin-top: 1rem;">
+                    <h4>CCO de cada tipo de correo</h4>
+                    <p class="notif-hint">Elija el módulo y marque los correos que deben ir en copia oculta. La selección se guarda sola al marcar o desmarcar.</p>
                     <div class="form-group">
                         <label>Tipo de correo</label>
                         <select id="ccoCorreoModuloSel"></select>
                     </div>
                     <label style="display: flex; align-items: flex-start; gap: 0.45rem; margin-bottom: 0.4rem; cursor: pointer; font-size: 0.8125rem; color: var(--text-secondary);">
                         <input type="checkbox" id="ccoCorreoModuloActivo" checked style="margin-top: 0.15rem; flex-shrink: 0;">
-                        <span>Enviar CCO automático</span>
+                        <span>Enviar CCO automático en este tipo</span>
                     </label>
                     <label style="display: flex; align-items: flex-start; gap: 0.45rem; margin-bottom: 0.7rem; cursor: pointer; font-size: 0.8125rem; color: var(--text-secondary);">
                         <input type="checkbox" id="ccoCorreoModuloIncluirGlobal" checked style="margin-top: 0.15rem; flex-shrink: 0;">
-                        <span>Incluir el CCO global</span>
+                        <span>Sumar también el CCO global (buzón y copias extra de arriba)</span>
                     </label>
-                    <p class="notif-hint" style="margin-bottom: 0.4rem;">Copias extra de este tipo</p>
-                    <table class="notif-tabla" style="margin-bottom: 0.7rem;">
-                        <thead>
-                            <tr>
-                                <th>Nombre</th>
-                                <th>Correo</th>
-                                <th style="text-align: center; width: 96px;">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tbodyCcoCorreoModulo"></tbody>
-                    </table>
-                    <details style="margin-bottom: 0.7rem;">
-                        <summary style="cursor: pointer; font-size: 0.8125rem; font-weight: 650; margin-bottom: 0.45rem;">Agregar desde destinatarios</summary>
-                        <div id="ccoDesdeAdminLista" style="max-height: 160px; overflow: auto; margin-bottom: 0.45rem;"></div>
-                        <button type="button" class="btn btn-primary" id="btnCcoAgregarDesdeAdmin">Agregar seleccionados</button>
-                    </details>
+                    <div style="display: flex; gap: 0.4rem; flex-wrap: wrap; margin-bottom: 0.5rem;">
+                        <button type="button" class="btn btn-secondary" id="btnCcoMarcarTodos" style="padding: 0.35rem 0.7rem; font-size: 0.75rem;">Marcar todos</button>
+                        <button type="button" class="btn btn-secondary" id="btnCcoDesmarcarTodos" style="padding: 0.35rem 0.7rem; font-size: 0.75rem;">Desmarcar todos</button>
+                    </div>
+                    <div id="ccoDesdeAdminLista" style="max-height: 280px; overflow: auto; border: 1px solid var(--border-color); border-radius: 8px; padding: 0.65rem 0.75rem; background: var(--bg-primary);"></div>
+                    <p class="notif-hint" style="margin: 0.7rem 0 0.4rem;">Otro correo que no esté en el listado:</p>
                     <form id="formCcoCorreoModulo">
                         <div class="form-row" style="gap: 0.5rem; align-items: flex-end;">
                             <div class="form-group" style="flex: 1; margin-bottom: 0;">
@@ -9722,12 +9712,22 @@
                             </div>
                         </div>
                     </form>
+                    <table class="notif-tabla" style="margin-top: 0.7rem;">
+                        <thead>
+                            <tr>
+                                <th>Extras de este tipo</th>
+                                <th>Correo</th>
+                                <th style="text-align: center; width: 96px;">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyCcoCorreoModulo"></tbody>
+                    </table>
                     <div style="margin-top: 0.7rem; display: flex; gap: 0.45rem; flex-wrap: wrap;">
-                        <button type="button" class="btn btn-primary" id="btnGuardarCcoCorreoModulo">Guardar</button>
-                        <button type="button" class="btn btn-secondary" id="btnRestablecerCcoCorreoModulo">Usar solo CCO global</button>
+                        <button type="button" class="btn btn-primary" id="btnGuardarCcoCorreoModulo">Guardar selección</button>
+                        <button type="button" class="btn btn-secondary" id="btnRestablecerCcoCorreoModulo">Volver al CCO global</button>
                     </div>
                     <div id="resumenCcoCorreoModulos" style="margin-top: 0.85rem;"></div>
-                </details>
+                </div>
             </div>
 
             <div id="notifSubPlant" class="form-section" hidden>
@@ -14847,7 +14847,7 @@
 
         async function obtenerPlantillasCorreoModulosMap() {
             try {
-                const datos = await obtenerDatos('plantillasCorreoModulos');
+                const datos = await obtenerMapaNube('plantillasCorreoModulos');
                 if (datos && typeof datos === 'object' && !Array.isArray(datos)) return datos;
             } catch (e) {
                 console.warn('plantillasCorreoModulos', e);
@@ -14868,13 +14868,14 @@
             return {
                 activo: o.activo !== false,
                 incluirGlobal: o.incluirGlobal !== false,
+                seleccionExplicit: o.seleccionExplicit === true || correos.length > 0,
                 correos: correos
             };
         }
 
         async function obtenerMapaCcoCorreoModulos() {
             try {
-                const datos = await obtenerDatos('ccoCorreoModulos');
+                const datos = await obtenerMapaNube('ccoCorreoModulos');
                 if (datos && typeof datos === 'object' && !Array.isArray(datos)) return datos;
             } catch (e) {
                 console.warn('ccoCorreoModulos', e);
@@ -24460,9 +24461,58 @@ document.getElementById('chatForm').onsubmit = function (e) {
         }
 
         async function guardarDatos(key, datos) {
+            if (datos && typeof datos === 'object' && !Array.isArray(datos)) {
+                await guardarMapaNube(key, datos);
+                return;
+            }
             let lista = Array.isArray(datos) ? datos : [];
             if (key === 'personalEdificio') lista = aligerarPersonalEdificio(lista);
             await nubeEscribir(key, lista, { modulo: key });
+        }
+
+        async function obtenerMapaNube(docId) {
+            if (!firebaseInitialized || !db) return {};
+            try {
+                const doc = await db.collection('comunidad').doc(docId).get();
+                if (!doc.exists) return {};
+                const data = doc.data() || {};
+                if (data.tipo === 'mapa' && data.datos && typeof data.datos === 'object' && !Array.isArray(data.datos)) {
+                    return data.datos;
+                }
+                if (data.datos && typeof data.datos === 'object' && !Array.isArray(data.datos) && data.tipo !== 'lista') {
+                    return data.datos;
+                }
+                if (Array.isArray(data.datos)) {
+                    const map = {};
+                    data.datos.forEach(function (row) {
+                        const id = row && (row.id || row.moduloId);
+                        if (!id) return;
+                        const copy = Object.assign({}, row);
+                        delete copy.id;
+                        delete copy.moduloId;
+                        map[String(id)] = copy;
+                    });
+                    return map;
+                }
+            } catch (e) {
+                console.warn('obtenerMapaNube', docId, e);
+            }
+            return {};
+        }
+
+        async function guardarMapaNube(docId, mapa) {
+            if (!firebaseInitialized || !db) {
+                throw new Error('No hay conexión con Firestore. Los datos solo se guardan en la nube.');
+            }
+            const plano = JSON.parse(JSON.stringify(mapa && typeof mapa === 'object' && !Array.isArray(mapa) ? mapa : {}));
+            await db.collection('comunidad').doc(docId).set({
+                modulo: docId,
+                tipo: 'mapa',
+                datos: plano,
+                partido: false,
+                partes: 0,
+                actualizado: firebase.firestore.FieldValue.serverTimestamp()
+            });
         }
 
         // Funciones para personalización de la app
@@ -27051,15 +27101,18 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     tipo: 'CCO'
                 });
             };
+            if (cfgMod.seleccionExplicit) {
+                (cfgMod.correos || []).forEach(function (c) {
+                    if (c && c.correo) add(c.nombre, c.correo);
+                });
+                return out;
+            }
             if (cfgMod.incluirGlobal !== false) {
                 if (cfg.activo && cfg.correo) add(cfg.nombre, cfg.correo);
                 (correosConsejeria || []).forEach(function (c) {
                     if (c && c.correo) add(c.nombre, c.correo);
                 });
             }
-            (cfgMod.correos || []).forEach(function (c) {
-                if (c && c.correo) add(c.nombre, c.correo);
-            });
             return out;
         }
         window.obtenerDestinatariosCcoConsejeria = obtenerDestinatariosCcoConsejeria;
@@ -33462,9 +33515,57 @@ document.getElementById('chatForm').onsubmit = function (e) {
             const act = document.getElementById('ccoCorreoModuloActivo');
             const glob = document.getElementById('ccoCorreoModuloIncluirGlobal');
             if (act) act.checked = cfg.activo !== false;
-            if (glob) glob.checked = cfg.incluirGlobal !== false;
+            if (glob) glob.checked = cfg.seleccionExplicit ? false : cfg.incluirGlobal !== false;
             renderizarTablaCcoCorreoModulo(cfg.correos);
             renderizarListaCcoDesdeAdmin();
+        }
+
+        function candidatosChecklistCcoModulo(cfg) {
+            const out = [];
+            const seen = new Set();
+            const add = function (nombre, correo, grupo) {
+                const e = String(correo || '').trim();
+                if (!e || e.indexOf('@') < 0) return;
+                const k = e.toLowerCase();
+                if (seen.has(k)) return;
+                seen.add(k);
+                out.push({
+                    nombre: String(nombre || 'CCO').trim() || 'CCO',
+                    correo: e,
+                    grupo: grupo || 'extra'
+                });
+            };
+            (correosAdministrativos || []).forEach(function (c) {
+                if (c) add(c.nombre, c.correo, 'admin');
+            });
+            const nomB = document.getElementById('correoConsejeriaBuzonNombre');
+            const emB = document.getElementById('correoConsejeriaBuzonEmail');
+            if (emB && String(emB.value || '').trim()) add(nomB && nomB.value, emB.value, 'global');
+            else if (window._configCorreosConsejeriaCache && window._configCorreosConsejeriaCache.correo) {
+                add(window._configCorreosConsejeriaCache.nombre, window._configCorreosConsejeriaCache.correo, 'global');
+            }
+            (correosConsejeria || []).forEach(function (c) {
+                if (c) add(c.nombre, c.correo, 'global');
+            });
+            (cfg && cfg.correos ? cfg.correos : []).forEach(function (c) {
+                if (c) add(c.nombre, c.correo, 'extra');
+            });
+            return out;
+        }
+
+        function setEmailsMarcadosCco(candidatos, cfg) {
+            const marked = new Set();
+            if (cfg && cfg.seleccionExplicit) {
+                (cfg.correos || []).forEach(function (c) {
+                    const k = String((c && c.correo) || '').trim().toLowerCase();
+                    if (k) marked.add(k);
+                });
+            } else {
+                candidatos.forEach(function (c) {
+                    if (c.grupo === 'global') marked.add(c.correo.toLowerCase());
+                });
+            }
+            return marked;
         }
 
         function renderizarListaCcoDesdeAdmin() {
@@ -33473,85 +33574,78 @@ document.getElementById('chatForm').onsubmit = function (e) {
             const id = idCcoCorreoModuloSeleccionado();
             const map = window._ccoCorreoModulosEditable || {};
             const cfg = normalizarConfigCcoModulo(id ? map[id] : null);
-            const ya = new Set((cfg.correos || []).map(function (c) {
-                return String((c && c.correo) || '').trim().toLowerCase();
-            }).filter(Boolean));
-            const lista = Array.isArray(correosAdministrativos) ? correosAdministrativos : [];
-            const disponibles = lista.filter(function (c) {
-                const em = String((c && c.correo) || '').trim();
-                return em && em.indexOf('@') > 0 && !ya.has(em.toLowerCase());
-            });
-            if (!lista.length) {
-                wrap.innerHTML = '<p style="margin: 0; font-size: 0.8125rem; color: var(--text-tertiary); font-style: italic;">No hay correos en el listado administrativo. Agréguelos arriba y vuelva a esta sección.</p>';
+            const candidatos = candidatosChecklistCcoModulo(cfg);
+            const marked = setEmailsMarcadosCco(candidatos, cfg);
+            if (!candidatos.length) {
+                wrap.innerHTML = '<p style="margin: 0; font-size: 0.8125rem; color: var(--text-tertiary); font-style: italic;">Agregue destinatarios o copias globales para poder marcarlos aquí.</p>';
                 return;
             }
-            if (!disponibles.length) {
-                wrap.innerHTML = '<p style="margin: 0; font-size: 0.8125rem; color: var(--text-tertiary); font-style: italic;">Todos los correos administrativos ya están en el CCO de este módulo.</p>';
-                return;
-            }
-            wrap.innerHTML = '<label style="display:flex;align-items:center;gap:0.45rem;margin-bottom:0.45rem;font-size:0.8125rem;cursor:pointer;">' +
-                '<input type="checkbox" id="ccoDesdeAdminTodos"> Seleccionar todos (' + disponibles.length + ')</label>' +
-                disponibles.map(function (c, i) {
-                    const em = String(c.correo || '').replace(/"/g, '&quot;');
-                    const nm = String(c.nombre || 'Administración').replace(/</g, '&lt;');
-                    return '<label style="display:flex;align-items:flex-start;gap:0.45rem;margin-bottom:0.35rem;font-size:0.8125rem;cursor:pointer;">' +
-                        '<input type="checkbox" class="cco-desde-admin-item" data-cco-admin-idx="' + i + '" data-cco-admin-email="' + em + '" style="margin-top:0.15rem;flex-shrink:0;">' +
-                        '<span><strong>' + nm + '</strong><br><span style="color:var(--text-secondary);word-break:break-all;">' + String(c.correo || '').replace(/</g, '&lt;') + '</span></span></label>';
-                }).join('');
-            const todos = document.getElementById('ccoDesdeAdminTodos');
-            if (todos && !todos.dataset.listenerCco) {
-                todos.dataset.listenerCco = '1';
-                todos.addEventListener('change', function () {
-                    wrap.querySelectorAll('.cco-desde-admin-item').forEach(function (cb) { cb.checked = todos.checked; });
+            const grupos = [
+                { id: 'admin', titulo: 'Destinatarios administrativos' },
+                { id: 'global', titulo: 'CCO global (buzón y copias extra)' },
+                { id: 'extra', titulo: 'Correos extra de este tipo' }
+            ];
+            wrap.innerHTML = grupos.map(function (g) {
+                const items = candidatos.filter(function (c) { return c.grupo === g.id; });
+                if (!items.length) return '';
+                return '<p style="margin: 0.35rem 0 0.4rem; font-size: 0.75rem; font-weight: 700; color: var(--text-secondary);">' + g.titulo + '</p>' +
+                    items.map(function (c) {
+                        const em = String(c.correo).replace(/"/g, '&quot;');
+                        const nm = String(c.nombre || 'CCO').replace(/</g, '&lt;');
+                        const on = marked.has(c.correo.toLowerCase()) ? ' checked' : '';
+                        return '<label style="display:flex;align-items:flex-start;gap:0.45rem;margin-bottom:0.4rem;font-size:0.8125rem;cursor:pointer;">' +
+                            '<input type="checkbox" class="cco-desde-admin-item" data-cco-admin-email="' + em + '" data-cco-admin-nombre="' + nm.replace(/"/g, '&quot;') + '"' + on + ' style="margin-top:0.15rem;flex-shrink:0;">' +
+                            '<span><strong>' + nm + '</strong><br><span style="color:var(--text-secondary);word-break:break-all;">' + String(c.correo).replace(/</g, '&lt;') + '</span></span></label>';
+                    }).join('');
+            }).join('') || '<p style="margin: 0; font-size: 0.8125rem; color: var(--text-tertiary);">No hay correos para marcar.</p>';
+            if (!wrap.dataset.listenerCcoCheck) {
+                wrap.dataset.listenerCcoCheck = '1';
+                wrap.addEventListener('change', function (ev) {
+                    const t = ev.target;
+                    if (!t || !t.classList || !t.classList.contains('cco-desde-admin-item')) return;
+                    guardarSeleccionChecklistCcoModulo();
                 });
             }
         }
 
-        async function agregarCcoDesdeAdminSeleccionados() {
+        function leerCorreosMarcadosChecklistCco() {
             const wrap = document.getElementById('ccoDesdeAdminLista');
-            if (!wrap) return;
-            const id = idCcoCorreoModuloSeleccionado();
-            if (!id) return;
-            const checks = Array.from(wrap.querySelectorAll('.cco-desde-admin-item:checked'));
-            if (!checks.length) {
-                mostrarAlerta('Marque al menos un correo administrativo.', 'Error');
-                return;
-            }
-            const mapaAdmin = {};
-            (correosAdministrativos || []).forEach(function (c) {
-                const k = String((c && c.correo) || '').trim().toLowerCase();
-                if (k) mapaAdmin[k] = c;
-            });
-            const nuevos = [];
-            const seen = new Set();
-            checks.forEach(function (cb) {
-                const em = String(cb.getAttribute('data-cco-admin-email') || '').trim();
-                const k = em.toLowerCase();
-                if (!em || seen.has(k)) return;
-                seen.add(k);
-                const src = mapaAdmin[k] || {};
-                nuevos.push({
-                    nombre: String(src.nombre || '').trim() || (em.split('@')[0] || 'Administración'),
-                    correo: em
-                });
-            });
+            if (!wrap) return [];
+            return Array.from(wrap.querySelectorAll('.cco-desde-admin-item:checked')).map(function (cb) {
+                return {
+                    nombre: String(cb.getAttribute('data-cco-admin-nombre') || '').trim() || 'CCO',
+                    correo: String(cb.getAttribute('data-cco-admin-email') || '').trim()
+                };
+            }).filter(function (c) { return c.correo; });
+        }
+
+        async function guardarSeleccionChecklistCcoModulo() {
+            const act = document.getElementById('ccoCorreoModuloActivo');
             try {
-                const n = await agregarCorreosCcoModuloLista(nuevos);
-                if (n > 0) {
-                    mostrarAlerta(n === 1 ? 'Correo administrativo agregado al CCO de este módulo' : (n + ' correos administrativos agregados al CCO de este módulo'), 'Éxito');
-                }
+                await persistirConfigCcoModuloActual({
+                    activo: !!(act && act.checked),
+                    incluirGlobal: false,
+                    seleccionExplicit: true,
+                    correos: leerCorreosMarcadosChecklistCco()
+                }, true);
             } catch (e) {
-                mostrarAlerta('No se pudieron agregar: ' + (e && e.message ? e.message : 'error'), 'Error');
+                mostrarAlerta('No se pudo guardar el CCO de este tipo: ' + (e && e.message ? e.message : 'error'), 'Error');
             }
         }
-        window.agregarCcoDesdeAdminSeleccionados = agregarCcoDesdeAdminSeleccionados;
+
+        async function marcarTodosCcoModulo(marcar) {
+            const wrap = document.getElementById('ccoDesdeAdminLista');
+            if (!wrap) return;
+            wrap.querySelectorAll('.cco-desde-admin-item').forEach(function (cb) { cb.checked = !!marcar; });
+            await guardarSeleccionChecklistCcoModulo();
+        }
 
         function renderizarTablaCcoCorreoModulo(correos) {
             const tbody = document.getElementById('tbodyCcoCorreoModulo');
             if (!tbody) return;
             const lista = Array.isArray(correos) ? correos : [];
             if (!lista.length) {
-                tbody.innerHTML = '<tr><td colspan="3" style="padding: 1.25rem; text-align: center; color: var(--text-tertiary); font-style: italic;">Sin copias extra. Si el CCO está activo y hereda el global, se usan las direcciones de conserjería.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="3" style="padding: 0.85rem; text-align: center; color: var(--text-tertiary); font-style: italic;">Sin extras. Use el listado de arriba para marcar varios correos.</td></tr>';
                 return;
             }
             tbody.innerHTML = lista.map(function (c, index) {
@@ -33572,13 +33666,8 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 const personalizado = Object.prototype.hasOwnProperty.call(map, m.id);
                 let estado;
                 if (!cfg.activo) estado = 'CCO desactivado';
-                else if (!personalizado) estado = 'CCO global';
-                else {
-                    const partes = [];
-                    partes.push(cfg.incluirGlobal ? 'global' : 'sin global');
-                    if (cfg.correos.length) partes.push(cfg.correos.length + ' extra');
-                    estado = partes.join(' + ');
-                }
+                else if (cfg.seleccionExplicit) estado = cfg.correos.length + ' correo(s)';
+                else estado = 'CCO global';
                 return '<tr><td style="padding: 0.4rem 0.55rem; border-bottom: 1px solid var(--border-color);">' + String(m.label).replace(/</g, '&lt;') + '</td>' +
                     '<td style="padding: 0.4rem 0.55rem; border-bottom: 1px solid var(--border-color); color: var(--text-secondary); font-size: 0.8125rem;">' + estado.replace(/</g, '&lt;') + '</td></tr>';
             }).join('');
@@ -33593,26 +33682,26 @@ document.getElementById('chatForm').onsubmit = function (e) {
             if (!id) return;
             const map = Object.assign({}, await obtenerMapaCcoCorreoModulos());
             map[id] = normalizarConfigCcoModulo(cfg);
-            await guardarDatos('ccoCorreoModulos', map);
+            await guardarMapaNube('ccoCorreoModulos', map);
             window._ccoCorreoModulosEditable = map;
-            actualizarCamposCcoCorreoModuloUI();
+            renderizarTablaCcoCorreoModulo(map[id].correos);
             renderizarResumenCcoCorreoModulos();
-            if (!silencioso) mostrarAlerta('CCO de este módulo guardado. Se aplicará en los próximos envíos.', 'Éxito');
+            if (!silencioso) mostrarAlerta('CCO de este tipo guardado. Se usará al enviar ese correo.', 'Éxito');
         }
 
         async function guardarCcoCorreoModuloDesdeUI() {
-            const id = idCcoCorreoModuloSeleccionado();
-            if (!id) return;
-            const map = window._ccoCorreoModulosEditable || {};
-            const prev = normalizarConfigCcoModulo(map[id]);
-            const act = document.getElementById('ccoCorreoModuloActivo');
-            const glob = document.getElementById('ccoCorreoModuloIncluirGlobal');
             try {
+                const act = document.getElementById('ccoCorreoModuloActivo');
+                const glob = document.getElementById('ccoCorreoModuloIncluirGlobal');
+                const marcados = leerCorreosMarcadosChecklistCco();
+                const explicit = marcados.length > 0 || (glob && !glob.checked);
                 await persistirConfigCcoModuloActual({
                     activo: !!(act && act.checked),
-                    incluirGlobal: !!(glob && glob.checked),
-                    correos: prev.correos
+                    incluirGlobal: glob ? !!glob.checked && !explicit : false,
+                    seleccionExplicit: explicit,
+                    correos: marcados
                 }, false);
+                renderizarListaCcoDesdeAdmin();
             } catch (e) {
                 mostrarAlerta('No se pudo guardar el CCO del módulo: ' + (e && e.message ? e.message : 'error'), 'Error');
             }
@@ -33647,9 +33736,11 @@ document.getElementById('chatForm').onsubmit = function (e) {
             prev.correos = (prev.correos || []).concat(nuevos);
             await persistirConfigCcoModuloActual({
                 activo: !!(act && act.checked),
-                incluirGlobal: !!(glob && glob.checked),
+                incluirGlobal: false,
+                seleccionExplicit: true,
                 correos: prev.correos
             }, true);
+            renderizarListaCcoDesdeAdmin();
             return nuevos.length;
         }
 
@@ -33696,9 +33787,11 @@ document.getElementById('chatForm').onsubmit = function (e) {
             try {
                 await persistirConfigCcoModuloActual({
                     activo: !!(act && act.checked),
-                    incluirGlobal: !!(glob && glob.checked),
+                    incluirGlobal: false,
+                    seleccionExplicit: prev.correos.length > 0,
                     correos: prev.correos
                 }, true);
+                renderizarListaCcoDesdeAdmin();
                 mostrarAlerta('Correo eliminado del CCO de este módulo', 'Éxito');
             } catch (e) {
                 mostrarAlerta('No se pudo eliminar: ' + (e && e.message ? e.message : 'error'), 'Error');
@@ -33714,7 +33807,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
             try {
                 const map = Object.assign({}, await obtenerMapaCcoCorreoModulos());
                 delete map[id];
-                await guardarDatos('ccoCorreoModulos', map);
+                await guardarMapaNube('ccoCorreoModulos', map);
                 window._ccoCorreoModulosEditable = map;
                 actualizarCamposCcoCorreoModuloUI();
                 renderizarResumenCcoCorreoModulos();
@@ -35099,8 +35192,48 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 if (btnGuardarCcoMod) btnGuardarCcoMod.addEventListener('click', function () { guardarCcoCorreoModuloDesdeUI(); });
                 const btnRestCcoMod = document.getElementById('btnRestablecerCcoCorreoModulo');
                 if (btnRestCcoMod) btnRestCcoMod.addEventListener('click', function () { restablecerCcoCorreoModuloDesdeUI(); });
-                const btnCcoAdmin = document.getElementById('btnCcoAgregarDesdeAdmin');
-                if (btnCcoAdmin) btnCcoAdmin.addEventListener('click', function () { agregarCcoDesdeAdminSeleccionados(); });
+                const btnCcoTodos = document.getElementById('btnCcoMarcarTodos');
+                if (btnCcoTodos) btnCcoTodos.addEventListener('click', function () { marcarTodosCcoModulo(true); });
+                const btnCcoNinguno = document.getElementById('btnCcoDesmarcarTodos');
+                if (btnCcoNinguno) btnCcoNinguno.addEventListener('click', function () { marcarTodosCcoModulo(false); });
+                const chkCcoAct = document.getElementById('ccoCorreoModuloActivo');
+                if (chkCcoAct && !chkCcoAct.dataset.listenerCco) {
+                    chkCcoAct.dataset.listenerCco = '1';
+                    chkCcoAct.addEventListener('change', async function () {
+                        const id = idCcoCorreoModuloSeleccionado();
+                        if (!id) return;
+                        const map = window._ccoCorreoModulosEditable || {};
+                        const prev = normalizarConfigCcoModulo(map[id]);
+                        try {
+                            await persistirConfigCcoModuloActual(Object.assign({}, prev, { activo: !!chkCcoAct.checked }), true);
+                        } catch (eAct) {
+                            mostrarAlerta('No se pudo guardar: ' + (eAct && eAct.message ? eAct.message : 'error'), 'Error');
+                        }
+                    });
+                }
+                const chkCcoGlob = document.getElementById('ccoCorreoModuloIncluirGlobal');
+                if (chkCcoGlob && !chkCcoGlob.dataset.listenerCco) {
+                    chkCcoGlob.dataset.listenerCco = '1';
+                    chkCcoGlob.addEventListener('change', async function () {
+                        const id = idCcoCorreoModuloSeleccionado();
+                        if (!id) return;
+                        try {
+                            if (chkCcoGlob.checked) {
+                                const map = Object.assign({}, await obtenerMapaCcoCorreoModulos());
+                                delete map[id];
+                                await guardarMapaNube('ccoCorreoModulos', map);
+                                window._ccoCorreoModulosEditable = map;
+                                actualizarCamposCcoCorreoModuloUI();
+                                renderizarResumenCcoCorreoModulos();
+                                return;
+                            }
+                            await guardarSeleccionChecklistCcoModulo();
+                            actualizarCamposCcoCorreoModuloUI();
+                        } catch (eGlob) {
+                            mostrarAlerta('No se pudo guardar: ' + (eGlob && eGlob.message ? eGlob.message : 'error'), 'Error');
+                        }
+                    });
+                }
                 const wrapNotif = document.getElementById('notificaciones');
                 if (wrapNotif && !wrapNotif.dataset.listenerSub) {
                     wrapNotif.dataset.listenerSub = '1';
