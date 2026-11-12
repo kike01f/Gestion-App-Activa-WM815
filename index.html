@@ -1663,14 +1663,14 @@
         }
         .tabla-acciones .badge-notif-correo,
         .moroso-acciones .badge-notif-correo {
-            flex: 0 0 8.15rem;
+            flex: 0 0 auto;
             display: inline-flex;
             align-items: center;
             justify-content: center;
             box-sizing: border-box;
-            width: 8.15rem;
-            min-width: 8.15rem;
-            max-width: 8.15rem;
+            width: auto;
+            min-width: 0;
+            max-width: none;
             height: 1.85rem;
             min-height: 1.85rem;
             margin: 0;
@@ -8619,6 +8619,37 @@
             align-items: center;
             gap: 0.28rem !important;
             width: max-content;
+        }
+        .tab-content .tabla-acciones:has(> .tabla-acciones-fila),
+        .tab-content .moroso-acciones:has(> .tabla-acciones-fila) {
+            display: inline-flex !important;
+            flex-direction: column !important;
+            flex-wrap: nowrap !important;
+            align-items: stretch !important;
+            justify-content: flex-start !important;
+            gap: 0.28rem !important;
+            width: max-content !important;
+            min-width: 0 !important;
+            max-width: none !important;
+        }
+        .tabla-acciones-fila {
+            display: flex;
+            flex-flow: row nowrap;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 0.28rem;
+            width: max-content;
+        }
+        .tab-content .tabla-acciones > .badge-notif-correo,
+        .tab-content .moroso-acciones > .badge-notif-correo {
+            flex: 0 0 auto !important;
+            align-self: stretch !important;
+            box-sizing: border-box;
+            width: auto !important;
+            min-width: 0 !important;
+            max-width: none !important;
+            height: 1.85rem !important;
+            margin: 0 !important;
         }
         .tab-content .tabla-acciones .btn.btn-acc,
         .tab-content .moroso-acciones .btn.btn-acc {
@@ -28388,7 +28419,31 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 TONOS.forEach(function (t) { btn.classList.toggle('btn-acc--' + t, t === regla.tono); });
                 if (!btn.getAttribute('title')) btn.setAttribute('title', etiqueta);
             }
+            function agruparFilaAcciones(box) {
+                if (!box || box.querySelector(':scope > .tabla-acciones-fila')) return;
+                var badge = null;
+                var hijos = box.children;
+                for (var i = 0; i < hijos.length; i++) {
+                    if (hijos[i].classList && hijos[i].classList.contains('badge-notif-correo')) {
+                        badge = hijos[i];
+                        break;
+                    }
+                }
+                if (!badge) return;
+                var fila = document.createElement('div');
+                fila.className = 'tabla-acciones-fila';
+                var nodo = badge.nextSibling;
+                while (nodo) {
+                    var sig = nodo.nextSibling;
+                    fila.appendChild(nodo);
+                    nodo = sig;
+                }
+                if (!fila.childNodes.length) return;
+                box.appendChild(fila);
+            }
             function recorrer() {
+                var cajas = document.querySelectorAll('.tabla-acciones, .moroso-acciones');
+                for (var c = 0; c < cajas.length; c++) agruparFilaAcciones(cajas[c]);
                 var lista = document.querySelectorAll(SEL);
                 for (var i = 0; i < lista.length; i++) {
                     if (!lista[i].querySelector('.btn-acc-ico')) decorar(lista[i]);
