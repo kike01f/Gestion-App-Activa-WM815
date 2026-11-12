@@ -1604,7 +1604,7 @@
         .tabla-acciones,
         .moroso-acciones {
             display: flex;
-            flex-flow: row wrap;
+            flex-flow: row nowrap;
             align-items: center;
             justify-content: flex-start;
             gap: 0.28rem;
@@ -1615,7 +1615,9 @@
         td:has(.tabla-acciones),
         td:has(.moroso-acciones) {
             vertical-align: middle;
-            white-space: nowrap;
+            white-space: nowrap !important;
+            word-break: normal !important;
+            overflow-wrap: normal !important;
         }
         .tabla-acciones .btn,
         .moroso-acciones .btn,
@@ -1661,21 +1663,28 @@
         }
         .tabla-acciones .badge-notif-correo,
         .moroso-acciones .badge-notif-correo {
-            flex: 1 0 100%;
+            flex: 0 0 8.15rem;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            width: auto;
-            min-height: 1.35rem;
+            box-sizing: border-box;
+            width: 8.15rem;
+            min-width: 8.15rem;
+            max-width: 8.15rem;
+            height: 1.85rem;
+            min-height: 1.85rem;
+            margin: 0;
+            padding: 0 0.35rem;
             font-size: 0.62rem;
             font-weight: 700;
             line-height: 1;
-            padding: 0.2rem 0.45rem;
-            border-radius: 6px;
+            border-radius: 8px;
             text-align: center;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
             background: #f3f4f6;
             color: #6b7280;
-            white-space: nowrap;
         }
         .tabla-acciones .badge-notif-correo--ok,
         .moroso-acciones .badge-notif-correo--ok {
@@ -7560,7 +7569,7 @@
             .tabla-acciones,
             .moroso-acciones {
                 display: flex !important;
-                flex-flow: row wrap;
+                flex-flow: row nowrap;
                 align-items: center;
                 width: max-content;
                 max-width: none;
@@ -8606,8 +8615,30 @@
         .tab-content .tabla-acciones:has(.btn-acc),
         .tab-content .moroso-acciones:has(.btn-acc) {
             display: flex !important;
-            flex-wrap: wrap;
-            gap: 0.3rem !important;
+            flex-flow: row nowrap;
+            align-items: center;
+            gap: 0.28rem !important;
+            width: max-content;
+        }
+        .tab-content .tabla-acciones .btn.btn-acc,
+        .tab-content .moroso-acciones .btn.btn-acc {
+            width: 1.85rem !important;
+            height: 1.85rem !important;
+            min-width: 1.85rem !important;
+            max-width: 1.85rem !important;
+            min-height: 1.85rem !important;
+            padding: 0 !important;
+            flex: 0 0 1.85rem !important;
+            gap: 0 !important;
+        }
+        .tab-content .tabla-acciones .btn .btn-acc-txt,
+        .tab-content .moroso-acciones .btn .btn-acc-txt {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            overflow: hidden;
+            clip: rect(0 0 0 0);
+            white-space: nowrap;
         }
 
         /* ===== Animación al cambiar de módulo ===== */
@@ -14436,18 +14467,19 @@
             const lista = obtenerNotificacionesCorreoRegistro(reg);
             const u = lista.length ? lista[lista.length - 1] : null;
             if (!u || !u.fecha) {
-                return '<span class="badge-notif-correo">Sin notificar</span>';
+                return '<span class="badge-notif-correo" title="Sin notificar">Sin notificar</span>';
             }
             const fechaTxt = typeof formatearFecha === 'function' ? formatearFecha(u.fecha) : String(u.fecha);
+            const corta = /^\d{2}\/\d{2}/.test(fechaTxt) ? fechaTxt.slice(0, 5) : fechaTxt;
             const hora = u.hora ? String(u.hora).slice(0, 5) : '';
             const n = lista.length;
             const nTxt = n > 1 ? ' · ' + n + ' envíos' : '';
-            const title = [u.tipo || 'comprobante', u.asunto, u.destinatarios, u.mailId ? ('Ref. ' + u.mailId) : '']
+            const title = ['Notificado ' + fechaTxt + (hora ? ' ' + hora : '') + nTxt, u.tipo || 'comprobante', u.asunto, u.destinatarios, u.mailId ? ('Ref. ' + u.mailId) : '']
                 .filter(Boolean)
                 .join(' · ')
                 .replace(/&/g, '&amp;')
                 .replace(/"/g, '&quot;');
-            return '<span class="badge-notif-correo badge-notif-correo--ok" title="' + title + '">Notificado ' + fechaTxt + (hora ? ' ' + hora : '') + nTxt + '</span>';
+            return '<span class="badge-notif-correo badge-notif-correo--ok" title="' + title + '">Notif. ' + corta + (hora ? ' ' + hora : '') + '</span>';
         }
 
         async function registrarNotificacionCorreoRegistro(coleccion, idRegistro, payload) {
@@ -28314,7 +28346,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 { re: /cancelacion|anulacion/, ico: 'documentoX', correo: 'correoX', tono: 'rojo' },
                 { re: /confirmacion|faltantes/, ico: 'documentoCheck', correo: 'correoCheck', tono: 'cian' },
                 { re: /corte|luz/, ico: 'ampolleta', tono: 'ambar' },
-                { re: /^mes$|traslad/, ico: 'calendarioMover', tono: 'indigo' },
+                { re: /^mes$|traslad/, ico: 'calendarioMover', solo: true, tono: 'indigo' },
                 { re: /abonar|pagar|pago/, ico: 'monedas', tono: 'verde' },
                 { re: /pedir/, ico: 'carro', tono: 'naranja' },
                 { re: /agregar|anadir|nuevo/, ico: 'mas', tono: 'verde' },
