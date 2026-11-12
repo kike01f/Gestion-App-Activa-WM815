@@ -26627,23 +26627,61 @@ document.getElementById('chatForm').onsubmit = function (e) {
             nubeOlvidarLocal(docId);
         }
 
+        function errorEsPermisoFirestore(error) {
+            var codigo = error && error.code ? String(error.code) : '';
+            var mensaje = error && error.message ? String(error.message) : '';
+            return codigo === 'permission-denied' || codigo === 'unauthenticated' || /insufficient permissions/i.test(mensaje);
+        }
+
+        function esperarSesionGestion() {
+            return new Promise(function (resolve) {
+                var usuario = null;
+                try { usuario = (typeof auth !== 'undefined' && auth) ? auth.currentUser : null; } catch (eU) {}
+                function listo(user) {
+                    if (!user || typeof user.getIdToken !== 'function') {
+                        resolve(false);
+                        return;
+                    }
+                    user.getIdToken().then(function () { resolve(true); }).catch(function () { resolve(false); });
+                }
+                if (usuario) {
+                    listo(usuario);
+                    return;
+                }
+                if (typeof auth !== 'undefined' && auth && typeof auth.onAuthStateChanged === 'function') {
+                    var unsub = auth.onAuthStateChanged(function (user) {
+                        if (!user) return;
+                        try { if (typeof unsub === 'function') unsub(); } catch (eUn) {}
+                        listo(user);
+                    });
+                    return;
+                }
+                resolve(false);
+            });
+        }
+
         async function nubeLeer(docId) {
             if (!firebaseInitialized || !db) return { existe: false, datos: [] };
-            const ref = db.collection('comunidad').doc(docId);
-            const doc = await ref.get();
-            if (!doc.exists) return { existe: false, datos: [] };
-            const data = doc.data() || {};
-            if (data.partido === true) {
-                const n = data.partes || 0;
-                const datos = [];
-                for (let i = 0; i < n; i++) {
-                    const parte = await db.collection('comunidad').doc(nubeIdParte(docId, i)).get();
-                    const arr = parte.exists ? parte.data().datos : null;
-                    if (Array.isArray(arr)) datos.push.apply(datos, arr);
+            try {
+                const ref = db.collection('comunidad').doc(docId);
+                const doc = await ref.get();
+                if (!doc.exists) return { existe: false, datos: [] };
+                const data = doc.data() || {};
+                if (data.partido === true) {
+                    const n = data.partes || 0;
+                    const datos = [];
+                    for (let i = 0; i < n; i++) {
+                        const parte = await db.collection('comunidad').doc(nubeIdParte(docId, i)).get();
+                        const arr = parte.exists ? parte.data().datos : null;
+                        if (Array.isArray(arr)) datos.push.apply(datos, arr);
+                    }
+                    return { existe: true, datos: datos };
                 }
-                return { existe: true, datos: datos };
+                return { existe: true, datos: nubeNormalizarLista(data) };
+            } catch (error) {
+                if (errorEsPermisoFirestore(error)) return { existe: false, datos: [] };
+                throw error;
             }
-            return { existe: true, datos: nubeNormalizarLista(data) };
         }
 
         async function nubeEliminar(docId) {
@@ -26788,7 +26826,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                         };
                     }
                 } catch (error) {
-                    console.error('Error al leer personalización de Firestore:', error);
+                    if (!errorEsPermisoFirestore(error)) console.error('Error al leer personalización de Firestore:', error);
                 }
             }
             
@@ -29592,7 +29630,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                         return data.cerrado === true;
                     }
                 } catch (error) {
-                    console.error('Error al leer estado de cierre de Firestore:', error);
+                    if (!errorEsPermisoFirestore(error)) console.error('Error al leer estado de cierre de Firestore:', error);
                 }
             }
             
@@ -33754,7 +33792,9 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 local = raw ? JSON.parse(raw) : [];
             } catch (eL) { local = []; }
             if (!Array.isArray(local)) local = [];
-            if (typeof firebaseInitialized !== 'undefined' && firebaseInitialized && typeof db !== 'undefined' && db) {
+            var usuarioTomb = null;
+            try { usuarioTomb = (typeof auth !== 'undefined' && auth) ? auth.currentUser : null; } catch (eTu) {}
+            if (usuarioTomb && typeof firebaseInitialized !== 'undefined' && firebaseInitialized && typeof db !== 'undefined' && db) {
                 try {
                     var doc = await db.collection('comunidad').doc('multas_eliminadas').get();
                     var remoto = [];
@@ -33773,7 +33813,9 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     local = mezclado;
                     nubeOlvidarLocal('multas_eliminadas');
                 } catch (eFs) {
-                    console.warn('[multas] tombstones:', eFs);
+                    if (typeof errorEsPermisoFirestore !== 'function' || !errorEsPermisoFirestore(eFs)) {
+                        console.warn('[multas] tombstones:', eFs);
+                    }
                 }
             }
             window._multasTombstones = local;
@@ -34092,6 +34134,9 @@ document.getElementById('chatForm').onsubmit = function (e) {
             };
         }
         async function sincronizarMultasDesdeConserjeria() {
+            var usuarioSync = null;
+            try { usuarioSync = (typeof auth !== 'undefined' && auth) ? auth.currentUser : null; } catch (eSu) {}
+            if (!usuarioSync) return 0;
             if (window._multasSyncLock) return window._multasSyncLock;
             var job = (async function () {
                 try {
@@ -34264,7 +34309,9 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     }
                     return creadas;
                 } catch (eSync) {
-                    console.warn('[multas] sync Conserjería:', eSync);
+                    if (typeof errorEsPermisoFirestore !== 'function' || !errorEsPermisoFirestore(eSync)) {
+                        console.warn('[multas] sync Conserjería:', eSync);
+                    }
                     return 0;
                 } finally {
                     if (window._multasSyncLock === job) window._multasSyncLock = null;
@@ -48476,7 +48523,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                             }
                         }
                     } catch (error) {
-                        console.error('Error al leer config-modulos de Firestore:', error);
+                        if (!errorEsPermisoFirestore(error)) console.error('Error al leer config-modulos de Firestore:', error);
                     }
                 }
                 
@@ -63368,7 +63415,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 // Actualizar la vista con los recordatorios
                 actualizarVistaArturito(contenedor, saludo, emoji, consejos, recordatorios);
             }).catch(error => {
-                console.error('Error al cargar datos de Arturito:', error);
+                if (!errorEsPermisoFirestore(error)) console.error('Error al cargar datos de Arturito:', error);
                 const detalle = document.getElementById('arturitoMensajesDetalle2') || document.getElementById('arturitoMensajesDetalle');
                 if (detalle) {
                     detalle.innerHTML += '<div style="font-size: 0.75rem; color: var(--text-tertiary); margin-top: 0.5rem;">⚠️ Algunos datos no se pudieron cargar</div>';
@@ -64376,7 +64423,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                         }
                     });
                 } catch (error) {
-                    console.error('Error al buscar meses en Firestore:', error);
+                    if (!errorEsPermisoFirestore(error)) console.error('Error al buscar meses en Firestore:', error);
                 }
             }
             
@@ -64424,7 +64471,11 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 }
             }
             try {
-                if (typeof cargarDashboard === 'function') cargarDashboard();
+                if (typeof cargarDashboard === 'function') {
+                    Promise.resolve(cargarDashboard()).catch(function (eDash) {
+                        if (!errorEsPermisoFirestore(eDash)) console.error('Error al cargar el panel:', eDash);
+                    });
+                }
                 lanzar('mudanzas', typeof cargarMudanzas === 'function' ? cargarMudanzas : null);
                 lanzar('aperturas', typeof cargarAperturas === 'function' ? cargarAperturas : null);
                 lanzar('tarjetas', typeof cargarTarjetas === 'function' ? cargarTarjetas : null);
@@ -64434,9 +64485,13 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 lanzar('lecturasAgua', typeof cargarLecturasAgua === 'function' ? cargarLecturasAgua : null);
                 lanzar('caja', typeof cargarCaja === 'function' ? cargarCaja : null);
                 lanzar('mantenciones', typeof cargarProveedores === 'function' ? cargarProveedores : null);
-                if (typeof cargarSelectProveedores === 'function') cargarSelectProveedores();
+                if (typeof cargarSelectProveedores === 'function') {
+                    Promise.resolve(cargarSelectProveedores()).catch(function () {});
+                }
                 lanzar('mantenciones', typeof cargarMantenciones === 'function' ? cargarMantenciones : null);
-                if (typeof cargarSelectPersonalAseo === 'function') cargarSelectPersonalAseo();
+                if (typeof cargarSelectPersonalAseo === 'function') {
+                    Promise.resolve(cargarSelectPersonalAseo()).catch(function () {});
+                }
                 lanzar('pagos-aseo', typeof cargarPagosAseo === 'function' ? cargarPagosAseo : null);
                 lanzar('pagos-aseo', typeof cargarRegistrosEspaciosPendientes === 'function' ? cargarRegistrosEspaciosPendientes : null);
                 lanzar('insumos', typeof cargarInsumos === 'function' ? cargarInsumos : null);
@@ -64956,7 +65011,11 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 document.body.classList.add('app-ready');
             });
             cargarTema().catch(function() {});
-            window.promiseVisibilidadModulos = actualizarVisibilidadModulos().catch(function(e) {
+            window.promiseVisibilidadModulos = esperarSesionGestion().then(function (ok) {
+                if (!ok || typeof actualizarVisibilidadModulos !== 'function') return;
+                return actualizarVisibilidadModulos();
+            }).catch(function(e) {
+                if (errorEsPermisoFirestore(e)) return;
                 console.error('Visibilidad módulos:', e);
             });
             requestAnimationFrame(function() {
@@ -65842,17 +65901,17 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 if (typeof window.inicializarFiltrosInteligentes === 'function') {
                     window.inicializarFiltrosInteligentes();
                 }
-                // Cargar todos los datos al iniciar (sin retraso para que el panel muestre info cuanto antes)
-                if (typeof cargarDatos === 'function') {
-                    try {
-                        cargarDatos();
-                    } catch (err) {
-                        console.error('Error al cargar datos:', err);
-                        if (typeof mostrarToast === 'function') {
-                            mostrarToast('Error al cargar algunos datos. Por favor, recarga la página.', 'error', 'Error', 5000);
-                        }
+                // Cargar datos solo cuando la sesión de Gestión ya tiene token
+                esperarSesionGestion().then(function (ok) {
+                    if (!ok || typeof cargarDatos !== 'function') return;
+                    return cargarDatos();
+                }).catch(function (err) {
+                    if (errorEsPermisoFirestore(err)) return;
+                    console.error('Error al cargar datos:', err);
+                    if (typeof mostrarToast === 'function') {
+                        mostrarToast('Error al cargar algunos datos. Por favor, recarga la página.', 'error', 'Error', 5000);
                     }
-                }
+                });
             } catch (error) {
                 console.error('Error en inicialización:', error);
                 // Mostrar error al usuario
