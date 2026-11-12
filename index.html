@@ -7617,6 +7617,13 @@
         body.permisos-bloqueado .tab-content { display: none !important; }
         #permisosBloqueo { display: none; max-width: 32rem; margin: 4rem auto; padding: 1.5rem; border: 1px solid var(--border-color); border-radius: 12px; background: var(--bg-secondary); }
         body.permisos-bloqueado #permisosBloqueo { display: block !important; }
+        body.permisos-solo-lectura #avisoPermisoSoloLectura { display: block !important; }
+        body.permisos-solo-lectura #dashboard #btnCerrarMes,
+        body.permisos-solo-lectura #dashboard #btnReabrirMes,
+        body.permisos-solo-lectura #dashboard #btnEliminarMes,
+        body.permisos-solo-lectura #dashboard #herramientasAppContent,
+        body.permisos-solo-lectura #dashboard .dashboard2-herramientas-grid { pointer-events: none; opacity: 0.45; }
+        #avisoPermisoSoloLectura { display: none; margin: 0 0 0.85rem; padding: 0.55rem 0.85rem; border-radius: 8px; border: 1px solid rgba(96,165,250,0.4); background: rgba(37,99,235,0.18); font-size: 0.82rem; font-weight: 600; color: #dbeafe; }
         .perfil-avatar { display: inline-flex; align-items: center; justify-content: center; width: 2.1rem; height: 2.1rem; border-radius: 50%; background: #334155; font-size: 1.05rem; overflow: hidden; flex-shrink: 0; }
         .perfil-avatar--sm { width: 1.55rem; height: 1.55rem; font-size: 0.85rem; }
         .perfil-avatar--lg { width: 4.4rem; height: 4.4rem; font-size: 2rem; }
@@ -8003,6 +8010,7 @@
             <div id="avisoSoloLecturaMesArchivado" style="display: none; margin: 0 0 1rem 0; padding: 0.625rem 1rem; background: linear-gradient(90deg, rgba(245, 158, 11, 0.12) 0%, rgba(251, 191, 36, 0.08) 100%); border: 1px solid rgba(245, 158, 11, 0.35); border-radius: 8px; font-size: 0.875rem; color: #422006; font-weight: 600;">
                 📋 Consultando mes archivado (solo lectura). Los datos no se pueden editar. Para editar, reabra el mes desde el Panel de Control.
             </div>
+            <div id="avisoPermisoSoloLectura">Su cuenta es de solo visualización: puede consultar el panel y los módulos, pero no registrar ni modificar datos.</div>
 
             <!-- PANEL DE CONTROL (único) -->
         <div id="dashboard" class="tab-content active">
@@ -10831,6 +10839,14 @@
                             <select id="permisosCfgNivel"></select>
                         </div>
                         <p id="permisosCfgNivelDesc" class="perso-hint"></p>
+                        <div class="form-group">
+                            <label>Acceso en el panel y módulos</label>
+                            <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-top:0.35rem;">
+                                <label style="display:flex;gap:0.4rem;align-items:center;font-size:0.82rem;cursor:pointer;"><input type="radio" name="permisosCfgAcceso" value="visualizar"> Solo visualizar</label>
+                                <label style="display:flex;gap:0.4rem;align-items:center;font-size:0.82rem;cursor:pointer;"><input type="radio" name="permisosCfgAcceso" value="editar" checked> Editar</label>
+                            </div>
+                            <small style="color:var(--text-tertiary);font-size:0.72rem;display:block;margin-top:0.25rem;">Visualizar: ve el Panel de Control y los datos, sin guardar cambios. Editar: puede registrar y modificar.</small>
+                        </div>
                         <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:0.65rem;">
                             <label style="display:flex;gap:0.4rem;align-items:center;font-size:0.8rem;cursor:pointer;"><input type="checkbox" id="permisosCfgChat"> Chat interno</label>
                             <label style="display:flex;gap:0.4rem;align-items:center;font-size:0.8rem;cursor:pointer;"><input type="checkbox" id="permisosCfgNotif"> Notificaciones</label>
@@ -12220,7 +12236,7 @@
             if (appContainer) appContainer.style.display = 'none';
             document.body.classList.remove('chat-activo');
             document.body.classList.remove('bitacora-solo');
-            document.body.classList.remove('permisos-restringido', 'permisos-sin-chat', 'permisos-sin-notif', 'permisos-sin-busqueda', 'permisos-bloqueado');
+            document.body.classList.remove('permisos-restringido', 'permisos-sin-chat', 'permisos-sin-notif', 'permisos-sin-busqueda', 'permisos-bloqueado', 'permisos-solo-lectura');
             window._permisosSesion = null;
             document.body.classList.remove('presencia-admin');
             if (typeof detenerPresenciaUsuario === 'function') detenerPresenciaUsuario();
@@ -25518,13 +25534,18 @@ document.getElementById('chatForm').onsubmit = function (e) {
             var chat = o.chat == null ? !!def.chat : (o.chat === true || o.chat === 'true');
             var notif = o.notif == null ? !!def.notif : (o.notif === true || o.notif === 'true');
             if (def.todos) { chat = true; notif = true; }
+            var acceso = String(o.acceso || '').toLowerCase();
+            if (acceso !== 'visualizar' && acceso !== 'editar') {
+                acceso = (nivel === 'bitacora' || nivel === 'comite') ? 'visualizar' : 'editar';
+            }
             return {
                 nombre: String(o.nombre || '').trim(),
                 correo: correo,
                 nivel: nivel,
                 tabs: tabs,
                 chat: chat,
-                notif: notif
+                notif: notif,
+                acceso: acceso
             };
         }
 
@@ -25554,7 +25575,8 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 nivel: String((u && u.nivel) || 'bitacora'),
                 tabs: Array.isArray(u && u.tabs) ? u.tabs.slice() : [],
                 chat: !!(u && u.chat),
-                notif: !!(u && u.notif)
+                notif: !!(u && u.notif),
+                acceso: (u && u.acceso) === 'visualizar' ? 'visualizar' : 'editar'
             };
         }
 
@@ -25571,7 +25593,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
         }
 
         function permisosSesionAdminPrincipal() {
-            return { todos: true, tabs: permisosIdsCatalogo().slice(), chat: true, notif: true, nivel: 'administracion', restringido: false, bloqueado: false };
+            return { todos: true, tabs: permisosIdsCatalogo().slice(), chat: true, notif: true, nivel: 'administracion', restringido: false, bloqueado: false, acceso: 'editar', soloLectura: false };
         }
 
         function permisosSesionBloqueada(mail) {
@@ -25609,9 +25631,19 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 restringido: true,
                 bloqueado: false,
                 nombre: u.nombre,
-                correo: u.correo
+                correo: u.correo,
+                acceso: u.acceso || 'editar',
+                soloLectura: u.acceso === 'visualizar'
             };
         }
+
+        function usuarioPuedeEditar() {
+            var ses = window._permisosSesion;
+            if (!ses || ses.bloqueado) return false;
+            if (ses.todos) return true;
+            return !ses.soloLectura;
+        }
+        window.usuarioPuedeEditar = usuarioPuedeEditar;
 
         function usuarioPuedeVerTab(tabName) {
             var t = String(tabName || '');
@@ -25647,6 +25679,10 @@ document.getElementById('chatForm').onsubmit = function (e) {
             document.body.classList.toggle('permisos-sin-busqueda', !!(s.bloqueado || (s.restringido && (s.tabs || []).indexOf('dashboard') < 0)));
             var soloBit = !s.bloqueado && s.restringido && (s.tabs || []).length === 1 && s.tabs[0] === 'bitacoraPublica';
             document.body.classList.toggle('bitacora-solo', soloBit);
+            document.body.classList.toggle('permisos-solo-lectura', !!(!s.bloqueado && s.soloLectura));
+            if (typeof actualizarEstadoFormularios === 'function') {
+                try { actualizarEstadoFormularios(); } catch (eF) {}
+            }
             if (!s.chat || s.bloqueado) document.body.classList.remove('chat-activo');
             var bloq = document.getElementById('permisosBloqueo');
             if (bloq) bloq.style.display = s.bloqueado ? 'block' : 'none';
@@ -25773,13 +25809,15 @@ document.getElementById('chatForm').onsubmit = function (e) {
             var correo = bitacoraNormCorreo((document.getElementById('permisosCfgCorreo') || {}).value);
             var nivel = String((document.getElementById('permisosCfgNivel') || {}).value || 'personalizado');
             if (!PERMISOS_NIVELES[nivel]) nivel = 'personalizado';
+            var accEl = document.querySelector('input[name="permisosCfgAcceso"]:checked');
             return permisosNormalizarUsuario({
                 nombre: nombre,
                 correo: correo,
                 nivel: nivel,
                 tabs: permisosTabsMarcadosEditor(),
                 chat: !!(document.getElementById('permisosCfgChat') && document.getElementById('permisosCfgChat').checked),
-                notif: !!(document.getElementById('permisosCfgNotif') && document.getElementById('permisosCfgNotif').checked)
+                notif: !!(document.getElementById('permisosCfgNotif') && document.getElementById('permisosCfgNotif').checked),
+                acceso: accEl ? accEl.value : 'editar'
             }, correo);
         }
 
@@ -25793,6 +25831,9 @@ document.getElementById('chatForm').onsubmit = function (e) {
             if (nom) nom.value = u.nombre || '';
             if (em) em.value = u.correo || '';
             if (sel) sel.value = u.nivel || 'personalizado';
+            document.querySelectorAll('input[name="permisosCfgAcceso"]').forEach(function (r) {
+                r.checked = r.value === (u.acceso || 'editar');
+            });
             permisosRefrescarEditorNivel();
             if ((u.nivel || '') === 'personalizado') {
                 document.querySelectorAll('#permisosCfgMods [data-perm-tab]').forEach(function (cb) {
@@ -25893,7 +25934,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 var av = (typeof perfilHtmlAvatar === 'function') ? perfilHtmlAvatar(u.correo, 'perfil-avatar') : '';
                 return '<div class="perm-user" style="gap:0.65rem;">' + av + '<div style="flex:1;min-width:0;"><strong>' + bitacoraEsc(u.nombre || 'Sin nombre') + '</strong> ' +
                     '<span class="perm-nivel">' + bitacoraEsc(lab) + '</span><br>' +
-                    '<span style="font-size:0.78rem;color:var(--text-secondary);">' + bitacoraEsc(u.correo) + ' · ' + bitacoraEsc(nMod) + '</span></div>' +
+                    '<span style="font-size:0.78rem;color:var(--text-secondary);">' + bitacoraEsc(u.correo) + ' · ' + bitacoraEsc(nMod) + ' · ' + bitacoraEsc(u.acceso === 'visualizar' ? 'Solo visualizar' : 'Editar') + '</span></div>' +
                     '<div style="display:flex;gap:0.35rem;flex-wrap:wrap;">' +
                     '<button type="button" class="btn btn-secondary" data-perm-editar="' + bitacoraEsc(u.correo) + '" style="padding:0.25rem 0.55rem;font-size:0.75rem;">Editar</button>' +
                     '<button type="button" class="btn btn-secondary" data-perm-del="' + bitacoraEsc(u.correo) + '" style="padding:0.25rem 0.55rem;font-size:0.75rem;">Quitar</button>' +
@@ -27034,6 +27075,12 @@ document.getElementById('chatForm').onsubmit = function (e) {
 
         function protegerRegistro(fn, etiqueta) {
             return async function () {
+                if (typeof usuarioPuedeEditar === 'function' && !usuarioPuedeEditar()) {
+                    if (typeof mostrarAlerta === 'function') {
+                        mostrarAlerta('Su cuenta solo puede visualizar. No está autorizado para registrar ni modificar datos.', 'Solo lectura');
+                    }
+                    return;
+                }
                 try {
                     return await fn.apply(this, arguments);
                 } catch (err) {
@@ -27050,6 +27097,12 @@ document.getElementById('chatForm').onsubmit = function (e) {
             form.setAttribute('data-reg-bind', '1');
             form.addEventListener('submit', function (e) {
                 e.preventDefault();
+                if (typeof usuarioPuedeEditar === 'function' && !usuarioPuedeEditar()) {
+                    if (typeof mostrarAlerta === 'function') {
+                        mostrarAlerta('Su cuenta solo puede visualizar. No está autorizado para registrar ni modificar datos.', 'Solo lectura');
+                    }
+                    return;
+                }
                 if (typeof fn !== 'function') return;
                 Promise.resolve(fn.call(this, e)).catch(function (err) {
                     console.error(err);
@@ -46884,6 +46937,31 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 submitButtons.forEach(btn => {
                     btn.disabled = false;
                     btn.style.opacity = '1';
+                });
+            }
+            if (typeof usuarioPuedeEditar === 'function' && !usuarioPuedeEditar()) {
+                const skip = function (el) {
+                    if (!el) return true;
+                    if (el.closest && (el.closest('#loginScreen') || el.closest('#modalPerfilUsuario') || el.closest('#bitacoraPublica') || el.closest('#consultaRapida') || el.id === 'bitacoraMesSel' || el.id === 'bitacoraBuscar' || el.id === 'mesConsulta')) return true;
+                    return false;
+                };
+                forms.forEach(function (form) {
+                    if (skip(form) || (form.id === 'formPersonalizacion')) return;
+                    form.style.opacity = '0.72';
+                    form.style.pointerEvents = 'none';
+                });
+                inputs.forEach(function (input) {
+                    if (skip(input)) return;
+                    input.disabled = true;
+                });
+                submitButtons.forEach(function (btn) {
+                    if (skip(btn)) return;
+                    btn.disabled = true;
+                    btn.style.opacity = '0.5';
+                });
+                ['btnCerrarMes', 'btnReabrirMes', 'btnEliminarMes'].forEach(function (id) {
+                    var b = document.getElementById(id);
+                    if (b) { b.disabled = true; b.style.opacity = '0.5'; }
                 });
             }
         }
