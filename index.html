@@ -13493,6 +13493,10 @@
                     if (esAdminPrincipalApp(mailLogin)) {
                         window._permisosSesion = { todos: true, tabs: [], chat: true, notif: true, nivel: 'administracion', restringido: false, bloqueado: false };
                         document.body.classList.remove('permisos-bloqueado', 'permisos-cargando');
+                        if (!window._bienvenidaMostradaEstaSesion) {
+                            document.body.classList.add('bienvenida-usuario-on');
+                            if (typeof bienvenidaUsuarioRefrescarNombre === 'function') bienvenidaUsuarioRefrescarNombre();
+                        }
                     } else {
                         window._permisosSesion = { todos: false, tabs: [], chat: false, notif: false, restringido: true, bloqueado: true, pendiente: true };
                         document.body.classList.remove('permisos-bloqueado');
@@ -27164,7 +27168,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
             }
             if (intFrase) clearInterval(intFrase);
             window._permisosSesion = resolverPermisosSesion(mail, cfgP, cfgB);
-            if (window._permisosSesion.restringido && !window._permisosSesion.bloqueado && !window._permisosSesion.todos && !window._bienvenidaMostradaEstaSesion) {
+            if (!window._permisosSesion.bloqueado && !window._bienvenidaMostradaEstaSesion) {
                 document.body.classList.add('bienvenida-usuario-on');
             }
             aplicarPermisosEnMenu(window._permisosSesion);
@@ -27190,6 +27194,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
             var p = (window._perfilesMapa || {})[mail];
             var nom = String((p && p.nombre) || ses.nombre || '').trim();
             if (nom) return nom;
+            if (ses.todos) return 'Administrador';
             if (mail && mail.indexOf('@') > 0) return mail.split('@')[0];
             return 'usuario';
         }
@@ -27286,11 +27291,15 @@ document.getElementById('chatForm').onsubmit = function (e) {
             var ses = window._permisosSesion || {};
             var vistos = {};
             var out = [];
-            (ses.tabs || []).forEach(function (id) {
+            var ids = ses.todos
+                ? ['dashboard', 'conserjeria', 'multas', 'morosos', 'caja', 'mudanzas', 'espacios', 'mantenciones']
+                : (ses.tabs || []);
+            ids.forEach(function (id) {
                 if (id === 'personalizacion' || vistos[id]) return;
                 vistos[id] = true;
                 var t = typeof permisosItemCatalogo === 'function' ? permisosItemCatalogo(id) : null;
                 var btnMenu = document.querySelector('#tabsMenu .tab-button[data-tab="' + id + '"]');
+                if (ses.todos && !btnMenu) return;
                 var icono = '';
                 var spanIco = btnMenu ? btnMenu.querySelector('span:first-child') : null;
                 if (spanIco) icono = spanIco.innerHTML;
@@ -27303,7 +27312,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
         function bienvenidaUsuarioIniciar() {
             var ses = window._permisosSesion;
             bienvenidaUsuarioRefrescarNombre();
-            if (!ses || ses.bloqueado || !ses.restringido || ses.todos) {
+            if (!ses || ses.bloqueado || ses.pendiente) {
                 document.body.classList.remove('bienvenida-usuario-on');
                 return;
             }
@@ -27350,7 +27359,9 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 b.addEventListener('click', function () { bienvenidaUsuarioCerrar(m.id); });
                 hilo.appendChild(b);
             });
-            var texto = mods.length
+            var texto = ses.todos
+                ? 'Soy Arturito. Tu panel de administración está listo. Elige un acceso rápido o pulsa Iniciar.'
+                : mods.length
                 ? 'Soy Arturito. Preparé tu espacio con ' + (mods.length === 1 ? 'tu módulo' : 'tus ' + mods.length + ' módulos') + '. Elige uno o pulsa Iniciar.'
                 : 'Soy Arturito. Tu espacio de trabajo está listo.';
             var t0 = setTimeout(function () {
