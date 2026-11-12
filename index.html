@@ -25322,7 +25322,18 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 if (!snap || !snap.exists) return;
                 var data = snap.data() || {};
                 var jobs = Array.isArray(data.queue) ? data.queue.slice() : [];
-                var pendientes = jobs.filter(function (j) { return j && j.status === 'pending'; });
+                var pendientes = jobs.filter(function (j) {
+                    if (!j) return false;
+                    if (j.status === 'pending') return true;
+                    if (j.status !== 'html') return false;
+                    var origenPend = String(j.origen || '');
+                    var htmlPend = j.html ? String(j.html) : '';
+                    return j.tipo === 'operativo'
+                        || origenPend === 'conserjeria-encomienda'
+                        || origenPend === 'conserjeria-visita'
+                        || origenPend.indexOf('prueba') === 0
+                        || htmlPend.indexOf('Correo automático') >= 0;
+                });
                 if (!pendientes.length) return;
                 if (typeof obtenerConfigCorreosConsejeria === 'function') {
                     try { await obtenerConfigCorreosConsejeria(); } catch (eCfgQ) {}
