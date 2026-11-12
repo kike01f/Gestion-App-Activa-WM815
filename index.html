@@ -858,6 +858,32 @@
             #notificaciones.tab-content { max-width: none; }
         }
 
+        #personalizacion.tab-content { max-width: none; }
+        #personalizacion .perso-head { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.75rem; margin-bottom: 1rem; align-items: flex-end; }
+        #personalizacion .perso-head h2 { margin: 0; font-size: 1.35rem; color: var(--text-primary); }
+        #personalizacion .perso-head p { margin: 0.3rem 0 0; font-size: 0.8125rem; color: var(--text-secondary); }
+        #personalizacion .perso-admin { display: inline-flex; align-items: center; gap: 0.55rem; padding: 0.45rem 0.75rem; border-radius: 999px; border: 1px solid var(--border-color); background: var(--bg-secondary); font-size: 0.75rem; color: var(--text-secondary); }
+        #personalizacion .perso-admin strong { color: var(--text-primary); }
+        #personalizacion .perso-subnav { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 1rem; padding: 0.3rem; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 12px; }
+        #personalizacion .perso-subnav-btn { border: 0; background: transparent; color: var(--text-secondary); border-radius: 9px; padding: 0.5rem 0.85rem; font-size: 0.8125rem; font-weight: 600; cursor: pointer; flex: 1 1 auto; }
+        #personalizacion .perso-subnav-btn.is-on { background: var(--bg-primary); color: var(--text-primary); box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+        #personalizacion .perso-panel { display: none; }
+        #personalizacion .perso-panel.is-on { display: block; }
+        #personalizacion .perso-hint { margin: 0 0 1rem; font-size: 0.8rem; color: var(--text-secondary); line-height: 1.45; }
+        #personalizacion .perso-grid { display: grid; grid-template-columns: minmax(260px, 1.05fr) minmax(260px, 1fr); gap: 1rem; align-items: start; }
+        #personalizacion .perso-card { background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 12px; padding: 1rem 1.1rem; }
+        #personalizacion .perso-card h3 { margin: 0 0 0.35rem; font-size: 1rem; }
+        #personalizacion .perso-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0.65rem; margin: 0 0 1rem; }
+        #personalizacion .perso-kpis div { border: 1px solid var(--border-color); border-radius: 10px; padding: 0.7rem 0.8rem; background: var(--bg-secondary); }
+        #personalizacion .perso-kpis strong { display: block; font-size: 1.05rem; }
+        #personalizacion .perso-kpis span { font-size: 0.72rem; color: var(--text-tertiary); }
+        #personalizacion #permisosCfgMods { display: grid; grid-template-columns: repeat(auto-fill, minmax(168px, 1fr)); gap: 0.4rem; margin: 0.35rem 0 0.9rem; }
+        #personalizacion #permisosCfgMods label { display: flex; gap: 0.4rem; align-items: center; font-size: 0.78rem; padding: 0.35rem 0.45rem; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-primary); cursor: pointer; }
+        #personalizacion #permisosCfgLista .perm-user { margin-bottom: 0.45rem; }
+        #persoListaModulos { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.5rem; }
+        @media (max-width: 860px) {
+            #personalizacion .perso-grid { grid-template-columns: 1fr; }
+        }
         #envioCorreos.tab-content { max-width: none; }
         #envioCorreos .mailer-head { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.75rem; margin-bottom: 1rem; }
         #envioCorreos .mailer-head h2 { margin: 0; font-size: 1.35rem; }
@@ -10675,133 +10701,128 @@
 
         <!-- MÓDULO 11: PERSONALIZACIÓN -->
         <div id="personalizacion" class="tab-content">
-            <div style="margin-bottom: 1.5rem;">
-                <h2 id="tituloPersonalizacion" style="margin: 0; color: var(--gray-900); font-size: 1.5rem; font-weight: 700; display: flex; align-items: center; gap: 0.75rem;">
-                    <span style="display: inline-flex; align-items: center; width: 1.75rem; height: 1.75rem;"></span> Personalización
-                </h2>
-                <p style="color: var(--gray-600); font-size: 0.875rem; margin: 0.5rem 0 0 0;">Configuración general de la aplicación</p>
+            <div class="perso-head">
+                <div>
+                    <h2 id="tituloPersonalizacion">Personalización</h2>
+                    <p>Identidad del edificio, accesos de usuarios, bitácora y módulos visibles.</p>
+                </div>
+                <div class="perso-admin">Administrador principal <strong>edificio.wm815@gmail.com</strong></div>
+            </div>
+            <nav class="perso-subnav" aria-label="Secciones de personalización">
+                <button type="button" class="perso-subnav-btn is-on" data-perso-sub="persoPanelComunidad">Comunidad</button>
+                <button type="button" class="perso-subnav-btn" data-perso-sub="persoPanelUsuarios">Usuarios y accesos</button>
+                <button type="button" class="perso-subnav-btn" data-perso-sub="persoPanelBitacora">Bitácora</button>
+                <button type="button" class="perso-subnav-btn" data-perso-sub="persoPanelModulos">Módulos visibles</button>
+            </nav>
+
+            <div id="persoPanelComunidad" class="perso-panel is-on">
+                <div class="perso-kpis" id="persoKpisComunidad">
+                    <div><strong id="persoKpiNombre">—</strong><span>Nombre en reportes</span></div>
+                    <div><strong id="persoKpiJefe">—</strong><span>Jefe de edificio</span></div>
+                    <div><strong id="persoKpiDeptos">—</strong><span>Departamentos</span></div>
+                </div>
+                <div class="perso-card">
+                    <h3>Datos que salen en documentos</h3>
+                    <p class="perso-hint">Estos campos alimentan PDF, nómina y encabezados. No cambian el acceso de otras cuentas.</p>
+                    <form id="formPersonalizacion" onsubmit="guardarPersonalizacion(event)">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Nombre de la comunidad / edificio *</label>
+                                <input type="text" id="personalizacionComunidad" required placeholder="Ej: Entre Cerros">
+                            </div>
+                            <div class="form-group">
+                                <label>Jefe de edificio *</label>
+                                <input type="text" id="personalizacionJefeEdificio" required placeholder="Ej: Nombre y apellido">
+                            </div>
+                            <div class="form-group">
+                                <label>Número de departamentos</label>
+                                <input type="number" id="personalizacionDeptos" min="1" placeholder="Ej: 259">
+                            </div>
+                        </div>
+                        <div style="display:flex;gap:0.6rem;flex-wrap:wrap;margin-top:0.35rem;">
+                            <button type="submit" class="btn btn-primary">Guardar comunidad</button>
+                            <button type="button" class="btn btn-secondary" onclick="cargarPersonalizacion()">Restaurar</button>
+                        </div>
+                    </form>
+                </div>
             </div>
 
-            <div class="form-section">
-                <h3 style="margin: 0 0 1.5rem 0; font-size: 1.125rem; font-weight: 700; color: var(--gray-900); display: flex; align-items: center; gap: 0.5rem;">
-                    <span>⚙️</span> Información de la Comunidad
-                </h3>
-                <p style="color: var(--gray-600); font-size: 0.875rem; margin-bottom: 1.5rem;">
-                    Configure los datos que se utilizarán en los encabezados de los reportes, nómina y otros documentos generados por la aplicación.
-                </p>
-                
-                <form id="formPersonalizacion" onsubmit="guardarPersonalizacion(event)">
-                    <div class="form-row">
+            <div id="persoPanelUsuarios" class="perso-panel">
+                <p class="perso-hint">Solo esta cuenta de administración crea usuarios y les asigna módulos. Quien no esté en la lista puede entrar, pero no verá la app.</p>
+                <div class="perso-grid">
+                    <div class="perso-card">
+                        <h3>Nueva cuenta</h3>
                         <div class="form-group">
-                            <label>Nombre de la Comunidad / Edificio *</label>
-                            <input type="text" id="personalizacionComunidad" required placeholder="Ej: Activa WM815" value="">
-                            <small style="color: var(--gray-500); font-size: 0.75rem; margin-top: 0.25rem; display: block;">
-                                Este nombre aparecerá en todos los reportes como "Proyecto"
-                            </small>
+                            <label>Nombre</label>
+                            <input type="text" id="permisosCfgNombre" placeholder="Ej: Comité de administración">
                         </div>
                         <div class="form-group">
-                            <label>Jefe de Edificio *</label>
-                            <input type="text" id="personalizacionJefeEdificio" required placeholder="Ej: Angel Avendaño" value="">
-                            <small style="color: var(--gray-500); font-size: 0.75rem; margin-top: 0.25rem; display: block;">
-                                Nombre del jefe de edificio que aparecerá en los reportes
-                            </small>
+                            <label>Correo de acceso</label>
+                            <input type="email" id="permisosCfgCorreo" placeholder="usuario@entrecerros.cl">
                         </div>
                         <div class="form-group">
-                            <label>Número de Departamentos</label>
-                            <input type="number" id="personalizacionDeptos" min="1" placeholder="Ej: 259" value="">
-                            <small style="color: var(--gray-500); font-size: 0.75rem; margin-top: 0.25rem; display: block;">
-                                Cantidad total de departamentos (opcional)
-                            </small>
+                            <label>Contraseña (mínimo 6 caracteres)</label>
+                            <input type="password" id="permisosCfgClave" placeholder="Para crear la cuenta" autocomplete="new-password">
                         </div>
-                        <!-- Modo noche fijo en la app; selector de tema eliminado para mantener estándar -->
+                        <div class="form-group">
+                            <label>Nivel de permiso</label>
+                            <select id="permisosCfgNivel"></select>
+                        </div>
+                        <p id="permisosCfgNivelDesc" class="perso-hint"></p>
+                        <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:0.65rem;">
+                            <label style="display:flex;gap:0.4rem;align-items:center;font-size:0.8rem;cursor:pointer;"><input type="checkbox" id="permisosCfgChat"> Chat interno</label>
+                            <label style="display:flex;gap:0.4rem;align-items:center;font-size:0.8rem;cursor:pointer;"><input type="checkbox" id="permisosCfgNotif"> Notificaciones</label>
+                        </div>
+                        <p style="font-size:0.75rem;color:var(--text-tertiary);margin:0 0 0.35rem;">Módulos (en Personalizado se marcan uno a uno)</p>
+                        <div id="permisosCfgMods"></div>
+                        <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+                            <button type="button" class="btn btn-primary" id="permisosCfgAgregar">Crear cuenta y agregar</button>
+                            <button type="button" class="btn btn-secondary" id="permisosCfgGuardar">Guardar lista</button>
+                        </div>
                     </div>
-                    <div style="display: flex; gap: 0.75rem; margin-top: 1.5rem;">
-                        <button type="submit" class="btn btn-primary">
-                            💾 Guardar Configuración
-                        </button>
-                        <button type="button" class="btn btn-secondary" onclick="cargarPersonalizacion()">
-                            🔄 Restaurar Valores
-                        </button>
+                    <div class="perso-card">
+                        <h3>Usuarios registrados</h3>
+                        <p class="perso-hint">Edite o quite accesos. Los cambios se guardan en la nube.</p>
+                        <div id="permisosCfgLista"></div>
                     </div>
-                </form>
+                </div>
             </div>
 
-            <div class="form-section" style="margin-top: 2rem; padding: 1rem; background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(99, 102, 241, 0.05) 100%); border-radius: 8px; border: 1px solid rgba(99, 102, 241, 0.2);">
-                <div style="display: flex; align-items: center; gap: 0.75rem;">
-                    <span style="font-size: 1.5rem;">ℹ️</span>
-                    <div>
-                        <strong style="color: var(--gray-900); font-size: 0.9375rem;">Información</strong>
-                        <p style="margin: 0.25rem 0 0 0; color: var(--gray-600); font-size: 0.875rem;">
-                            Los datos configurados aquí se utilizarán automáticamente en todos los reportes PDF, nómina y documentos generados por la aplicación.
-                        </p>
+            <div id="persoPanelBitacora" class="perso-panel">
+                <div class="perso-grid">
+                    <div class="perso-card">
+                        <h3>Qué muestra la bitácora</h3>
+                        <p class="perso-hint">El acceso se asigna en Usuarios (nivel Solo bitácora, Comité u otro). Aquí define el contenido del módulo.</p>
+                        <label style="display:flex;gap:0.5rem;align-items:flex-start;margin-bottom:0.85rem;cursor:pointer;">
+                            <input type="checkbox" id="bitacoraCfgActivo" style="margin-top:0.2rem;">
+                            <span>Activar contenido de bitácora</span>
+                        </label>
+                        <div class="form-group">
+                            <label>Título</label>
+                            <input type="text" id="bitacoraCfgTitulo" placeholder="Bitácora de reclamos y multas">
+                        </div>
+                        <label style="display:flex;gap:0.4rem;align-items:center;margin:0.35rem 0;cursor:pointer;"><input type="checkbox" id="bitacoraCfgReclamos" checked> Mostrar reclamos</label>
+                        <label style="display:flex;gap:0.4rem;align-items:center;margin:0.35rem 0 0.85rem;cursor:pointer;"><input type="checkbox" id="bitacoraCfgMultas" checked> Mostrar multas cursadas</label>
+                        <button type="button" class="btn btn-primary" id="bitacoraCfgGuardar">Guardar bitácora</button>
+                    </div>
+                    <div class="perso-card">
+                        <h3>Acceso rápido (opcional)</h3>
+                        <p class="perso-hint">Si agrega correos aquí y aún no tienen permiso, se les asigna Solo bitácora. Prefiera crearlos en Usuarios con contraseña.</p>
+                        <div class="form-group">
+                            <label>Nombre, correo</label>
+                            <textarea id="bitacoraCfgNuevos" rows="4" placeholder="Comité, comite@entrecerros.cl"></textarea>
+                        </div>
+                        <div id="bitacoraCfgLista"></div>
                     </div>
                 </div>
             </div>
 
-            <div class="form-section" style="margin-top: 2rem;">
-                <h3>Portal de bitácora (usuarios autenticados)</h3>
-                <p style="font-size:0.82rem;color:var(--text-secondary);margin:0 0 1rem;">
-                    Vista separada: las personas de esta lista, al iniciar sesión, solo ven reclamos y multas por mes. Deben existir como usuarios en Firebase Authentication. No agregue aquí las cuentas de administración.
-                </p>
-                <label style="display:flex;gap:0.5rem;align-items:flex-start;margin-bottom:0.85rem;cursor:pointer;">
-                    <input type="checkbox" id="bitacoraCfgActivo" style="margin-top:0.2rem;">
-                    <span>Activar portal de bitácora para los correos autorizados</span>
-                </label>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Título en la bitácora</label>
-                        <input type="text" id="bitacoraCfgTitulo" placeholder="Bitácora de reclamos y multas">
-                    </div>
-                    <div class="form-group">
-                        <label>Contenido visible</label>
-                        <label style="display:flex;gap:0.4rem;align-items:center;margin-top:0.35rem;"><input type="checkbox" id="bitacoraCfgReclamos" checked> Reclamos</label>
-                        <label style="display:flex;gap:0.4rem;align-items:center;margin-top:0.25rem;"><input type="checkbox" id="bitacoraCfgMultas" checked> Multas cursadas</label>
-                    </div>
+            <div id="persoPanelModulos" class="perso-panel">
+                <div class="perso-card">
+                    <h3>Módulos del menú de administración</h3>
+                    <p class="perso-hint">Oculta módulos para la cuenta administradora y para reportes. No sustituye los permisos de cada usuario.</p>
+                    <div id="persoListaModulos" class="lista-modulos-config"></div>
                 </div>
-                <div class="form-group">
-                    <label>Agregar usuarios (nombre y correo)</label>
-                    <textarea id="bitacoraCfgNuevos" rows="3" placeholder="Comité, comite@entrecerros.cl&#10;Directorio, directorio@entrecerros.cl"></textarea>
-                    <small style="color:var(--gray-500);font-size:0.75rem;display:block;margin-top:0.25rem;">Un correo por línea. Formato: Nombre, correo@dominio.cl</small>
-                </div>
-                <div id="bitacoraCfgLista" style="margin-bottom:0.85rem;"></div>
-                <button type="button" class="btn btn-primary" id="bitacoraCfgGuardar">Guardar bitácora</button>
-            </div>
-
-            <div class="form-section" style="margin-top: 2rem;">
-                <h3>Permisos de usuarios</h3>
-                <p style="font-size:0.82rem;color:var(--text-secondary);margin:0 0 1rem;">
-                    Solo <strong>edificio.wm815@gmail.com</strong> administra la app. Aquí crea las cuentas de los demás y les asigna módulos. Quien no esté en la lista puede iniciar sesión, pero no verá ningún módulo.
-                </p>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Nombre</label>
-                        <input type="text" id="permisosCfgNombre" placeholder="Ej: Comité de administración">
-                    </div>
-                    <div class="form-group">
-                        <label>Correo de acceso</label>
-                        <input type="email" id="permisosCfgCorreo" placeholder="usuario@entrecerros.cl">
-                    </div>
-                    <div class="form-group">
-                        <label>Contraseña (crear cuenta)</label>
-                        <input type="password" id="permisosCfgClave" placeholder="Mínimo 6 caracteres" autocomplete="new-password">
-                    </div>
-                    <div class="form-group">
-                        <label>Nivel</label>
-                        <select id="permisosCfgNivel"></select>
-                    </div>
-                </div>
-                <p id="permisosCfgNivelDesc" style="font-size:0.78rem;color:var(--text-secondary);margin:0 0 0.65rem;"></p>
-                <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:0.5rem;">
-                    <label style="display:flex;gap:0.4rem;align-items:center;font-size:0.8rem;cursor:pointer;"><input type="checkbox" id="permisosCfgChat"> Chat interno</label>
-                    <label style="display:flex;gap:0.4rem;align-items:center;font-size:0.8rem;cursor:pointer;"><input type="checkbox" id="permisosCfgNotif"> Campana de notificaciones</label>
-                </div>
-                <p style="font-size:0.75rem;color:var(--text-tertiary);margin:0 0 0.35rem;">Módulos permitidos (en nivel Personalizado se eligen uno a uno; en los demás se muestran como referencia)</p>
-                <div id="permisosCfgMods"></div>
-                <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:1rem;">
-                    <button type="button" class="btn btn-secondary" id="permisosCfgAgregar">Crear cuenta y agregar</button>
-                    <button type="button" class="btn btn-primary" id="permisosCfgGuardar">Guardar permisos</button>
-                </div>
-                <div id="permisosCfgLista"></div>
             </div>
         </div>
 
@@ -25062,10 +25083,18 @@ document.getElementById('chatForm').onsubmit = function (e) {
             if (comunidadInput) comunidadInput.value = personalizacion.comunidad || '';
             if (jefeInput) jefeInput.value = personalizacion.jefeEdificio || '';
             if (deptosInput) deptosInput.value = personalizacion.deptos || '';
+            var kpiN = document.getElementById('persoKpiNombre');
+            var kpiJ = document.getElementById('persoKpiJefe');
+            var kpiD = document.getElementById('persoKpiDeptos');
+            if (kpiN) kpiN.textContent = personalizacion.comunidad || '—';
+            if (kpiJ) kpiJ.textContent = personalizacion.jefeEdificio || '—';
+            if (kpiD) kpiD.textContent = personalizacion.deptos || '—';
             document.documentElement.setAttribute('data-theme', 'dark');
             if (typeof inicializarIconosMenu === 'function') inicializarIconosMenu();
+            if (typeof persoBindUi === 'function') persoBindUi();
             if (typeof cargarFormularioBitacoraPortal === 'function') cargarFormularioBitacoraPortal();
             if (typeof cargarFormularioPermisosUsuarios === 'function') cargarFormularioPermisosUsuarios();
+            if (typeof cargarConfigModulos === 'function') cargarConfigModulos();
         };
 
         // Función para guardar personalización desde el formulario
@@ -25100,7 +25129,13 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 inicializarIconosMenu();
             }
             
-            mostrarAlerta('Configuración guardada exitosamente. Los cambios se aplicarán en los próximos reportes.', 'Configuración Guardada');
+            var kpiN2 = document.getElementById('persoKpiNombre');
+            var kpiJ2 = document.getElementById('persoKpiJefe');
+            var kpiD2 = document.getElementById('persoKpiDeptos');
+            if (kpiN2) kpiN2.textContent = comunidad;
+            if (kpiJ2) kpiJ2.textContent = jefeEdificio;
+            if (kpiD2) kpiD2.textContent = deptos || '—';
+            mostrarAlerta('Datos de la comunidad guardados. Se usarán en los próximos reportes.', 'Comunidad');
         };
 
         // Funciones helper para obtener datos de personalización
@@ -25112,6 +25147,25 @@ document.getElementById('chatForm').onsubmit = function (e) {
         async function obtenerJefeEdificio() {
             const personalizacion = await obtenerPersonalizacion();
             return personalizacion.jefeEdificio;
+        }
+
+        function persoBindUi() {
+            if (window._persoUiBound) return;
+            window._persoUiBound = true;
+            document.querySelectorAll('#personalizacion .perso-subnav-btn').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    var id = btn.getAttribute('data-perso-sub');
+                    document.querySelectorAll('#personalizacion .perso-subnav-btn').forEach(function (b) {
+                        b.classList.toggle('is-on', b === btn);
+                    });
+                    document.querySelectorAll('#personalizacion .perso-panel').forEach(function (p) {
+                        p.classList.toggle('is-on', p.id === id);
+                    });
+                    if (id === 'persoPanelModulos' && typeof cargarConfigModulos === 'function') cargarConfigModulos();
+                    if (id === 'persoPanelUsuarios' && typeof cargarFormularioPermisosUsuarios === 'function') cargarFormularioPermisosUsuarios();
+                    if (id === 'persoPanelBitacora' && typeof cargarFormularioBitacoraPortal === 'function') cargarFormularioBitacoraPortal();
+                });
+            });
         }
 
         var BITACORA_PORTAL_DOC = 'bitacoraPortalConfig';
@@ -25357,19 +25411,45 @@ document.getElementById('chatForm').onsubmit = function (e) {
             };
         }
 
-        async function obtenerPermisosUsuarios() {
-            var mapa = {};
-            try { mapa = await obtenerMapaNube(PERMISOS_DOC); } catch (eP) { mapa = {}; }
-            var src = (mapa && mapa.usuarios && typeof mapa.usuarios === 'object' && !Array.isArray(mapa.usuarios))
-                ? mapa.usuarios
-                : (mapa && typeof mapa === 'object' && !Array.isArray(mapa) ? mapa : {});
-            var usuarios = {};
-            Object.keys(src).forEach(function (k) {
-                var row = src[k];
-                if (k === 'usuarios' || k === 'actualizado') return;
-                var u = permisosNormalizarUsuario(row, (row && row.correo) || k);
-                if (u.correo) usuarios[u.correo] = u;
+        function permisosRecolectarFilas(nodo, acc) {
+            if (!nodo || !acc) return acc;
+            if (Array.isArray(nodo)) {
+                nodo.forEach(function (x) { permisosRecolectarFilas(x, acc); });
+                return acc;
+            }
+            if (typeof nodo !== 'object') return acc;
+            if (nodo.correo || (nodo.nivel && (nodo.tabs || nodo.nombre))) {
+                var u = permisosNormalizarUsuario(nodo, nodo.correo);
+                if (u.correo) acc[u.correo] = u;
+            }
+            Object.keys(nodo).forEach(function (k) {
+                if (k === 'actualizado' || k === 'modulo' || k === 'tipo') return;
+                var v = nodo[k];
+                if (v && typeof v === 'object') permisosRecolectarFilas(v, acc);
             });
+            return acc;
+        }
+
+        function permisosFilaParaNube(u) {
+            return {
+                nombre: String((u && u.nombre) || '').trim(),
+                correo: bitacoraNormCorreo(u && u.correo),
+                nivel: String((u && u.nivel) || 'bitacora'),
+                tabs: Array.isArray(u && u.tabs) ? u.tabs.slice() : [],
+                chat: !!(u && u.chat),
+                notif: !!(u && u.notif)
+            };
+        }
+
+        async function obtenerPermisosUsuarios() {
+            var usuarios = {};
+            try {
+                var lista = await obtenerDatos(PERMISOS_DOC);
+                permisosRecolectarFilas(lista, usuarios);
+            } catch (eLista) {}
+            if (!Object.keys(usuarios).length) {
+                try { permisosRecolectarFilas(await obtenerMapaNube(PERMISOS_DOC), usuarios); } catch (eMap) {}
+            }
             return { usuarios: usuarios };
         }
 
@@ -25682,7 +25762,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
             if (!wrap) return;
             var list = window._permisosCfgUsuarios || [];
             if (!list.length) {
-                wrap.innerHTML = '<p style="font-size:0.8rem;color:var(--text-tertiary);margin:0;">No hay usuarios con permisos especiales. El resto de cuentas autenticadas opera como administración.</p>';
+                wrap.innerHTML = '<p style="font-size:0.8rem;color:var(--text-tertiary);margin:0;">Aún no hay usuarios registrados. Créelos aquí; si no están en esta lista no podrán usar la app.</p>';
                 return;
             }
             wrap.innerHTML = list.map(function (u) {
@@ -25722,20 +25802,20 @@ document.getElementById('chatForm').onsubmit = function (e) {
             if (!esAdminPrincipal(auth && auth.currentUser && auth.currentUser.email)) {
                 throw new Error('Solo el administrador principal puede guardar permisos.');
             }
-            var list = window._permisosCfgUsuarios || [];
-            var mapa = { usuarios: {} };
-            list.forEach(function (u) {
-                if (!u || !u.correo) return;
-                mapa.usuarios[u.correo] = {
-                    nombre: u.nombre || '',
-                    correo: u.correo,
-                    nivel: u.nivel,
-                    tabs: u.tabs || [],
-                    chat: !!u.chat,
-                    notif: !!u.notif
-                };
+            var list = (window._permisosCfgUsuarios || []).map(permisosFilaParaNube).filter(function (u) {
+                return u.correo && u.correo.indexOf('@') > 0;
             });
-            await guardarMapaNube(PERMISOS_DOC, mapa);
+            if (typeof guardarDatos !== 'function') {
+                throw new Error('No hay función de guardado en la nube.');
+            }
+            await guardarDatos(PERMISOS_DOC, list);
+            var verif = await obtenerPermisosUsuarios();
+            var nOk = Object.keys(verif.usuarios || {}).length;
+            if (list.length && !nOk) {
+                throw new Error('Firestore no conservó los usuarios. Revise la conexión e intente de nuevo.');
+            }
+            window._permisosCfgUsuarios = Object.keys(verif.usuarios || {}).map(function (k) { return verif.usuarios[k]; });
+            permisosPintarLista();
             if (!silencio && typeof mostrarAlerta === 'function') {
                 mostrarAlerta('Permisos guardados. Los demás usuarios verán solo los módulos que usted les asignó.', 'Permisos');
             }
@@ -45398,8 +45478,8 @@ document.getElementById('chatForm').onsubmit = function (e) {
 
         // Función para cargar configuración de módulos
         async function cargarConfigModulos() {
-            const lista = document.getElementById('listaModulosConfig');
-            if (!lista) {
+            const listas = document.querySelectorAll('#listaModulosConfig, #persoListaModulos');
+            if (!listas.length) {
                 console.error('No se encontró el elemento listaModulosConfig');
                 return;
             }
@@ -45432,7 +45512,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                         </div>
                     `;
                 }
-                lista.innerHTML = gruposCfg.map(function (g) {
+                var htmlMods = gruposCfg.map(function (g) {
                     var entradas = Object.entries(MODULOS_DISPONIBLES).filter(function (pair) {
                         var tab = pair[1].tab;
                         var enGrupo = g.tabs.indexOf(tab) >= 0 || (g.id === 'otros' && !DASHBOARD_GRUPOS_TARJETAS.some(function (x) { return x.tabs.indexOf(tab) >= 0; }));
@@ -45442,9 +45522,12 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     if (!entradas.length) return '';
                     return '<div style="grid-column:1/-1;font-size:0.7rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--gray-500);margin:0.35rem 0 0.15rem;">' + g.titulo + '</div>' + entradas.map(function (pair) { return htmlToggleModulo(pair[0], pair[1]); }).join('');
                 }).join('');
+                listas.forEach(function (el) { el.innerHTML = htmlMods; });
             } catch (error) {
                 console.error('Error al cargar configuración de módulos:', error);
-                lista.innerHTML = '<p style="color: var(--danger); padding: 1rem; transition: color 0.3s ease;">Error al cargar la configuración de módulos. Por favor, recargue la página.</p>';
+                listas.forEach(function (el) {
+                    el.innerHTML = '<p style="color: var(--danger); padding: 1rem;">Error al cargar la configuración de módulos. Por favor, recargue la página.</p>';
+                });
             }
         }
 
