@@ -7978,372 +7978,344 @@
             }
         }
 
-        /* ===== Diseño unificado de módulos (estilo login / Arturito) ===== */
+        /* ===== Diseño minimalista de módulos ===== */
         :root {
-            --ui-radius: 16px;
-            --ui-radius-sm: 11px;
-            --ui-accent-soft: color-mix(in srgb, var(--primary) 12%, transparent);
-            --ui-accent-ring: color-mix(in srgb, var(--primary) 28%, transparent);
-            --ui-card-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 8px 24px -12px rgba(15, 23, 42, 0.14);
-            --ui-card-shadow-hover: 0 2px 4px rgba(15, 23, 42, 0.05), 0 16px 36px -14px rgba(15, 23, 42, 0.22);
-            --ui-ease: cubic-bezier(0.22, 1, 0.36, 1);
-        }
-        [data-theme="dark"] {
-            --ui-card-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 10px 28px -14px rgba(0, 0, 0, 0.6);
-            --ui-card-shadow-hover: 0 2px 4px rgba(0, 0, 0, 0.35), 0 18px 40px -16px rgba(0, 0, 0, 0.7);
+            --m-radius: 10px;
+            --m-radius-sm: 8px;
+            --m-line: color-mix(in srgb, var(--border-color) 90%, transparent);
+            --m-line-strong: color-mix(in srgb, var(--text-tertiary) 35%, var(--border-color));
+            --m-muted: var(--text-tertiary);
+            --m-accent-soft: color-mix(in srgb, var(--primary) 11%, transparent);
+            --m-accent-ring: color-mix(in srgb, var(--primary) 22%, transparent);
+            --m-hover: color-mix(in srgb, var(--text-primary) 4%, transparent);
+            --m-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
         }
 
-        .main-content {
-            background:
-                radial-gradient(1100px 420px at 100% -10%, color-mix(in srgb, var(--primary) 7%, transparent), transparent 60%),
-                radial-gradient(900px 380px at -10% 110%, color-mix(in srgb, var(--primary) 5%, transparent), transparent 55%),
-                var(--bg-secondary);
-            min-height: 100vh;
-        }
+        .main-content { background: var(--bg-secondary); }
 
-        /* Menú lateral: ítems tipo píldora */
-        .tabs {
-            background: color-mix(in srgb, var(--bg-primary) 92%, transparent);
-            backdrop-filter: blur(16px) saturate(1.2);
-            -webkit-backdrop-filter: blur(16px) saturate(1.2);
-            border-right: 1px solid var(--border-color);
+        /* Menú lateral */
+        .tabs,
+        [data-theme="dark"] .tabs {
+            background: var(--bg-primary);
+            border-right: 1px solid var(--m-line);
+            box-shadow: none;
         }
+        .tabs::before { display: none; }
         .tab-button {
-            width: calc(100% - 1.25rem);
-            margin: 0.1rem 0.625rem;
-            padding: 0.72rem 1rem;
+            width: calc(100% - 1rem);
+            margin: 1px 0.5rem;
+            padding: 0.55rem 0.8rem;
             border-left: none;
-            border-radius: 12px;
-            transition: background 0.25s var(--ui-ease), color 0.2s ease, transform 0.25s var(--ui-ease), box-shadow 0.25s ease;
+            border-radius: var(--m-radius-sm);
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            box-shadow: none;
+            transition: background 0.15s ease, color 0.15s ease;
         }
         .tab-button::after { display: none; }
         .tab-button:hover {
-            background: var(--ui-accent-soft);
-            transform: translateX(2px);
+            background: var(--m-hover);
+            color: var(--text-primary);
+            transform: none;
         }
         .tab-button.active {
-            background: linear-gradient(135deg, color-mix(in srgb, var(--primary) 22%, transparent), color-mix(in srgb, var(--primary) 8%, transparent));
-            box-shadow: inset 0 0 0 1px var(--ui-accent-ring);
+            background: var(--m-accent-soft);
+            color: var(--primary);
+            font-weight: 600;
+            box-shadow: none;
         }
-        .tabs-group-label { padding-left: 1.6rem; }
+        .tab-button span:first-child { font-size: 1rem; min-width: 1.4rem; }
+        .tab-button svg,
+        .tab-button span:first-child svg {
+            width: 1.05rem;
+            height: 1.05rem;
+            min-width: 1.05rem;
+            min-height: 1.05rem;
+        }
+        .tabs-group-label {
+            padding: 1rem 1.3rem 0.3rem;
+            font-size: 0.6rem;
+            letter-spacing: 0.1em;
+            color: var(--m-muted);
+        }
 
-        /* Entrada suave al cambiar de módulo */
-        .tab-content.active {
-            animation: uiModuloIn 0.55s var(--ui-ease) both;
+        /* Contenedor del módulo */
+        .tab-content:not(#dashboard) {
+            padding: 1.5rem 2rem 2.5rem !important;
+            max-width: 1480px;
+            margin: 0 auto !important;
+            font-size: 0.8125rem;
         }
-        .tab-content:not(#dashboard).active > * {
-            animation: uiBloqueIn 0.6s var(--ui-ease) both;
-        }
-        .tab-content:not(#dashboard).active > *:nth-child(2) { animation-delay: 0.05s; }
-        .tab-content:not(#dashboard).active > *:nth-child(3) { animation-delay: 0.1s; }
-        .tab-content:not(#dashboard).active > *:nth-child(4) { animation-delay: 0.15s; }
-        .tab-content:not(#dashboard).active > *:nth-child(n+5) { animation-delay: 0.2s; }
-        @keyframes uiModuloIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        @keyframes uiBloqueIn {
-            from { opacity: 0; transform: translateY(14px); }
+        .tab-content.active { animation: mFade 0.28s var(--m-ease) both; }
+        @keyframes mFade {
+            from { opacity: 0; transform: translateY(4px); }
             to { opacity: 1; transform: none; }
         }
 
-        /* Cabecera de cada módulo */
+        /* Cabecera: título + bajada, separada por una línea fina */
         .tab-content:not(#dashboard) > :first-child:has(> h2),
         .tab-content:not(#dashboard) > :first-child:has(> div > h2),
         .tab-content:not(#dashboard) > .notif-head,
         .tab-content:not(#dashboard) > .perso-head,
         .tab-content:not(#dashboard) > .mailer-head,
         .tab-content:not(#dashboard) > .inv-head {
-            position: relative;
-            overflow: hidden;
-            padding: 1.35rem 1.6rem !important;
-            margin-bottom: 1.75rem !important;
-            border-radius: 20px;
-            border: 1px solid color-mix(in srgb, var(--primary) 22%, var(--border-color));
-            background:
-                radial-gradient(700px 220px at -5% -40%, color-mix(in srgb, var(--primary) 18%, transparent), transparent 60%),
-                linear-gradient(160deg, color-mix(in srgb, var(--bg-primary) 96%, transparent), color-mix(in srgb, var(--bg-primary) 82%, transparent));
-            backdrop-filter: blur(14px) saturate(1.15);
-            -webkit-backdrop-filter: blur(14px) saturate(1.15);
-            box-shadow: var(--ui-card-shadow);
-        }
-        .tab-content:not(#dashboard) > :first-child:has(> h2)::before,
-        .tab-content:not(#dashboard) > :first-child:has(> div > h2)::before,
-        .tab-content:not(#dashboard) > .notif-head::before,
-        .tab-content:not(#dashboard) > .perso-head::before,
-        .tab-content:not(#dashboard) > .mailer-head::before,
-        .tab-content:not(#dashboard) > .inv-head::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            width: 4px;
-            background: linear-gradient(180deg, var(--primary-light), var(--primary-dark));
+            padding: 0 0 1rem !important;
+            margin: 0 0 1.25rem !important;
+            border: none;
+            border-bottom: 1px solid var(--m-line);
+            border-radius: 0;
+            background: none;
+            box-shadow: none;
         }
         .tab-content:not(#dashboard) h2 {
-            letter-spacing: -0.03em;
+            font-size: 1.25rem !important;
+            font-weight: 650 !important;
+            letter-spacing: -0.02em;
+            line-height: 1.3;
+            color: var(--text-primary) !important;
         }
+        .tab-content:not(#dashboard) h2 + p,
+        .tab-content:not(#dashboard) > :first-child p {
+            font-size: 0.78rem !important;
+            line-height: 1.45;
+            color: var(--m-muted) !important;
+        }
+        .tab-content:not(#dashboard) h3 {
+            font-size: 0.9rem !important;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+            color: var(--text-primary);
+        }
+        .tab-content:not(#dashboard) h4 { font-size: 0.8rem; font-weight: 600; }
 
-        /* Tarjetas de formulario y tablas */
-        .form-section,
-        .tab-content:not(#dashboard) .table-section,
-        .stat-card {
-            border-radius: var(--ui-radius);
-            border: 1px solid var(--border-color);
-            box-shadow: var(--ui-card-shadow);
-            transition: box-shadow 0.3s var(--ui-ease), transform 0.3s var(--ui-ease), border-color 0.3s ease, background-color 0.3s ease;
-        }
-        .form-section:hover,
-        .stat-card:hover {
-            box-shadow: var(--ui-card-shadow-hover);
-            border-color: color-mix(in srgb, var(--primary) 26%, var(--border-color));
-        }
-        .stat-card:hover { transform: translateY(-2px); }
+        /* Secciones */
+        .tab-content:not(#dashboard) .form-section,
         .tab-content:not(#dashboard) .table-section {
             background: var(--bg-primary);
-            padding: 1.5rem 1.75rem;
+            border: 1px solid var(--m-line);
+            border-radius: var(--m-radius);
+            box-shadow: none;
+            padding: 1.1rem 1.25rem;
+            margin: 0 0 1rem;
         }
-        .form-section h3,
-        .table-section h3 {
-            display: flex;
-            align-items: center;
-            gap: 0.55rem;
+        .tab-content:not(#dashboard) .form-section .table-section {
+            border: none;
+            padding: 0;
+            margin: 1rem 0 0;
+            background: none;
         }
-        .tab-content:not(#dashboard) .form-section > h3::before,
-        .tab-content:not(#dashboard) .table-section > h3::before {
-            content: '';
-            width: 0.5rem;
-            height: 0.5rem;
-            border-radius: 50%;
-            flex-shrink: 0;
-            background: var(--primary);
-            box-shadow: 0 0 0 4px var(--ui-accent-soft);
+        .tab-content:not(#dashboard) .form-section h3,
+        .tab-content:not(#dashboard) .table-section h3 {
+            margin: 0 0 0.85rem !important;
+            font-size: 0.875rem !important;
         }
 
-        /* Campos */
-        .form-group input,
-        .form-group select,
-        .form-group textarea,
-        .modulo-mes-consulta select,
-        .filtro-inteligente {
-            border-radius: var(--ui-radius-sm);
-            transition: border-color 0.2s ease, box-shadow 0.25s var(--ui-ease), background-color 0.2s ease;
+        /* Formularios */
+        .tab-content:not(#dashboard) .form-row { gap: 0.75rem 1rem; }
+        .tab-content:not(#dashboard) .form-group { margin-bottom: 0.75rem; }
+        .tab-content:not(#dashboard) .form-group label {
+            font-size: 0.72rem;
+            font-weight: 500;
+            color: var(--text-tertiary);
+            margin-bottom: 0.3rem;
         }
-        .form-group input:hover,
-        .form-group select:hover,
-        .form-group textarea:hover {
-            border-color: color-mix(in srgb, var(--primary) 35%, var(--border-color));
+        .tab-content:not(#dashboard) .form-group input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+        .tab-content:not(#dashboard) .form-group select,
+        .tab-content:not(#dashboard) .form-group textarea {
+            min-height: 2.25rem;
+            padding: 0.45rem 0.7rem;
+            font-size: 0.8125rem;
+            border: 1px solid var(--m-line);
+            border-radius: var(--m-radius-sm);
+            background: var(--bg-primary);
+            box-shadow: none;
+            transition: border-color 0.15s ease, box-shadow 0.15s ease;
+        }
+        .tab-content:not(#dashboard) .form-group textarea { min-height: 72px; }
+        .tab-content:not(#dashboard) .form-group input:hover,
+        .tab-content:not(#dashboard) .form-group select:hover,
+        .tab-content:not(#dashboard) .form-group textarea:hover {
+            border-color: var(--m-line-strong);
         }
         .form-group input:focus,
         .form-group select:focus,
         .form-group textarea:focus,
         .modulo-mes-consulta select:focus,
         [contenteditable="true"]:focus {
+            outline: none;
             border-color: var(--primary) !important;
-            box-shadow: 0 0 0 4px var(--ui-accent-ring);
+            box-shadow: 0 0 0 3px var(--m-accent-ring);
         }
-        .filtro-inteligente:focus-within {
+        .tab-content:not(#dashboard) .form-group small {
+            font-size: 0.72rem;
+            margin-top: 0.3rem;
+            color: var(--m-muted);
+        }
+        .tab-content:not(#dashboard) .filtro-inteligente {
+            background: var(--bg-primary);
+            border: 1px solid var(--m-line);
+            border-radius: var(--m-radius-sm);
+            box-shadow: none;
+            padding: 0.3rem 0.6rem;
+            margin-bottom: 0.75rem;
+        }
+        .tab-content:not(#dashboard) .filtro-inteligente:focus-within {
             border-color: var(--primary);
-            box-shadow: 0 0 0 4px var(--ui-accent-ring);
+            box-shadow: 0 0 0 3px var(--m-accent-ring);
         }
-        .form-group label {
-            font-weight: 600;
-            letter-spacing: 0.005em;
-        }
+        .tab-content:not(#dashboard) .filtro-inteligente input { font-size: 0.8rem; }
 
         /* Botones */
         .btn {
-            border-radius: var(--ui-radius-sm);
-            font-weight: 600;
-            letter-spacing: 0.01em;
-            transition: transform 0.2s var(--ui-ease), box-shadow 0.25s ease, background 0.2s ease, filter 0.2s ease;
+            border-radius: var(--m-radius-sm);
+            font-weight: 500;
+            letter-spacing: 0;
+            box-shadow: none;
+            gap: 0.35rem;
+            transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
         }
+        .tab-content:not(#dashboard) .btn {
+            min-height: 2.15rem;
+            padding: 0.4rem 0.9rem;
+            font-size: 0.78rem;
+            margin: 0.35rem 0.4rem 0 0;
+        }
+        .btn:hover,
+        .btn:active { transform: none !important; }
         .btn-primary {
-            background: linear-gradient(180deg, var(--primary-light) 0%, var(--primary) 50%, var(--primary-dark) 100%);
-            box-shadow: 0 1px 0 rgba(255, 255, 255, 0.22) inset, 0 6px 16px -8px color-mix(in srgb, var(--primary) 70%, transparent);
+            background: var(--primary);
+            color: #fff;
+            border: 1px solid transparent;
         }
         .btn-primary:hover {
-            background: linear-gradient(180deg, var(--primary-light) 0%, var(--primary) 50%, var(--primary-dark) 100%);
-            filter: brightness(1.05);
-            box-shadow: 0 1px 0 rgba(255, 255, 255, 0.28) inset, 0 10px 22px -10px color-mix(in srgb, var(--primary) 80%, transparent);
+            background: var(--primary-dark);
+            box-shadow: none;
+            filter: none;
         }
         .btn-secondary {
-            background: var(--bg-tertiary);
+            background: var(--bg-primary);
             color: var(--text-secondary);
-            box-shadow: inset 0 0 0 1px var(--border-color);
+            border: 1px solid var(--m-line);
         }
         .btn-secondary:hover {
-            background: var(--ui-accent-soft);
+            background: var(--m-hover);
             color: var(--text-primary);
-            box-shadow: inset 0 0 0 1px var(--ui-accent-ring);
+            border-color: var(--m-line-strong);
         }
         .btn-danger {
-            background: linear-gradient(180deg, #f87171 0%, var(--danger) 55%, #dc2626 100%);
-            box-shadow: 0 6px 16px -8px rgba(239, 68, 68, 0.7);
+            background: color-mix(in srgb, var(--danger) 10%, transparent);
+            color: var(--danger);
+            border: 1px solid color-mix(in srgb, var(--danger) 30%, transparent);
+        }
+        .btn-danger:hover {
+            background: var(--danger);
+            color: #fff;
         }
         .btn:focus-visible {
             outline: none;
-            box-shadow: 0 0 0 4px var(--ui-accent-ring);
+            box-shadow: 0 0 0 3px var(--m-accent-ring);
         }
-        .btn:disabled {
-            filter: grayscale(0.35);
-            cursor: not-allowed;
-        }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-        /* Tablas */
-        .tab-content:not(#dashboard) table {
-            border-radius: 14px;
-            border-collapse: separate;
-            border-spacing: 0;
-            box-shadow: var(--ui-card-shadow);
-        }
-        .tab-content:not(#dashboard) thead {
-            background: linear-gradient(180deg, color-mix(in srgb, var(--primary) 9%, var(--bg-tertiary)), var(--bg-tertiary));
-        }
-        .tab-content:not(#dashboard) th {
-            color: var(--text-tertiary);
-            font-weight: 700;
-            letter-spacing: 0.06em;
-        }
-        .tab-content:not(#dashboard) tbody tr {
-            transition: background-color 0.2s ease;
-        }
-        .tab-content:not(#dashboard) tbody tr:hover {
-            background: var(--ui-accent-soft);
-        }
-        .tab-content:not(#dashboard) tbody tr:nth-child(even) {
-            background: color-mix(in srgb, var(--bg-tertiary) 45%, transparent);
-        }
-        .tab-content:not(#dashboard) tbody tr:nth-child(even):hover {
-            background: var(--ui-accent-soft);
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-            .tab-content.active,
-            .tab-content:not(#dashboard).active > * {
-                animation: none !important;
-            }
-            .stat-card:hover,
-            .tab-button:hover { transform: none; }
-        }
-        @media (max-width: 768px) {
-            .tab-content:not(#dashboard) > :first-child:has(> h2),
-            .tab-content:not(#dashboard) > :first-child:has(> div > h2),
-            .tab-content:not(#dashboard) > .notif-head,
-            .tab-content:not(#dashboard) > .perso-head,
-            .tab-content:not(#dashboard) > .mailer-head,
-            .tab-content:not(#dashboard) > .inv-head {
-                padding: 1rem 1.1rem !important;
-                border-radius: 16px;
-            }
-            .tab-content:not(#dashboard) .table-section { padding: 1rem; }
-        }
-
-        /* ===== Densidad compacta: texto más chico y tablas sin scroll excesivo ===== */
-        .tab-content:not(#dashboard) {
-            padding: 1.1rem 1.4rem !important;
-            font-size: 0.82rem;
-        }
-        .tab-content:not(#dashboard) h2 {
-            font-size: 1.15rem !important;
-            line-height: 1.25;
-        }
-        .tab-content:not(#dashboard) h2 + p,
-        .tab-content:not(#dashboard) > :first-child p {
-            font-size: 0.76rem !important;
-        }
-        .tab-content:not(#dashboard) h3 {
-            font-size: 0.95rem !important;
-            margin-bottom: 0.7rem !important;
-        }
-        .tab-content:not(#dashboard) h4 { font-size: 0.85rem; }
-        .tab-content:not(#dashboard) > :first-child:has(> h2),
-        .tab-content:not(#dashboard) > :first-child:has(> div > h2),
-        .tab-content:not(#dashboard) > .notif-head,
-        .tab-content:not(#dashboard) > .perso-head,
-        .tab-content:not(#dashboard) > .mailer-head,
-        .tab-content:not(#dashboard) > .inv-head {
-            padding: 0.85rem 1.1rem !important;
-            margin-bottom: 1rem !important;
-            border-radius: 16px;
-        }
-        .tab-content:not(#dashboard) .form-section {
-            padding: 1rem 1.15rem;
-            margin-bottom: 1rem;
-        }
-        .tab-content:not(#dashboard) .table-section {
-            padding: 0.9rem 1rem;
-            margin-top: 1rem;
-            margin-bottom: 1rem;
-        }
-        .tab-content:not(#dashboard) .form-group { margin-bottom: 0.7rem; }
-        .tab-content:not(#dashboard) .form-row { gap: 0.85rem; }
-        .tab-content:not(#dashboard) .form-group label {
-            font-size: 0.74rem;
-            margin-bottom: 0.25rem;
-        }
-        .tab-content:not(#dashboard) .form-group input,
-        .tab-content:not(#dashboard) .form-group select,
-        .tab-content:not(#dashboard) .form-group textarea {
-            padding: 0.5rem 0.7rem;
-            font-size: 0.8rem;
-        }
-        .tab-content:not(#dashboard) .form-group textarea { min-height: 70px; }
-        .tab-content:not(#dashboard) .form-group small { font-size: 0.72rem; margin-top: 0.3rem; }
-        .tab-content:not(#dashboard) .btn {
-            padding: 0.48rem 0.95rem;
-            font-size: 0.78rem;
-            margin-right: 0.45rem;
-            margin-top: 0.45rem;
-        }
-        .tab-content:not(#dashboard) .stat-card { padding: 0.85rem 1rem; }
-        .tab-content:not(#dashboard) .stat-card .stat-value { font-size: 1.2rem; }
-        .tab-content:not(#dashboard) .stat-card h4,
-        .tab-content:not(#dashboard) .stat-card .stat-label { font-size: 0.68rem; }
-
-        .tab-content:not(#dashboard) table {
-            width: 100%;
-            max-width: 100%;
-            table-layout: auto;
-        }
-        .tab-content:not(#dashboard) th {
-            padding: 0.5rem 0.6rem !important;
-            font-size: 0.64rem !important;
-            line-height: 1.25;
-            white-space: normal;
-        }
-        .tab-content:not(#dashboard) td {
-            padding: 0.42rem 0.6rem !important;
-            font-size: 0.76rem !important;
-            line-height: 1.35;
-            white-space: normal;
-            overflow-wrap: anywhere;
-            word-break: normal;
-            vertical-align: top;
-        }
         .tab-content:not(#dashboard) td .btn.btn-sm,
         .tab-content:not(#dashboard) .tabla-acciones .btn,
         .tab-content:not(#dashboard) .moroso-acciones .btn {
+            min-height: 1.55rem;
             margin: 0 !important;
-            padding: 0.12rem 0.3rem !important;
-            font-size: 0.62rem !important;
+            padding: 0.15rem 0.45rem !important;
+            font-size: 0.68rem !important;
+            font-weight: 500;
+            border-radius: 6px;
         }
         .tab-content:not(#dashboard) .tabla-acciones,
         .tab-content:not(#dashboard) .moroso-acciones {
             min-width: 0;
-            grid-template-columns: repeat(auto-fit, minmax(3.6rem, 1fr));
+            gap: 0.25rem;
+            grid-template-columns: repeat(auto-fit, minmax(3.8rem, 1fr));
         }
-        .tab-content:not(#dashboard) .filtro-inteligente {
-            padding: 0.3rem 0.55rem;
-            margin-bottom: 0.55rem;
+
+        /* Tablas */
+        .tab-content:not(#dashboard) table {
+            width: 100%;
+            max-width: 100%;
+            table-layout: auto;
+            border-collapse: separate;
+            border-spacing: 0;
+            border: 1px solid var(--m-line);
+            border-radius: var(--m-radius);
+            background: var(--bg-primary);
+            box-shadow: none;
+            font-variant-numeric: tabular-nums;
         }
-        .tab-content:not(#dashboard) .filtro-inteligente input { font-size: 0.78rem; }
-        @media (min-width: 1025px) {
-            .tab-content:not(#dashboard) .table-section > div,
-            .tab-content:not(#dashboard) [style*="overflow-x"] {
-                overflow-x: auto;
-            }
+        .tab-content:not(#dashboard) thead { background: var(--bg-secondary); }
+        .tab-content:not(#dashboard) th {
+            padding: 0.55rem 0.75rem !important;
+            font-size: 0.66rem !important;
+            font-weight: 600;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            text-align: left;
+            line-height: 1.3;
+            color: var(--m-muted);
+            border-bottom: 1px solid var(--m-line);
+            white-space: normal;
+        }
+        .tab-content:not(#dashboard) td {
+            padding: 0.55rem 0.75rem !important;
+            font-size: 0.78rem !important;
+            line-height: 1.4;
+            color: var(--text-secondary);
+            border-bottom: 1px solid var(--m-line);
+            vertical-align: middle;
+            white-space: normal;
+            overflow-wrap: break-word;
+        }
+        .tab-content:not(#dashboard) tbody tr {
+            background: transparent;
+            transition: background 0.12s ease;
+        }
+        .tab-content:not(#dashboard) tbody tr:hover { background: var(--m-hover); }
+        .tab-content:not(#dashboard) tbody tr:last-child td { border-bottom: none; }
+
+        /* Indicadores */
+        .tab-content:not(#dashboard) .stat-card {
+            background: var(--bg-primary);
+            border: 1px solid var(--m-line);
+            border-radius: var(--m-radius);
+            box-shadow: none;
+            padding: 0.9rem 1rem;
+        }
+        .tab-content:not(#dashboard) .stat-card.danger,
+        .tab-content:not(#dashboard) .stat-card.warning,
+        .tab-content:not(#dashboard) .stat-card.success,
+        .tab-content:not(#dashboard) .stat-card.info { border-left-width: 3px; }
+        .tab-content:not(#dashboard) .stat-card h4,
+        .tab-content:not(#dashboard) .stat-card .stat-label {
+            font-size: 0.66rem;
+            color: var(--m-muted);
+        }
+        .tab-content:not(#dashboard) .stat-card .stat-value {
+            font-size: 1.25rem;
+            font-weight: 650;
+            letter-spacing: -0.02em;
+        }
+
+        /* Barras de desplazamiento discretas */
+        .tab-content ::-webkit-scrollbar { width: 8px; height: 8px; }
+        .tab-content ::-webkit-scrollbar-track { background: transparent; }
+        .tab-content ::-webkit-scrollbar-thumb {
+            background: color-mix(in srgb, var(--text-tertiary) 35%, transparent);
+            border-radius: 8px;
+        }
+
+        @media (max-width: 768px) {
+            .tab-content:not(#dashboard) { padding: 1rem 0.85rem 2rem !important; }
+            .tab-content:not(#dashboard) .form-section,
+            .tab-content:not(#dashboard) .table-section { padding: 0.9rem; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .tab-content.active { animation: none !important; }
         }
 
     </style>
