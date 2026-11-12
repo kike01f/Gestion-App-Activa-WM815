@@ -877,8 +877,13 @@
         #personalizacion .perso-kpis div { border: 1px solid var(--border-color); border-radius: 10px; padding: 0.7rem 0.8rem; background: var(--bg-secondary); }
         #personalizacion .perso-kpis strong { display: block; font-size: 1.05rem; }
         #personalizacion .perso-kpis span { font-size: 0.72rem; color: var(--text-tertiary); }
-        #personalizacion #permisosCfgMods { display: grid; grid-template-columns: repeat(auto-fill, minmax(168px, 1fr)); gap: 0.4rem; margin: 0.35rem 0 0.9rem; }
-        #personalizacion #permisosCfgMods label { display: flex; gap: 0.4rem; align-items: center; font-size: 0.78rem; padding: 0.35rem 0.45rem; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-primary); cursor: pointer; }
+        #personalizacion #permisosCfgMods { display: flex; flex-direction: column; gap: 0.35rem; margin: 0.35rem 0 0.9rem; max-height: 28rem; overflow: auto; padding-right: 0.15rem; }
+        #personalizacion #permisosCfgMods .perm-grupo { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-tertiary); margin: 0.45rem 0 0.1rem; }
+        #personalizacion #permisosCfgMods .perm-mod { border: 1px solid var(--border-color); border-radius: 10px; padding: 0.45rem 0.6rem; background: var(--bg-primary); }
+        #personalizacion #permisosCfgMods .perm-mod.is-off { opacity: 0.68; }
+        #personalizacion #permisosCfgMods .perm-mod-head { display: flex; align-items: center; gap: 0.45rem; font-size: 0.8rem; font-weight: 650; margin: 0; padding: 0; border: 0; background: none; cursor: pointer; }
+        #personalizacion #permisosCfgMods .perm-mod-subs { display: flex; flex-wrap: wrap; gap: 0.3rem 0.85rem; margin: 0.35rem 0 0 1.35rem; }
+        #personalizacion #permisosCfgMods .perm-mod-subs label { display: flex; gap: 0.3rem; align-items: center; font-size: 0.73rem; font-weight: 500; padding: 0; border: 0; background: none; cursor: pointer; }
         #personalizacion #permisosCfgLista .perm-user { margin-bottom: 0.45rem; }
         #persoListaModulos { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.5rem; }
         @media (max-width: 860px) {
@@ -7639,8 +7644,7 @@
         #perfilAvatarGrid button { appearance: none; border: 2px solid transparent; border-radius: 10px; background: var(--bg-secondary); font-size: 1.45rem; padding: 0.35rem; cursor: pointer; }
         #perfilAvatarGrid button.is-on { border-color: var(--primary); background: color-mix(in srgb, var(--primary) 16%, transparent); }
         .perm-user { display: flex; align-items: center; }
-        #permisosCfgMods { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 0.35rem 0.75rem; margin: 0.5rem 0 0.85rem; }
-        #permisosCfgMods label { display: flex; gap: 0.4rem; align-items: center; font-size: 0.8rem; cursor: pointer; }
+        #permisosCfgMods { display: flex; flex-direction: column; gap: 0.35rem; margin: 0.5rem 0 0.85rem; }
         #permisosCfgLista .perm-user { display: flex; justify-content: space-between; gap: 0.75rem; align-items: center; padding: 0.5rem 0.7rem; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-secondary); margin-bottom: 0.4rem; }
         #permisosCfgLista .perm-nivel { display: inline-block; font-size: 0.68rem; font-weight: 700; padding: 0.1rem 0.4rem; border-radius: 6px; background: #334155; color: #e2e8f0; }
         #bitacoraPublica .bit-kpi { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0.65rem; margin: 0 0 1rem; }
@@ -8010,7 +8014,7 @@
             <div id="avisoSoloLecturaMesArchivado" style="display: none; margin: 0 0 1rem 0; padding: 0.625rem 1rem; background: linear-gradient(90deg, rgba(245, 158, 11, 0.12) 0%, rgba(251, 191, 36, 0.08) 100%); border: 1px solid rgba(245, 158, 11, 0.35); border-radius: 8px; font-size: 0.875rem; color: #422006; font-weight: 600;">
                 📋 Consultando mes archivado (solo lectura). Los datos no se pueden editar. Para editar, reabra el mes desde el Panel de Control.
             </div>
-            <div id="avisoPermisoSoloLectura">Su cuenta es de solo visualización: puede consultar el panel y los módulos, pero no registrar ni modificar datos.</div>
+            <div id="avisoPermisoSoloLectura">En este módulo su cuenta solo puede consultar; no puede registrar ni modificar datos.</div>
 
             <!-- PANEL DE CONTROL (único) -->
         <div id="dashboard" class="tab-content active">
@@ -10818,7 +10822,7 @@
             </div>
 
             <div id="persoPanelUsuarios" class="perso-panel">
-                <p class="perso-hint">Solo esta cuenta de administración crea usuarios y les asigna módulos. Quien no esté en la lista puede entrar, pero no verá la app.</p>
+                <p class="perso-hint">Solo esta cuenta de administración crea usuarios y les asigna módulos y subpermisos. Quien no esté en la lista puede entrar, pero no verá la app.</p>
                 <div class="perso-grid">
                     <div class="perso-card">
                         <h3>Nueva cuenta</h3>
@@ -10835,23 +10839,15 @@
                             <input type="password" id="permisosCfgClave" placeholder="Para crear la cuenta" autocomplete="new-password">
                         </div>
                         <div class="form-group">
-                            <label>Nivel de permiso</label>
+                            <label>Plantilla rápida</label>
                             <select id="permisosCfgNivel"></select>
                         </div>
                         <p id="permisosCfgNivelDesc" class="perso-hint"></p>
-                        <div class="form-group">
-                            <label>Acceso en el panel y módulos</label>
-                            <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-top:0.35rem;">
-                                <label style="display:flex;gap:0.4rem;align-items:center;font-size:0.82rem;cursor:pointer;"><input type="radio" name="permisosCfgAcceso" value="visualizar"> Solo visualizar</label>
-                                <label style="display:flex;gap:0.4rem;align-items:center;font-size:0.82rem;cursor:pointer;"><input type="radio" name="permisosCfgAcceso" value="editar" checked> Editar</label>
-                            </div>
-                            <small style="color:var(--text-tertiary);font-size:0.72rem;display:block;margin-top:0.25rem;">Visualizar: ve el Panel de Control y los datos, sin guardar cambios. Editar: puede registrar y modificar.</small>
-                        </div>
                         <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:0.65rem;">
                             <label style="display:flex;gap:0.4rem;align-items:center;font-size:0.8rem;cursor:pointer;"><input type="checkbox" id="permisosCfgChat"> Chat interno</label>
-                            <label style="display:flex;gap:0.4rem;align-items:center;font-size:0.8rem;cursor:pointer;"><input type="checkbox" id="permisosCfgNotif"> Notificaciones</label>
+                            <label style="display:flex;gap:0.4rem;align-items:center;font-size:0.8rem;cursor:pointer;"><input type="checkbox" id="permisosCfgNotif"> Campana de avisos</label>
                         </div>
-                        <p style="font-size:0.75rem;color:var(--text-tertiary);margin:0 0 0.35rem;">Módulos (en Personalizado se marcan uno a uno)</p>
+                        <p style="font-size:0.75rem;color:var(--text-tertiary);margin:0 0 0.35rem;">Módulos y subpermisos: primero el acceso al módulo y, debajo, qué puede hacer.</p>
                         <div id="permisosCfgMods"></div>
                         <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
                             <button type="button" class="btn btn-primary" id="permisosCfgAgregar">Crear cuenta y agregar</button>
@@ -13436,6 +13432,10 @@
                 }
                 if (typeof window.inicializarFiltrosInteligentes === 'function') {
                     window.inicializarFiltrosInteligentes();
+                }
+                if (typeof aplicarPermisosModuloActivo === 'function') aplicarPermisosModuloActivo();
+                if (typeof actualizarEstadoFormularios === 'function') {
+                    try { actualizarEstadoFormularios(); } catch (ePermTab) {}
                 }
                 if (typeof programarFechaHoraActualRegistro === 'function') {
                     programarFechaHoraActualRegistro(tabName);
@@ -19931,13 +19931,13 @@
                 var qNum = String(q).replace(/^#/, '').trim();
                 if (/^\d+$/.test(qNum) && Number(n.numeroLibro) === Number(qNum)) return true;
                 var notasTxt = (n.notas || []).map(function (x) { return x && x.texto; }).join(' ');
-                var blob = [etiquetaLibroNovedadGestion(n), n.numeroLibro, n.texto, n.conserje, n.categoria, n.fecha, n.hora, n.notaInterna, notasTxt].join(' ').toLowerCase();
-                return blob.indexOf(q) !== -1;
+                var blob = [etiquetaLibroNovedadGestion(n), n.numeroLibro, n.texto, n.conserje, n.categoria, n.fecha, n.hora, n.notaInterna, notasTxt].join(' ');
+                return coincidirFiltroInteligente(blob, q);
             });
             var vis = (cache.visitas || []).filter(function (v) {
                 if (!q) return true;
-                var blob = [v.visitor, v.deptLabel, v.plate, v.parkingCode].join(' ').toLowerCase();
-                return blob.indexOf(q) !== -1;
+                var blob = [v.visitor, v.deptLabel, v.plate, v.parkingCode].join(' ');
+                return coincidirFiltroInteligente(blob, q);
             });
             var tbN = document.getElementById('tbodyConserjeriaNovedades');
             if (tbN) {
@@ -20452,7 +20452,7 @@
             return (list || []).filter(function (r) {
                 if (desde && String(r.ymd || '') < desde) return false;
                 if (hasta && String(r.ymd || '') > hasta) return false;
-                if (cons && String(r.conserje || '').toLowerCase().indexOf(cons) < 0) return false;
+                if (cons && !coincidirFiltroInteligente(r.conserje || '', cons)) return false;
                 if (tipo && r.tipo !== tipo) return false;
                 if (est === 'incidencia' && chkEstadoOperativo(r) !== 'incidencia') return false;
                 if (est === 'observaciones' && chkEstadoOperativo(r) !== 'observaciones') return false;
@@ -22350,7 +22350,7 @@ function pcshChatRefreshCitaNovedadList() {
         String(n.categoria || '') +
         ' ' +
         String(n.conserje || '');
-      return blob.toLowerCase().indexOf(q) >= 0;
+      return coincidirFiltroInteligente(blob, q);
     });
   }
   if (!rows.length) {
@@ -22471,14 +22471,7 @@ function pcshChatRenderMessages(snap) {
           String(cn.conserje || '')
         ].join(' ')
       : '';
-    return (
-      texto.toLowerCase().indexOf(q) >= 0 ||
-      String(entry.d.autor || '')
-        .toLowerCase()
-        .indexOf(q) >= 0 ||
-      stickerAlt.toLowerCase().indexOf(q) >= 0 ||
-      citaTxt.toLowerCase().indexOf(q) >= 0
-    );
+    return coincidirFiltroInteligente([texto, entry.d.autor, stickerAlt, citaTxt].join(' '), q);
   });
 
   box.innerHTML = '';
@@ -23967,12 +23960,12 @@ document.getElementById('chatForm').onsubmit = function (e) {
             var root = document.getElementById('dashboardBienvenidaBlock');
             if (!root) return;
             root.querySelectorAll('.bienvenida-chip[data-unidad]').forEach(function (btn) {
-                var n = String(btn.getAttribute('data-unidad') || btn.textContent || '').toLowerCase();
-                btn.hidden = !!(q && n.indexOf(q) === -1);
+                var n = String(btn.getAttribute('data-unidad') || btn.textContent || '');
+                btn.hidden = !!(q && !coincidirFiltroInteligente(n, q));
             });
             root.querySelectorAll('.bienvenida-registro tbody tr[data-unidad]').forEach(function (tr) {
-                var n = String(tr.getAttribute('data-unidad') || '').toLowerCase();
-                tr.hidden = !!(q && n.indexOf(q) === -1);
+                var n = String(tr.getAttribute('data-unidad') || tr.textContent || '');
+                tr.hidden = !!(q && !coincidirFiltroInteligente(n, q));
             });
         }
 
@@ -25473,42 +25466,70 @@ document.getElementById('chatForm').onsubmit = function (e) {
         }
 
         var PERMISOS_DOC = 'permisosUsuarios';
+        var PERMISOS_SUBS = {
+            ver: { label: 'Ver módulo' },
+            editar: { label: 'Registrar y editar' },
+            eliminar: { label: 'Eliminar' },
+            comentar: { label: 'Comentar casos' },
+            gestionar: { label: 'Cerrar mes y herramientas' },
+            enviar: { label: 'Enviar' }
+        };
+        var PERMISOS_GRUPOS = [
+            { id: 'operacion', label: 'Operación' },
+            { id: 'comunidad', label: 'Comunidad' },
+            { id: 'convivencia', label: 'Convivencia' },
+            { id: 'finanzas', label: 'Finanzas' },
+            { id: 'comunicacion', label: 'Comunicación' }
+        ];
         var PERMISOS_CATALOGO_TABS = [
-            { id: 'dashboard', nombre: 'Panel de Control' },
-            { id: 'conserjeria', nombre: 'Conserjería' },
-            { id: 'checklistTurnos', nombre: 'Checklist de Turnos' },
-            { id: 'ocupacion', nombre: 'Ocupación' },
-            { id: 'mudanzas', nombre: 'Mudanzas' },
-            { id: 'aperturas', nombre: 'Aperturas de Puerta' },
-            { id: 'tarjetas', nombre: 'Tarjetas y TAG' },
-            { id: 'espacios', nombre: 'Espacios Comunes' },
-            { id: 'multas', nombre: 'Multas' },
-            { id: 'morosos', nombre: 'Morosos' },
-            { id: 'postventa', nombre: 'Postventa' },
-            { id: 'comite', nombre: 'Comité' },
-            { id: 'caja', nombre: 'Caja Chica' },
-            { id: 'lecturasAgua', nombre: 'Lecturas Agua Caliente' },
-            { id: 'pagos-aseo', nombre: 'Pagos Aseo' },
-            { id: 'nomina', nombre: 'Nómina Mensual' },
-            { id: 'insumos', nombre: 'Pedido de Insumos' },
-            { id: 'mantenciones', nombre: 'Mantenciones' },
-            { id: 'notificaciones', nombre: 'Central de Notificación' },
-            { id: 'envioCorreos', nombre: 'Envío de correos' },
-            { id: 'bitacoraPublica', nombre: 'Bitácora' },
-            { id: 'personalizacion', nombre: 'Personalización' }
+            { id: 'dashboard', nombre: 'Panel de Control', grupo: 'operacion', subs: ['ver', 'gestionar'] },
+            { id: 'conserjeria', nombre: 'Conserjería', grupo: 'operacion', subs: ['ver', 'editar'] },
+            { id: 'checklistTurnos', nombre: 'Checklist de Turnos', grupo: 'operacion', subs: ['ver', 'editar'] },
+            { id: 'ocupacion', nombre: 'Ocupación', grupo: 'comunidad', subs: ['ver', 'editar'] },
+            { id: 'mudanzas', nombre: 'Mudanzas', grupo: 'comunidad', subs: ['ver', 'editar', 'eliminar'] },
+            { id: 'aperturas', nombre: 'Aperturas de Puerta', grupo: 'comunidad', subs: ['ver', 'editar', 'eliminar'] },
+            { id: 'tarjetas', nombre: 'Tarjetas y TAG', grupo: 'comunidad', subs: ['ver', 'editar', 'eliminar'] },
+            { id: 'espacios', nombre: 'Espacios Comunes', grupo: 'comunidad', subs: ['ver', 'editar', 'eliminar'] },
+            { id: 'multas', nombre: 'Multas', grupo: 'convivencia', subs: ['ver', 'editar', 'eliminar'] },
+            { id: 'morosos', nombre: 'Morosos', grupo: 'convivencia', subs: ['ver', 'editar', 'eliminar'] },
+            { id: 'postventa', nombre: 'Postventa', grupo: 'convivencia', subs: ['ver', 'editar', 'eliminar'] },
+            { id: 'comite', nombre: 'Comité', grupo: 'convivencia', subs: ['ver', 'editar'] },
+            { id: 'bitacoraPublica', nombre: 'Bitácora', grupo: 'convivencia', subs: ['ver', 'comentar'] },
+            { id: 'caja', nombre: 'Caja Chica', grupo: 'finanzas', subs: ['ver', 'editar', 'eliminar'] },
+            { id: 'lecturasAgua', nombre: 'Lecturas Agua Caliente', grupo: 'finanzas', subs: ['ver', 'editar'] },
+            { id: 'pagos-aseo', nombre: 'Pagos Aseo', grupo: 'finanzas', subs: ['ver', 'editar', 'eliminar'] },
+            { id: 'nomina', nombre: 'Nómina Mensual', grupo: 'finanzas', subs: ['ver', 'editar'] },
+            { id: 'insumos', nombre: 'Pedido de Insumos', grupo: 'finanzas', subs: ['ver', 'editar', 'eliminar'] },
+            { id: 'mantenciones', nombre: 'Mantenciones', grupo: 'finanzas', subs: ['ver', 'editar', 'eliminar'] },
+            { id: 'notificaciones', nombre: 'Central de Notificación', grupo: 'comunicacion', subs: ['ver', 'enviar'] },
+            { id: 'envioCorreos', nombre: 'Envío de correos', grupo: 'comunicacion', subs: ['ver', 'enviar'] },
+            { id: 'personalizacion', nombre: 'Personalización', grupo: 'operacion', subs: ['ver'] }
         ];
         var PERMISOS_NIVELES = {
             administracion: { label: 'Administración', desc: 'Reservado a edificio.wm815@gmail.com. No se asigna a otras cuentas.', todos: true, chat: true, notif: true },
-            gestion: { label: 'Gestión operativa', desc: 'Operación diaria de la comunidad, sin personalización ni permisos.', excluir: ['personalizacion'], chat: true, notif: true },
-            finanzas: { label: 'Finanzas', desc: 'Panel, caja, lecturas, aseo, nómina, insumos y mantenciones.', tabs: ['dashboard', 'caja', 'lecturasAgua', 'pagos-aseo', 'nomina', 'insumos', 'mantenciones'], chat: true, notif: true },
-            convivencia: { label: 'Convivencia', desc: 'Panel, multas, morosos, postventa, comité y bitácora.', tabs: ['dashboard', 'multas', 'morosos', 'postventa', 'comite', 'bitacoraPublica'], chat: false, notif: true },
-            comite: { label: 'Comité', desc: 'Consulta de bitácora, comité, postventa y panel.', tabs: ['dashboard', 'bitacoraPublica', 'comite', 'postventa'], chat: false, notif: false },
-            bitacora: { label: 'Solo bitácora', desc: 'Únicamente el resumen mensual de reclamos y multas.', tabs: ['bitacoraPublica'], chat: false, notif: false },
-            personalizado: { label: 'Personalizado', desc: 'Elija módulos, chat y notificaciones uno a uno.', tabs: [], chat: false, notif: false }
+            gestion: { label: 'Gestión operativa', desc: 'Todos los módulos operativos, con registro y edición. Sin personalización.', excluir: ['personalizacion'], chat: true, notif: true, modo: 'completo' },
+            finanzas: { label: 'Finanzas', desc: 'Panel, caja, lecturas, aseo, nómina, insumos y mantenciones, con edición.', tabs: ['dashboard', 'caja', 'lecturasAgua', 'pagos-aseo', 'nomina', 'insumos', 'mantenciones'], chat: true, notif: true, modo: 'completo' },
+            convivencia: { label: 'Convivencia', desc: 'Panel, multas, morosos, postventa, comité y bitácora, con edición y comentarios.', tabs: ['dashboard', 'multas', 'morosos', 'postventa', 'comite', 'bitacoraPublica'], chat: false, notif: true, modo: 'completo' },
+            comite: { label: 'Comité (solo ver)', desc: 'Panel, bitácora, comité y postventa en consulta. Puede comentar en bitácora.', tabs: ['dashboard', 'bitacoraPublica', 'comite', 'postventa'], chat: false, notif: false, modo: 'ver' },
+            bitacora: { label: 'Solo bitácora', desc: 'Únicamente bitácora: ver casos y comentar.', tabs: ['bitacoraPublica'], chat: false, notif: false, modo: 'ver' },
+            personalizado: { label: 'Personalizado', desc: 'Elija módulos y, en cada uno, los subpermisos (ver, editar, eliminar, comentar…).', tabs: [], chat: false, notif: false, modo: 'personalizado' }
         };
 
         function permisosIdsCatalogo() {
             return PERMISOS_CATALOGO_TABS.map(function (t) { return t.id; });
+        }
+
+        function permisosItemCatalogo(id) {
+            var i;
+            for (i = 0; i < PERMISOS_CATALOGO_TABS.length; i++) {
+                if (PERMISOS_CATALOGO_TABS[i].id === id) return PERMISOS_CATALOGO_TABS[i];
+            }
+            return null;
+        }
+
+        function permisosSubsDeModulo(id) {
+            var item = permisosItemCatalogo(id);
+            return (item && item.subs && item.subs.length) ? item.subs.slice() : ['ver'];
         }
 
         function permisosTabsDeNivel(nivel, row) {
@@ -25516,6 +25537,9 @@ document.getElementById('chatForm').onsubmit = function (e) {
             if (def.todos) return permisosIdsCatalogo().slice();
             if (nivel === 'personalizado') {
                 var custom = Array.isArray(row && row.tabs) ? row.tabs : [];
+                if ((!custom || !custom.length) && row && row.mods && typeof row.mods === 'object') {
+                    custom = Object.keys(row.mods);
+                }
                 return custom.filter(function (id) { return permisosIdsCatalogo().indexOf(id) >= 0; });
             }
             if (Array.isArray(def.excluir)) {
@@ -25524,11 +25548,53 @@ document.getElementById('chatForm').onsubmit = function (e) {
             return Array.isArray(def.tabs) ? def.tabs.slice() : [];
         }
 
+        function permisosNormalizarListaSubs(id, lista) {
+            var permitidos = permisosSubsDeModulo(id);
+            var out = [];
+            (Array.isArray(lista) ? lista : []).forEach(function (s) {
+                var k = String(s || '').trim();
+                if (permitidos.indexOf(k) >= 0 && out.indexOf(k) < 0) out.push(k);
+            });
+            if (out.length && out.indexOf('ver') < 0 && permitidos.indexOf('ver') >= 0) out.unshift('ver');
+            return out;
+        }
+
+        function permisosSubsPorDefecto(id, modo, acceso) {
+            var permitidos = permisosSubsDeModulo(id);
+            if (modo === 'ver' || acceso === 'visualizar') {
+                var solo = ['ver'];
+                if (id === 'bitacoraPublica' && permitidos.indexOf('comentar') >= 0) solo.push('comentar');
+                return solo.filter(function (s) { return permitidos.indexOf(s) >= 0; });
+            }
+            return permitidos.slice();
+        }
+
+        function permisosModsDeUsuario(o, nivel, tabs, acceso) {
+            var def = PERMISOS_NIVELES[nivel] || PERMISOS_NIVELES.personalizado;
+            var mods = {};
+            var crudos = (o && o.mods && typeof o.mods === 'object' && !Array.isArray(o.mods)) ? o.mods : null;
+            if (crudos && nivel === 'personalizado') {
+                Object.keys(crudos).forEach(function (id) {
+                    if (id === 'personalizacion') return;
+                    if (permisosIdsCatalogo().indexOf(id) < 0) return;
+                    var subs = permisosNormalizarListaSubs(id, crudos[id]);
+                    if (subs.length) mods[id] = subs;
+                });
+                if (Object.keys(mods).length) return mods;
+            }
+            (tabs || []).forEach(function (id) {
+                if (id === 'personalizacion') return;
+                var subs = permisosSubsPorDefecto(id, def.modo, acceso);
+                if (subs.length) mods[id] = subs;
+            });
+            return mods;
+        }
+
         function permisosNormalizarUsuario(raw, correoFallback) {
             var o = raw && typeof raw === 'object' ? raw : {};
             var correo = bitacoraNormCorreo(o.correo || correoFallback);
             var nivel = String(o.nivel || '').trim();
-            if (!PERMISOS_NIVELES[nivel]) nivel = 'bitacora';
+            if (!PERMISOS_NIVELES[nivel]) nivel = (o.mods ? 'personalizado' : 'bitacora');
             var def = PERMISOS_NIVELES[nivel];
             var tabs = permisosTabsDeNivel(nivel, o);
             var chat = o.chat == null ? !!def.chat : (o.chat === true || o.chat === 'true');
@@ -25538,14 +25604,20 @@ document.getElementById('chatForm').onsubmit = function (e) {
             if (acceso !== 'visualizar' && acceso !== 'editar') {
                 acceso = (nivel === 'bitacora' || nivel === 'comite') ? 'visualizar' : 'editar';
             }
+            var mods = permisosModsDeUsuario(o, nivel, tabs, acceso);
+            tabs = Object.keys(mods);
+            var tieneEscritura = tabs.some(function (id) {
+                return (mods[id] || []).some(function (s) { return s !== 'ver'; });
+            });
             return {
                 nombre: String(o.nombre || '').trim(),
                 correo: correo,
                 nivel: nivel,
                 tabs: tabs,
+                mods: mods,
                 chat: chat,
                 notif: notif,
-                acceso: acceso
+                acceso: tieneEscritura ? 'editar' : 'visualizar'
             };
         }
 
@@ -25569,14 +25641,16 @@ document.getElementById('chatForm').onsubmit = function (e) {
         }
 
         function permisosFilaParaNube(u) {
+            var n = permisosNormalizarUsuario(u, u && u.correo);
             return {
-                nombre: String((u && u.nombre) || '').trim(),
-                correo: bitacoraNormCorreo(u && u.correo),
-                nivel: String((u && u.nivel) || 'bitacora'),
-                tabs: Array.isArray(u && u.tabs) ? u.tabs.slice() : [],
-                chat: !!(u && u.chat),
-                notif: !!(u && u.notif),
-                acceso: (u && u.acceso) === 'visualizar' ? 'visualizar' : 'editar'
+                nombre: n.nombre,
+                correo: n.correo,
+                nivel: n.nivel || 'personalizado',
+                tabs: n.tabs.slice(),
+                mods: n.mods,
+                chat: !!n.chat,
+                notif: !!n.notif,
+                acceso: n.acceso
             };
         }
 
@@ -25593,11 +25667,13 @@ document.getElementById('chatForm').onsubmit = function (e) {
         }
 
         function permisosSesionAdminPrincipal() {
-            return { todos: true, tabs: permisosIdsCatalogo().slice(), chat: true, notif: true, nivel: 'administracion', restringido: false, bloqueado: false, acceso: 'editar', soloLectura: false };
+            var mods = {};
+            permisosIdsCatalogo().forEach(function (id) { mods[id] = permisosSubsDeModulo(id); });
+            return { todos: true, tabs: permisosIdsCatalogo().slice(), mods: mods, chat: true, notif: true, nivel: 'administracion', restringido: false, bloqueado: false, acceso: 'editar', soloLectura: false };
         }
 
         function permisosSesionBloqueada(mail) {
-            return { todos: false, tabs: [], chat: false, notif: false, nivel: '', restringido: true, bloqueado: true, correo: mail || '' };
+            return { todos: false, tabs: [], mods: {}, chat: false, notif: false, nivel: '', restringido: true, bloqueado: true, correo: mail || '' };
         }
 
         function esAdminPrincipal(mail) {
@@ -25617,14 +25693,21 @@ document.getElementById('chatForm').onsubmit = function (e) {
             if (!row) return permisosSesionBloqueada(email);
             var u = permisosNormalizarUsuario(row, email);
             if (u.nivel === 'administracion') {
-                u.nivel = 'gestion';
-                u.tabs = permisosTabsDeNivel('gestion', u);
+                u = permisosNormalizarUsuario({
+                    nombre: u.nombre,
+                    correo: u.correo,
+                    nivel: 'gestion',
+                    chat: true,
+                    notif: true
+                }, email);
             }
-            u.tabs = (u.tabs || []).filter(function (id) { return id !== 'personalizacion'; });
+            if (u.mods) delete u.mods.personalizacion;
+            u.tabs = Object.keys(u.mods || {}).filter(function (id) { return id !== 'personalizacion'; });
             if (!u.tabs.length) return permisosSesionBloqueada(email);
             return {
                 todos: false,
                 tabs: u.tabs.slice(),
+                mods: u.mods || {},
                 chat: !!u.chat,
                 notif: !!u.notif,
                 nivel: u.nivel,
@@ -25637,21 +25720,55 @@ document.getElementById('chatForm').onsubmit = function (e) {
             };
         }
 
-        function usuarioPuedeEditar() {
+        function permisosTabCanonico(tabName) {
+            var t = String(tabName || '');
+            if (t === 'inventarioBodega' || t === 'registroRetirosBodega') return 'insumos';
+            return t;
+        }
+
+        function tabPermisoActual() {
+            var el = document.querySelector('.tab-content.active');
+            return el ? permisosTabCanonico(el.id) : '';
+        }
+
+        function usuarioPuede(mod, sub) {
             var ses = window._permisosSesion;
             if (!ses || ses.bloqueado) return false;
+            var t = permisosTabCanonico(mod || tabPermisoActual());
+            var s = String(sub || 'ver');
             if (ses.todos) return true;
-            return !ses.soloLectura;
+            var grants = (ses.mods && ses.mods[t]) || [];
+            if (s === 'ver') return grants.indexOf('ver') >= 0 || grants.length > 0 || (ses.tabs || []).indexOf(t) >= 0;
+            return grants.indexOf(s) >= 0;
+        }
+        window.usuarioPuede = usuarioPuede;
+
+        function usuarioPuedeEditar(mod) {
+            var t = permisosTabCanonico(mod || tabPermisoActual());
+            if (!t) {
+                var ses = window._permisosSesion;
+                if (!ses || ses.bloqueado) return false;
+                if (ses.todos) return true;
+                return !ses.soloLectura;
+            }
+            if (t === 'dashboard') return usuarioPuede(t, 'gestionar') || usuarioPuede(t, 'editar');
+            if (t === 'notificaciones' || t === 'envioCorreos') return usuarioPuede(t, 'enviar') || usuarioPuede(t, 'editar');
+            if (t === 'bitacoraPublica') return usuarioPuede(t, 'comentar');
+            return usuarioPuede(t, 'editar');
         }
         window.usuarioPuedeEditar = usuarioPuedeEditar;
 
+        function usuarioPuedeEliminar(mod) {
+            return usuarioPuede(mod || tabPermisoActual(), 'eliminar');
+        }
+        window.usuarioPuedeEliminar = usuarioPuedeEliminar;
+
         function usuarioPuedeVerTab(tabName) {
-            var t = String(tabName || '');
-            if (t === 'inventarioBodega' || t === 'registroRetirosBodega') t = 'insumos';
+            var t = permisosTabCanonico(tabName);
             var ses = window._permisosSesion;
             if (!ses || ses.bloqueado) return false;
             if (ses.todos) return true;
-            return (ses.tabs || []).indexOf(t) >= 0;
+            return usuarioPuede(t, 'ver');
         }
 
         function primeraTabPermitida() {
@@ -25661,6 +25778,26 @@ document.getElementById('chatForm').onsubmit = function (e) {
             var tabs = ses.tabs || [];
             if (tabs.indexOf('dashboard') >= 0) return 'dashboard';
             return tabs[0] || '';
+        }
+
+        function aplicarPermisosModuloActivo() {
+            var s = window._permisosSesion || permisosSesionBloqueada('');
+            var tab = tabPermisoActual();
+            var puedeEscribir = !s.bloqueado && (s.todos || usuarioPuedeEditar(tab));
+            var soloVer = !s.bloqueado && !!tab && usuarioPuedeVerTab(tab) && !puedeEscribir && tab !== 'bitacoraPublica';
+            document.body.classList.toggle('permisos-solo-lectura', soloVer);
+            var aviso = document.getElementById('avisoPermisoSoloLectura');
+            if (aviso) {
+                var item = permisosItemCatalogo(tab);
+                var nom = item ? item.nombre : 'este módulo';
+                aviso.textContent = 'En ' + nom + ' su cuenta solo puede consultar; no puede registrar ni modificar datos.';
+            }
+            document.querySelectorAll('.tab-content').forEach(function (el) {
+                var id = permisosTabCanonico(el.id);
+                var ver = !s.bloqueado && (s.todos || usuarioPuedeVerTab(id));
+                var edit = !s.bloqueado && (s.todos || usuarioPuedeEditar(id));
+                el.classList.toggle('permisos-modulo-solo-lectura', ver && !edit && id !== 'bitacoraPublica');
+            });
         }
 
         function aplicarPermisosEnMenu(ses) {
@@ -25679,7 +25816,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
             document.body.classList.toggle('permisos-sin-busqueda', !!(s.bloqueado || (s.restringido && (s.tabs || []).indexOf('dashboard') < 0)));
             var soloBit = !s.bloqueado && s.restringido && (s.tabs || []).length === 1 && s.tabs[0] === 'bitacoraPublica';
             document.body.classList.toggle('bitacora-solo', soloBit);
-            document.body.classList.toggle('permisos-solo-lectura', !!(!s.bloqueado && s.soloLectura));
+            aplicarPermisosModuloActivo();
             if (typeof actualizarEstadoFormularios === 'function') {
                 try { actualizarEstadoFormularios(); } catch (eF) {}
             }
@@ -25715,6 +25852,30 @@ document.getElementById('chatForm').onsubmit = function (e) {
             await aplicarPermisosSesion();
         }
 
+        function permisosHtmlEditorModulos() {
+            var html = '';
+            PERMISOS_GRUPOS.forEach(function (g) {
+                var items = PERMISOS_CATALOGO_TABS.filter(function (t) { return t.grupo === g.id && t.id !== 'personalizacion'; });
+                if (!items.length) return;
+                html += '<div class="perm-grupo">' + bitacoraEsc(g.label) + '</div>';
+                items.forEach(function (t) {
+                    var subs = (t.subs || ['ver']).filter(function (s) { return s !== 'ver'; });
+                    html += '<div class="perm-mod is-off" data-perm-mod="' + t.id + '">';
+                    html += '<label class="perm-mod-head"><input type="checkbox" data-perm-tab="' + t.id + '"> ' + bitacoraEsc(t.nombre) + '</label>';
+                    if (subs.length) {
+                        html += '<div class="perm-mod-subs">';
+                        subs.forEach(function (s) {
+                            var lab = (PERMISOS_SUBS[s] && PERMISOS_SUBS[s].label) || s;
+                            html += '<label><input type="checkbox" data-perm-sub="' + s + '" data-perm-for="' + t.id + '"> ' + bitacoraEsc(lab) + '</label>';
+                        });
+                        html += '</div>';
+                    }
+                    html += '</div>';
+                });
+            });
+            return html;
+        }
+
         function permisosBindUi() {
             if (window._permisosUiBound) return;
             window._permisosUiBound = true;
@@ -25727,14 +25888,28 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     o.textContent = PERMISOS_NIVELES[k].label;
                     sel.appendChild(o);
                 });
-                sel.value = 'comite';
+                sel.value = 'personalizado';
             }
             var mods = document.getElementById('permisosCfgMods');
-            if (mods && !mods.getAttribute('data-ready')) {
-                mods.setAttribute('data-ready', '1');
-                mods.innerHTML = PERMISOS_CATALOGO_TABS.filter(function (t) { return t.id !== 'personalizacion'; }).map(function (t) {
-                    return '<label><input type="checkbox" data-perm-tab="' + t.id + '"> ' + bitacoraEsc(t.nombre) + '</label>';
-                }).join('');
+            if (mods && mods.getAttribute('data-ready') !== 'subs-v1') {
+                mods.setAttribute('data-ready', 'subs-v1');
+                mods.innerHTML = permisosHtmlEditorModulos();
+                mods.addEventListener('change', function (ev) {
+                    var t = ev.target;
+                    if (!t) return;
+                    if (t.getAttribute('data-perm-tab')) {
+                        permisosSincronizarCajaModulo(t.getAttribute('data-perm-tab'));
+                    } else if (t.getAttribute('data-perm-for')) {
+                        var id = t.getAttribute('data-perm-for');
+                        var ver = document.querySelector('#permisosCfgMods [data-perm-tab="' + id + '"]');
+                        if (t.checked && ver) ver.checked = true;
+                        permisosSincronizarCajaModulo(id);
+                    }
+                    var selN = document.getElementById('permisosCfgNivel');
+                    if (selN && selN.value !== 'personalizado') selN.value = 'personalizado';
+                    var desc = document.getElementById('permisosCfgNivelDesc');
+                    if (desc) desc.textContent = (PERMISOS_NIVELES.personalizado || {}).desc || '';
+                });
             }
             if (sel) sel.addEventListener('change', permisosRefrescarEditorNivel);
             var add = document.getElementById('permisosCfgAgregar');
@@ -25772,36 +25947,62 @@ document.getElementById('chatForm').onsubmit = function (e) {
             }
         }
 
+        function permisosSincronizarCajaModulo(id) {
+            var caja = document.querySelector('#permisosCfgMods [data-perm-mod="' + id + '"]');
+            var ver = document.querySelector('#permisosCfgMods [data-perm-tab="' + id + '"]');
+            var on = !!(ver && ver.checked);
+            if (caja) caja.classList.toggle('is-off', !on);
+            document.querySelectorAll('#permisosCfgMods [data-perm-for="' + id + '"]').forEach(function (cb) {
+                cb.disabled = !on;
+                if (!on) cb.checked = false;
+            });
+        }
+
+        function permisosPintarModsEditor(mods) {
+            var mapa = mods || {};
+            document.querySelectorAll('#permisosCfgMods [data-perm-tab]').forEach(function (cb) {
+                var id = cb.getAttribute('data-perm-tab');
+                var subs = mapa[id] || [];
+                cb.checked = subs.indexOf('ver') >= 0 || subs.length > 0;
+                document.querySelectorAll('#permisosCfgMods [data-perm-for="' + id + '"]').forEach(function (sub) {
+                    sub.checked = subs.indexOf(sub.getAttribute('data-perm-sub')) >= 0;
+                });
+                permisosSincronizarCajaModulo(id);
+            });
+        }
+
+        function permisosModsMarcadosEditor() {
+            var mods = {};
+            document.querySelectorAll('#permisosCfgMods [data-perm-tab]').forEach(function (cb) {
+                var id = cb.getAttribute('data-perm-tab');
+                if (!cb.checked) return;
+                var subs = ['ver'];
+                document.querySelectorAll('#permisosCfgMods [data-perm-for="' + id + '"]:checked').forEach(function (sub) {
+                    var s = sub.getAttribute('data-perm-sub');
+                    if (s && subs.indexOf(s) < 0) subs.push(s);
+                });
+                mods[id] = permisosNormalizarListaSubs(id, subs);
+            });
+            return mods;
+        }
+
         function permisosRefrescarEditorNivel() {
             var sel = document.getElementById('permisosCfgNivel');
             var nivel = sel ? sel.value : 'personalizado';
             var def = PERMISOS_NIVELES[nivel] || PERMISOS_NIVELES.personalizado;
             var desc = document.getElementById('permisosCfgNivelDesc');
             if (desc) desc.textContent = def.desc || '';
-            var personal = nivel === 'personalizado';
-            var tabs = permisosTabsDeNivel(nivel, { tabs: permisosTabsMarcadosEditor() });
-            if (!personal) {
-                document.querySelectorAll('#permisosCfgMods [data-perm-tab]').forEach(function (cb) {
-                    cb.checked = tabs.indexOf(cb.getAttribute('data-perm-tab')) >= 0;
-                    cb.disabled = !personal;
-                });
-                var chat = document.getElementById('permisosCfgChat');
-                var notif = document.getElementById('permisosCfgNotif');
-                if (chat) { chat.checked = !!def.chat; chat.disabled = nivel === 'administracion'; }
-                if (notif) { notif.checked = !!def.notif; notif.disabled = nivel === 'administracion'; }
-            } else {
-                document.querySelectorAll('#permisosCfgMods [data-perm-tab]').forEach(function (cb) { cb.disabled = false; });
-                var chatP = document.getElementById('permisosCfgChat');
-                var notifP = document.getElementById('permisosCfgNotif');
-                if (chatP) chatP.disabled = false;
-                if (notifP) notifP.disabled = false;
-            }
+            var chat = document.getElementById('permisosCfgChat');
+            var notif = document.getElementById('permisosCfgNotif');
+            if (chat) { chat.checked = !!def.chat; chat.disabled = false; }
+            if (notif) { notif.checked = !!def.notif; notif.disabled = false; }
+            if (nivel === 'personalizado') return;
+            var dummy = permisosNormalizarUsuario({ nivel: nivel, correo: 'plantilla@local' }, 'plantilla@local');
+            permisosPintarModsEditor(dummy.mods);
         }
 
         function permisosTabsMarcadosEditor() {
-            return Array.prototype.slice.call(document.querySelectorAll('#permisosCfgMods [data-perm-tab]:checked')).map(function (cb) {
-                return cb.getAttribute('data-perm-tab');
-            });
+            return Object.keys(permisosModsMarcadosEditor());
         }
 
         function permisosLeerEditor() {
@@ -25809,15 +26010,14 @@ document.getElementById('chatForm').onsubmit = function (e) {
             var correo = bitacoraNormCorreo((document.getElementById('permisosCfgCorreo') || {}).value);
             var nivel = String((document.getElementById('permisosCfgNivel') || {}).value || 'personalizado');
             if (!PERMISOS_NIVELES[nivel]) nivel = 'personalizado';
-            var accEl = document.querySelector('input[name="permisosCfgAcceso"]:checked');
             return permisosNormalizarUsuario({
                 nombre: nombre,
                 correo: correo,
                 nivel: nivel,
+                mods: permisosModsMarcadosEditor(),
                 tabs: permisosTabsMarcadosEditor(),
                 chat: !!(document.getElementById('permisosCfgChat') && document.getElementById('permisosCfgChat').checked),
-                notif: !!(document.getElementById('permisosCfgNotif') && document.getElementById('permisosCfgNotif').checked),
-                acceso: accEl ? accEl.value : 'editar'
+                notif: !!(document.getElementById('permisosCfgNotif') && document.getElementById('permisosCfgNotif').checked)
             }, correo);
         }
 
@@ -25825,25 +26025,20 @@ document.getElementById('chatForm').onsubmit = function (e) {
             var mail = bitacoraNormCorreo(correo);
             var u = (window._permisosCfgUsuarios || []).filter(function (x) { return bitacoraNormCorreo(x.correo) === mail; })[0];
             if (!u) return;
+            u = permisosNormalizarUsuario(u, mail);
             var nom = document.getElementById('permisosCfgNombre');
             var em = document.getElementById('permisosCfgCorreo');
             var sel = document.getElementById('permisosCfgNivel');
             if (nom) nom.value = u.nombre || '';
             if (em) em.value = u.correo || '';
             if (sel) sel.value = u.nivel || 'personalizado';
-            document.querySelectorAll('input[name="permisosCfgAcceso"]').forEach(function (r) {
-                r.checked = r.value === (u.acceso || 'editar');
-            });
-            permisosRefrescarEditorNivel();
-            if ((u.nivel || '') === 'personalizado') {
-                document.querySelectorAll('#permisosCfgMods [data-perm-tab]').forEach(function (cb) {
-                    cb.checked = (u.tabs || []).indexOf(cb.getAttribute('data-perm-tab')) >= 0;
-                });
-                var chat = document.getElementById('permisosCfgChat');
-                var notif = document.getElementById('permisosCfgNotif');
-                if (chat) chat.checked = !!u.chat;
-                if (notif) notif.checked = !!u.notif;
-            }
+            var desc = document.getElementById('permisosCfgNivelDesc');
+            if (desc) desc.textContent = ((PERMISOS_NIVELES[u.nivel] || PERMISOS_NIVELES.personalizado).desc) || '';
+            var chat = document.getElementById('permisosCfgChat');
+            var notif = document.getElementById('permisosCfgNotif');
+            if (chat) chat.checked = !!u.chat;
+            if (notif) notif.checked = !!u.notif;
+            permisosPintarModsEditor(u.mods);
         }
 
         async function permisosCrearCuentaFirebase(correo, clave) {
@@ -25887,8 +26082,8 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 u.nivel = 'gestion';
                 u.tabs = permisosTabsDeNivel('gestion', u);
             }
-            if (u.nivel === 'personalizado' && !(u.tabs || []).length) {
-                if (typeof mostrarAlerta === 'function') mostrarAlerta('En nivel Personalizado marque al menos un módulo.', 'Permisos');
+            if (!(u.tabs || []).length) {
+                if (typeof mostrarAlerta === 'function') mostrarAlerta('Marque al menos un módulo de acceso.', 'Permisos');
                 return;
             }
             var list = window._permisosCfgUsuarios || [];
@@ -25929,12 +26124,18 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 return;
             }
             wrap.innerHTML = list.map(function (u) {
-                var lab = (PERMISOS_NIVELES[u.nivel] || {}).label || u.nivel;
-                var nMod = u.nivel === 'administracion' ? 'Todos' : String((u.tabs || []).length) + ' módulos';
+                var nu = permisosNormalizarUsuario(u, u.correo);
+                var lab = (PERMISOS_NIVELES[nu.nivel] || {}).label || nu.nivel;
+                var nMod = String((nu.tabs || []).length);
+                var nEdit = 0;
+                Object.keys(nu.mods || {}).forEach(function (id) {
+                    if ((nu.mods[id] || []).some(function (s) { return s !== 'ver'; })) nEdit += 1;
+                });
+                var det = nMod + ' módulo' + (nMod === '1' ? '' : 's') + ' · ' + nEdit + ' con acciones';
                 var av = (typeof perfilHtmlAvatar === 'function') ? perfilHtmlAvatar(u.correo, 'perfil-avatar') : '';
-                return '<div class="perm-user" style="gap:0.65rem;">' + av + '<div style="flex:1;min-width:0;"><strong>' + bitacoraEsc(u.nombre || 'Sin nombre') + '</strong> ' +
+                return '<div class="perm-user" style="gap:0.65rem;">' + av + '<div style="flex:1;min-width:0;"><strong>' + bitacoraEsc(nu.nombre || 'Sin nombre') + '</strong> ' +
                     '<span class="perm-nivel">' + bitacoraEsc(lab) + '</span><br>' +
-                    '<span style="font-size:0.78rem;color:var(--text-secondary);">' + bitacoraEsc(u.correo) + ' · ' + bitacoraEsc(nMod) + ' · ' + bitacoraEsc(u.acceso === 'visualizar' ? 'Solo visualizar' : 'Editar') + '</span></div>' +
+                    '<span style="font-size:0.78rem;color:var(--text-secondary);">' + bitacoraEsc(nu.correo) + ' · ' + bitacoraEsc(det) + '</span></div>' +
                     '<div style="display:flex;gap:0.35rem;flex-wrap:wrap;">' +
                     '<button type="button" class="btn btn-secondary" data-perm-editar="' + bitacoraEsc(u.correo) + '" style="padding:0.25rem 0.55rem;font-size:0.75rem;">Editar</button>' +
                     '<button type="button" class="btn btn-secondary" data-perm-del="' + bitacoraEsc(u.correo) + '" style="padding:0.25rem 0.55rem;font-size:0.75rem;">Quitar</button>' +
@@ -25961,7 +26162,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
             }
             permisosPintarLista();
             var sel = document.getElementById('permisosCfgNivel');
-            if (sel && !sel.value) sel.value = 'comite';
+            if (sel && !sel.value) sel.value = 'personalizado';
             permisosRefrescarEditorNivel();
         }
 
@@ -25984,7 +26185,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
             window._permisosCfgUsuarios = Object.keys(verif.usuarios || {}).map(function (k) { return verif.usuarios[k]; });
             permisosPintarLista();
             if (!silencio && typeof mostrarAlerta === 'function') {
-                mostrarAlerta('Permisos guardados. Los demás usuarios verán solo los módulos que usted les asignó.', 'Permisos');
+                mostrarAlerta('Permisos guardados. Cada usuario verá solo los módulos y acciones que usted le asignó.', 'Permisos');
             }
             await aplicarPermisosSesion();
         }
@@ -25993,6 +26194,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
         window.primeraTabPermitida = primeraTabPermitida;
         window.aplicarPermisosSesion = aplicarPermisosSesion;
         window.aplicarPermisosEnMenu = aplicarPermisosEnMenu;
+        window.aplicarPermisosModuloActivo = aplicarPermisosModuloActivo;
         window.cargarFormularioPermisosUsuarios = cargarFormularioPermisosUsuarios;
 
         var PERFILES_DOC = 'perfilesUsuarios';
@@ -26455,9 +26657,9 @@ document.getElementById('chatForm').onsubmit = function (e) {
         }
 
         function bitacoraFiltrarFilas(q) {
-            var t = String(q || '').toLowerCase().trim();
+            var t = String(q || '').trim();
             document.querySelectorAll('#bitacoraPublica tr.bit-fila').forEach(function (tr) {
-                var hay = !t || String(tr.getAttribute('data-bit-q') || '').indexOf(t) >= 0;
+                var hay = !t || coincidirFiltroInteligente(tr.getAttribute('data-bit-q') || '', t);
                 tr.hidden = !hay;
             });
         }
@@ -26532,10 +26734,13 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     '<div class="bit-sec"><h4>Gestiones realizadas</h4>' + bitacoraHtmlGestionMulta(caso) + '</div>';
             }
             html +=
-                '<div class="bit-com"><div class="bit-sec"><h4>Comentarios</h4>' + bitacoraHtmlComentarios(comentarios) + '</div>' +
-                '<div class="form-group" style="margin:0.5rem 0 0.45rem;"><label>Registrar comentario</label>' +
-                '<textarea id="bitacoraComentarioTxt" rows="3" placeholder="Observación, seguimiento o acuerdo sobre este caso…"></textarea></div>' +
-                '<button type="button" class="btn btn-primary" id="bitacoraBtnComentar">Publicar comentario</button></div>';
+                '<div class="bit-com"><div class="bit-sec"><h4>Comentarios</h4>' + bitacoraHtmlComentarios(comentarios) + '</div>';
+            if (typeof usuarioPuede === 'function' && usuarioPuede('bitacoraPublica', 'comentar')) {
+                html += '<div class="form-group" style="margin:0.5rem 0 0.45rem;"><label>Registrar comentario</label>' +
+                    '<textarea id="bitacoraComentarioTxt" rows="3" placeholder="Observación, seguimiento o acuerdo sobre este caso…"></textarea></div>' +
+                    '<button type="button" class="btn btn-primary" id="bitacoraBtnComentar">Publicar comentario</button>';
+            }
+            html += '</div>';
             box.innerHTML = html;
             if (window.matchMedia && window.matchMedia('(max-width: 900px)').matches) {
                 box.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -26543,6 +26748,10 @@ document.getElementById('chatForm').onsubmit = function (e) {
         }
 
         async function guardarComentarioBitacora() {
+            if (typeof usuarioPuede === 'function' && !usuarioPuede('bitacoraPublica', 'comentar')) {
+                if (typeof mostrarAlerta === 'function') mostrarAlerta('No tiene permiso para comentar en la bitácora.', 'Permisos');
+                return;
+            }
             var abierto = window._bitacoraCasoAbierto;
             if (!abierto || !abierto.id) return;
             var ta = document.getElementById('bitacoraComentarioTxt');
@@ -27077,7 +27286,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
             return async function () {
                 if (typeof usuarioPuedeEditar === 'function' && !usuarioPuedeEditar()) {
                     if (typeof mostrarAlerta === 'function') {
-                        mostrarAlerta('Su cuenta solo puede visualizar. No está autorizado para registrar ni modificar datos.', 'Solo lectura');
+                        mostrarAlerta('No está autorizado para registrar ni modificar datos en este módulo.', 'Permisos');
                     }
                     return;
                 }
@@ -27099,7 +27308,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 e.preventDefault();
                 if (typeof usuarioPuedeEditar === 'function' && !usuarioPuedeEditar()) {
                     if (typeof mostrarAlerta === 'function') {
-                        mostrarAlerta('Su cuenta solo puede visualizar. No está autorizado para registrar ni modificar datos.', 'Solo lectura');
+                        mostrarAlerta('No está autorizado para registrar ni modificar datos en este módulo.', 'Permisos');
                     }
                     return;
                 }
@@ -31109,8 +31318,8 @@ document.getElementById('chatForm').onsubmit = function (e) {
             var rows = multaListaNovedadesConserjeria();
             if (q) {
                 rows = rows.filter(function (n) {
-                    var blob = [n.numeroLibro, n.correlativo, n.fecha, n.hora, n.categoria, n.conserje, n.texto].join(' ').toLowerCase();
-                    return blob.indexOf(q) !== -1;
+                    var blob = [n.numeroLibro, n.correlativo, n.fecha, n.hora, n.categoria, n.conserje, n.texto].join(' ');
+                    return coincidirFiltroInteligente(blob, q);
                 });
             }
             rows = rows.slice(0, 80);
@@ -36713,7 +36922,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
             const q = String((document.getElementById('mailerBuscarDest') || {}).value || '').trim().toLowerCase();
             const filas = mailerFilasDestino().filter(function (r) {
                 if (!q) return true;
-                return (r.depto + ' ' + r.nombre + ' ' + r.tipo + ' ' + r.correo).toLowerCase().indexOf(q) >= 0;
+                return coincidirFiltroInteligente(r.depto + ' ' + r.nombre + ' ' + r.tipo + ' ' + r.correo, q);
             });
             if (!filas.length) {
                 wrap.innerHTML = '<p style="padding:0.75rem;color:var(--text-tertiary);font-size:0.8rem;">No hay coincidencias. Cargue Ocupación si el directorio está vacío.</p>';
@@ -36775,7 +36984,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
             const q = String((document.getElementById('mailerDirFiltro') || {}).value || '').trim().toLowerCase();
             const filas = mailerListarOcupacion().filter(function (r) {
                 if (!q) return true;
-                return (r.depto + ' ' + r.nombre + ' ' + r.tipo + ' ' + r.correo).toLowerCase().indexOf(q) >= 0;
+                return coincidirFiltroInteligente(r.depto + ' ' + r.nombre + ' ' + r.tipo + ' ' + r.correo, q);
             });
             if (wrap) {
                 wrap.innerHTML = '<table class="notif-tabla" style="width:100%;border-collapse:collapse;"><thead><tr><th>Depto</th><th>Nombre</th><th>Tipo</th><th>Correo</th></tr></thead><tbody>' +
@@ -51636,13 +51845,11 @@ document.getElementById('chatForm').onsubmit = function (e) {
             if (texto) {
                 if (esPorUnidad) {
                     filtradas = opciones.filter(function(o) {
-                        return (o.unitNumber || '').toLowerCase().indexOf(texto) !== -1 ||
-                            (o.unitNumber || '').replace(/\D/g, '').indexOf(texto.replace(/\D/g, '')) !== -1;
+                        return coincidirFiltroInteligente((o.unitNumber || '') + ' ' + (o.name || ''), texto);
                     });
                 } else {
                     filtradas = opciones.filter(function(o) {
-                        return (o.name || '').toLowerCase().indexOf(texto) !== -1 ||
-                            (o.unitNumber || '').toLowerCase().indexOf(texto) !== -1;
+                        return coincidirFiltroInteligente((o.name || '') + ' ' + (o.unitNumber || ''), texto);
                     });
                 }
             }
@@ -51813,10 +52020,23 @@ document.getElementById('chatForm').onsubmit = function (e) {
             });
             el.textContent = n;
         }
+        function multaAptoHistorialOcupacion(m) {
+            if (!m) return false;
+            if (typeof multaEsRegistroAnulacion === 'function' && multaEsRegistroAnulacion(m)) return false;
+            if (typeof multaEstaAnulada === 'function' && multaEstaAnulada(m)) return false;
+            var est = (typeof multaEstadoRegistro === 'function') ? multaEstadoRegistro(m) : String((m && m.estadoGestion) || '');
+            if (est === 'anulada' || est === 'anulado') return false;
+            return est === 'gestionada' || est === 'cerrada' || !est;
+        }
+        function itemHistorialMultaVisibleOcupacion(item) {
+            if (!item) return false;
+            var est = String(item.estado || '').toLowerCase();
+            if (est === 'anulada' || est === 'anulado' || item.vigente === false) return false;
+            if (est && est !== 'gestionada' && est !== 'cerrada') return false;
+            return true;
+        }
         function itemHistorialDesdeMulta(m, mes) {
             var est = (typeof multaEstadoRegistro === 'function') ? multaEstadoRegistro(m) : (m && m.estadoGestion) || '';
-            var anul = typeof multaEstaAnulada === 'function' ? multaEstaAnulada(m) : (est === 'anulada');
-            var esAnulReg = typeof multaEsRegistroAnulacion === 'function' && multaEsRegistroAnulacion(m);
             return {
                 id: m && m.id ? String(m.id) : '',
                 fecha: m && m.fecha ? String(m.fecha) : '',
@@ -51826,14 +52046,14 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 motivo: (m && m.motivo) || '',
                 monto: m && m.monto != null ? Number(m.monto) : 0,
                 tipoUnidad: (m && m.tipoUnidad) || 'UF',
-                estado: anul || esAnulReg ? 'anulada' : (est || 'gestionada'),
-                vigente: !(anul || esAnulReg)
+                estado: est || 'gestionada',
+                vigente: true
             };
         }
         function incorporarMultasEnHistorial(lista, mes, destino) {
             var out = destino || window._historialMultasPorUnidad || {};
             (Array.isArray(lista) ? lista : []).forEach(function (m) {
-                if (!m) return;
+                if (!multaAptoHistorialOcupacion(m)) return;
                 var key = claveUnidadHistorialMultas(m.departamento || m.depto || m.unidad);
                 if (!key) return;
                 if (!out[key]) out[key] = { total: 0, vigentes: 0, ultimaFecha: '', items: [] };
@@ -51847,11 +52067,13 @@ document.getElementById('chatForm').onsubmit = function (e) {
             });
             Object.keys(out).forEach(function (k) {
                 var u = out[k];
+                u.items = (u.items || []).filter(itemHistorialMultaVisibleOcupacion);
                 u.items.sort(function (a, b) { return String(b.fecha || '').localeCompare(String(a.fecha || '')); });
                 if (u.items.length > 40) u.items = u.items.slice(0, 40);
                 u.total = u.items.length;
-                u.vigentes = u.items.filter(function (x) { return x && x.vigente; }).length;
+                u.vigentes = u.items.length;
                 u.ultimaFecha = (u.items[0] && u.items[0].fecha) || '';
+                if (!u.total) delete out[k];
             });
             window._historialMultasPorUnidad = out;
             return out;
@@ -51894,7 +52116,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                         }
                     }
                 } catch (eDoc) {}
-                window._historialMultasPorUnidad = out;
+                incorporarMultasEnHistorial([], '', out);
                 var meses = [];
                 try {
                     if (typeof listarMesesSelectorModulo === 'function') meses = listarMesesSelectorModulo();
@@ -51930,7 +52152,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
         function htmlHistorialMultasUnidad(unitNumber) {
             var h = historialMultasDeUnidad(unitNumber);
             if (!h.total) {
-                return '<div style="margin:6px 0;padding:6px 8px;background:var(--bg-secondary);border-radius:6px;border:1px solid var(--border-color);"><span style="font-size:0.8rem;color:var(--gray-600);">Sin multas registradas en esta unidad.</span></div>';
+                return '<div style="margin:6px 0;padding:6px 8px;background:var(--bg-secondary);border-radius:6px;border:1px solid var(--border-color);"><span style="font-size:0.8rem;color:var(--gray-600);">Sin multas gestionadas en esta unidad.</span></div>';
             }
             var fmtFecha = function (f) {
                 if (typeof formatearFecha === 'function') return formatearFecha(f);
@@ -51942,20 +52164,21 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 if (isNaN(n)) n = 0;
                 return n.toFixed(2) + ' ' + ((item && item.tipoUnidad) || 'UF');
             };
-            var filas = (h.items || []).map(function (it) {
-                var est = it.vigente ? 'Vigente' : 'Anulada / histórica';
-                var col = it.vigente ? '#b91c1c' : '#92400e';
-                var bg = it.vigente ? 'rgba(239,68,68,0.1)' : 'rgba(217,119,6,0.12)';
-                return '<div style="padding:6px 8px;margin:0 0 4px 0;border-radius:6px;background:' + bg + ';border:1px solid ' + (it.vigente ? 'rgba(239,68,68,0.28)' : 'rgba(217,119,6,0.28)') + ';">' +
+            var visibles = (h.items || []).filter(itemHistorialMultaVisibleOcupacion);
+            if (!visibles.length) {
+                return '<div style="margin:6px 0;padding:6px 8px;background:var(--bg-secondary);border-radius:6px;border:1px solid var(--border-color);"><span style="font-size:0.8rem;color:var(--gray-600);">Sin multas gestionadas en esta unidad.</span></div>';
+            }
+            var filas = visibles.map(function (it) {
+                var estLab = it.estado === 'cerrada' ? 'Cerrada' : 'Gestionada';
+                return '<div style="padding:6px 8px;margin:0 0 4px 0;border-radius:6px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.28);">' +
                     '<div style="font-size:0.78rem;font-weight:700;color:var(--text-primary);">' + String(it.motivo || 'Multa').replace(/</g, '&lt;') + '</div>' +
                     '<div style="font-size:0.72rem;color:var(--gray-600);margin-top:2px;">' + fmtFecha(it.fecha) +
                     (it.folio ? ' · ' + String(it.folio).replace(/</g, '&lt;') : '') +
                     (it.nombre ? ' · ' + String(it.nombre).replace(/</g, '&lt;') : '') +
                     ' · ' + fmtMonto(it) +
-                    ' · <span style="color:' + col + ';font-weight:700;">' + est + '</span></div></div>';
+                    ' · <span style="color:#b91c1c;font-weight:700;">' + estLab + '</span></div></div>';
             }).join('');
-            var resumen = h.total + ' registro' + (h.total === 1 ? '' : 's') +
-                (h.vigentes ? ' · ' + h.vigentes + ' vigente' + (h.vigentes === 1 ? '' : 's') : '');
+            var resumen = visibles.length + ' multa' + (visibles.length === 1 ? '' : 's') + ' gestionada' + (visibles.length === 1 ? '' : 's');
             return '<div class="ocupacion-hist-multas" style="margin:8px 0 0 0;">' +
                 '<button type="button" class="btn btn-secondary ocupacion-hist-multas-btn" aria-expanded="false" style="width:100%;padding:8px 10px;font-size:0.8rem;font-weight:700;display:flex;align-items:center;justify-content:space-between;gap:0.5rem;text-align:left;">' +
                 '<span>⚠ Historial de multas <span style="font-weight:600;color:var(--gray-600);">(' + resumen + ')</span></span>' +
@@ -52037,7 +52260,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 var isUnitNumberSearch = filterNumbers.length >= 3 || /^\d+$/.test(filterValue.trim());
                 if (isUnitNumberSearch) {
                     if (unitNumbers === filterNumbers) return true;
-                    if (unitNumbers.startsWith(filterNumbers) && filterNumbers.length >= 2) return true;
+                    if (filterNumbers.length >= 3 && unitNumbers.startsWith(filterNumbers)) return true;
                     return false;
                 }
                 if (unitNumber.toLowerCase() === filterValue.toLowerCase()) return true;
@@ -62024,29 +62247,102 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 .toLowerCase()
                 .normalize('NFD')
                 .replace(/[\u0300-\u036f]/g, '')
-                .replace(/[^a-z0-9\s]/g, ' ')
+                .replace(/[#№]/g, ' ')
+                .replace(/[^\w\s./-]/gi, ' ')
+                .replace(/[./]+/g, ' ')
+                .replace(/-/g, ' ')
                 .replace(/\s+/g, ' ')
                 .trim();
         }
 
-        function coincidirFiltroInteligente(haystack, query) {
-            const q = normalizarTextoFiltro(query);
-            if (!q) return true;
-            const h = normalizarTextoFiltro(haystack);
-            const hCompact = h.replace(/\s+/g, '');
-            const stop = {
-                depto: 1, dpto: 1, departamento: 1, dept: 1, de: 1,
-                unidad: 1, nro: 1, numero: 1, num: 1, el: 1, la: 1, del: 1
-            };
-            const tokens = q.split(' ').filter(function (token) {
-                return token && !stop[token];
-            });
-            const usar = tokens.length ? tokens : q.split(' ').filter(Boolean);
-            return usar.every(function (token) {
-                if (!token) return true;
-                return h.indexOf(token) !== -1 || hCompact.indexOf(token) !== -1;
-            });
+        function tokensFiltroPrecisos(valor) {
+            var n = normalizarTextoFiltro(valor);
+            if (!n) return [];
+            return n.split(' ').filter(Boolean);
         }
+
+        function expandirFechasFiltro(texto) {
+            var s = String(texto || '');
+            var extra = [];
+            s.replace(/\b(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})\b/g, function (_, d, m, y) {
+                var yy = y.length === 2 ? ('20' + y) : y;
+                var dd = String(d).padStart(2, '0');
+                var mm = String(m).padStart(2, '0');
+                extra.push(dd + ' ' + mm + ' ' + yy, yy + ' ' + mm + ' ' + dd, dd + mm + yy);
+                return _;
+            });
+            s.replace(/\b(\d{4})-(\d{2})-(\d{2})\b/g, function (_, y, m, d) {
+                extra.push(d + ' ' + m + ' ' + y, d + m + y);
+                return _;
+            });
+            return s + ' ' + extra.join(' ');
+        }
+
+        function parsearConsultaFiltro(query) {
+            var raw = String(query || '');
+            var frases = [];
+            raw = raw.replace(/"([^"]+)"/g, function (_, p) {
+                var n = normalizarTextoFiltro(p);
+                if (n) frases.push(n);
+                return ' ';
+            });
+            var stop = {
+                de: 1, la: 1, el: 1, del: 1, los: 1, las: 1, un: 1, una: 1, y: 1, o: 1, en: 1, a: 1, al: 1,
+                depto: 1, dpto: 1, departamento: 1, dept: 1, unidad: 1, nro: 1, numero: 1, num: 1, folio: 1
+            };
+            var tokens = tokensFiltroPrecisos(raw).filter(function (t) {
+                if (!t) return false;
+                if (stop[t]) return false;
+                return true;
+            });
+            if (!tokens.length && !frases.length) {
+                tokens = tokensFiltroPrecisos(raw);
+            }
+            return { tokens: tokens, frases: frases };
+        }
+
+        function tokenFiltroCoincide(hayTokens, token) {
+            if (!token) return true;
+            var i;
+            for (i = 0; i < hayTokens.length; i++) {
+                if (hayTokens[i] === token) return true;
+            }
+            if (/^\d+$/.test(token)) {
+                for (i = 0; i < hayTokens.length; i++) {
+                    var digits = String(hayTokens[i]).replace(/\D/g, '');
+                    if (!digits) continue;
+                    if (digits === token) return true;
+                    if (token.length >= 3 && digits.indexOf(token) === 0) return true;
+                }
+                return false;
+            }
+            if (token.length === 1) return false;
+            for (i = 0; i < hayTokens.length; i++) {
+                var ht = hayTokens[i];
+                if (ht.indexOf(token) === 0) return true;
+                if (token.length >= 4 && ht.indexOf(token) !== -1) return true;
+            }
+            return false;
+        }
+
+        function coincidirFiltroInteligente(haystack, query) {
+            var parsed = parsearConsultaFiltro(query);
+            if (!parsed.tokens.length && !parsed.frases.length) return true;
+            var expanded = expandirFechasFiltro(haystack);
+            var compacto = String(expanded).replace(/(\d)[-/.]([a-zA-Z0-9])/g, '$1$2');
+            var h = normalizarTextoFiltro(expanded + ' ' + compacto);
+            var hayTokens = h ? h.split(' ').filter(Boolean) : [];
+            var f;
+            for (f = 0; f < parsed.frases.length; f++) {
+                if (h.indexOf(parsed.frases[f]) === -1) return false;
+            }
+            var t;
+            for (t = 0; t < parsed.tokens.length; t++) {
+                if (!tokenFiltroCoincide(hayTokens, parsed.tokens[t])) return false;
+            }
+            return true;
+        }
+        window.coincidirFiltroInteligente = coincidirFiltroInteligente;
 
         function textoBuscableRegistro(obj, profundidad) {
             if (obj == null) return '';
