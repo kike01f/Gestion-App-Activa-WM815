@@ -858,6 +858,29 @@
             #notificaciones.tab-content { max-width: none; }
         }
 
+        #envioCorreos.tab-content { max-width: 1120px; }
+        #envioCorreos .mailer-head { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.75rem; margin-bottom: 1rem; }
+        #envioCorreos .mailer-head h2 { margin: 0; font-size: 1.35rem; }
+        #envioCorreos .mailer-head p { margin: 0.3rem 0 0; font-size: 0.8125rem; color: var(--gray-600); }
+        #envioCorreos .mailer-subnav { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 1rem; padding: 0.3rem; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 12px; }
+        #envioCorreos .mailer-subnav-btn { border: 0; background: transparent; color: var(--text-secondary); border-radius: 9px; padding: 0.5rem 0.85rem; font-size: 0.8125rem; font-weight: 600; cursor: pointer; flex: 1 1 auto; }
+        #envioCorreos .mailer-subnav-btn.is-on { background: var(--bg-primary); color: var(--text-primary); box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+        #envioCorreos.tab-content .form-section { padding: 1.1rem 1.2rem; margin-bottom: 0; }
+        #envioCorreos.tab-content .form-section h3 { margin: 0 0 0.4rem; font-size: 1.02rem; }
+        #envioCorreos.tab-content .form-group { margin-bottom: 0.65rem; }
+        #envioCorreos .mailer-hint { margin: 0 0 0.75rem; font-size: 0.78rem; color: var(--text-tertiary); line-height: 1.4; }
+        #envioCorreos .mailer-grid { display: grid; grid-template-columns: minmax(280px, 1fr) minmax(320px, 1.15fr); gap: 1rem; align-items: start; }
+        #envioCorreos .mailer-preview { width: 100%; min-height: 420px; border: 1px solid var(--border-color); border-radius: 10px; background: #fff; }
+        #envioCorreos .mailer-lista { max-height: 320px; overflow: auto; border: 1px solid var(--border-color); border-radius: 8px; }
+        #envioCorreos .mailer-lista label { display: flex; gap: 0.45rem; align-items: flex-start; padding: 0.4rem 0.55rem; font-size: 0.78rem; border-bottom: 1px solid var(--border-color); cursor: pointer; }
+        #envioCorreos .mailer-lista label:hover { background: var(--bg-secondary); }
+        #envioCorreos .mailer-chip { display: inline-flex; align-items: center; gap: 0.3rem; border: 1px solid var(--border-color); border-radius: 999px; padding: 0.15rem 0.5rem; font-size: 0.72rem; margin: 0.15rem; }
+        #envioCorreos .mailer-tpl-item { display: flex; justify-content: space-between; gap: 0.5rem; align-items: center; padding: 0.55rem 0.65rem; border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 0.4rem; cursor: pointer; }
+        #envioCorreos .mailer-tpl-item.is-on { border-color: var(--primary); background: var(--bg-secondary); }
+        @media (max-width: 860px) {
+            #envioCorreos .mailer-grid { grid-template-columns: 1fr; }
+        }
+
         /* Autocompletado residentes: lista desplegable */
         .form-group-residente { position: relative; }
         .residente-autocomplete-list {
@@ -7776,6 +7799,14 @@
                 </span>
                 <span>Central de Notificación</span>
             </button>
+            <button class="tab-button" data-tab="envioCorreos">
+                <span>
+                    <svg class="menu-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                    </svg>
+                </span>
+                <span>Envío de correos</span>
+            </button>
             <button class="tab-button" data-tab="personalizacion">
                 <span>
                     <svg class="menu-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -10585,6 +10616,124 @@
             </div>
         </div>
 
+        <!-- MÓDULO: ENVÍO DE CORREOS -->
+        <div id="envioCorreos" class="tab-content">
+            <div class="mailer-head">
+                <div>
+                    <h2>Envío de correos</h2>
+                    <p>Comunicados con formato profesional, destinatarios de ocupación y plantillas HTML editables.</p>
+                </div>
+            </div>
+            <nav class="mailer-subnav" aria-label="Secciones de envío">
+                <button type="button" class="mailer-subnav-btn is-on" data-mailer-sub="mailerSubRedactar">Redactar y enviar</button>
+                <button type="button" class="mailer-subnav-btn" data-mailer-sub="mailerSubDest">Destinatarios</button>
+                <button type="button" class="mailer-subnav-btn" data-mailer-sub="mailerSubPlant">Plantillas</button>
+            </nav>
+
+            <div id="mailerSubRedactar" class="form-section">
+                <h3>Redactar</h3>
+                <p class="mailer-hint">Elija una plantilla, revise la vista previa y seleccione departamentos u otros correos. En envíos masivos los residentes van en CCO para que no se vean entre sí.</p>
+                <div class="mailer-grid">
+                    <div>
+                        <div class="form-group">
+                            <label>Plantilla</label>
+                            <select id="mailerPlantillaSel"></select>
+                        </div>
+                        <div class="form-group">
+                            <label>Asunto</label>
+                            <input type="text" id="mailerAsunto" placeholder="Asunto del correo">
+                        </div>
+                        <div class="form-group">
+                            <label>HTML (editable)</label>
+                            <textarea id="mailerHtml" rows="12" style="font-family: ui-monospace, monospace; font-size: 0.75rem;"></textarea>
+                        </div>
+                        <p class="mailer-hint">Placeholders: {{comunidad}} {{fecha}} {{mes}} {{departamento}} {{residente}}</p>
+                        <div class="form-group">
+                            <label>Buscar unidad o residente</label>
+                            <input type="text" id="mailerBuscarDest" placeholder="Depto, nombre o correo…">
+                        </div>
+                        <div style="display:flex;gap:0.4rem;flex-wrap:wrap;margin-bottom:0.5rem;">
+                            <button type="button" class="btn btn-secondary" id="mailerBtnMarcarFiltrados" style="padding:0.35rem 0.7rem;font-size:0.75rem;">Marcar filtrados</button>
+                            <button type="button" class="btn btn-secondary" id="mailerBtnDesmarcar" style="padding:0.35rem 0.7rem;font-size:0.75rem;">Desmarcar</button>
+                            <button type="button" class="btn btn-secondary" id="mailerBtnTodosOcupacion" style="padding:0.35rem 0.7rem;font-size:0.75rem;">Todos con correo</button>
+                        </div>
+                        <div id="mailerListaOcupacion" class="mailer-lista"></div>
+                        <p class="mailer-hint" id="mailerResumenDest" style="margin-top:0.5rem;">0 destinatarios</p>
+                        <div class="form-group" style="margin-top:0.65rem;">
+                            <label>Otros correos (además de ocupación)</label>
+                            <textarea id="mailerOtrosCorreos" rows="2" placeholder="copia@ejemplo.com, otro@ejemplo.com"></textarea>
+                        </div>
+                        <label style="display:flex;gap:0.4rem;align-items:flex-start;font-size:0.8125rem;margin-bottom:0.65rem;cursor:pointer;">
+                            <input type="checkbox" id="mailerIncluirAdmin" style="margin-top:0.15rem;">
+                            <span>Incluir correos administrativos (Central de Notificación)</span>
+                        </label>
+                        <button type="button" class="btn btn-primary" id="mailerBtnEnviar">Enviar correo</button>
+                    </div>
+                    <div>
+                        <label style="display:block;margin-bottom:0.35rem;font-size:0.8125rem;font-weight:600;">Vista previa</label>
+                        <iframe id="mailerPreview" class="mailer-preview" title="Vista previa del correo" sandbox="allow-same-origin"></iframe>
+                    </div>
+                </div>
+            </div>
+
+            <div id="mailerSubDest" class="form-section" hidden>
+                <h3>Directorio de correos</h3>
+                <p class="mailer-hint">Consulta de ocupación y listado extra para este módulo. Las visitas frecuentes no se incluyen.</p>
+                <input type="text" id="mailerDirFiltro" placeholder="Filtrar directorio…" style="margin-bottom:0.65rem;">
+                <div id="mailerDirectorioTablaWrap" style="overflow:auto;max-height:360px;border:1px solid var(--border-color);border-radius:8px;"></div>
+                <h3 style="margin-top:1rem;">Correos adicionales</h3>
+                <form id="mailerFormExtra">
+                    <div class="form-row" style="gap:0.5rem;align-items:flex-end;">
+                        <div class="form-group" style="flex:1;margin-bottom:0;">
+                            <label>Nombre</label>
+                            <input type="text" id="mailerExtraNombre" placeholder="Comité, proveedor…">
+                        </div>
+                        <div class="form-group" style="flex:1.5;margin-bottom:0;">
+                            <label>Correo(s)</label>
+                            <textarea id="mailerExtraEmail" rows="2" required placeholder="correo@ejemplo.com"></textarea>
+                        </div>
+                        <div class="form-group" style="margin-bottom:0;">
+                            <button type="submit" class="btn btn-primary">Agregar</button>
+                        </div>
+                    </div>
+                </form>
+                <div id="mailerExtrasWrap" style="margin-top:0.75rem;"></div>
+            </div>
+
+            <div id="mailerSubPlant" class="form-section" hidden>
+                <h3>Repertorio de plantillas</h3>
+                <p class="mailer-hint">Plantillas del sistema (bienvenida, circular, documentación del personal, avisos) y las que cree usted. Puede editar el HTML y ver el resultado al instante.</p>
+                <div class="mailer-grid">
+                    <div>
+                        <div style="display:flex;gap:0.4rem;flex-wrap:wrap;margin-bottom:0.65rem;">
+                            <button type="button" class="btn btn-primary" id="mailerBtnNuevaPlantilla" style="padding:0.4rem 0.75rem;font-size:0.8rem;">Nueva plantilla</button>
+                        </div>
+                        <div id="mailerListaPlantillas"></div>
+                    </div>
+                    <div>
+                        <div class="form-group">
+                            <label>Nombre</label>
+                            <input type="text" id="mailerTplNombre" placeholder="Nombre de la plantilla">
+                        </div>
+                        <div class="form-group">
+                            <label>Asunto</label>
+                            <input type="text" id="mailerTplAsunto" placeholder="Asunto predeterminado">
+                        </div>
+                        <div class="form-group">
+                            <label>HTML</label>
+                            <textarea id="mailerTplHtml" rows="10" style="font-family: ui-monospace, monospace; font-size: 0.75rem;"></textarea>
+                        </div>
+                        <div style="display:flex;gap:0.4rem;flex-wrap:wrap;margin-bottom:0.65rem;">
+                            <button type="button" class="btn btn-primary" id="mailerBtnGuardarPlantilla">Guardar</button>
+                            <button type="button" class="btn btn-secondary" id="mailerBtnDuplicarPlantilla">Duplicar</button>
+                            <button type="button" class="btn btn-danger" id="mailerBtnEliminarPlantilla">Eliminar</button>
+                        </div>
+                        <iframe id="mailerTplPreview" class="mailer-preview" title="Vista previa de plantilla" sandbox="allow-same-origin" style="min-height:320px;"></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- MÓDULO 9: PAGOS DE ASEO ÁREAS COMUNES -->
         <div id="pagos-aseo" class="tab-content">
             <div style="margin-bottom: 1.5rem;">
@@ -12816,6 +12965,9 @@
                         if (typeof cargarPersonalizacion === 'function') {
                             cargarPersonalizacion();
                         }
+                    } else if (tabName === 'envioCorreos') {
+                        if (typeof mailerBindUi === 'function') mailerBindUi();
+                        if (typeof cargarModuloEnvioCorreos === 'function') cargarModuloEnvioCorreos();
                     } else if (tabName !== 'dashboard' && window.mesEnConsulta && typeof window.cargarDatosMesConsulta === 'function') {
                         window.cargarDatosMesConsulta(window.mesEnConsulta);
                     } else if (tabName !== 'dashboard' && typeof window.cargarDatos === 'function') {
@@ -14819,7 +14971,8 @@
             { id: 'comprobanteAnulacionMulta', label: 'Comprobante — Anulación de multa' },
             { id: 'comprobanteMoroso', label: 'Comprobante — Estado de morosidad' },
             { id: 'avisoCorteLuz', label: 'Morosos — Aviso de corte de luz' },
-            { id: 'bienvenidaResidente', label: 'Bienvenida — Nuevo residente' }
+            { id: 'bienvenidaResidente', label: 'Bienvenida — Nuevo residente' },
+            { id: 'envioMasivo', label: 'Envío de correos (módulo)' }
         ];
 
         function aplicarPlaceholdersPlantillaCorreo(str, ctx) {
@@ -33816,6 +33969,560 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 mostrarAlerta('No se pudo restablecer: ' + (e && e.message ? e.message : 'error'), 'Error');
             }
         }
+
+        // ============================================
+        // MÓDULO: ENVÍO DE CORREOS
+        // ============================================
+        let mailerPlantillasMap = {};
+        let mailerExtras = [];
+        let mailerPlantillaEdicionId = '';
+        let mailerPreviewTimer = null;
+        let mailerHtmlDocumentacionCache = '';
+        let mailerIniciado = false;
+
+        function mailerHtmlEnvoltorio(titulo, innerHtml, comunidad) {
+            if (typeof generarPlantillaCorreoNotificacion === 'function') {
+                return generarPlantillaCorreoNotificacion(titulo || 'Comunicado', comunidad || '{{comunidad}}', '', innerHtml || '', false, true, 600);
+            }
+            return '<!DOCTYPE html><html lang="es"><body style="font-family:Arial,sans-serif;">' + (innerHtml || '') + '</body></html>';
+        }
+
+        function mailerInnerP(texto) {
+            return '<p style="margin:0 0 12px 0;font-size:14px;color:#333;line-height:1.6;">' + texto + '</p>';
+        }
+
+        function mailerPlantillasBase() {
+            const circularInner = mailerInnerP('Estimado/a residente:') +
+                mailerInnerP('Junto con saludar, informamos a la comunidad lo siguiente:') +
+                mailerInnerP('<strong>{{mensaje}}</strong>'.replace('{{mensaje}}', 'Escriba aquí el comunicado.')) +
+                mailerInnerP('Agradecemos su atención y quedamos atentos a consultas.') +
+                mailerInnerP('Administración · {{comunidad}}');
+            const servInner = mailerInnerP('Se informa que se realizará una intervención en las instalaciones del edificio.') +
+                mailerInnerP('<strong>Fecha:</strong> {{fecha}}<br><strong>Afecta a:</strong> {{departamento}}') +
+                mailerInnerP('Durante el trabajo puede haber interrupción temporal de servicios. Pedimos disculpas por las molestias.') +
+                mailerInnerP('Administración · {{comunidad}}');
+            const reunionInner = mailerInnerP('Se convoca a reunión de copropietarios / comité.') +
+                mailerInnerP('<strong>Fecha:</strong> {{fecha}}<br><strong>Lugar:</strong> hall / sala de reuniones del edificio.') +
+                mailerInnerP('Su asistencia es importante para el buen funcionamiento de {{comunidad}}.');
+            const morInner = mailerInnerP('Estimado/a {{residente}} (Depto {{departamento}}):') +
+                mailerInnerP('Registramos un saldo pendiente en gastos comunes. Le solicitamos regularizar a la brevedad para evitar acciones posteriores.') +
+                mailerInnerP('Si ya canceló, ignore este aviso o envíe el comprobante a administración.') +
+                mailerInnerP('{{comunidad}} · {{fecha}}');
+            const docInner = mailerInnerP('Se ha habilitado un repositorio con documentación de apoyo, capacitaciones y protocolos de consulta para el personal.') +
+                mailerInnerP('Revise periódicamente el material correspondiente a su cargo.') +
+                '<p style="margin:12px 0 6px;font-size:12px;font-weight:700;color:#5a9219;letter-spacing:.06em;text-transform:uppercase;">Carpetas</p>' +
+                '<p style="margin:0 0 8px;font-size:14px;line-height:1.55;"><a href="https://drive.google.com/drive/folders/1tnwZ0D6NPBHLbWhFLdoUTLUkLP4CXALK?usp=drive_link" style="color:#5a9219;font-weight:700;">Capacitaciones conserjes</a><br>' +
+                '<a href="https://drive.google.com/drive/folders/1v1ulMHUk7bzNHuOXJZ09yDwNMXX1wxVj?usp=drive_link" style="color:#5a9219;font-weight:700;">Protocolos conserjes</a><br>' +
+                '<a href="https://drive.google.com/drive/folders/1UL_5CxDfBWRAy0Io_7LhtNi9bOd3jPjp?usp=drive_link" style="color:#5a9219;font-weight:700;">Protocolo Ley Karin</a><br>' +
+                '<a href="https://drive.google.com/drive/folders/1v8yeNeGLtykE55guQNfmNhE8IqU2Sppn?usp=drive_link" style="color:#5a9219;font-weight:700;">Reglamento interno de seguridad e higiene</a><br>' +
+                '<a href="https://drive.google.com/drive/folders/1MLLXyzsDep4XU-vscHQvv6hQ3tatUi3W?usp=drive_link" style="color:#5a9219;font-weight:700;">Protocolo auxiliar de aseo</a></p>' +
+                mailerInnerP('Mutual de Seguridad · adherente 480324 · tasa 0,93 · RUT 53327026-3. Accidente grave: 1407.');
+            return [
+                { id: 'mailer_circular', nombre: 'Circular a residentes', asunto: 'Comunicado de administración — {{comunidad}}', sistema: true, html: mailerHtmlEnvoltorio('Comunicado de administración', circularInner) },
+                { id: 'mailer_servicios', nombre: 'Aviso de trabajos / servicios', asunto: 'Aviso de intervención — {{comunidad}} — {{fecha}}', sistema: true, html: mailerHtmlEnvoltorio('Aviso de trabajos en el edificio', servInner) },
+                { id: 'mailer_reunion', nombre: 'Convocatoria a reunión', asunto: 'Convocatoria a reunión — {{comunidad}}', sistema: true, html: mailerHtmlEnvoltorio('Convocatoria a reunión', reunionInner) },
+                { id: 'mailer_morosidad', nombre: 'Aviso de morosidad (genérico)', asunto: 'Aviso de saldo pendiente — Depto {{departamento}} — {{comunidad}}', sistema: true, html: mailerHtmlEnvoltorio('Aviso de saldo pendiente', morInner) },
+                { id: 'mailer_documentacion', nombre: 'Documentación y capacitaciones del personal', asunto: 'Documentación y capacitaciones del personal — {{comunidad}}', sistema: true, html: mailerHtmlDocumentacionCache || mailerHtmlEnvoltorio('Documentación y capacitaciones del personal', docInner) },
+                { id: 'mailer_bienvenida', nombre: 'Bienvenida a nuevo residente', asunto: 'Le damos la bienvenida — {{comunidad}}', sistema: true, html: (typeof htmlCorreoBienvenidaNuevoResidente === 'function' ? htmlCorreoBienvenidaNuevoResidente() : mailerHtmlEnvoltorio('Bienvenida', mailerInnerP('Estimado/a {{residente}}, le damos la bienvenida a {{comunidad}}.'))) }
+            ];
+        }
+
+        function mailerTodasPlantillas() {
+            const base = mailerPlantillasBase();
+            const out = [];
+            const seen = new Set();
+            Object.keys(mailerPlantillasMap || {}).forEach(function (id) {
+                const row = mailerPlantillasMap[id];
+                if (!row) return;
+                seen.add(id);
+                out.push(Object.assign({ id: id }, row));
+            });
+            base.forEach(function (p) {
+                if (!seen.has(p.id)) out.push(p);
+            });
+            return out.sort(function (a, b) { return String(a.nombre || '').localeCompare(String(b.nombre || ''), 'es'); });
+        }
+
+        function mailerPlantillaPorId(id) {
+            if (mailerPlantillasMap[id]) return Object.assign({ id: id }, mailerPlantillasMap[id]);
+            return mailerPlantillasBase().find(function (p) { return p.id === id; }) || null;
+        }
+
+        async function mailerCargarPlantillas() {
+            try {
+                mailerPlantillasMap = await obtenerMapaNube('plantillasCorreoEnvio');
+            } catch (e) {
+                mailerPlantillasMap = {};
+            }
+            if (!mailerPlantillasMap || typeof mailerPlantillasMap !== 'object' || Array.isArray(mailerPlantillasMap)) mailerPlantillasMap = {};
+            try {
+                const htmlDoc = await fetch('correo-documentacion-personal-wm815.html').then(function (r) { return r.ok ? r.text() : ''; }).catch(function () { return ''; });
+                if (htmlDoc) mailerHtmlDocumentacionCache = htmlDoc;
+            } catch (eDoc) { /* usa fallback */ }
+        }
+
+        async function mailerGuardarPlantillas() {
+            await guardarMapaNube('plantillasCorreoEnvio', mailerPlantillasMap);
+        }
+
+        async function mailerCargarExtras() {
+            try {
+                const datos = await obtenerDatos('correosEnvioLibre');
+                mailerExtras = Array.isArray(datos) ? datos : [];
+            } catch (e) {
+                mailerExtras = [];
+            }
+        }
+
+        async function mailerGuardarExtras() {
+            await guardarDatos('correosEnvioLibre', mailerExtras);
+        }
+
+        function mailerListarOcupacion() {
+            const units = Array.isArray(window.vinculacionUnits) ? window.vinculacionUnits : [];
+            const rows = [];
+            const seen = new Set();
+            units.forEach(function (u) {
+                if (!u) return;
+                const depto = String(u.unitNumber || u.departamento || '').trim();
+                const residents = Array.isArray(u.residents) ? u.residents : [];
+                residents.forEach(function (r) {
+                    if (!r) return;
+                    const tipoRes = String(r.type || r.tipo || '').trim().toLowerCase();
+                    if (tipoRes.indexOf('visita') !== -1) return;
+                    const correo = String(r.email || r.correo || '').trim();
+                    if (!correo || correo.indexOf('@') < 0) return;
+                    const key = depto + '|' + correo.toLowerCase();
+                    if (seen.has(key)) return;
+                    seen.add(key);
+                    rows.push({
+                        key: key,
+                        depto: depto,
+                        nombre: String(r.name || r.nombre || 'Residente').trim(),
+                        tipo: String(r.type || r.tipo || '').trim(),
+                        correo: correo,
+                        origen: 'ocupacion'
+                    });
+                });
+            });
+            rows.sort(function (a, b) {
+                return String(a.depto).localeCompare(String(b.depto), 'es', { numeric: true }) || a.correo.localeCompare(b.correo);
+            });
+            return rows;
+        }
+
+        function mailerFilasDestino() {
+            const occ = mailerListarOcupacion();
+            const extra = (mailerExtras || []).map(function (c, i) {
+                return {
+                    key: 'extra|' + i + '|' + String(c.correo || '').toLowerCase(),
+                    depto: '—',
+                    nombre: c.nombre || 'Extra',
+                    tipo: 'Adicional',
+                    correo: c.correo,
+                    origen: 'extra'
+                };
+            });
+            return occ.concat(extra);
+        }
+
+        function mailerMostrarSub(id) {
+            ['mailerSubRedactar', 'mailerSubDest', 'mailerSubPlant'].forEach(function (p) {
+                const el = document.getElementById(p);
+                if (el) el.hidden = p !== id;
+            });
+            document.querySelectorAll('#envioCorreos .mailer-subnav-btn').forEach(function (b) {
+                b.classList.toggle('is-on', b.getAttribute('data-mailer-sub') === id);
+            });
+            if (id === 'mailerSubDest') mailerRenderDirectorio();
+            if (id === 'mailerSubPlant') mailerRenderListaPlantillas();
+        }
+
+        function mailerHtmlPreview(html) {
+            const ctx = mailerContextoPlaceholders();
+            return typeof aplicarPlaceholdersPlantillaCorreo === 'function'
+                ? aplicarPlaceholdersPlantillaCorreo(html || '', ctx)
+                : (html || '');
+        }
+
+        function mailerContextoPlaceholders() {
+            const first = mailerDestinatariosMarcados()[0];
+            let comunidad = 'Comunidad';
+            try { comunidad = localStorage.getItem(lsKey('nombreComunidad')) || comunidad; } catch (e) {}
+            const hoy = new Date();
+            return {
+                nombreComunidad: comunidad,
+                nombreMes: (typeof obtenerNombreMes === 'function' && typeof obtenerMesPeriodoVista === 'function') ? obtenerNombreMes(obtenerMesPeriodoVista()) : '',
+                fechaEmision: String(hoy.getDate()).padStart(2, '0') + '-' + String(hoy.getMonth() + 1).padStart(2, '0') + '-' + hoy.getFullYear(),
+                departamento: first ? first.depto : '',
+                nombreResidente: first ? first.nombre : ''
+            };
+        }
+
+        function mailerActualizarPreview() {
+            const iframe = document.getElementById('mailerPreview');
+            const ta = document.getElementById('mailerHtml');
+            if (!iframe) return;
+            const html = mailerHtmlPreview(ta ? ta.value : '');
+            iframe.srcdoc = html || '<p style="font-family:Arial;padding:1rem;color:#888;">Sin contenido</p>';
+        }
+
+        function mailerPoblarSelectPlantillas() {
+            const sel = document.getElementById('mailerPlantillaSel');
+            if (!sel) return;
+            const cur = sel.value;
+            const lista = mailerTodasPlantillas();
+            sel.innerHTML = lista.map(function (p) {
+                return '<option value="' + String(p.id).replace(/"/g, '&quot;') + '">' + String(p.nombre || p.id).replace(/</g, '&lt;') + (p.sistema && !mailerPlantillasMap[p.id] ? ' (sistema)' : '') + '</option>';
+            }).join('');
+            if (cur && lista.some(function (p) { return p.id === cur; })) sel.value = cur;
+            else if (lista[0]) sel.value = lista[0].id;
+            if (!mailerIniciado) mailerAplicarPlantillaSeleccionada();
+        }
+
+        function mailerAplicarPlantillaSeleccionada() {
+            const sel = document.getElementById('mailerPlantillaSel');
+            const p = mailerPlantillaPorId(sel && sel.value);
+            const as = document.getElementById('mailerAsunto');
+            const ta = document.getElementById('mailerHtml');
+            if (!p) return;
+            if (as) as.value = p.asunto || '';
+            if (ta) ta.value = p.html || '';
+            mailerActualizarPreview();
+        }
+
+        function mailerRenderListaOcupacion() {
+            const wrap = document.getElementById('mailerListaOcupacion');
+            if (!wrap) return;
+            const q = String((document.getElementById('mailerBuscarDest') || {}).value || '').trim().toLowerCase();
+            const filas = mailerFilasDestino().filter(function (r) {
+                if (!q) return true;
+                return (r.depto + ' ' + r.nombre + ' ' + r.tipo + ' ' + r.correo).toLowerCase().indexOf(q) >= 0;
+            });
+            if (!filas.length) {
+                wrap.innerHTML = '<p style="padding:0.75rem;color:var(--text-tertiary);font-size:0.8rem;">No hay coincidencias. Cargue Ocupación si el directorio está vacío.</p>';
+                mailerActualizarResumenDest();
+                return;
+            }
+            const prev = {};
+            wrap.querySelectorAll('input[data-mailer-key]:checked').forEach(function (cb) { prev[cb.getAttribute('data-mailer-key')] = true; });
+            wrap.innerHTML = filas.map(function (r) {
+                const k = String(r.key).replace(/"/g, '&quot;');
+                const on = prev[r.key] ? ' checked' : '';
+                return '<label><input type="checkbox" data-mailer-key="' + k + '" data-mailer-email="' + String(r.correo).replace(/"/g, '&quot;') + '" data-mailer-nombre="' + String(r.nombre).replace(/"/g, '&quot;') + '" data-mailer-depto="' + String(r.depto).replace(/"/g, '&quot;') + '"' + on + '>' +
+                    '<span><strong>' + String(r.depto).replace(/</g, '&lt;') + '</strong> · ' + String(r.nombre).replace(/</g, '&lt;') +
+                    (r.tipo ? ' <span style="color:var(--text-tertiary);">(' + String(r.tipo).replace(/</g, '&lt;') + ')</span>' : '') +
+                    '<br><span style="color:var(--text-secondary);word-break:break-all;">' + String(r.correo).replace(/</g, '&lt;') + '</span></span></label>';
+            }).join('');
+            mailerActualizarResumenDest();
+        }
+
+        function mailerDestinatariosMarcados() {
+            const wrap = document.getElementById('mailerListaOcupacion');
+            const out = [];
+            const seen = new Set();
+            if (wrap) {
+                wrap.querySelectorAll('input[data-mailer-email]:checked').forEach(function (cb) {
+                    const correo = String(cb.getAttribute('data-mailer-email') || '').trim();
+                    const k = correo.toLowerCase();
+                    if (!correo || seen.has(k)) return;
+                    seen.add(k);
+                    out.push({
+                        correo: correo,
+                        nombre: cb.getAttribute('data-mailer-nombre') || '',
+                        depto: cb.getAttribute('data-mailer-depto') || ''
+                    });
+                });
+            }
+            const otros = document.getElementById('mailerOtrosCorreos');
+            if (otros && typeof parsearEntradasCorreoLista === 'function') {
+                parsearEntradasCorreoLista(otros.value, '').forEach(function (e) {
+                    const k = e.correo.toLowerCase();
+                    if (seen.has(k)) return;
+                    seen.add(k);
+                    out.push({ correo: e.correo, nombre: e.nombre, depto: '' });
+                });
+            }
+            return out;
+        }
+
+        function mailerActualizarResumenDest() {
+            const el = document.getElementById('mailerResumenDest');
+            if (!el) return;
+            const n = mailerDestinatariosMarcados().length;
+            el.textContent = n === 1 ? '1 destinatario seleccionado' : (n + ' destinatarios seleccionados');
+        }
+
+        function mailerRenderDirectorio() {
+            const wrap = document.getElementById('mailerDirectorioTablaWrap');
+            const extrasWrap = document.getElementById('mailerExtrasWrap');
+            const q = String((document.getElementById('mailerDirFiltro') || {}).value || '').trim().toLowerCase();
+            const filas = mailerListarOcupacion().filter(function (r) {
+                if (!q) return true;
+                return (r.depto + ' ' + r.nombre + ' ' + r.tipo + ' ' + r.correo).toLowerCase().indexOf(q) >= 0;
+            });
+            if (wrap) {
+                wrap.innerHTML = '<table class="notif-tabla" style="width:100%;border-collapse:collapse;"><thead><tr><th>Depto</th><th>Nombre</th><th>Tipo</th><th>Correo</th></tr></thead><tbody>' +
+                    (filas.length ? filas.map(function (r) {
+                        return '<tr><td>' + String(r.depto).replace(/</g, '&lt;') + '</td><td>' + String(r.nombre).replace(/</g, '&lt;') + '</td><td>' + String(r.tipo || '—').replace(/</g, '&lt;') + '</td><td>' + String(r.correo).replace(/</g, '&lt;') + '</td></tr>';
+                    }).join('') : '<tr><td colspan="4" style="padding:1rem;color:var(--text-tertiary);">Sin correos de ocupación. Abra el módulo Ocupación para sincronizar.</td></tr>') +
+                    '</tbody></table>';
+            }
+            if (extrasWrap) {
+                if (!mailerExtras.length) extrasWrap.innerHTML = '<p class="mailer-hint">No hay correos adicionales.</p>';
+                else extrasWrap.innerHTML = '<table class="notif-tabla" style="width:100%;"><thead><tr><th>Nombre</th><th>Correo</th><th></th></tr></thead><tbody>' +
+                    mailerExtras.map(function (c, i) {
+                        return '<tr><td>' + String(c.nombre || '').replace(/</g, '&lt;') + '</td><td>' + String(c.correo || '').replace(/</g, '&lt;') + '</td><td><button type="button" class="btn btn-danger btn-sm" data-mailer-del-extra="' + i + '">Eliminar</button></td></tr>';
+                    }).join('') + '</tbody></table>';
+            }
+        }
+
+        function mailerRenderListaPlantillas() {
+            const wrap = document.getElementById('mailerListaPlantillas');
+            if (!wrap) return;
+            const lista = mailerTodasPlantillas();
+            wrap.innerHTML = lista.map(function (p) {
+                const on = p.id === mailerPlantillaEdicionId ? ' is-on' : '';
+                const tag = mailerPlantillasMap[p.id] ? '' : (p.sistema ? ' · sistema' : '');
+                return '<div class="mailer-tpl-item' + on + '" data-mailer-tpl="' + String(p.id).replace(/"/g, '&quot;') + '"><div><strong>' + String(p.nombre || p.id).replace(/</g, '&lt;') + '</strong><div style="font-size:0.72rem;color:var(--text-tertiary);">' + String(p.asunto || '').replace(/</g, '&lt;') + tag + '</div></div></div>';
+            }).join('');
+            if (mailerPlantillaEdicionId) mailerCargarEditorPlantilla(mailerPlantillaEdicionId);
+            else if (lista[0]) mailerCargarEditorPlantilla(lista[0].id);
+        }
+
+        function mailerCargarEditorPlantilla(id) {
+            const p = mailerPlantillaPorId(id);
+            mailerPlantillaEdicionId = id;
+            const n = document.getElementById('mailerTplNombre');
+            const a = document.getElementById('mailerTplAsunto');
+            const h = document.getElementById('mailerTplHtml');
+            const iframe = document.getElementById('mailerTplPreview');
+            if (n) n.value = (p && p.nombre) || '';
+            if (a) a.value = (p && p.asunto) || '';
+            if (h) h.value = (p && p.html) || '';
+            if (iframe) iframe.srcdoc = mailerHtmlPreview((p && p.html) || '');
+            document.querySelectorAll('#mailerListaPlantillas .mailer-tpl-item').forEach(function (el) {
+                el.classList.toggle('is-on', el.getAttribute('data-mailer-tpl') === id);
+            });
+        }
+
+        async function mailerGuardarPlantillaDesdeEditor() {
+            const id = mailerPlantillaEdicionId || ('mailer_user_' + Date.now());
+            const nombre = ((document.getElementById('mailerTplNombre') || {}).value || '').trim() || 'Plantilla';
+            const asunto = ((document.getElementById('mailerTplAsunto') || {}).value || '').trim();
+            const html = ((document.getElementById('mailerTplHtml') || {}).value || '');
+            mailerPlantillasMap[id] = { nombre: nombre, asunto: asunto, html: html, sistema: false, actualizado: new Date().toISOString() };
+            mailerPlantillaEdicionId = id;
+            try {
+                await mailerGuardarPlantillas();
+                mailerPoblarSelectPlantillas();
+                mailerRenderListaPlantillas();
+                mostrarAlerta('Plantilla guardada.', 'Éxito');
+            } catch (e) {
+                mostrarAlerta('No se pudo guardar: ' + (e && e.message ? e.message : 'error'), 'Error');
+            }
+        }
+
+        async function mailerNuevaPlantilla() {
+            mailerPlantillaEdicionId = 'mailer_user_' + Date.now();
+            const n = document.getElementById('mailerTplNombre');
+            const a = document.getElementById('mailerTplAsunto');
+            const h = document.getElementById('mailerTplHtml');
+            if (n) n.value = 'Nueva plantilla';
+            if (a) a.value = 'Comunicado — {{comunidad}}';
+            if (h) h.value = mailerHtmlEnvoltorio('Comunicado', mailerInnerP('Escriba el mensaje aquí.') + mailerInnerP('Administración · {{comunidad}}'));
+            await mailerGuardarPlantillaDesdeEditor();
+        }
+
+        async function mailerDuplicarPlantilla() {
+            const origen = mailerPlantillaPorId(mailerPlantillaEdicionId);
+            if (!origen) return;
+            mailerPlantillaEdicionId = 'mailer_user_' + Date.now();
+            const n = document.getElementById('mailerTplNombre');
+            const a = document.getElementById('mailerTplAsunto');
+            const h = document.getElementById('mailerTplHtml');
+            if (n) n.value = (origen.nombre || 'Plantilla') + ' (copia)';
+            if (a) a.value = origen.asunto || '';
+            if (h) h.value = origen.html || '';
+            await mailerGuardarPlantillaDesdeEditor();
+        }
+
+        async function mailerEliminarPlantilla() {
+            const id = mailerPlantillaEdicionId;
+            if (!id) return;
+            const esSistema = mailerPlantillasBase().some(function (p) { return p.id === id; });
+            const ok = await confirmarAccion(esSistema && mailerPlantillasMap[id]
+                ? '¿Restaurar la plantilla de sistema y quitar su edición?'
+                : (esSistema ? 'Las plantillas de sistema no se eliminan. Puede duplicarlas y editar la copia.' : '¿Eliminar esta plantilla?'), 'Plantillas');
+            if (!ok) return;
+            if (esSistema && !mailerPlantillasMap[id]) {
+                mostrarAlerta('Esta plantilla es de sistema. Duplíquela para editarla o eliminarla como copia.', 'Plantillas');
+                return;
+            }
+            delete mailerPlantillasMap[id];
+            try {
+                await mailerGuardarPlantillas();
+                mailerPlantillaEdicionId = '';
+                mailerPoblarSelectPlantillas();
+                mailerRenderListaPlantillas();
+                mostrarAlerta(esSistema ? 'Se restauró la versión de sistema.' : 'Plantilla eliminada.', 'Éxito');
+            } catch (e) {
+                mostrarAlerta('No se pudo eliminar: ' + (e && e.message ? e.message : 'error'), 'Error');
+            }
+        }
+
+        async function mailerEnviar() {
+            const dest = mailerDestinatariosMarcados();
+            let extrasAdmin = [];
+            if (document.getElementById('mailerIncluirAdmin') && document.getElementById('mailerIncluirAdmin').checked) {
+                extrasAdmin = await obtenerDestinatariosDirectorioAdministrativo();
+            }
+            const seen = new Set(dest.map(function (d) { return d.correo.toLowerCase(); }));
+            (extrasAdmin || []).forEach(function (d) {
+                const k = String(d.correo || '').toLowerCase();
+                if (!k || seen.has(k)) return;
+                seen.add(k);
+                dest.push({ correo: d.correo, nombre: d.nombre, depto: '' });
+            });
+            if (!dest.length) {
+                mostrarAlerta('Seleccione al menos un destinatario o agregue correos.', 'Sin destinatarios');
+                return;
+            }
+            const asuntoEl = document.getElementById('mailerAsunto');
+            const htmlEl = document.getElementById('mailerHtml');
+            const ctx = mailerContextoPlaceholders();
+            const asunto = typeof aplicarPlaceholdersPlantillaCorreo === 'function'
+                ? aplicarPlaceholdersPlantillaCorreo((asuntoEl && asuntoEl.value) || '', ctx)
+                : ((asuntoEl && asuntoEl.value) || '');
+            const html = mailerHtmlPreview((htmlEl && htmlEl.value) || '');
+            if (!asunto.trim() || !html.trim()) {
+                mostrarAlerta('Indique asunto y contenido HTML.', 'Error');
+                return;
+            }
+            const ok = await confirmarAccion('Se enviará a ' + dest.length + ' destinatario(s). En grupos, los residentes van en copia oculta. ¿Enviar ahora?', 'Enviar correo');
+            if (!ok) return;
+            const visible = (typeof correoVisibleBienvenidaMasiva === 'function') ? correoVisibleBienvenidaMasiva() : dest[0].correo;
+            const correos = dest.map(function (d) { return d.correo; });
+            mostrarProgreso('Enviando correo…');
+            try {
+                const LOTE = 40;
+                let okLotes = 0;
+                for (let i = 0; i < correos.length; i += LOTE) {
+                    const lote = correos.slice(i, i + LOTE);
+                    const masivo = lote.length > 1;
+                    const resultado = await enviarCorreo(
+                        { nombre: dest[0].nombre || 'Comunidad', correo: masivo ? visible : lote[0] },
+                        asunto,
+                        '',
+                        html,
+                        null,
+                        {
+                            ccoModulo: 'envioMasivo',
+                            bcc: masivo ? lote : undefined,
+                            silencioso: true
+                        }
+                    );
+                    if (!resultado || !resultado.exito) {
+                        ocultarProgreso();
+                        mostrarAlerta('Error al enviar: ' + ((resultado && resultado.error) || 'desconocido'), 'Error');
+                        return;
+                    }
+                    okLotes += 1;
+                }
+                ocultarProgreso();
+                mostrarAlerta('Correo encolado para ' + dest.length + ' destinatario(s)' + (okLotes > 1 ? ' en ' + okLotes + ' lotes' : '') + '.', 'Éxito');
+            } catch (e) {
+                ocultarProgreso();
+                mostrarAlerta('Error al enviar: ' + (e && e.message ? e.message : e), 'Error');
+            }
+        }
+
+        async function cargarModuloEnvioCorreos() {
+            if (typeof cargarUnidadesOcupacion === 'function') {
+                try { await cargarUnidadesOcupacion(); } catch (e) {}
+            }
+            await mailerCargarPlantillas();
+            await mailerCargarExtras();
+            mailerPoblarSelectPlantillas();
+            if (!mailerIniciado) {
+                mailerAplicarPlantillaSeleccionada();
+                mailerIniciado = true;
+            }
+            mailerRenderListaOcupacion();
+            mailerRenderDirectorio();
+        }
+        window.cargarModuloEnvioCorreos = cargarModuloEnvioCorreos;
+
+        function mailerBindUi() {
+            const wrap = document.getElementById('envioCorreos');
+            if (!wrap || wrap.dataset.mailerBound) return;
+            wrap.dataset.mailerBound = '1';
+            wrap.addEventListener('click', function (ev) {
+                const sub = ev.target && ev.target.closest ? ev.target.closest('[data-mailer-sub]') : null;
+                if (sub) mailerMostrarSub(sub.getAttribute('data-mailer-sub'));
+                const tpl = ev.target && ev.target.closest ? ev.target.closest('[data-mailer-tpl]') : null;
+                if (tpl) mailerCargarEditorPlantilla(tpl.getAttribute('data-mailer-tpl'));
+                const del = ev.target && ev.target.closest ? ev.target.closest('[data-mailer-del-extra]') : null;
+                if (del) {
+                    const i = parseInt(del.getAttribute('data-mailer-del-extra'), 10);
+                    mailerExtras.splice(i, 1);
+                    mailerGuardarExtras().then(function () { mailerRenderDirectorio(); mailerRenderListaOcupacion(); });
+                }
+            });
+            wrap.addEventListener('change', function (ev) {
+                if (ev.target && ev.target.getAttribute && ev.target.getAttribute('data-mailer-email')) mailerActualizarResumenDest();
+            });
+            const sel = document.getElementById('mailerPlantillaSel');
+            if (sel) sel.addEventListener('change', mailerAplicarPlantillaSeleccionada);
+            const html = document.getElementById('mailerHtml');
+            if (html) html.addEventListener('input', function () {
+                clearTimeout(mailerPreviewTimer);
+                mailerPreviewTimer = setTimeout(mailerActualizarPreview, 280);
+            });
+            const bus = document.getElementById('mailerBuscarDest');
+            if (bus) bus.addEventListener('input', mailerRenderListaOcupacion);
+            const dirF = document.getElementById('mailerDirFiltro');
+            if (dirF) dirF.addEventListener('input', mailerRenderDirectorio);
+            const otros = document.getElementById('mailerOtrosCorreos');
+            if (otros) otros.addEventListener('input', mailerActualizarResumenDest);
+            const tplH = document.getElementById('mailerTplHtml');
+            if (tplH) tplH.addEventListener('input', function () {
+                const iframe = document.getElementById('mailerTplPreview');
+                if (iframe) iframe.srcdoc = mailerHtmlPreview(tplH.value);
+            });
+            document.getElementById('mailerBtnEnviar') && document.getElementById('mailerBtnEnviar').addEventListener('click', mailerEnviar);
+            document.getElementById('mailerBtnMarcarFiltrados') && document.getElementById('mailerBtnMarcarFiltrados').addEventListener('click', function () {
+                document.querySelectorAll('#mailerListaOcupacion input[data-mailer-email]').forEach(function (cb) { cb.checked = true; });
+                mailerActualizarResumenDest();
+            });
+            document.getElementById('mailerBtnDesmarcar') && document.getElementById('mailerBtnDesmarcar').addEventListener('click', function () {
+                document.querySelectorAll('#mailerListaOcupacion input[data-mailer-email]').forEach(function (cb) { cb.checked = false; });
+                mailerActualizarResumenDest();
+            });
+            document.getElementById('mailerBtnTodosOcupacion') && document.getElementById('mailerBtnTodosOcupacion').addEventListener('click', function () {
+                document.getElementById('mailerBuscarDest').value = '';
+                mailerRenderListaOcupacion();
+                document.querySelectorAll('#mailerListaOcupacion input[data-mailer-email]').forEach(function (cb) { cb.checked = true; });
+                mailerActualizarResumenDest();
+            });
+            document.getElementById('mailerFormExtra') && document.getElementById('mailerFormExtra').addEventListener('submit', async function (ev) {
+                ev.preventDefault();
+                const entradas = parsearEntradasCorreoLista((document.getElementById('mailerExtraEmail') || {}).value || '', (document.getElementById('mailerExtraNombre') || {}).value || '');
+                if (!entradas.length) { mostrarAlerta('Ingrese correos válidos.', 'Error'); return; }
+                entradas.forEach(function (e) { mailerExtras.push(e); });
+                await mailerGuardarExtras();
+                document.getElementById('mailerFormExtra').reset();
+                mailerRenderDirectorio();
+                mailerRenderListaOcupacion();
+                mostrarAlerta('Correo(s) adicionales guardados.', 'Éxito');
+            });
+            document.getElementById('mailerBtnNuevaPlantilla') && document.getElementById('mailerBtnNuevaPlantilla').addEventListener('click', mailerNuevaPlantilla);
+            document.getElementById('mailerBtnGuardarPlantilla') && document.getElementById('mailerBtnGuardarPlantilla').addEventListener('click', mailerGuardarPlantillaDesdeEditor);
+            document.getElementById('mailerBtnDuplicarPlantilla') && document.getElementById('mailerBtnDuplicarPlantilla').addEventListener('click', mailerDuplicarPlantilla);
+            document.getElementById('mailerBtnEliminarPlantilla') && document.getElementById('mailerBtnEliminarPlantilla').addEventListener('click', mailerEliminarPlantilla);
+        }
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', mailerBindUi);
+        else mailerBindUi();
         
         // Funciones auxiliares para generar reportes como adjuntos
         // Función para generar HTML como adjunto (en lugar de PDF)
