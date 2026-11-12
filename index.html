@@ -7622,6 +7622,73 @@
         body.permisos-bloqueado .tab-content { display: none !important; }
         #permisosBloqueo { display: none; max-width: 32rem; margin: 4rem auto; padding: 1.5rem; border: 1px solid var(--border-color); border-radius: 12px; background: var(--bg-secondary); }
         body.permisos-bloqueado #permisosBloqueo { display: block !important; }
+        #bienvenidaUsuario {
+            display: none;
+            max-width: 42rem;
+            margin: 1.25rem auto 1.5rem;
+            padding: 1.25rem 1.35rem 1.15rem;
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            background: linear-gradient(165deg, color-mix(in srgb, var(--primary, #7FBA02) 14%, var(--bg-secondary)) 0%, var(--bg-secondary) 52%);
+            box-shadow: 0 12px 32px rgba(0,0,0,0.18);
+            gap: 1.1rem;
+            align-items: flex-start;
+        }
+        body.bienvenida-usuario-on #bienvenidaUsuario { display: flex !important; }
+        body.bienvenida-usuario-on .tab-content,
+        body.bienvenida-usuario-on #avisoPermisoSoloLectura,
+        body.bienvenida-usuario-on #avisoSoloLecturaMesArchivado { display: none !important; }
+        #bienvenidaUsuario .arturito-dashboard { width: 5.6rem; height: 5.6rem; flex-shrink: 0; }
+        .bienvenida-chat { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 0.55rem; }
+        .bienvenida-nombre {
+            margin: 0 0 0.15rem;
+            font-size: 1.15rem;
+            font-weight: 750;
+            color: var(--text-primary);
+            letter-spacing: -0.02em;
+        }
+        .bienvenida-burbuja {
+            align-self: flex-start;
+            max-width: 100%;
+            padding: 0.55rem 0.8rem;
+            border-radius: 4px 14px 14px 14px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            font-size: 0.92rem;
+            line-height: 1.45;
+            color: var(--text-primary);
+            min-height: 1.4em;
+            opacity: 0;
+            transform: translateY(6px);
+        }
+        .bienvenida-burbuja.is-on { opacity: 1; transform: none; transition: opacity 0.28s ease, transform 0.28s ease; }
+        .bienvenida-burbuja .bienvenida-cursor {
+            display: inline-block;
+            width: 0.45em;
+            margin-left: 1px;
+            border-right: 2px solid var(--primary, #7FBA02);
+            animation: bienvenidaCursor 0.85s step-end infinite;
+            vertical-align: baseline;
+        }
+        @keyframes bienvenidaCursor { 50% { border-color: transparent; } }
+        .bienvenida-acciones { margin-top: 0.35rem; }
+        #bienvenidaUsuarioBar {
+            display: none;
+            align-items: center;
+            gap: 0.65rem;
+            margin: 0 0 0.95rem;
+            padding: 0.55rem 0.85rem;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            background: var(--bg-secondary);
+        }
+        body.permisos-restringido:not(.permisos-bloqueado):not(.bienvenida-usuario-on) #bienvenidaUsuarioBar { display: flex; }
+        #bienvenidaUsuarioBar .arturito-dashboard { width: 2.6rem; height: 2.6rem; flex-shrink: 0; }
+        #bienvenidaUsuarioBarNombre { font-weight: 700; font-size: 0.92rem; }
+        #bienvenidaUsuarioBarTxt { font-size: 0.8rem; color: var(--text-secondary); }
+        @media (max-width: 720px) {
+            #bienvenidaUsuario { flex-direction: column; align-items: center; text-align: left; }
+        }
         body.permisos-solo-lectura #avisoPermisoSoloLectura { display: block !important; }
         body.permisos-solo-lectura #dashboard #btnCerrarMes,
         body.permisos-solo-lectura #dashboard #btnReabrirMes,
@@ -8026,6 +8093,62 @@
                 <p style="margin:0 0 1rem;color:var(--text-secondary);font-size:0.9rem;">Esta cuenta inició sesión, pero el administrador principal aún no le asignó módulos. Solicite acceso a <strong>edificio.wm815@gmail.com</strong>.</p>
                 <button type="button" class="btn btn-secondary" id="permisosBloqueoSalir">Cerrar sesión</button>
             </div>
+            <div id="bienvenidaUsuarioBar" aria-hidden="true">
+                <div class="arturito-dashboard expression-happy" title="Arturito" aria-hidden="true">
+                    <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="16" y="28" width="32" height="28" rx="6" fill="#7FBA02"/>
+                        <rect x="18" y="30" width="28" height="24" rx="4" fill="#8FCB1A"/>
+                        <rect x="20" y="32" width="24" height="18" rx="2" fill="#1a1a1a"/>
+                        <g class="blinking-eyes expression-eyes">
+                            <circle cx="28" cy="40" r="2.5" fill="#7FBA02"/>
+                            <circle cx="36" cy="40" r="2.5" fill="#7FBA02"/>
+                        </g>
+                        <path class="expression-mouth" d="M26 44 Q32 48 38 44" stroke="#7FBA02" stroke-width="2" stroke-linecap="round" fill="none"/>
+                        <g class="waving-hand">
+                            <circle cx="50" cy="20" r="6" fill="#7FBA02" opacity="0.9"/>
+                            <circle cx="14" cy="18" r="4" fill="#7FBA02" opacity="0.8"/>
+                        </g>
+                    </svg>
+                </div>
+                <div>
+                    <div id="bienvenidaUsuarioBarNombre">Hola</div>
+                    <div id="bienvenidaUsuarioBarTxt">Tus módulos están en el menú.</div>
+                </div>
+            </div>
+            <div id="bienvenidaUsuario" role="dialog" aria-labelledby="bienvenidaUsuarioNombre" aria-modal="true">
+                <div class="arturito-dashboard expression-happy" id="bienvenidaArturito" title="Arturito" aria-hidden="true">
+                    <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="16" y="28" width="32" height="28" rx="6" fill="#7FBA02"/>
+                        <rect x="18" y="30" width="28" height="24" rx="4" fill="#8FCB1A"/>
+                        <rect x="20" y="32" width="24" height="18" rx="2" fill="#1a1a1a"/>
+                        <rect x="22" y="34" width="20" height="14" rx="1" fill="#2a2a2a"/>
+                        <g class="blinking-eyes expression-eyes">
+                            <circle cx="28" cy="40" r="2.5" fill="#7FBA02"/>
+                            <circle cx="36" cy="40" r="2.5" fill="#7FBA02"/>
+                            <circle cx="28.5" cy="39.5" r="1" fill="#8FCB1A"/>
+                            <circle cx="36.5" cy="39.5" r="1" fill="#8FCB1A"/>
+                        </g>
+                        <path class="expression-mouth" d="M26 44 Q32 48 38 44" stroke="#7FBA02" stroke-width="2" stroke-linecap="round" fill="none"/>
+                        <g class="waving-hand">
+                            <circle cx="50" cy="20" r="6" fill="#7FBA02" opacity="0.9"/>
+                            <circle cx="50" cy="20" r="5" fill="#8FCB1A" opacity="0.7"/>
+                            <path d="M46 24 L50 28 L54 24" fill="#7FBA02" opacity="0.9"/>
+                            <circle cx="14" cy="18" r="4" fill="#7FBA02" opacity="0.8"/>
+                            <circle cx="14" cy="18" r="3" fill="#8FCB1A" opacity="0.6"/>
+                        </g>
+                        <circle cx="24" cy="28" r="2" fill="#FFD700"/>
+                        <circle cx="40" cy="28" r="2" fill="#FFD700"/>
+                        <rect x="20" y="54" width="24" height="4" rx="2" fill="#5a8501"/>
+                    </svg>
+                </div>
+                <div class="bienvenida-chat">
+                    <h2 class="bienvenida-nombre" id="bienvenidaUsuarioNombre">Hola</h2>
+                    <div id="bienvenidaChatHilo" aria-live="polite"></div>
+                    <div class="bienvenida-acciones">
+                        <button type="button" class="btn btn-primary" id="bienvenidaUsuarioContinuar">Continuar</button>
+                    </div>
+                </div>
+            </div>
             <!-- Aviso visible en todos los módulos cuando se consulta un mes archivado (solo lectura) -->
             <div id="avisoSoloLecturaMesArchivado" style="display: none; margin: 0 0 1rem 0; padding: 0.625rem 1rem; background: linear-gradient(90deg, rgba(245, 158, 11, 0.12) 0%, rgba(251, 191, 36, 0.08) 100%); border: 1px solid rgba(245, 158, 11, 0.35); border-radius: 8px; font-size: 0.875rem; color: #422006; font-weight: 600;">
                 📋 Consultando mes archivado (solo lectura). Los datos no se pueden editar. Para editar, reabra el mes desde el Panel de Control.
@@ -8144,7 +8267,6 @@
                 </section>
                 <section class="dashboard2-block" id="dashboardReclamosPendientesSec" hidden aria-label="Reclamos de Conserjería">
                     <h2 class="dashboard2-block-title">Reclamos de Conserjería</h2>
-                    <p class="reclamos-dash-hint">Los estados se actualizan en la bitácora de Conserjería WM.</p>
                     <div class="reclamos-filtro-estados" id="reclamosFiltroEstados">
                         <button type="button" data-reclamo-filtro="tratamiento" class="is-on">Por tratar</button>
                         <button type="button" data-reclamo-filtro="">Todos</button>
@@ -8249,7 +8371,6 @@
                         <input type="text" id="blocQuickTitulo" maxlength="180" placeholder="Nueva nota… se registra ahora, plazo 3 días">
                         <button type="submit">Añadir</button>
                     </form>
-                    <p class="bloc-hint">Se guarda con día y hora actuales. Tiene 3 días para gestionarla.</p>
                     <div id="blocNotasLista" class="bloc-lista"></div>
                 </section>
                 <!-- 3. Nómina (seguimiento operativo) -->
@@ -8298,7 +8419,6 @@
                                 <div class="dashboard2-htool-card">
                                     <div class="htool-icon htool-icon--purple">⚙️</div>
                                     <h4 class="htool-title">Configuración de Módulos</h4>
-                                    <p class="htool-desc">Muestre u oculte módulos del menú y de los reportes.</p>
                                     <div class="htool-toggle" onclick="toggleConfigModulos()">
                                         <span>Ver configuración</span>
                                         <span id="configModulosToggle">▼</span>
@@ -8311,7 +8431,6 @@
                                 <div class="dashboard2-htool-card">
                                     <div class="htool-icon htool-icon--green">🔧</div>
                                     <h4 class="htool-title">Recuperar Datos</h4>
-                                    <p class="htool-desc">Restaure datos de Firestore si un mes se cerró por error.</p>
                                     <button class="btn" id="btnRecuperarFirestore" style="background: var(--primary); color: white; margin-bottom: 0.5rem;">⬇️ Recuperar Todo de Firestore</button>
                                     <button class="btn" id="btnBuscarMeses" style="background: rgba(255,255,255,0.2); color: #fff; border: 1px solid rgba(255,255,255,0.3);">🔍 Buscar Meses Disponibles</button>
                                     <div id="mesesDisponibles" style="display: none; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.1);"><!-- Se llena dinámicamente --></div>
@@ -8320,14 +8439,12 @@
                                 <div class="dashboard2-htool-card">
                                     <div class="htool-icon htool-icon--amber">↔</div>
                                     <h4 class="htool-title">Trasladar Cargos entre Meses</h4>
-                                    <p class="htool-desc">Mueva cargos entre períodos, incluidos meses archivados.</p>
                                     <button type="button" class="btn" id="btnAbrirTrasladarCargos" style="background: #f59e0b; color: #111827; font-weight: 600; border: none;">↔ Trasladar cargos</button>
                                 </div>
                                 <!-- Consultar meses y cierre -->
                                 <div class="dashboard2-htool-card dashboard2-htool-card--wide">
                                     <div class="htool-icon htool-icon--amber">📅</div>
                                     <h4 class="htool-title">Consultar Meses Anteriores y Cierre de Mes</h4>
-                                    <p class="htool-desc">Consulte historial, reporte PDF, reabra o cierre el mes.</p>
                                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0.65rem; margin-bottom: 0.65rem;">
                                         <div class="form-group" style="margin: 0;">
                                             <label style="font-size: 0.8125rem; font-weight: 600; margin-bottom: 0.4rem; display: block;">Mes a consultar</label>
@@ -8733,7 +8850,7 @@
                 <h2 id="tituloEspacios" style="margin: 0; color: var(--gray-900); font-size: 1.5rem; font-weight: 700; display: flex; align-items: center; gap: 0.75rem;">
                     <span style="display: inline-flex; align-items: center; width: 1.75rem; height: 1.75rem;"></span> Espacios Comunes
                 </h2>
-                <p style="color: var(--gray-600); font-size: 0.875rem; margin: 0.5rem 0 0 0;">Registro de uso de espacios comunes. Cada registro se publica en <strong>Reservas</strong> de Conserjería WM (horario del día: 10:00 a 22:00).</p>
+                <p style="color: var(--gray-600); font-size: 0.875rem; margin: 0.5rem 0 0 0;">Registro de uso de espacios comunes</p>
             </div>
             <div class="form-section" style="margin-bottom: 1rem;">
                 <h3 style="margin: 0 0 0.75rem 0; font-size: 1rem; font-weight: 700;">Uso de Espacios Comunes</h3>
@@ -8832,7 +8949,7 @@
                 <h2 id="tituloMultas" style="margin: 0; color: var(--gray-900); font-size: 1.5rem; font-weight: 700; display: flex; align-items: center; gap: 0.75rem;">
                     <span style="display: inline-flex; align-items: center; width: 1.75rem; height: 1.75rem;"></span> Multas
                 </h2>
-                <p style="color: var(--gray-600); font-size: 0.875rem; margin: 0.5rem 0 0 0;">Registro de multas a residentes. Las novedades con etiqueta Multa de Conserjería WM llegan aquí como pendientes de tratamiento.</p>
+                <p style="color: var(--gray-600); font-size: 0.875rem; margin: 0.5rem 0 0 0;">Registro de multas a residentes</p>
             </div>
             <div id="multasAlertaPendientes" class="multas-alerta" role="status"></div>
             <div class="table-section multas-pend-tabla" id="multasPendientesSec" hidden>
@@ -9823,7 +9940,6 @@
 
             <div id="notifSubDest" class="form-section">
                 <h3>Destinatarios de reportes</h3>
-                <p class="notif-hint">Aparecen como destinatarios al enviar reportes. Puede pegar varios correos a la vez.</p>
                 <form id="formCorreoAdmin">
                     <div class="form-row" style="gap: 0.5rem; margin-bottom: 0.35rem; align-items: flex-end;">
                         <div class="form-group" style="flex: 1; margin-bottom: 0;">
@@ -9855,7 +9971,6 @@
 
             <div id="notifSubCco" class="form-section" hidden>
                 <h3>Copias ocultas (CCO)</h3>
-                <p class="notif-hint">El buzón y las copias extra se envían en todos los módulos, salvo que un tipo de correo las desactive. En cada envío puede desmarcar copias.</p>
                 <div class="notif-grid">
                     <div class="notif-card">
                         <h4>Buzón del edificio</h4>
@@ -9903,7 +10018,6 @@
 
                 <div class="notif-card" style="margin-top: 1rem;">
                     <h4>CCO de cada tipo de correo</h4>
-                    <p class="notif-hint">Elija el módulo y marque los correos que deben ir en copia oculta. La selección se guarda sola al marcar o desmarcar.</p>
                     <div class="form-group">
                         <label>Tipo de correo</label>
                         <select id="ccoCorreoModuloSel"></select>
@@ -9921,7 +10035,6 @@
                         <button type="button" class="btn btn-secondary" id="btnCcoDesmarcarTodos" style="padding: 0.35rem 0.7rem; font-size: 0.75rem;">Desmarcar todos</button>
                     </div>
                     <div id="ccoDesdeAdminLista" style="max-height: 280px; overflow: auto; border: 1px solid var(--border-color); border-radius: 8px; padding: 0.65rem 0.75rem; background: var(--bg-primary);"></div>
-                    <p class="notif-hint" style="margin: 0.7rem 0 0.4rem;">Otro correo que no esté en el listado:</p>
                     <form id="formCcoCorreoModulo">
                         <div class="form-row" style="gap: 0.5rem; align-items: flex-end;">
                             <div class="form-group" style="flex: 1; margin-bottom: 0;">
@@ -9957,7 +10070,7 @@
 
             <div id="notifSubPlant" class="form-section" hidden>
                 <h3>Textos por tipo de correo</h3>
-                <p class="notif-hint">Asunto y mensaje inicial al enviar. Si deja el asunto vacío, se usa el del sistema. Placeholders:
+                <p class="notif-hint">
                     <span class="notif-ph">{{comunidad}}</span>
                     <span class="notif-ph">{{mes}}</span>
                     <span class="notif-ph">{{fecha}}</span>
@@ -9978,7 +10091,7 @@
                     <textarea id="plantillaCorreoCuerpo" rows="4" placeholder="Párrafo opcional antes del reporte o comprobante."></textarea>
                 </div>
                 <div id="plantillaCorreoPostventaPendExtra" style="display: none; margin-bottom: 0.65rem; padding: 0.75rem; background: var(--bg-secondary); border-radius: 8px; border: 1px solid var(--border-color);">
-                    <p class="notif-hint" style="margin-bottom: 0.5rem;">Solo Postventa con selección de registros: textos del primer paso.</p>
+                    <p class="notif-hint" style="margin-bottom: 0.5rem;">Postventa — primer paso</p>
                     <div class="form-group">
                         <label>Saludo inicial</label>
                         <input type="text" id="plantillaCorreoSaludoLista" placeholder="Estimado/a,">
@@ -10000,7 +10113,6 @@
             <header class="ocupacion-head">
                 <div>
                     <h2>Ocupación del edificio</h2>
-                    <p id="ocupacionFuenteDatos" style="color: var(--gray-600); font-size: 0.875rem; margin: 0.4rem 0 0 0;">Cargando fuente de residentes…</p>
                 </div>
             </header>
             <div id="resumenOcupacion" class="resumen-ocupacion-map">
@@ -10027,7 +10139,6 @@
             </div>
             <section class="ocupacion-mapa-sec" aria-label="Mapa del edificio">
                 <h3>Mapa del edificio</h3>
-                <p class="ocupacion-mapa-lead">El edificio se lee como está: piso 19 arriba y piso 2 abajo. Cada columna es el depto (01 a 15), así 204 queda sobre 304, 404, 504… Pulse una unidad para ver el detalle.</p>
                 <div class="ocupacion-mapa-toolbar">
                     <input type="text" id="buildingMapFilterOcupacion" class="form-input" placeholder="Buscar unidad, residente, estacionamiento o bodega…" style="padding: 0.45rem 0.7rem; font-size: 0.82rem;">
                     <div class="ocupacion-vistas" id="ocupacionMapaVistas" role="group" aria-label="Vista del mapa">
@@ -10066,7 +10177,6 @@
             </section>
             <section class="ocupacion-registro-sec" aria-label="Registro mensual de ingresos y salidas">
                 <h3>Ingresos y salidas del mes</h3>
-                <p class="ocupacion-registro-lead" id="ocupacionRegistroLead">Ingreso de la unidad: día de mudanza según el registro en Conserjería. En habitacional se anota el propietario; en arriendo, el primer arrendatario.</p>
                 <div class="ocupacion-registro-kpis">
                     <div class="resumen-item">
                         <div id="ocupacionIngresosMes" class="valor" style="color: #059669;">0</div>
@@ -10105,7 +10215,6 @@
             </section>
             <section class="ocupacion-bienvenida-sec" aria-label="Correo de bienvenida">
                 <h3>Correo de bienvenida</h3>
-                <p style="margin: 0; font-size: 0.78rem; color: var(--gray-600);">Envío por unidad, separado del mapa para no tapar la lectura del edificio.</p>
                 <div class="ocupacion-bienvenida-kpis">
                     <div class="resumen-item">
                         <div id="ocupacionBienvenidaEnviadas" class="valor" style="color: #059669;">0</div>
@@ -10139,7 +10248,6 @@
                     <h2 id="tituloConserjeria" style="margin: 0; color: var(--gray-900); font-size: 1.5rem; font-weight: 700; display: flex; align-items: center; gap: 0.75rem;">
                         <span style="display: inline-flex; align-items: center; width: 1.75rem; height: 1.75rem;"></span> Conserjería
                     </h2>
-                    <p id="conserjeriaFuenteDatos" style="color: var(--gray-600); font-size: 0.875rem; margin: 0.5rem 0 0 0; max-width: 42rem; line-height: 1.45;">Novedades e incidencias de Conserjería WM. Puede destacar, anotar y editar desde aquí; los cambios quedan en la bitácora de conserjería.</p>
                     <p id="conserjeriaMesTexto" hidden></p>
                 </div>
                 <div class="conserjeria-modulo__acciones">
@@ -10159,7 +10267,6 @@
                 <header class="conserjeria-modulo__sec-head">
                     <span class="conserjeria-modulo__kicker">1 · Operación</span>
                     <h3 id="conserjeriaOperacionTitulo">Bitácora del mes</h3>
-                    <p>Primero el pulso del mes, luego las destacadas y el listado para trabajar. Pulse un indicador para filtrar.</p>
                 </header>
                 <div id="conserjeriaKpis" class="resumen-ocupacion-map"></div>
                 <div class="conserjeria-modulo__panel" id="conserjeriaResumenDiarioWrap" hidden>
@@ -10282,7 +10389,6 @@
                     <span style="font-size:0.78rem;color:var(--gray-600);font-weight:500;">Edite nombre, color y visibilidad. El cambio llega a portería.</span>
                 </summary>
                 <div class="conserjeria-modulo__details-body">
-                    <p style="margin: 0 0 0.65rem 0; font-size: 0.8rem; color: var(--gray-600); line-height: 1.45;">Estas son las categorías del selector de Conserjería WM. Puede cambiar el nombre y el color de las existentes; al renombrar, la bitácora conserva el mismo tipo. «En Conserjería» las muestra al registrar; «En Gestión» las incluye en este módulo.</p>
                     <div id="conserjeriaEtiquetasLista" class="conserjeria-cat-lista"></div>
                     <div style="display:flex;flex-wrap:wrap;gap:0.4rem;align-items:center;margin-top:0.65rem;">
                         <input type="text" id="conserjeriaNuevaEtiquetaNombre" class="form-input" placeholder="Nueva categoría…" maxlength="40" style="padding:0.4rem 0.5rem;font-size:0.8rem;min-width:12rem;">
@@ -10365,9 +10471,6 @@
                 <h2 id="tituloPostventa" style="margin: 0; color: var(--gray-900); font-size: 1.5rem; font-weight: 700; display: flex; align-items: center; gap: 0.75rem;">
                     <span style="display: inline-flex; align-items: center; width: 1.75rem; height: 1.75rem;"></span> Postventa
                 </h2>
-                <p style="color: var(--gray-600); font-size: 0.875rem; margin: 0.5rem 0 0 0; max-width: 42rem; line-height: 1.5;">
-                    Seguimiento de observaciones y estados (pendiente, en proceso, terminado, no aplica). Exporte a Excel, envíe por correo o importe desde hoja de cálculo.
-                </p>
             </header>
 
             <div id="postventaCumplimientoWrap" style="display: none !important;" aria-hidden="true"></div>
@@ -10501,9 +10604,6 @@
                 <h2 id="tituloComite" style="margin: 0; color: var(--gray-900); font-size: 1.5rem; font-weight: 700; display: flex; align-items: center; gap: 0.75rem;">
                     <span style="display: inline-flex; align-items: center; width: 1.75rem; height: 1.75rem;"></span> Comité
                 </h2>
-                <p style="color: var(--gray-600); font-size: 0.875rem; margin: 0.5rem 0 0 0; max-width: 44rem; line-height: 1.5;">
-                    Gestione propuestas del comité: cotizaciones (hasta 3), documentos, enlaces, y decisión de aprobación o rechazo. Los trabajos aprobados se cierran con la fecha de realización, un comentario y los documentos de la mejora.
-                </p>
             </header>
 
             <section class="form-section" style="margin-bottom: 1rem; padding: 1rem 1.15rem; border-radius: 12px; border: 1px solid var(--border-color); background: linear-gradient(135deg, rgba(117, 187, 33, 0.1) 0%, rgba(117, 187, 33, 0.03) 100%);">
@@ -10794,7 +10894,6 @@
             <div class="perso-head">
                 <div>
                     <h2 id="tituloPersonalizacion">Personalización</h2>
-                    <p>Identidad del edificio, accesos de usuarios, bitácora y módulos visibles.</p>
                 </div>
                 <div class="perso-admin">Administrador principal <strong>edificio.wm815@gmail.com</strong></div>
             </div>
@@ -10813,7 +10912,6 @@
                 </div>
                 <div class="perso-card">
                     <h3>Datos que salen en documentos</h3>
-                    <p class="perso-hint">Estos campos alimentan PDF, nómina y encabezados. No cambian el acceso de otras cuentas.</p>
                     <form id="formPersonalizacion" onsubmit="guardarPersonalizacion(event)">
                         <div class="form-row">
                             <div class="form-group">
@@ -10838,7 +10936,6 @@
             </div>
 
             <div id="persoPanelUsuarios" class="perso-panel">
-                <p class="perso-hint">Solo esta cuenta de administración crea usuarios y les asigna módulos y subpermisos. Quien no esté en la lista puede entrar, pero no verá la app.</p>
                 <div class="perso-grid">
                     <div class="perso-card">
                         <h3>Nueva cuenta</h3>
@@ -10863,7 +10960,6 @@
                             <label style="display:flex;gap:0.4rem;align-items:center;font-size:0.8rem;cursor:pointer;"><input type="checkbox" id="permisosCfgChat"> Chat interno</label>
                             <label style="display:flex;gap:0.4rem;align-items:center;font-size:0.8rem;cursor:pointer;"><input type="checkbox" id="permisosCfgNotif"> Campana de avisos</label>
                         </div>
-                        <p style="font-size:0.75rem;color:var(--text-tertiary);margin:0 0 0.35rem;">Módulos y subpermisos: primero el acceso al módulo y, debajo, qué puede hacer.</p>
                         <div id="permisosCfgMods"></div>
                         <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
                             <button type="button" class="btn btn-primary" id="permisosCfgAgregar">Crear cuenta y agregar</button>
@@ -10872,7 +10968,6 @@
                     </div>
                     <div class="perso-card">
                         <h3>Usuarios registrados</h3>
-                        <p class="perso-hint">Edite o quite accesos. Los cambios se guardan en la nube.</p>
                         <div id="permisosCfgLista"></div>
                     </div>
                 </div>
@@ -10882,7 +10977,6 @@
                 <div class="perso-grid">
                     <div class="perso-card">
                         <h3>Qué muestra la bitácora</h3>
-                        <p class="perso-hint">El acceso se asigna en Usuarios (nivel Solo bitácora, Comité u otro). Aquí define el contenido del módulo.</p>
                         <label style="display:flex;gap:0.5rem;align-items:flex-start;margin-bottom:0.85rem;cursor:pointer;">
                             <input type="checkbox" id="bitacoraCfgActivo" style="margin-top:0.2rem;">
                             <span>Activar contenido de bitácora</span>
@@ -10897,7 +10991,6 @@
                     </div>
                     <div class="perso-card">
                         <h3>Acceso rápido (opcional)</h3>
-                        <p class="perso-hint">Si agrega correos aquí y aún no tienen permiso, se les asigna Solo bitácora. Prefiera crearlos en Usuarios con contraseña.</p>
                         <div class="form-group">
                             <label>Nombre, correo</label>
                             <textarea id="bitacoraCfgNuevos" rows="4" placeholder="Comité, comite@entrecerros.cl"></textarea>
@@ -10910,7 +11003,6 @@
             <div id="persoPanelModulos" class="perso-panel">
                 <div class="perso-card">
                     <h3>Módulos del menú de administración</h3>
-                    <p class="perso-hint">Oculta módulos para la cuenta administradora y para reportes. No sustituye los permisos de cada usuario.</p>
                     <div id="persoListaModulos" class="lista-modulos-config"></div>
                 </div>
             </div>
@@ -10921,7 +11013,6 @@
             <div class="mailer-head">
                 <div>
                     <h2>Correo</h2>
-                    <p>Bandeja tipo Gmail de la cuenta de administración, más comunicados masivos y plantillas.</p>
                 </div>
             </div>
             <nav class="mailer-subnav" aria-label="Secciones de envío">
@@ -10933,7 +11024,6 @@
 
             <div id="mailerSubRedactar" class="form-section" hidden>
                 <h3>Redactar</h3>
-                <p class="mailer-hint">Elija una plantilla, revise la vista previa y seleccione departamentos u otros correos. En envíos masivos los residentes van en CCO para que no se vean entre sí.</p>
                 <div class="mailer-grid">
                     <div>
                         <div class="form-group">
@@ -11067,7 +11157,6 @@
 
             <div id="mailerSubDest" class="form-section" hidden>
                 <h3>Directorio de correos</h3>
-                <p class="mailer-hint">Consulta de ocupación y listado extra para este módulo. Las visitas frecuentes no se incluyen.</p>
                 <input type="text" id="mailerDirFiltro" placeholder="Filtrar directorio…" style="margin-bottom:0.65rem;">
                 <div id="mailerDirectorioTablaWrap" style="overflow:auto;max-height:360px;border:1px solid var(--border-color);border-radius:8px;"></div>
                 <h3 style="margin-top:1rem;">Correos adicionales</h3>
@@ -11091,7 +11180,6 @@
 
             <div id="mailerSubPlant" class="form-section" hidden>
                 <h3>Repertorio de plantillas</h3>
-                <p class="mailer-hint">Incluye las plantillas HTML creadas en Cursor (Zumba, TAG, mudanzas, Mutual, Comunidad Feliz, firma, etc.), las genéricas y las que cree usted. Puede editarlas o eliminar una copia.</p>
                 <div class="mailer-grid">
                     <div>
                         <div style="display:flex;gap:0.4rem;flex-wrap:wrap;margin-bottom:0.65rem;">
@@ -11239,19 +11327,6 @@
                 </div>
             </div>
 
-            <!-- Nota sobre gestión de personal -->
-            <div class="form-section" style="margin-top: 2rem; padding: 1rem; background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(99, 102, 241, 0.05) 100%); border-radius: 8px; border: 1px solid rgba(99, 102, 241, 0.2);">
-                <div style="display: flex; align-items: center; gap: 0.75rem;">
-                    <span style="font-size: 1.5rem;">ℹ️</span>
-                    <div>
-                        <strong style="color: var(--gray-900); font-size: 0.9375rem;">Gestión Centralizada de Personal</strong>
-                        <p style="margin: 0.25rem 0 0 0; color: var(--gray-600); font-size: 0.875rem;">
-                            El personal del edificio se gestiona desde el módulo de <strong>Nómina Mensual</strong>. 
-                            Los nombres registrados allí estarán disponibles automáticamente en este módulo.
-                        </p>
-                    </div>
-                </div>
-            </div>
         </div>
 
         <!-- MÓDULO 10: NÓMINA MENSUAL -->
@@ -12264,7 +12339,8 @@
             if (appContainer) appContainer.style.display = 'none';
             document.body.classList.remove('chat-activo');
             document.body.classList.remove('bitacora-solo');
-            document.body.classList.remove('permisos-restringido', 'permisos-sin-chat', 'permisos-sin-notif', 'permisos-sin-busqueda', 'permisos-bloqueado', 'permisos-solo-lectura');
+            document.body.classList.remove('permisos-restringido', 'permisos-sin-chat', 'permisos-sin-notif', 'permisos-sin-busqueda', 'permisos-bloqueado', 'permisos-solo-lectura', 'bienvenida-usuario-on');
+            if (typeof bienvenidaUsuarioDetener === 'function') bienvenidaUsuarioDetener();
             window._permisosSesion = null;
             document.body.classList.remove('presencia-admin');
             if (typeof detenerPresenciaUsuario === 'function') detenerPresenciaUsuario();
@@ -25984,7 +26060,139 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 var dest = primeraTabPermitida();
                 if (dest) window.showTab(dest);
             }
+            if (typeof bienvenidaUsuarioIniciar === 'function') bienvenidaUsuarioIniciar();
         }
+
+        function bienvenidaUsuarioNombre() {
+            var ses = window._permisosSesion || {};
+            var mail = typeof bitacoraNormCorreo === 'function'
+                ? bitacoraNormCorreo(auth && auth.currentUser && auth.currentUser.email)
+                : String((auth && auth.currentUser && auth.currentUser.email) || '').toLowerCase();
+            var p = (window._perfilesMapa || {})[mail];
+            var nom = String((p && p.nombre) || ses.nombre || '').trim();
+            if (nom) return nom;
+            if (mail && mail.indexOf('@') > 0) return mail.split('@')[0];
+            return 'usuario';
+        }
+
+        function bienvenidaUsuarioModulosTexto() {
+            var ses = window._permisosSesion || {};
+            var tabs = ses.tabs || [];
+            var nombres = [];
+            tabs.forEach(function (id) {
+                if (id === 'personalizacion') return;
+                var t = typeof permisosItemCatalogo === 'function' ? permisosItemCatalogo(id) : null;
+                var n = (t && t.nombre) || id;
+                if (nombres.indexOf(n) < 0) nombres.push(n);
+            });
+            if (!nombres.length) return 'Tus módulos están en el menú de la izquierda.';
+            if (nombres.length === 1) return 'Tienes acceso a ' + nombres[0] + '.';
+            if (nombres.length === 2) return 'Tienes acceso a ' + nombres[0] + ' y ' + nombres[1] + '.';
+            return 'Tienes acceso a ' + nombres.slice(0, -1).join(', ') + ' y ' + nombres[nombres.length - 1] + '.';
+        }
+
+        function bienvenidaUsuarioClaveSesion() {
+            var mail = typeof bitacoraNormCorreo === 'function'
+                ? bitacoraNormCorreo(auth && auth.currentUser && auth.currentUser.email)
+                : '';
+            return 'gwm_bienvenida_' + mail;
+        }
+
+        function bienvenidaUsuarioDetener() {
+            if (window._bienvenidaTimers) {
+                window._bienvenidaTimers.forEach(function (id) { clearTimeout(id); });
+            }
+            window._bienvenidaTimers = [];
+            window._bienvenidaStop = true;
+        }
+
+        function bienvenidaUsuarioCerrar() {
+            bienvenidaUsuarioDetener();
+            document.body.classList.remove('bienvenida-usuario-on');
+            try { sessionStorage.setItem(bienvenidaUsuarioClaveSesion(), '1'); } catch (eS) {}
+            var dest = typeof primeraTabPermitida === 'function' ? primeraTabPermitida() : '';
+            if (dest && typeof window.showTab === 'function') window.showTab(dest);
+        }
+
+        function bienvenidaUsuarioEscribir(el, texto, done) {
+            el.textContent = '';
+            var cur = document.createElement('span');
+            cur.className = 'bienvenida-cursor';
+            el.appendChild(cur);
+            var i = 0;
+            function tick() {
+                if (window._bienvenidaStop) return;
+                if (i >= texto.length) {
+                    if (cur.parentNode) cur.parentNode.removeChild(cur);
+                    if (done) done();
+                    return;
+                }
+                el.insertBefore(document.createTextNode(texto.charAt(i++)), cur);
+                var t = setTimeout(tick, texto.charAt(i - 1) === ' ' ? 12 : 20);
+                window._bienvenidaTimers.push(t);
+            }
+            tick();
+        }
+
+        function bienvenidaUsuarioRefrescarNombre() {
+            var nombre = bienvenidaUsuarioNombre();
+            var barNom = document.getElementById('bienvenidaUsuarioBarNombre');
+            var barTxt = document.getElementById('bienvenidaUsuarioBarTxt');
+            var panelNom = document.getElementById('bienvenidaUsuarioNombre');
+            if (barNom) barNom.textContent = 'Hola, ' + nombre;
+            if (barTxt) barTxt.textContent = bienvenidaUsuarioModulosTexto();
+            if (panelNom) panelNom.textContent = 'Hola, ' + nombre;
+        }
+
+        function bienvenidaUsuarioIniciar() {
+            var ses = window._permisosSesion;
+            bienvenidaUsuarioRefrescarNombre();
+            if (!ses || ses.bloqueado || !ses.restringido || ses.todos) {
+                document.body.classList.remove('bienvenida-usuario-on');
+                return;
+            }
+            var visto = false;
+            try { visto = sessionStorage.getItem(bienvenidaUsuarioClaveSesion()) === '1'; } catch (eV) {}
+            if (visto) {
+                document.body.classList.remove('bienvenida-usuario-on');
+                return;
+            }
+            var hilo = document.getElementById('bienvenidaChatHilo');
+            if (!hilo) return;
+            bienvenidaUsuarioDetener();
+            window._bienvenidaStop = false;
+            hilo.innerHTML = '';
+            document.body.classList.add('bienvenida-usuario-on');
+            var lineas = [
+                'Soy Arturito. Te doy la bienvenida.',
+                bienvenidaUsuarioModulosTexto(),
+                'Cuando quieras, continúa y trabaja desde el menú.'
+            ];
+            function addBurbuja(texto, next) {
+                var b = document.createElement('div');
+                b.className = 'bienvenida-burbuja';
+                hilo.appendChild(b);
+                requestAnimationFrame(function () { b.classList.add('is-on'); });
+                bienvenidaUsuarioEscribir(b, texto, function () {
+                    var t = setTimeout(next, 420);
+                    window._bienvenidaTimers.push(t);
+                });
+            }
+            function run(ix) {
+                if (window._bienvenidaStop || ix >= lineas.length) return;
+                addBurbuja(lineas[ix], function () { run(ix + 1); });
+            }
+            var t0 = setTimeout(function () { run(0); }, 280);
+            window._bienvenidaTimers.push(t0);
+        }
+
+        (function bienvenidaUsuarioBind() {
+            var btn = document.getElementById('bienvenidaUsuarioContinuar');
+            if (btn && !btn._bienvenidaBound) {
+                btn._bienvenidaBound = true;
+                btn.addEventListener('click', bienvenidaUsuarioCerrar);
+            }
+        })();
 
         async function aplicarModoBitacoraPortal() {
             await aplicarPermisosSesion();
@@ -26369,6 +26577,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 });
             } catch (eP) {}
             window._perfilesMapa = mapa;
+            if (typeof bienvenidaUsuarioRefrescarNombre === 'function') bienvenidaUsuarioRefrescarNombre();
             return mapa;
         }
 
@@ -48500,22 +48709,9 @@ document.getElementById('chatForm').onsubmit = function (e) {
 
         function actualizarTextoFuenteResidentesOcupacion() {
             var el = document.getElementById('ocupacionFuenteDatos');
-            if (!el) return;
-            var src = window.__gestionResidentesFuente;
-            if (src === 'prueba-conserjeria-cloud') {
-                el.textContent = 'Datos de residentes y ocupación leídos directamente desde Conserjería (Firestore pcsh_wm815/state). Para editar unidades o residentes, abra prueba-conserjeria.html.';
-            } else if (src === 'index-fabrica') {
-                el.textContent = 'Datos de residentes y ocupación desde la nube (Firestore cgSites/…/kv), alimentada por el panel Conserjería (prueba-conserjeria). Para editar unidades o residentes, abra prueba-conserjeria.html.';
-            } else if (src === 'prueba-conserjeria-local') {
-                el.textContent = 'Datos desde la caché local del panel Conserjería (vlcom_wm815_units_v1). Al guardar en Conserjería se sincroniza la nube con Gestión; el botón «Enviar unidades a Gestión WM» fuerza otro envío.';
-            } else if (src === 'prueba-conserjeria-cloud-vacio') {
-                el.textContent = 'El documento principal de Conserjería no tiene unidades aún. Registre residentes en prueba-conserjeria.html o revise la conexión al proyecto conserjeria2-1.';
-            } else if (src === 'index-fabrica-vacio') {
-                el.textContent = 'El documento en la nube no tiene unidades aún. Registre residentes en prueba-conserjeria.html (al guardar se sincroniza con Gestión) o abra Conserjería en este mismo navegador para usar la caché local.';
-            } else if (src === 'sin-conserjeria') {
-                el.textContent = 'No hay residentes cargados desde Conserjería. Use prueba-conserjeria.html en el mismo origen (misma URL/puerto) o compruebe red y reglas de lectura en Firestore.';
-            } else {
-                el.textContent = 'Cargando fuente de residentes…';
+            if (el) {
+                el.textContent = '';
+                el.hidden = true;
             }
         }
 
@@ -52934,9 +53130,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 parkingHtml + rentalParkingHtml + storageHtml + bikeHtml + contratoHtml + mascotaHtml + bienvenidaHtml + noteHtml +
                 htmlHistorialMultasUnidad(unit.unitNumber) +
                 '<div style="margin-top:8px;"><div style="color:var(--gray-600);font-size:0.75rem;margin-bottom:3px;font-weight:600;">👥 Residentes:</div><div style="max-height:280px;overflow-y:auto;padding:6px 8px;background:var(--bg-secondary);border-radius:6px;border:1px solid var(--border-color);">' + residentsHtml + '</div></div>' +
-                '<p style="margin:12px 0 0 0;font-size:0.75rem;color:var(--gray-500);">Para editar residentes, notas o imprimir la ficha, use el panel Conserjería.</p>' +
                 '<button type="button" class="btn btn-primary btn-enviar-bienvenida-unidad" style="margin-top:10px;width:100%;padding:8px;font-size:0.8rem;">📧 Enviar correo de bienvenida</button>' +
-                '<a href="prueba-conserjeria.html#building" target="_blank" rel="noopener" class="btn btn-secondary" style="margin-top:8px;width:100%;padding:8px;font-size:0.8rem;text-align:center;display:block;text-decoration:none;">Abrir Conserjería (residentes)</a>' +
                 '<button type="button" class="btn btn-secondary" style="margin-top:8px;width:100%;padding:8px;font-size:0.8rem;" onclick="this.closest(\'.modal\').remove()">Cerrar</button></div>';
             document.body.appendChild(modal);
             var btnBienvenida = modal.querySelector('.btn-enviar-bienvenida-unidad');
@@ -53358,7 +53552,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                             ${(metricasVinculacion.error || (metricasVinculacion.ocupacionActual === 0 && metricasVinculacion.unidadesEntregadas === 0 && metricasVinculacion.unidadesObtenidas === 0)) ? 
                                 `<div style="padding: 0.5rem; background: #fef3c7; border: 1px solid #f59e0b; border-radius: 8px; margin-bottom: 0.5rem;">
                                     <p style="margin: 0; color: #92400e; font-size: 0.875rem;">
-                                        ⚠️ ${metricasVinculacion.mensajeError || 'No hay datos de ocupación desde Conserjería. Registre unidades en prueba-conserjeria.html y recargue Gestión.'}
+                                        ⚠️ ${metricasVinculacion.mensajeError || 'No hay datos de ocupación.'}
                                     </p>
                                     ${metricasVinculacion.unidadesObtenidas !== undefined ? 
                                         `<p style="margin: 0.5rem 0 0 0; color: #92400e; font-size: 0.8rem;">Unidades obtenidas: ${metricasVinculacion.unidadesObtenidas}</p>` 
