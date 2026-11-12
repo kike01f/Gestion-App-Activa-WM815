@@ -7595,7 +7595,7 @@
                 grid-template-columns: 1fr !important;
             }
         }
-        body.bitacora-solo #tabsMenu .tab-button:not([data-tab="bitacoraPublica"]):not(#btnLogout) { display: none !important; }
+        body.bitacora-solo #tabsMenu .tab-button:not([data-tab="bitacoraPublica"]):not(#btnLogout):not(#btnMiPerfil) { display: none !important; }
         body.bitacora-solo #tabsMenu .tabs-group-label,
         body.bitacora-solo #tabsMenu .tabs-menu-dev-logo,
         body.bitacora-solo #notifBell,
@@ -7608,7 +7608,7 @@
         body.permisos-sin-notif #notifBell,
         body.permisos-sin-notif .notif-bell { display: none !important; }
         body.permisos-sin-busqueda #consultaRapida { display: none !important; }
-        body.permisos-bloqueado #tabsMenu .tab-button:not(#btnLogout),
+        body.permisos-bloqueado #tabsMenu .tab-button:not(#btnLogout):not(#btnMiPerfil),
         body.permisos-bloqueado #tabsMenu .tabs-group-label,
         body.permisos-bloqueado #tabsMenu .tabs-menu-dev-logo,
         body.permisos-bloqueado #notifBellWrap,
@@ -7617,6 +7617,21 @@
         body.permisos-bloqueado .tab-content { display: none !important; }
         #permisosBloqueo { display: none; max-width: 32rem; margin: 4rem auto; padding: 1.5rem; border: 1px solid var(--border-color); border-radius: 12px; background: var(--bg-secondary); }
         body.permisos-bloqueado #permisosBloqueo { display: block !important; }
+        .perfil-avatar { display: inline-flex; align-items: center; justify-content: center; width: 2.1rem; height: 2.1rem; border-radius: 50%; background: #334155; font-size: 1.05rem; overflow: hidden; flex-shrink: 0; }
+        .perfil-avatar--sm { width: 1.55rem; height: 1.55rem; font-size: 0.85rem; }
+        .perfil-avatar--lg { width: 4.4rem; height: 4.4rem; font-size: 2rem; }
+        .perfil-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        #btnMiPerfil { gap: 0.45rem; }
+        #presenciaAdminBar { display: none; align-items: center; gap: 0.55rem; flex-wrap: wrap; margin: 0 0 0.85rem; padding: 0.45rem 0.7rem; border: 1px solid var(--border-color); border-radius: 10px; background: var(--bg-secondary); font-size: 0.78rem; }
+        body.presencia-admin #presenciaAdminBar { display: flex; }
+        #presenciaAdminBar .pres-dot { width: 0.55rem; height: 0.55rem; border-radius: 50%; background: #22c55e; box-shadow: 0 0 0 3px rgba(34,197,94,0.25); }
+        #presenciaAdminChips { display: flex; gap: 0.35rem; flex-wrap: wrap; }
+        .pres-chip { display: inline-flex; align-items: center; gap: 0.3rem; padding: 0.15rem 0.45rem 0.15rem 0.2rem; border-radius: 999px; border: 1px solid var(--border-color); background: var(--bg-primary); }
+        #modalPerfilUsuario.modal-overlay.active { display: flex; }
+        #perfilAvatarGrid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 0.4rem; margin: 0.4rem 0 0.75rem; }
+        #perfilAvatarGrid button { appearance: none; border: 2px solid transparent; border-radius: 10px; background: var(--bg-secondary); font-size: 1.45rem; padding: 0.35rem; cursor: pointer; }
+        #perfilAvatarGrid button.is-on { border-color: var(--primary); background: color-mix(in srgb, var(--primary) 16%, transparent); }
+        .perm-user { display: flex; align-items: center; }
         #permisosCfgMods { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 0.35rem 0.75rem; margin: 0.5rem 0 0.85rem; }
         #permisosCfgMods label { display: flex; gap: 0.4rem; align-items: center; font-size: 0.8rem; cursor: pointer; }
         #permisosCfgLista .perm-user { display: flex; justify-content: space-between; gap: 0.75rem; align-items: center; padding: 0.5rem 0.7rem; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-secondary); margin-bottom: 0.4rem; }
@@ -7953,6 +7968,10 @@
                 <span>Personalización</span>
             </button>
             <div style="margin-top: auto; padding: 1rem 1rem 0; border-top: 1px solid var(--border-color);">
+                <button type="button" class="tab-button" id="btnMiPerfil" title="Mi perfil" style="width: 100%; justify-content: center;">
+                    <span class="perfil-avatar perfil-avatar--sm" id="btnMiPerfilAvatar" aria-hidden="true">👤</span>
+                    <span>Mi perfil</span>
+                </button>
                 <button type="button" class="tab-button" id="btnLogout" title="Cerrar sesión" style="width: 100%; justify-content: center; color: var(--text-secondary);">
                     <span>
                         <svg class="menu-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>
@@ -7970,6 +7989,11 @@
             <button class="menu-toggle-btn" id="menuToggleBtn" title="Mostrar/Ocultar Menú">
                 ☰
             </button>
+            <div id="presenciaAdminBar" aria-live="polite">
+                <span class="pres-dot" aria-hidden="true"></span>
+                <strong id="presenciaAdminTitulo">Nadie más conectado</strong>
+                <div id="presenciaAdminChips"></div>
+            </div>
             <div id="permisosBloqueo">
                 <h2 style="margin:0 0 0.5rem;">Sin permisos asignados</h2>
                 <p style="margin:0 0 1rem;color:var(--text-secondary);font-size:0.9rem;">Esta cuenta inició sesión, pero el administrador principal aún no le asignó módulos. Solicite acceso a <strong>edificio.wm815@gmail.com</strong>.</p>
@@ -11999,6 +12023,34 @@
         </div>
     </div>
 
+    <div id="modalPerfilUsuario" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modalPerfilTitulo">
+        <div class="modal-confirm" style="max-width: 420px; width: 100%; text-align: left;">
+            <h3 id="modalPerfilTitulo" style="margin: 0 0 0.35rem;">Mi perfil</h3>
+            <p style="margin: 0 0 0.85rem; font-size: 0.8rem; color: var(--text-secondary);">Foto o un avatar divertido. Se verá cuando esté conectado.</p>
+            <div style="display:flex;gap:0.85rem;align-items:center;margin-bottom:0.85rem;">
+                <span class="perfil-avatar perfil-avatar--lg" id="perfilPreview" aria-hidden="true">👤</span>
+                <div>
+                    <div id="perfilPreviewNombre" style="font-weight:700;">Usuario</div>
+                    <div id="perfilPreviewCorreo" style="font-size:0.75rem;color:var(--text-tertiary);"></div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Nombre visible</label>
+                <input type="text" id="perfilNombreVisible" placeholder="Cómo lo verá el administrador">
+            </div>
+            <p style="font-size:0.75rem;font-weight:600;margin:0.2rem 0;">Avatar divertido</p>
+            <div id="perfilAvatarGrid"></div>
+            <div class="form-group">
+                <label>O subir una foto</label>
+                <input type="file" id="perfilFotoFile" accept="image/*">
+            </div>
+            <div class="modal-buttons">
+                <button type="button" class="btn btn-secondary" id="perfilBtnCerrar">Cerrar</button>
+                <button type="button" class="btn btn-primary" id="perfilBtnGuardar">Guardar perfil</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Modal Abonar Moroso -->
     <div id="modalAbonarMoroso" class="modal-overlay">
         <div class="modal-confirm" style="max-width: 540px; width: 100%;">
@@ -12170,6 +12222,8 @@
             document.body.classList.remove('bitacora-solo');
             document.body.classList.remove('permisos-restringido', 'permisos-sin-chat', 'permisos-sin-notif', 'permisos-sin-busqueda', 'permisos-bloqueado');
             window._permisosSesion = null;
+            document.body.classList.remove('presencia-admin');
+            if (typeof detenerPresenciaUsuario === 'function') detenerPresenciaUsuario();
             if (typeof setChatOpen === 'function') {
                 try { setChatOpen(false); } catch (eChatClose) {}
             }
@@ -12208,7 +12262,10 @@
 
         function continuarTrasLoginAutorizado() {
             try {
-                if (document.body.classList.contains('permisos-bloqueado') || document.body.classList.contains('permisos-sin-chat')) return;
+                if (document.body.classList.contains('permisos-bloqueado')) return;
+                if (typeof iniciarPresenciaUsuario === 'function') iniciarPresenciaUsuario();
+                if (typeof pintarAvatarMenu === 'function') pintarAvatarMenu();
+                if (document.body.classList.contains('permisos-sin-chat')) return;
                 if (typeof window.iniciarChatInternoGestion === 'function') window.iniciarChatInternoGestion();
                 if (typeof sincronizarEstadoBienvenidaHaciaConserjeria === 'function') {
                     sincronizarEstadoBienvenidaHaciaConserjeria();
@@ -25606,7 +25663,12 @@ document.getElementById('chatForm').onsubmit = function (e) {
             try { cfgB = await obtenerBitacoraPortalConfig(); } catch (e2) {}
             window._permisosSesion = resolverPermisosSesion(mail, cfgP, cfgB);
             aplicarPermisosEnMenu(window._permisosSesion);
-            if (window._permisosSesion.bloqueado) return;
+            if (typeof perfilBindUi === 'function') perfilBindUi();
+            if (window._permisosSesion.bloqueado) {
+                if (typeof detenerPresenciaUsuario === 'function') detenerPresenciaUsuario();
+                return;
+            }
+            if (typeof iniciarPresenciaUsuario === 'function') iniciarPresenciaUsuario();
             if (window._permisosSesion.restringido && typeof window.showTab === 'function') {
                 var dest = primeraTabPermitida();
                 if (dest) window.showTab(dest);
@@ -25828,7 +25890,8 @@ document.getElementById('chatForm').onsubmit = function (e) {
             wrap.innerHTML = list.map(function (u) {
                 var lab = (PERMISOS_NIVELES[u.nivel] || {}).label || u.nivel;
                 var nMod = u.nivel === 'administracion' ? 'Todos' : String((u.tabs || []).length) + ' módulos';
-                return '<div class="perm-user"><div><strong>' + bitacoraEsc(u.nombre || 'Sin nombre') + '</strong> ' +
+                var av = (typeof perfilHtmlAvatar === 'function') ? perfilHtmlAvatar(u.correo, 'perfil-avatar') : '';
+                return '<div class="perm-user" style="gap:0.65rem;">' + av + '<div style="flex:1;min-width:0;"><strong>' + bitacoraEsc(u.nombre || 'Sin nombre') + '</strong> ' +
                     '<span class="perm-nivel">' + bitacoraEsc(lab) + '</span><br>' +
                     '<span style="font-size:0.78rem;color:var(--text-secondary);">' + bitacoraEsc(u.correo) + ' · ' + bitacoraEsc(nMod) + '</span></div>' +
                     '<div style="display:flex;gap:0.35rem;flex-wrap:wrap;">' +
@@ -25852,6 +25915,9 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 });
             } catch (eBit) {}
             window._permisosCfgUsuarios = list;
+            if (typeof cargarMapaPerfiles === 'function') {
+                try { await cargarMapaPerfiles(); } catch (ePf) {}
+            }
             permisosPintarLista();
             var sel = document.getElementById('permisosCfgNivel');
             if (sel && !sel.value) sel.value = 'comite';
@@ -25887,6 +25953,368 @@ document.getElementById('chatForm').onsubmit = function (e) {
         window.aplicarPermisosSesion = aplicarPermisosSesion;
         window.aplicarPermisosEnMenu = aplicarPermisosEnMenu;
         window.cargarFormularioPermisosUsuarios = cargarFormularioPermisosUsuarios;
+
+        var PERFILES_DOC = 'perfilesUsuarios';
+        var PERFIL_AVATARES = [
+            { id: 'zorro', emoji: '🦊', label: 'Zorro' },
+            { id: 'pinguino', emoji: '🐧', label: 'Pingüino' },
+            { id: 'rana', emoji: '🐸', label: 'Rana' },
+            { id: 'gato', emoji: '🐱', label: 'Gato' },
+            { id: 'pulpo', emoji: '🐙', label: 'Pulpo' },
+            { id: 'cohete', emoji: '🚀', label: 'Cohete' },
+            { id: 'cactus', emoji: '🌵', label: 'Cactus' },
+            { id: 'dona', emoji: '🍩', label: 'Dona' },
+            { id: 'guitarra', emoji: '🎸', label: 'Guitarra' },
+            { id: 'arcoiris', emoji: '🌈', label: 'Arcoíris' },
+            { id: 'luna', emoji: '🌙', label: 'Luna' },
+            { id: 'sol', emoji: '🌞', label: 'Sol' }
+        ];
+
+        function perfilIdSesion(correo) {
+            return bitacoraNormCorreo(correo).replace(/[^a-z0-9]+/g, '_').slice(0, 80) || 'anon';
+        }
+
+        function perfilAvatarMeta(id) {
+            return PERFIL_AVATARES.filter(function (a) { return a.id === id; })[0] || null;
+        }
+
+        async function cargarMapaPerfiles() {
+            var mapa = {};
+            try {
+                var lista = await obtenerDatos(PERFILES_DOC);
+                (Array.isArray(lista) ? lista : []).forEach(function (p) {
+                    var mail = bitacoraNormCorreo(p && p.correo);
+                    if (mail) mapa[mail] = p;
+                });
+            } catch (eP) {}
+            window._perfilesMapa = mapa;
+            return mapa;
+        }
+
+        function perfilDeCorreo(correo) {
+            var mapa = window._perfilesMapa || {};
+            return mapa[bitacoraNormCorreo(correo)] || null;
+        }
+
+        function perfilHtmlAvatar(correo, cls) {
+            var p = perfilDeCorreo(correo);
+            var klass = cls || 'perfil-avatar';
+            if (p && p.fotoUrl) {
+                return '<span class="' + klass + '"><img src="' + String(p.fotoUrl).replace(/"/g, '') + '" alt=""></span>';
+            }
+            var meta = perfilAvatarMeta(p && p.avatarId);
+            return '<span class="' + klass + '">' + (meta ? meta.emoji : '👤') + '</span>';
+        }
+
+        function perfilPintarNodo(el, correo) {
+            if (!el) return;
+            var p = perfilDeCorreo(correo);
+            if (p && p.fotoUrl) {
+                el.innerHTML = '<img src="' + String(p.fotoUrl).replace(/"/g, '') + '" alt="">';
+            } else {
+                var meta = perfilAvatarMeta(p && p.avatarId);
+                el.textContent = meta ? meta.emoji : '👤';
+            }
+        }
+
+        async function pintarAvatarMenu() {
+            try { await cargarMapaPerfiles(); } catch (eM) {}
+            var mail = bitacoraNormCorreo(auth && auth.currentUser && auth.currentUser.email);
+            perfilPintarNodo(document.getElementById('btnMiPerfilAvatar'), mail);
+            perfilPintarNodo(document.getElementById('perfilPreview'), mail);
+        }
+
+        function perfilBindUi() {
+            if (window._perfilUiBound) return;
+            window._perfilUiBound = true;
+            var grid = document.getElementById('perfilAvatarGrid');
+            if (grid && !grid.getAttribute('data-ready')) {
+                grid.setAttribute('data-ready', '1');
+                grid.innerHTML = PERFIL_AVATARES.map(function (a) {
+                    return '<button type="button" data-avatar-id="' + a.id + '" title="' + a.label + '">' + a.emoji + '</button>';
+                }).join('');
+                grid.addEventListener('click', function (e) {
+                    var b = e.target && e.target.closest ? e.target.closest('[data-avatar-id]') : null;
+                    if (!b) return;
+                    window._perfilDraft = window._perfilDraft || {};
+                    window._perfilDraft.avatarId = b.getAttribute('data-avatar-id');
+                    window._perfilDraft.fotoUrl = '';
+                    grid.querySelectorAll('button').forEach(function (x) { x.classList.toggle('is-on', x === b); });
+                    perfilPintarNodoDraft();
+                });
+            }
+            var file = document.getElementById('perfilFotoFile');
+            if (file) {
+                file.addEventListener('change', function () {
+                    var f = file.files && file.files[0];
+                    if (!f) return;
+                    perfilComprimirFoto(f).then(function (url) {
+                        window._perfilDraft = window._perfilDraft || {};
+                        window._perfilDraft.fotoUrl = url;
+                        window._perfilDraft.avatarId = '';
+                        var g = document.getElementById('perfilAvatarGrid');
+                        if (g) g.querySelectorAll('button').forEach(function (x) { x.classList.remove('is-on'); });
+                        perfilPintarNodoDraft();
+                    }).catch(function (err) {
+                        if (typeof mostrarAlerta === 'function') mostrarAlerta((err && err.message) || 'No se pudo leer la imagen.', 'Perfil');
+                    });
+                });
+            }
+            var abrir = document.getElementById('btnMiPerfil');
+            if (abrir) abrir.addEventListener('click', function (e) {
+                e.preventDefault();
+                abrirModalPerfil();
+            });
+            var cerrar = document.getElementById('perfilBtnCerrar');
+            var modal = document.getElementById('modalPerfilUsuario');
+            if (cerrar) cerrar.addEventListener('click', cerrarModalPerfil);
+            if (modal) modal.addEventListener('click', function (e) { if (e.target === modal) cerrarModalPerfil(); });
+            var save = document.getElementById('perfilBtnGuardar');
+            if (save) save.addEventListener('click', function () {
+                guardarPerfilUsuarioActual().catch(function (err) {
+                    if (typeof mostrarAlerta === 'function') mostrarAlerta((err && err.message) || 'No se pudo guardar el perfil.', 'Perfil');
+                });
+            });
+        }
+
+        function perfilPintarNodoDraft() {
+            var el = document.getElementById('perfilPreview');
+            if (!el) return;
+            var d = window._perfilDraft || {};
+            if (d.fotoUrl) el.innerHTML = '<img src="' + String(d.fotoUrl).replace(/"/g, '') + '" alt="">';
+            else {
+                var meta = perfilAvatarMeta(d.avatarId);
+                el.textContent = meta ? meta.emoji : '👤';
+            }
+        }
+
+        function perfilComprimirFoto(file) {
+            return new Promise(function (resolve, reject) {
+                if (!file || !/^image\//.test(file.type || '')) return reject(new Error('Elija una imagen.'));
+                var img = new Image();
+                var url = URL.createObjectURL(file);
+                img.onload = function () {
+                    try {
+                        var max = 256;
+                        var w = img.width;
+                        var h = img.height;
+                        var scale = Math.min(1, max / Math.max(w, h));
+                        var c = document.createElement('canvas');
+                        c.width = Math.max(1, Math.round(w * scale));
+                        c.height = Math.max(1, Math.round(h * scale));
+                        var ctx = c.getContext('2d');
+                        ctx.drawImage(img, 0, 0, c.width, c.height);
+                        URL.revokeObjectURL(url);
+                        resolve(c.toDataURL('image/jpeg', 0.72));
+                    } catch (eC) { reject(eC); }
+                };
+                img.onerror = function () { URL.revokeObjectURL(url); reject(new Error('Imagen no válida.')); };
+                img.src = url;
+            });
+        }
+
+        async function abrirModalPerfil() {
+            perfilBindUi();
+            var mail = bitacoraNormCorreo(auth && auth.currentUser && auth.currentUser.email);
+            try { await cargarMapaPerfiles(); } catch (eM) {}
+            var p = perfilDeCorreo(mail) || {};
+            var ses = window._permisosSesion || {};
+            window._perfilDraft = {
+                correo: mail,
+                nombre: p.nombre || ses.nombre || (auth.currentUser && (auth.currentUser.displayName || mail.split('@')[0])) || 'Usuario',
+                avatarId: p.avatarId || 'zorro',
+                fotoUrl: p.fotoUrl || ''
+            };
+            var nom = document.getElementById('perfilNombreVisible');
+            var em = document.getElementById('perfilPreviewCorreo');
+            var pn = document.getElementById('perfilPreviewNombre');
+            if (nom) nom.value = window._perfilDraft.nombre;
+            if (em) em.textContent = mail;
+            if (pn) pn.textContent = window._perfilDraft.nombre;
+            var grid = document.getElementById('perfilAvatarGrid');
+            if (grid) {
+                grid.querySelectorAll('button').forEach(function (b) {
+                    b.classList.toggle('is-on', b.getAttribute('data-avatar-id') === window._perfilDraft.avatarId && !window._perfilDraft.fotoUrl);
+                });
+            }
+            perfilPintarNodoDraft();
+            var modal = document.getElementById('modalPerfilUsuario');
+            if (modal) modal.classList.add('active');
+        }
+
+        function cerrarModalPerfil() {
+            var modal = document.getElementById('modalPerfilUsuario');
+            if (modal) modal.classList.remove('active');
+        }
+
+        async function guardarPerfilUsuarioActual() {
+            var mail = bitacoraNormCorreo(auth && auth.currentUser && auth.currentUser.email);
+            if (!mail) throw new Error('No hay sesión.');
+            var nomEl = document.getElementById('perfilNombreVisible');
+            var draft = window._perfilDraft || {};
+            var row = {
+                correo: mail,
+                nombre: String((nomEl && nomEl.value) || draft.nombre || '').trim() || mail.split('@')[0],
+                avatarId: draft.fotoUrl ? '' : (draft.avatarId || 'zorro'),
+                fotoUrl: draft.fotoUrl || ''
+            };
+            var mapa = await cargarMapaPerfiles();
+            mapa[mail] = row;
+            var lista = Object.keys(mapa).map(function (k) { return mapa[k]; });
+            await guardarDatos(PERFILES_DOC, lista);
+            window._perfilesMapa = mapa;
+            if (window._permisosSesion) window._permisosSesion.nombre = row.nombre;
+            pintarAvatarMenu();
+            cerrarModalPerfil();
+            if (typeof latidoPresenciaUsuario === 'function') latidoPresenciaUsuario();
+            if (typeof mostrarAlerta === 'function') mostrarAlerta('Perfil actualizado.', 'Perfil');
+        }
+
+        function presenciaRef(correo) {
+            if (!db) return null;
+            return db.collection('comunidad').doc('presencia').collection('sesiones').doc(perfilIdSesion(correo));
+        }
+
+        async function latidoPresenciaUsuario() {
+            var user = auth && auth.currentUser;
+            if (!user || !db) return;
+            var mail = bitacoraNormCorreo(user.email);
+            if (!mail) return;
+            var p = perfilDeCorreo(mail) || {};
+            var ses = window._permisosSesion || {};
+            var ref = presenciaRef(mail);
+            if (!ref) return;
+            var payload = {
+                correo: mail,
+                nombre: p.nombre || ses.nombre || user.displayName || mail.split('@')[0],
+                avatarId: p.avatarId || '',
+                fotoUrl: p.fotoUrl || '',
+                online: true,
+                lastSeen: Date.now(),
+                admin: !!esAdminPrincipal(mail)
+            };
+            try { await ref.set(payload, { merge: true }); } catch (eW) {}
+        }
+
+        async function marcarPresenciaOffline() {
+            var user = auth && auth.currentUser;
+            if (!user || !db) return;
+            var ref = presenciaRef(user.email);
+            if (!ref) return;
+            try { await ref.set({ online: false, lastSeen: Date.now() }, { merge: true }); } catch (eO) {}
+        }
+
+        function detenerPresenciaUsuario() {
+            if (window._presenciaTimer) {
+                clearInterval(window._presenciaTimer);
+                window._presenciaTimer = null;
+            }
+            if (window._presenciaUnsub) {
+                try { window._presenciaUnsub(); } catch (eU) {}
+                window._presenciaUnsub = null;
+            }
+            marcarPresenciaOffline();
+            document.body.classList.remove('presencia-admin');
+        }
+
+        function pintarBarraPresencia(rows) {
+            var bar = document.getElementById('presenciaAdminBar');
+            var tit = document.getElementById('presenciaAdminTitulo');
+            var chips = document.getElementById('presenciaAdminChips');
+            if (!bar || !tit || !chips) return;
+            var otros = (rows || []).filter(function (r) { return r && !r.admin; });
+            if (!otros.length) {
+                tit.textContent = 'Ningún otro usuario conectado';
+                chips.innerHTML = '';
+                return;
+            }
+            tit.textContent = otros.length === 1 ? '1 usuario conectado' : (otros.length + ' usuarios conectados');
+            chips.innerHTML = otros.map(function (r) {
+                var fake = { correo: r.correo, avatarId: r.avatarId, fotoUrl: r.fotoUrl };
+                window._perfilesMapa = window._perfilesMapa || {};
+                if (!window._perfilesMapa[r.correo]) window._perfilesMapa[r.correo] = fake;
+                else {
+                    if (r.fotoUrl) window._perfilesMapa[r.correo].fotoUrl = r.fotoUrl;
+                    if (r.avatarId) window._perfilesMapa[r.correo].avatarId = r.avatarId;
+                }
+                return '<span class="pres-chip">' + perfilHtmlAvatar(r.correo, 'perfil-avatar perfil-avatar--sm') +
+                    bitacoraEsc(r.nombre || r.correo) + '</span>';
+            }).join('');
+        }
+
+        function avisarAdminUsuarioConectado(row) {
+            if (!row || row.admin) return;
+            var key = String(row.correo || '');
+            window._presenciaAvisados = window._presenciaAvisados || {};
+            var prev = window._presenciaAvisados[key] || 0;
+            if (Date.now() - prev < 120000) return;
+            window._presenciaAvisados[key] = Date.now();
+            var nombre = row.nombre || row.correo;
+            if (typeof registrarMovimiento === 'function') {
+                registrarMovimiento('sesion', 'usuarios', nombre + ' se conectó a la app.');
+            }
+            if (typeof mostrarToast === 'function') {
+                mostrarToast(nombre + ' está conectado.', 'info');
+            }
+        }
+
+        function escucharPresenciaAdmin() {
+            if (!db || window._presenciaUnsub) return;
+            var col = db.collection('comunidad').doc('presencia').collection('sesiones');
+            window._presenciaUnsub = col.onSnapshot(function (snap) {
+                var now = Date.now();
+                var vivos = [];
+                snap.forEach(function (doc) {
+                    var d = doc.data() || {};
+                    var seen = Number(d.lastSeen || 0);
+                    var on = d.online !== false && seen && (now - seen) < 90000;
+                    if (on) vivos.push(d);
+                });
+                var prev = window._presenciaOnline || [];
+                var prevSet = {};
+                prev.forEach(function (r) { if (r && r.correo) prevSet[r.correo] = true; });
+                vivos.forEach(function (r) {
+                    if (r && r.correo && !prevSet[r.correo] && !esAdminPrincipal(r.correo)) {
+                        avisarAdminUsuarioConectado(r);
+                    }
+                });
+                window._presenciaOnline = vivos;
+                pintarBarraPresencia(vivos);
+            }, function (err) {
+                console.warn('[presencia]', err);
+            });
+        }
+
+        async function iniciarPresenciaUsuario() {
+            perfilBindUi();
+            if (document.body.classList.contains('permisos-bloqueado')) return;
+            try { await cargarMapaPerfiles(); } catch (eM) {}
+            pintarAvatarMenu();
+            await latidoPresenciaUsuario();
+            if (window._presenciaTimer) clearInterval(window._presenciaTimer);
+            window._presenciaTimer = setInterval(function () { latidoPresenciaUsuario(); }, 25000);
+            if (esAdminPrincipal(auth && auth.currentUser && auth.currentUser.email)) {
+                document.body.classList.add('presencia-admin');
+                escucharPresenciaAdmin();
+            } else {
+                document.body.classList.remove('presencia-admin');
+            }
+            if (!window._presenciaVisBind) {
+                window._presenciaVisBind = true;
+                document.addEventListener('visibilitychange', function () {
+                    if (document.visibilityState === 'visible') latidoPresenciaUsuario();
+                    else marcarPresenciaOffline();
+                });
+                window.addEventListener('beforeunload', function () { marcarPresenciaOffline(); });
+            }
+        }
+
+        window.iniciarPresenciaUsuario = iniciarPresenciaUsuario;
+        window.detenerPresenciaUsuario = detenerPresenciaUsuario;
+        window.pintarAvatarMenu = pintarAvatarMenu;
+        window.cargarMapaPerfiles = cargarMapaPerfiles;
+        window.perfilHtmlAvatar = perfilHtmlAvatar;
+        window.latidoPresenciaUsuario = latidoPresenciaUsuario;
 
         var BITACORA_COMENTARIOS_DOC = 'bitacoraComentarios';
 
