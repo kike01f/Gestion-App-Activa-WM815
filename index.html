@@ -10671,7 +10671,7 @@
                     </div>
                     <div>
                         <label style="display:block;margin-bottom:0.35rem;font-size:0.8125rem;font-weight:600;">Vista previa</label>
-                        <iframe id="mailerPreview" class="mailer-preview" title="Vista previa del correo" sandbox="allow-same-origin allow-popups allow-popups-to-escape-sandbox"></iframe>
+                        <iframe id="mailerPreview" class="mailer-preview" title="Vista previa del correo" sandbox="allow-scripts allow-popups allow-popups-to-escape-sandbox"></iframe>
                     </div>
                 </div>
             </div>
@@ -10728,7 +10728,7 @@
                             <button type="button" class="btn btn-secondary" id="mailerBtnDuplicarPlantilla">Duplicar</button>
                             <button type="button" class="btn btn-danger" id="mailerBtnEliminarPlantilla">Eliminar</button>
                         </div>
-                        <iframe id="mailerTplPreview" class="mailer-preview" title="Vista previa de plantilla" sandbox="allow-same-origin allow-popups allow-popups-to-escape-sandbox" style="min-height:320px;"></iframe>
+                        <iframe id="mailerTplPreview" class="mailer-preview" title="Vista previa de plantilla" sandbox="allow-scripts allow-popups allow-popups-to-escape-sandbox" style="min-height:320px;"></iframe>
                     </div>
                 </div>
             </div>
@@ -34227,6 +34227,15 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 : (html || '');
         }
 
+        function mailerHtmlParaIframe(html) {
+            let s = mailerHtmlPreview(html);
+            s = String(s || '').replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, '');
+            s = s.replace(/<script\b[^>]*\/>/gi, '');
+            s = s.replace(/\son[a-z]+\s*=\s*("[^"]*"|'[^']*'|[^\s>]+)/gi, '');
+            s = s.replace(/javascript\s*:/gi, '');
+            return s;
+        }
+
         function mailerContextoPlaceholders() {
             const first = mailerDestinatariosMarcados()[0];
             let comunidad = 'Comunidad';
@@ -34245,7 +34254,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
             const iframe = document.getElementById('mailerPreview');
             const ta = document.getElementById('mailerHtml');
             if (!iframe) return;
-            const html = mailerHtmlPreview(ta ? ta.value : '');
+            const html = mailerHtmlParaIframe(ta ? ta.value : '');
             iframe.srcdoc = html || '<p style="font-family:Arial;padding:1rem;color:#888;">Sin contenido</p>';
         }
 
@@ -34382,7 +34391,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
             if (n) n.value = (p && p.nombre) || '';
             if (a) a.value = (p && p.asunto) || '';
             if (h) h.value = (p && p.html) || '';
-            if (iframe) iframe.srcdoc = mailerHtmlPreview((p && p.html) || '');
+            if (iframe) iframe.srcdoc = mailerHtmlParaIframe((p && p.html) || '');
             document.querySelectorAll('#mailerListaPlantillas .mailer-tpl-item').forEach(function (el) {
                 el.classList.toggle('is-on', el.getAttribute('data-mailer-tpl') === id);
             });
@@ -34575,7 +34584,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
             const tplH = document.getElementById('mailerTplHtml');
             if (tplH) tplH.addEventListener('input', function () {
                 const iframe = document.getElementById('mailerTplPreview');
-                if (iframe) iframe.srcdoc = mailerHtmlPreview(tplH.value);
+                if (iframe) iframe.srcdoc = mailerHtmlParaIframe(tplH.value);
             });
             document.getElementById('mailerBtnEnviar') && document.getElementById('mailerBtnEnviar').addEventListener('click', mailerEnviar);
             document.getElementById('mailerBtnMarcarFiltrados') && document.getElementById('mailerBtnMarcarFiltrados').addEventListener('click', function () {
