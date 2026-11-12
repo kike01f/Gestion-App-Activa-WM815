@@ -7943,6 +7943,14 @@
         #bitacoraPublica tr.bit-fila { cursor: pointer; }
         #bitacoraPublica tr.bit-fila.is-on { outline: 2px solid var(--primary); background: color-mix(in srgb, var(--primary) 12%, transparent); }
         #bitacoraPublica .notif-tabla th, #bitacoraPublica .notif-tabla td { padding: 0.45rem 0.5rem; font-size: 0.78rem; border-bottom: 1px solid var(--border-color); vertical-align: top; }
+        #bitacoraPublica .bit-fotos { display: flex; flex-wrap: wrap; gap: 0.45rem; }
+        #bitacoraPublica .bit-fotos img, #bitacoraPublica .bit-foto-prev img { width: 5.2rem; height: 5.2rem; object-fit: cover; border-radius: 8px; border: 1px solid var(--border-color); display: block; }
+        #bitacoraPublica .bit-foto-prev { position: relative; }
+        #bitacoraPublica .bit-foto-prev button { position: absolute; top: -0.35rem; right: -0.35rem; width: 1.25rem; height: 1.25rem; border-radius: 999px; border: 0; background: #b91c1c; color: #fff; cursor: pointer; line-height: 1; }
+        #bitacoraPublica .bit-tipo { display: inline-block; padding: 0.05rem 0.45rem; border-radius: 999px; font-size: 0.72rem; font-weight: 650; }
+        #bitacoraPublica .bit-filtros .is-on { outline: 2px solid var(--primary); }
+        #bitacoraPublica .bit-prio { font-weight: 700; color: #b91c1c; }
+        #bitacoraPublica .bit-caso-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr)); gap: 0.65rem; }
         @media (max-width: 900px) {
             #bitacoraPublica .bit-layout { grid-template-columns: 1fr; }
             #bitacoraPublica .bit-detalle { position: static; }
@@ -12153,19 +12161,87 @@
                     <p id="bitacoraSubtituloVista" style="margin:0.3rem 0 0;font-size:0.82rem;color:var(--text-secondary);">Abra cada caso para ver el detalle, las gestiones y dejar comentarios.</p>
                 </div>
                 <div style="display:flex;gap:0.65rem;flex-wrap:wrap;align-items:flex-end;">
+                    <button type="button" class="btn btn-primary" id="bitacoraBtnNuevo">Registrar caso</button>
                     <div class="form-group" style="margin:0;min-width:11rem;">
                         <label>Mes</label>
                         <select id="bitacoraMesSel"></select>
                     </div>
                     <div class="form-group" style="margin:0;min-width:12rem;">
                         <label>Buscar</label>
-                        <input type="search" id="bitacoraBuscar" placeholder="Depto, motivo, residente…">
+                        <input type="search" id="bitacoraBuscar" placeholder="Depto, caso, motivo, residente…">
                     </div>
                 </div>
             </div>
+            <form id="bitacoraFormCaso" class="form-section" hidden>
+                <h3 style="margin-top:0;">Caso nuevo</h3>
+                <div class="bit-caso-grid">
+                    <div class="form-group" style="margin:0;">
+                        <label for="bitacoraCasoTipo">Tipo de caso</label>
+                        <select id="bitacoraCasoTipo" required></select>
+                    </div>
+                    <div class="form-group" style="margin:0;">
+                        <label for="bitacoraCasoUnidad">Unidad o lugar</label>
+                        <input type="text" id="bitacoraCasoUnidad" maxlength="60" placeholder="402, hall, estacionamiento…">
+                    </div>
+                    <div class="form-group" style="margin:0;">
+                        <label for="bitacoraCasoPrioridad">Prioridad</label>
+                        <select id="bitacoraCasoPrioridad">
+                            <option value="normal">Normal</option>
+                            <option value="urgente">Urgente</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="margin:0;">
+                        <label for="bitacoraCasoFecha">Fecha</label>
+                        <input type="date" id="bitacoraCasoFecha" required>
+                    </div>
+                    <div class="form-group" style="margin:0;">
+                        <label for="bitacoraCasoHora">Hora</label>
+                        <input type="time" id="bitacoraCasoHora" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="bitacoraCasoTitulo">Título</label>
+                    <input type="text" id="bitacoraCasoTitulo" maxlength="120" required placeholder="Qué hay que resolver">
+                </div>
+                <div class="form-group">
+                    <label for="bitacoraCasoDetalle">Qué ocurrió</label>
+                    <textarea id="bitacoraCasoDetalle" rows="4" maxlength="4000" required placeholder="Hechos, quién avisó y qué queda pendiente"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="bitacoraCasoFotos">Fotos (hasta 6)</label>
+                    <input type="file" id="bitacoraCasoFotos" accept="image/*" multiple>
+                    <div id="bitacoraFotosPreview" class="bit-fotos" style="margin-top:0.45rem;"></div>
+                </div>
+                <label style="display:flex;gap:0.45rem;align-items:flex-start;margin:0 0 0.75rem;cursor:pointer;font-size:0.82rem;">
+                    <input type="checkbox" id="bitacoraCasoAvisar" style="margin-top:0.15rem;">
+                    <span>Avisar al administrador por correo. El mensaje va a edificio.wm815@gmail.com y la respuesta llega al correo con el que inició sesión.</span>
+                </label>
+                <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+                    <button type="submit" class="btn btn-primary" id="bitacoraCasoGuardar">Guardar caso</button>
+                    <button type="button" class="btn btn-secondary" id="bitacoraCasoCancelar">Cancelar</button>
+                </div>
+            </form>
             <div class="bit-kpi" id="bitacoraKpis"></div>
             <div class="bit-layout">
                 <div class="bit-lista">
+                    <div id="bitacoraSecCasos" class="form-section" style="margin-top:0;">
+                        <div style="display:flex;justify-content:space-between;gap:0.55rem;flex-wrap:wrap;align-items:center;">
+                            <h3 style="margin:0;">Casos registrados</h3>
+                            <div class="bit-filtros" id="bitacoraFiltroCasos" style="display:flex;gap:0.35rem;flex-wrap:wrap;">
+                                <button type="button" class="btn btn-secondary is-on" data-bit-filtro="pendientes" style="padding:0.2rem 0.55rem;font-size:0.72rem;">Pendientes</button>
+                                <button type="button" class="btn btn-secondary" data-bit-filtro="abierto" style="padding:0.2rem 0.55rem;font-size:0.72rem;">Abiertos</button>
+                                <button type="button" class="btn btn-secondary" data-bit-filtro="en_gestion" style="padding:0.2rem 0.55rem;font-size:0.72rem;">En gestión</button>
+                                <button type="button" class="btn btn-secondary" data-bit-filtro="resuelto" style="padding:0.2rem 0.55rem;font-size:0.72rem;">Resueltos</button>
+                                <button type="button" class="btn btn-secondary" data-bit-filtro="todos" style="padding:0.2rem 0.55rem;font-size:0.72rem;">Todos</button>
+                            </div>
+                        </div>
+                        <div style="overflow:auto;margin-top:0.65rem;">
+                            <table class="notif-tabla" style="width:100%;border-collapse:collapse;">
+                                <thead><tr><th>Fecha</th><th>Lugar</th><th>Tipo</th><th>Caso</th><th>Estado</th><th></th></tr></thead>
+                                <tbody id="bitacoraTbodyCasos"></tbody>
+                            </table>
+                        </div>
+                    </div>
                     <div id="bitacoraSecReclamos" class="form-section" style="margin-top:0;">
                         <h3>Reclamos</h3>
                         <div style="overflow:auto;">
@@ -12186,7 +12262,7 @@
                     </div>
                 </div>
                 <aside class="bit-detalle" id="bitacoraDetalle" aria-live="polite">
-                    <div class="bit-detalle-vacio">Elija un reclamo o una multa para leer el caso completo, ver las gestiones y registrar un comentario.</div>
+                    <div class="bit-detalle-vacio">Elija un caso, un reclamo o una multa para leer el detalle, ver las fotos y registrar el seguimiento.</div>
                 </aside>
             </div>
         </div>
@@ -15586,6 +15662,11 @@
                     } else if (bccFiltrado.length > 1) {
                         mailData.bcc = bccFiltrado;
                     }
+                }
+
+                if (opciones && opciones.replyTo) {
+                    const replyTo = String(opciones.replyTo).trim();
+                    if (replyTo.indexOf('@') > 0) mailData.replyTo = replyTo;
                 }
 
                 // Agregar metadatos para seguimiento
@@ -19685,6 +19766,7 @@
                 if (etCur) edit.value = etCur.label;
                 else if (curE) edit.value = curE;
             }
+            if (typeof window.bitacoraLlenarTiposCaso === 'function') window.bitacoraLlenarTiposCaso();
         }
 
         function marcarCatalogoNovedadesEstadoUi(txt) {
@@ -27134,6 +27216,39 @@ document.getElementById('chatForm').onsubmit = function (e) {
             var wrap = document.getElementById('bitacoraPublica');
             if (wrap) {
                 wrap.addEventListener('click', function (e) {
+                    var quitar = e.target && e.target.closest ? e.target.closest('[data-bit-foto-quitar]') : null;
+                    if (quitar) {
+                        bitacoraQuitarFotoPendiente(parseInt(quitar.getAttribute('data-bit-foto-quitar'), 10));
+                        return;
+                    }
+                    var filtro = e.target && e.target.closest ? e.target.closest('[data-bit-filtro]') : null;
+                    if (filtro) {
+                        window._bitacoraFiltroCaso = filtro.getAttribute('data-bit-filtro') || 'pendientes';
+                        bitacoraPintarTablaCasos();
+                        return;
+                    }
+                    var estBtn = e.target && e.target.closest ? e.target.closest('[data-bit-estado]') : null;
+                    if (estBtn) {
+                        cambiarEstadoCasoBitacora(estBtn.getAttribute('data-bit-id'), estBtn.getAttribute('data-bit-estado')).catch(function (err) {
+                            if (typeof mostrarAlerta === 'function') mostrarAlerta((err && err.message) || 'No se pudo actualizar el caso.', 'Bitácora');
+                        });
+                        return;
+                    }
+                    var avisarBtn = e.target && e.target.closest ? e.target.closest('[data-bit-notificar]') : null;
+                    if (avisarBtn) {
+                        notificarCasoBitacoraAdmin(avisarBtn.getAttribute('data-bit-notificar')).catch(function (err) {
+                            if (typeof mostrarAlerta === 'function') mostrarAlerta((err && err.message) || 'No se pudo enviar el aviso.', 'Bitácora');
+                        });
+                        return;
+                    }
+                    if (e.target && e.target.closest && e.target.closest('#bitacoraBtnNuevo')) {
+                        bitacoraToggleFormCaso(true);
+                        return;
+                    }
+                    if (e.target && e.target.closest && e.target.closest('#bitacoraCasoCancelar')) {
+                        bitacoraToggleFormCaso(false);
+                        return;
+                    }
                     var btn = e.target && e.target.closest ? e.target.closest('[data-bit-caso]') : null;
                     if (btn) {
                         abrirBitacoraCaso(btn.getAttribute('data-bit-tipo'), btn.getAttribute('data-bit-caso'));
@@ -27153,6 +27268,18 @@ document.getElementById('chatForm').onsubmit = function (e) {
             if (buscar) {
                 buscar.addEventListener('input', function () { bitacoraFiltrarFilas(buscar.value); });
             }
+            var formCaso = document.getElementById('bitacoraFormCaso');
+            if (formCaso) formCaso.addEventListener('submit', function (ev) {
+                guardarCasoBitacora(ev).catch(function (err) {
+                    if (typeof mostrarAlerta === 'function') mostrarAlerta((err && err.message) || 'No se pudo guardar el caso.', 'Bitácora');
+                });
+            });
+            var inputFotos = document.getElementById('bitacoraCasoFotos');
+            if (inputFotos) inputFotos.addEventListener('change', function () {
+                var elegidas = inputFotos.files;
+                bitacoraAgregarFotosInput(elegidas).then(function () { inputFotos.value = ''; });
+            });
+            bitacoraAplicarPermisoRegistro();
         }
 
         var PERMISOS_DOC = 'permisosUsuarios';
@@ -28930,11 +29057,449 @@ document.getElementById('chatForm').onsubmit = function (e) {
             });
         }
 
+        var BITACORA_CASOS_DOC = 'bitacoraCasos';
+        var BITACORA_ESTADOS_CASO = { abierto: 'Abierto', en_gestion: 'En gestión', resuelto: 'Resuelto' };
+
+        function bitacoraPuedeRegistrar() {
+            return typeof usuarioPuede === 'function' && usuarioPuede('bitacoraPublica', 'comentar');
+        }
+
+        function bitacoraAplicarPermisoRegistro() {
+            var puede = bitacoraPuedeRegistrar();
+            var btn = document.getElementById('bitacoraBtnNuevo');
+            if (btn) btn.hidden = !puede;
+            if (!puede) bitacoraToggleFormCaso(false);
+        }
+
+        function bitacoraEtiquetasParaCaso() {
+            var list = typeof etiquetasNovedadGestion === 'function' ? etiquetasNovedadGestion() : [];
+            var activas = list.filter(function (e) { return e && e.activa !== false; });
+            return activas.length ? activas : list;
+        }
+
+        function bitacoraLlenarTiposCaso() {
+            var sel = document.getElementById('bitacoraCasoTipo');
+            if (!sel) return;
+            var cur = sel.value;
+            var list = bitacoraEtiquetasParaCaso();
+            sel.innerHTML = '<option value="">Seleccione el tipo</option>' + list.map(function (e) {
+                return '<option value="' + bitacoraEsc(e.id) + '">' + bitacoraEsc(e.label) + '</option>';
+            }).join('');
+            if (cur && sel.querySelector('option[value="' + String(cur).replace(/"/g, '') + '"]')) sel.value = cur;
+        }
+        window.bitacoraLlenarTiposCaso = bitacoraLlenarTiposCaso;
+
+        function bitacoraToggleFormCaso(abrir) {
+            var form = document.getElementById('bitacoraFormCaso');
+            if (!form) return;
+            if (abrir && !bitacoraPuedeRegistrar()) return;
+            form.hidden = !abrir;
+            if (!abrir) return;
+            bitacoraLlenarTiposCaso();
+            if (typeof cargarCatalogoNovedadesGestion === 'function') {
+                cargarCatalogoNovedadesGestion().then(bitacoraLlenarTiposCaso).catch(function () {});
+            }
+            var fecha = document.getElementById('bitacoraCasoFecha');
+            var hora = document.getElementById('bitacoraCasoHora');
+            if (fecha && !fecha.value && typeof obtenerFechaHoy === 'function') fecha.value = obtenerFechaHoy();
+            if (hora && !hora.value && typeof obtenerHoraHoyInput === 'function') hora.value = obtenerHoraHoyInput();
+            var tipo = document.getElementById('bitacoraCasoTipo');
+            if (tipo) tipo.focus();
+        }
+
+        function bitacoraResetFotosForm() {
+            (window._bitacoraFotosPendientes || []).forEach(function (f) {
+                if (f && f._url) URL.revokeObjectURL(f._url);
+            });
+            window._bitacoraFotosPendientes = [];
+            var prev = document.getElementById('bitacoraFotosPreview');
+            if (prev) prev.innerHTML = '';
+            var input = document.getElementById('bitacoraCasoFotos');
+            if (input) input.value = '';
+        }
+
+        function bitacoraPintarPreviewFotos() {
+            var prev = document.getElementById('bitacoraFotosPreview');
+            if (!prev) return;
+            prev.innerHTML = (window._bitacoraFotosPendientes || []).map(function (f, i) {
+                return '<div class="bit-foto-prev"><img src="' + bitacoraEsc(f._url || '') + '" alt="Foto ' + (i + 1) + '">' +
+                    '<button type="button" data-bit-foto-quitar="' + i + '" aria-label="Quitar foto">×</button></div>';
+            }).join('');
+        }
+
+        function bitacoraQuitarFotoPendiente(idx) {
+            var lista = window._bitacoraFotosPendientes || [];
+            if (!lista[idx]) return;
+            if (lista[idx]._url) URL.revokeObjectURL(lista[idx]._url);
+            lista.splice(idx, 1);
+            window._bitacoraFotosPendientes = lista;
+            bitacoraPintarPreviewFotos();
+        }
+
+        function bitacoraComprimirFoto(file) {
+            return new Promise(function (resolve) {
+                if (!file || !/^image\//.test(file.type || '')) { resolve(null); return; }
+                var img = new Image();
+                var url = URL.createObjectURL(file);
+                img.onload = function () {
+                    var max = 1600;
+                    var escala = Math.min(1, max / Math.max(img.width || 1, img.height || 1));
+                    var canvas = document.createElement('canvas');
+                    canvas.width = Math.max(1, Math.round((img.width || 1) * escala));
+                    canvas.height = Math.max(1, Math.round((img.height || 1) * escala));
+                    var ctx = canvas.getContext('2d');
+                    if (!ctx) { URL.revokeObjectURL(url); resolve(file); return; }
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    canvas.toBlob(function (blob) {
+                        URL.revokeObjectURL(url);
+                        resolve(blob ? new File([blob], 'foto.jpg', { type: 'image/jpeg' }) : file);
+                    }, 'image/jpeg', 0.72);
+                };
+                img.onerror = function () { URL.revokeObjectURL(url); resolve(file); };
+                img.src = url;
+            });
+        }
+
+        async function bitacoraAgregarFotosInput(fileList) {
+            var actuales = window._bitacoraFotosPendientes || [];
+            var incoming = Array.prototype.slice.call(fileList || []);
+            var i;
+            for (i = 0; i < incoming.length; i++) {
+                if (actuales.length >= 6) {
+                    if (typeof mostrarAlerta === 'function') mostrarAlerta('Puede adjuntar hasta 6 fotos por caso.', 'Bitácora');
+                    break;
+                }
+                var file = incoming[i];
+                if (!file || !/^image\//.test(file.type || '')) continue;
+                if (file.size > 12 * 1024 * 1024) {
+                    if (typeof mostrarAlerta === 'function') mostrarAlerta('Una foto supera 12 MB y no se adjuntó.', 'Bitácora');
+                    continue;
+                }
+                var comprimida = await bitacoraComprimirFoto(file);
+                if (!comprimida) continue;
+                actuales.push({ file: comprimida, _url: URL.createObjectURL(comprimida) });
+            }
+            window._bitacoraFotosPendientes = actuales;
+            bitacoraPintarPreviewFotos();
+        }
+
+        function bitacoraHtmlTipo(c) {
+            var color = /^#[0-9a-fA-F]{6}$/.test(String(c && c.tipoColor || '')) ? String(c.tipoColor) : '#64748b';
+            return '<span class="bit-tipo" style="background:' + color + '22;color:' + color + ';border:1px solid ' + color + '55;">' + bitacoraEsc((c && c.tipoLabel) || 'Caso') + '</span>';
+        }
+
+        function bitacoraHtmlFotosCaso(fotos) {
+            if (!fotos || !fotos.length) return '<p style="font-size:0.78rem;color:var(--text-tertiary);margin:0;">Sin fotos adjuntas.</p>';
+            return '<div class="bit-fotos">' + fotos.map(function (f) {
+                var url = bitacoraEsc(f && f.url || '');
+                return '<a href="' + url + '" target="_blank" rel="noopener"><img src="' + url + '" alt="' + bitacoraEsc((f && f.nombre) || 'Foto') + '"></a>';
+            }).join('') + '</div>';
+        }
+
+        function bitacoraHtmlHistorialCaso(c) {
+            var hist = (c && c.historial) || [];
+            if (!hist.length) return '<p style="font-size:0.78rem;color:var(--text-tertiary);margin:0;">Sin movimientos.</p>';
+            return '<ul class="bit-hist">' + hist.slice().reverse().map(function (h) {
+                var est = BITACORA_ESTADOS_CASO[h.estado] || h.estado || '';
+                return '<li>' + bitacoraEsc(bitacoraCuando(h.at)) + (h.por ? ' · ' + bitacoraEsc(h.por) : '') +
+                    (est ? ' → ' + bitacoraEsc(est) : '') +
+                    (h.nota ? ' — ' + bitacoraEsc(h.nota) : '') + '</li>';
+            }).join('') + '</ul>';
+        }
+
+        function bitacoraHtmlDetalleCaso(caso) {
+            var est = BITACORA_ESTADOS_CASO[caso.estado] || 'Abierto';
+            var html = '<h3>' + bitacoraEsc(caso.titulo || 'Caso') + '</h3><div class="bit-dl">' +
+                '<dt>Estado</dt><dd>' + bitacoraEsc(est) + (caso.prioridad === 'urgente' ? ' · <span class="bit-prio">Urgente</span>' : '') + '</dd>' +
+                '<dt>Tipo</dt><dd>' + bitacoraHtmlTipo(caso) + '</dd>' +
+                '<dt>Fecha</dt><dd>' + bitacoraEsc(caso.fecha || '—') + (caso.hora ? ' · ' + bitacoraEsc(String(caso.hora).slice(0, 5)) : '') + '</dd>' +
+                '<dt>Lugar</dt><dd>' + bitacoraEsc(caso.unidad || '—') + '</dd>' +
+                '<dt>Registró</dt><dd>' + bitacoraEsc(caso.autor || '—') + '</dd></div>' +
+                '<div class="bit-sec"><h4>Qué ocurrió</h4><div class="bit-texto">' + bitacoraEsc(caso.descripcion || 'Sin descripción.') + '</div></div>' +
+                '<div class="bit-sec"><h4>Fotos</h4>' + bitacoraHtmlFotosCaso(caso.fotos) + '</div>' +
+                '<div class="bit-sec"><h4>Seguimiento</h4>' + bitacoraHtmlHistorialCaso(caso);
+            if (bitacoraPuedeRegistrar()) {
+                var ultimoAviso = (caso.avisosAdmin && caso.avisosAdmin.length) ? caso.avisosAdmin[caso.avisosAdmin.length - 1] : null;
+                html += '<div style="display:flex;gap:0.4rem;flex-wrap:wrap;align-items:center;margin:0.55rem 0;">' +
+                    '<button type="button" class="btn btn-secondary" data-bit-notificar="' + bitacoraEsc(caso.id) + '">' + (ultimoAviso ? 'Volver a avisar al administrador' : 'Avisar al administrador') + '</button>' +
+                    '<span style="font-size:0.75rem;color:var(--text-tertiary);">Va a edificio.wm815@gmail.com. La respuesta llega a su correo de sesión.' +
+                    (ultimoAviso ? ' Último aviso: ' + bitacoraEsc(bitacoraCuando(ultimoAviso.at)) + '.' : '') +
+                    '</span></div>';
+                html += '<div class="form-group" style="margin:0.55rem 0 0.4rem;"><label for="bitacoraNotaEstado">Nota de esta gestión</label>' +
+                    '<input type="text" id="bitacoraNotaEstado" maxlength="400" placeholder="Qué se hizo o qué queda pendiente"></div>' +
+                    '<div style="display:flex;gap:0.4rem;flex-wrap:wrap;">';
+                if (caso.estado !== 'en_gestion') html += '<button type="button" class="btn btn-secondary" data-bit-estado="en_gestion" data-bit-id="' + bitacoraEsc(caso.id) + '">En gestión</button>';
+                if (caso.estado !== 'resuelto') html += '<button type="button" class="btn btn-primary" data-bit-estado="resuelto" data-bit-id="' + bitacoraEsc(caso.id) + '">Marcar resuelto</button>';
+                if (caso.estado !== 'abierto') html += '<button type="button" class="btn btn-secondary" data-bit-estado="abierto" data-bit-id="' + bitacoraEsc(caso.id) + '">Reabrir</button>';
+                html += '</div>';
+            }
+            return html + '</div>';
+        }
+
+        function bitacoraCasoVisible(c) {
+            var filtro = window._bitacoraFiltroCaso || 'pendientes';
+            var est = c && c.estado || 'abierto';
+            if (filtro === 'todos') return true;
+            if (filtro === 'pendientes') return est === 'abierto' || est === 'en_gestion';
+            return est === filtro;
+        }
+
+        function bitacoraPintarTablaCasos() {
+            var tb = document.getElementById('bitacoraTbodyCasos');
+            if (!tb) return;
+            var filtro = window._bitacoraFiltroCaso || 'pendientes';
+            document.querySelectorAll('#bitacoraFiltroCasos [data-bit-filtro]').forEach(function (b) {
+                b.classList.toggle('is-on', b.getAttribute('data-bit-filtro') === filtro);
+            });
+            var casos = ((window._bitacoraCache && window._bitacoraCache.casos) || []).filter(bitacoraCasoVisible);
+            if (filtro !== 'resuelto' && filtro !== 'todos') {
+                casos.sort(function (a, b) {
+                    var ua = a.prioridad === 'urgente' ? 0 : 1;
+                    var ub = b.prioridad === 'urgente' ? 0 : 1;
+                    if (ua !== ub) return ua - ub;
+                    return ((b.fecha || '') + (b.hora || '')).localeCompare((a.fecha || '') + (a.hora || ''));
+                });
+            }
+            if (!casos.length) {
+                var vacio = filtro === 'resuelto' ? 'No hay casos resueltos en este mes.' : (filtro === 'todos' ? 'No hay casos registrados en este mes.' : 'No hay casos pendientes en este mes.');
+                tb.innerHTML = '<tr><td colspan="6" style="color:var(--text-tertiary);">' + vacio + '</td></tr>';
+            } else {
+                tb.innerHTML = casos.map(function (c) {
+                    var est = BITACORA_ESTADOS_CASO[c.estado] || 'Abierto';
+                    var fotos = (c.fotos && c.fotos.length) ? (' · ' + c.fotos.length + (c.fotos.length === 1 ? ' foto' : ' fotos')) : '';
+                    var q = ['caso', c.fecha, c.hora, c.unidad, c.tipoLabel, c.titulo, c.descripcion, est, c.autor, c.prioridad].join(' ').toLowerCase();
+                    return '<tr class="bit-fila" data-bit-tipo="caso" data-bit-caso="' + bitacoraEsc(c.id) + '" data-bit-q="' + bitacoraEsc(q) + '">' +
+                        '<td>' + bitacoraEsc(c.fecha || '—') + (c.hora ? '<br><span style="opacity:.7">' + bitacoraEsc(String(c.hora).slice(0, 5)) + '</span>' : '') + '</td>' +
+                        '<td>' + bitacoraEsc(c.unidad || '—') + '</td>' +
+                        '<td>' + bitacoraHtmlTipo(c) + '</td>' +
+                        '<td>' + (c.prioridad === 'urgente' ? '<span class="bit-prio">Urgente</span> ' : '') + bitacoraEsc(c.titulo || '—') + '<br><span style="opacity:.7">' + bitacoraEsc(fotos.replace(/^ · /, '') || 'Sin fotos') + '</span></td>' +
+                        '<td>' + bitacoraEsc(est) + '</td>' +
+                        '<td><button type="button" class="btn btn-secondary" data-bit-tipo="caso" data-bit-caso="' + bitacoraEsc(c.id) + '" style="padding:0.2rem 0.5rem;font-size:0.72rem;">Ver</button></td></tr>';
+                }).join('');
+            }
+            var busc = document.getElementById('bitacoraBuscar');
+            if (busc && busc.value) bitacoraFiltrarFilas(busc.value);
+            var abierto = window._bitacoraCasoAbierto;
+            if (abierto && abierto.tipo === 'caso') bitacoraMarcarFilaActiva('caso', abierto.id);
+        }
+
+        async function bitacoraSubirFoto(file, ruta) {
+            if (typeof storage === 'undefined' || !storage || !firebaseInitialized) {
+                throw new Error('El almacenamiento de fotos no está disponible.');
+            }
+            var snap = await storage.ref().child(ruta).put(file);
+            return snap.ref.getDownloadURL();
+        }
+
+        function bitacoraLimpiarFormCaso() {
+            ['bitacoraCasoTipo', 'bitacoraCasoUnidad', 'bitacoraCasoTitulo', 'bitacoraCasoDetalle'].forEach(function (id) {
+                var el = document.getElementById(id);
+                if (el) el.value = '';
+            });
+            var prio = document.getElementById('bitacoraCasoPrioridad');
+            if (prio) prio.value = 'normal';
+            var fecha = document.getElementById('bitacoraCasoFecha');
+            var hora = document.getElementById('bitacoraCasoHora');
+            if (fecha && typeof obtenerFechaHoy === 'function') fecha.value = obtenerFechaHoy();
+            if (hora && typeof obtenerHoraHoyInput === 'function') hora.value = obtenerHoraHoyInput();
+            var avisar = document.getElementById('bitacoraCasoAvisar');
+            if (avisar) avisar.checked = false;
+            bitacoraResetFotosForm();
+        }
+
+        function bitacoraCorreoAdmin() {
+            if (typeof correoVisibleBienvenidaMasiva === 'function') return correoVisibleBienvenidaMasiva();
+            return 'edificio.wm815@gmail.com';
+        }
+
+        function bitacoraHtmlCorreoCaso(caso, autor) {
+            function fila(etiqueta, valor) {
+                return '<tr><td style="padding:6px 12px 6px 0;color:#64748b;vertical-align:top;white-space:nowrap;">' + etiqueta + '</td><td style="padding:6px 0;color:#1e293b;">' + valor + '</td></tr>';
+            }
+            var fotos = (caso.fotos || []).filter(function (f) { return f && f.url; }).map(function (f, i) {
+                var url = bitacoraEsc(f.url);
+                return '<a href="' + url + '" style="color:#1d4ed8;">' + bitacoraEsc(f.nombre || ('Foto ' + (i + 1))) + '</a>';
+            }).join(' · ');
+            var est = BITACORA_ESTADOS_CASO[caso.estado] || caso.estado || 'Abierto';
+            var cuando = bitacoraEsc((caso.fecha || '—') + (caso.hora ? ' · ' + String(caso.hora).slice(0, 5) : ''));
+            var registro = bitacoraEsc(caso.autor || autor.nombre || 'Usuario') + (caso.correo ? ' (' + bitacoraEsc(caso.correo) + ')' : '');
+            return '<div style="background:#ffffff;color:#1e293b;font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.5;">' +
+                '<p style="margin:0 0 12px;">Aviso de bitácora enviado por <strong>' + bitacoraEsc(autor.nombre || 'Usuario') + '</strong> (' + bitacoraEsc(autor.correo) + ').</p>' +
+                '<table role="presentation" cellpadding="0" cellspacing="0" border="0">' +
+                fila('Caso', bitacoraEsc(caso.titulo || 'Caso')) +
+                fila('Tipo', bitacoraEsc(caso.tipoLabel || '—')) +
+                fila('Estado', bitacoraEsc(est)) +
+                fila('Prioridad', caso.prioridad === 'urgente' ? 'Urgente' : 'Normal') +
+                fila('Lugar', bitacoraEsc(caso.unidad || '—')) +
+                fila('Fecha', cuando) +
+                fila('Registró', registro) +
+                '</table>' +
+                '<p style="margin:14px 0 6px;font-weight:700;">Qué ocurrió</p>' +
+                '<p style="margin:0;white-space:pre-wrap;">' + bitacoraEsc(caso.descripcion || 'Sin descripción.') + '</p>' +
+                (fotos ? '<p style="margin:14px 0 0;">Fotos: ' + fotos + '</p>' : '') +
+                '<p style="margin:16px 0 0;font-size:12px;color:#64748b;">Responda a ' + bitacoraEsc(autor.correo) + '. Este aviso sale de la bitácora de Gestión.</p>' +
+                '</div>';
+        }
+
+        async function notificarCasoBitacoraAdmin(id) {
+            if (!bitacoraPuedeRegistrar()) {
+                if (typeof mostrarAlerta === 'function') mostrarAlerta('No tiene permiso para avisar este caso.', 'Permisos');
+                return;
+            }
+            if (window._bitacoraAvisando) return;
+            var autor = bitacoraAutorActual();
+            var desde = String(autor.correo || '').trim();
+            if (desde.indexOf('@') < 1) {
+                if (typeof mostrarAlerta === 'function') mostrarAlerta('Su sesión no tiene un correo para que el administrador pueda responder.', 'Bitácora');
+                return;
+            }
+            var lista = await obtenerDatos(BITACORA_CASOS_DOC);
+            if (!Array.isArray(lista)) lista = [];
+            var caso = lista.filter(function (c) { return c && String(c.id) === String(id); })[0];
+            if (!caso) {
+                if (typeof mostrarAlerta === 'function') mostrarAlerta('No se encontró el caso para avisar.', 'Bitácora');
+                return;
+            }
+            var admin = bitacoraCorreoAdmin();
+            var asunto = 'Bitácora · ' + (caso.prioridad === 'urgente' ? 'Urgente · ' : '') + String(caso.titulo || 'Caso').slice(0, 90);
+            var texto = 'Aviso de ' + (autor.nombre || 'Usuario') + ' (' + desde + ').\n' +
+                'Caso: ' + (caso.titulo || '') + '\nTipo: ' + (caso.tipoLabel || '') + '\nLugar: ' + (caso.unidad || '—') + '\n\n' +
+                (caso.descripcion || '');
+            window._bitacoraAvisando = true;
+            try {
+                var envio = await enviarCorreo(
+                    { nombre: 'Administración', correo: admin },
+                    asunto,
+                    texto,
+                    bitacoraHtmlCorreoCaso(caso, autor),
+                    null,
+                    { silencioso: true, aplicarCcoGlobal: false, replyTo: desde }
+                );
+                if (!envio || envio.exito === false) {
+                    throw new Error((envio && envio.error) || 'No se pudo enviar el aviso.');
+                }
+                var ahora = new Date().toISOString();
+                caso.avisosAdmin = Array.isArray(caso.avisosAdmin) ? caso.avisosAdmin : [];
+                caso.avisosAdmin.push({ at: ahora, por: autor.nombre, correo: desde, para: admin });
+                caso.historial = Array.isArray(caso.historial) ? caso.historial : [];
+                caso.historial.push({ at: ahora, por: autor.nombre, estado: caso.estado || 'abierto', nota: 'Avisó al administrador (' + admin + ') desde ' + desde });
+                await guardarDatos(BITACORA_CASOS_DOC, lista);
+                window._bitacoraCasoAbierto = { tipo: 'caso', id: String(id) };
+                await cargarBitacoraPortal();
+                if (typeof mostrarToast === 'function') mostrarToast('Aviso enviado a ' + admin + '. La respuesta llega a ' + desde + '.', 'success');
+            } finally {
+                window._bitacoraAvisando = false;
+            }
+        }
+
+        async function guardarCasoBitacora(ev) {
+            if (ev && ev.preventDefault) ev.preventDefault();
+            if (!bitacoraPuedeRegistrar()) {
+                if (typeof mostrarAlerta === 'function') mostrarAlerta('No tiene permiso para registrar casos en la bitácora.', 'Permisos');
+                return;
+            }
+            if (window._bitacoraCasoGuardando) return;
+            var tipoEl = document.getElementById('bitacoraCasoTipo');
+            var titulo = String((document.getElementById('bitacoraCasoTitulo') || {}).value || '').trim();
+            var detalle = String((document.getElementById('bitacoraCasoDetalle') || {}).value || '').trim();
+            var tipoId = tipoEl ? String(tipoEl.value || '').trim() : '';
+            if (!tipoId || !titulo || !detalle) {
+                if (typeof mostrarAlerta === 'function') mostrarAlerta('Indique el tipo, un título y qué ocurrió.', 'Bitácora');
+                return;
+            }
+            var et = typeof encontrarEtiquetaNovedadGestion === 'function' ? encontrarEtiquetaNovedadGestion(tipoId) : null;
+            var fecha = String((document.getElementById('bitacoraCasoFecha') || {}).value || '').trim();
+            var hora = String((document.getElementById('bitacoraCasoHora') || {}).value || '').trim();
+            if (!fecha) fecha = typeof obtenerFechaHoy === 'function' ? obtenerFechaHoy() : '';
+            if (!hora) hora = typeof obtenerHoraHoyInput === 'function' ? obtenerHoraHoyInput() : '';
+            var unidad = String((document.getElementById('bitacoraCasoUnidad') || {}).value || '').trim();
+            var prio = String((document.getElementById('bitacoraCasoPrioridad') || {}).value || 'normal');
+            var id = Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+            var btn = document.getElementById('bitacoraCasoGuardar');
+            window._bitacoraCasoGuardando = true;
+            if (btn) { btn.disabled = true; btn.textContent = 'Guardando…'; }
+            try {
+                var fotos = [];
+                var pendientes = window._bitacoraFotosPendientes || [];
+                var n;
+                for (n = 0; n < pendientes.length; n++) {
+                    var ruta = 'bitacora-casos/' + id + '/' + (n + 1) + '.jpg';
+                    var url = await bitacoraSubirFoto(pendientes[n].file, ruta);
+                    fotos.push({ url: url, ruta: ruta, nombre: 'Foto ' + (n + 1) });
+                }
+                var autor = bitacoraAutorActual();
+                var ahora = new Date().toISOString();
+                var caso = {
+                    id: id,
+                    fecha: fecha,
+                    hora: hora,
+                    tipoId: et ? et.id : tipoId,
+                    tipoLabel: et ? et.label : tipoId,
+                    tipoColor: et ? et.color : '#64748b',
+                    unidad: unidad,
+                    titulo: titulo.slice(0, 120),
+                    descripcion: detalle.slice(0, 4000),
+                    prioridad: prio === 'urgente' ? 'urgente' : 'normal',
+                    estado: 'abierto',
+                    fotos: fotos,
+                    autor: autor.nombre,
+                    correo: autor.correo,
+                    creadoAt: ahora,
+                    historial: [{ at: ahora, por: autor.nombre, estado: 'abierto', nota: 'Caso registrado' }]
+                };
+                var lista = await obtenerDatos(BITACORA_CASOS_DOC);
+                if (!Array.isArray(lista)) lista = [];
+                lista.push(caso);
+                await guardarDatos(BITACORA_CASOS_DOC, lista);
+                var avisarAdmin = !!(document.getElementById('bitacoraCasoAvisar') && document.getElementById('bitacoraCasoAvisar').checked);
+                bitacoraLimpiarFormCaso();
+                bitacoraToggleFormCaso(false);
+                window._bitacoraCasoAbierto = { tipo: 'caso', id: id };
+                window._bitacoraFiltroCaso = 'pendientes';
+                await cargarBitacoraPortal();
+                if (typeof mostrarToast === 'function') mostrarToast('Caso registrado en la bitácora.', 'success');
+                if (avisarAdmin) await notificarCasoBitacoraAdmin(id);
+            } finally {
+                window._bitacoraCasoGuardando = false;
+                if (btn) { btn.disabled = false; btn.textContent = 'Guardar caso'; }
+            }
+        }
+
+        async function cambiarEstadoCasoBitacora(id, estado) {
+            if (!BITACORA_ESTADOS_CASO[estado]) return;
+            if (!bitacoraPuedeRegistrar()) {
+                if (typeof mostrarAlerta === 'function') mostrarAlerta('No tiene permiso para actualizar casos.', 'Permisos');
+                return;
+            }
+            var notaEl = document.getElementById('bitacoraNotaEstado');
+            var nota = notaEl ? String(notaEl.value || '').trim() : '';
+            if (estado === 'resuelto' && !nota) {
+                if (typeof mostrarAlerta === 'function') mostrarAlerta('Escriba qué se hizo antes de marcar el caso como resuelto.', 'Bitácora');
+                if (notaEl) notaEl.focus();
+                return;
+            }
+            var lista = await obtenerDatos(BITACORA_CASOS_DOC);
+            if (!Array.isArray(lista)) lista = [];
+            var caso = lista.filter(function (c) { return c && String(c.id) === String(id); })[0];
+            if (!caso || caso.estado === estado) return;
+            var autor = bitacoraAutorActual();
+            caso.estado = estado;
+            caso.actualizadoAt = new Date().toISOString();
+            caso.historial = Array.isArray(caso.historial) ? caso.historial : [];
+            caso.historial.push({ at: caso.actualizadoAt, por: autor.nombre, estado: estado, nota: nota });
+            await guardarDatos(BITACORA_CASOS_DOC, lista);
+            window._bitacoraCasoAbierto = { tipo: 'caso', id: String(id) };
+            await cargarBitacoraPortal();
+            if (typeof mostrarToast === 'function') mostrarToast('Caso actualizado: ' + BITACORA_ESTADOS_CASO[estado] + '.', 'success');
+        }
+
         async function abrirBitacoraCaso(tipo, id) {
             var cache = window._bitacoraCache || { reclamos: [], multas: [] };
             var caso = null;
             if (tipo === 'reclamo') {
                 caso = (cache.reclamos || []).filter(function (r) { return r && String(r.id) === String(id); })[0];
+            } else if (tipo === 'caso') {
+                caso = (cache.casos || []).filter(function (c) { return c && String(c.id) === String(id); })[0];
             } else {
                 caso = (cache.multas || []).filter(function (m) { return m && String(m.id) === String(id); })[0];
             }
@@ -28965,6 +29530,8 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     '<div class="bit-sec"><h4>Descripción del caso</h4><div class="bit-texto">' + bitacoraEsc(detalle || 'Sin descripción.') + '</div></div>' +
                     (caso.notaInterna ? '<div class="bit-sec"><h4>Nota interna</h4><div class="bit-texto">' + bitacoraEsc(caso.notaInterna) + '</div></div>' : '') +
                     '<div class="bit-sec"><h4>Gestiones realizadas</h4>' + bitacoraHtmlGestionReclamo(caso) + '</div>';
+            } else if (tipo === 'caso') {
+                html = bitacoraHtmlDetalleCaso(caso);
             } else {
                 var estM = (typeof multaHtmlEstado === 'function') ? multaHtmlEstado(caso) : bitacoraEsc(caso.estadoGestion || '');
                 var libroM = caso.novedadLibro != null && caso.novedadLibro !== '' ? '#' + caso.novedadLibro : '—';
@@ -29053,7 +29620,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 if (document.body.classList.contains('bitacora-solo') && !cfg.activo) {
                     sub.textContent = 'El portal está desactivado. Consulte a administración.';
                 } else {
-                    sub.textContent = (nombreCom ? nombreCom + ' · ' : '') + 'Consulta mensual de reclamos y multas' + (mes ? ' · ' + bitacoraLabelMes(mes) : '') + '.';
+                    sub.textContent = (nombreCom ? nombreCom + ' · ' : '') + 'Casos, reclamos y multas' + (mes ? ' · ' + bitacoraLabelMes(mes) : '') + '.';
                 }
             }
             var secR = document.getElementById('bitacoraSecReclamos');
@@ -29065,8 +29632,14 @@ document.getElementById('chatForm').onsubmit = function (e) {
             var tbM = document.getElementById('bitacoraTbodyMultas');
             if (document.body.classList.contains('bitacora-solo') && !cfg.activo) {
                 if (kpis) kpis.innerHTML = '';
+                var tbOff = document.getElementById('bitacoraTbodyCasos');
+                if (tbOff) tbOff.innerHTML = '<tr><td colspan="6">Portal desactivado.</td></tr>';
                 if (tbR) tbR.innerHTML = '<tr><td colspan="5">Portal desactivado.</td></tr>';
                 if (tbM) tbM.innerHTML = '<tr><td colspan="6">Portal desactivado.</td></tr>';
+                var btnOff = document.getElementById('bitacoraBtnNuevo');
+                if (btnOff) btnOff.hidden = true;
+                var formOff = document.getElementById('bitacoraFormCaso');
+                if (formOff) formOff.hidden = true;
                 var detOff = document.getElementById('bitacoraDetalle');
                 if (detOff) detOff.innerHTML = '<div class="bit-detalle-vacio">El portal está desactivado.</div>';
                 return;
@@ -29108,12 +29681,27 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 return !(typeof multaEsRegistroAnulacion === 'function' && multaEsRegistroAnulacion(m));
             });
             var mulAnul = mulCursadas.filter(function (m) { return typeof multaEstaAnulada === 'function' && multaEstaAnulada(m); }).length;
+            var casos = [];
+            try {
+                var leidosCasos = await obtenerDatos(BITACORA_CASOS_DOC);
+                casos = Array.isArray(leidosCasos) ? leidosCasos : [];
+            } catch (eCas) { casos = []; }
+            casos = casos.filter(function (c) {
+                return c && bitacoraMesDeFecha(c.fecha || c.creadoAt) === mes;
+            }).sort(function (a, b) {
+                return ((b.fecha || '') + (b.hora || '')).localeCompare((a.fecha || '') + (a.hora || ''));
+            });
+            var casAb = casos.filter(function (c) { return (c.estado || 'abierto') === 'abierto'; }).length;
+            var casGes = casos.filter(function (c) { return c.estado === 'en_gestion'; }).length;
             if (kpis) {
                 kpis.innerHTML =
+                    '<div><strong>' + casAb + '</strong><span>Casos abiertos</span></div><div><strong>' + casGes + '</strong><span>Casos en gestión</span></div>' +
                     (cfg.mostrarReclamos ? '<div><strong>' + reclamos.length + '</strong><span>Reclamos del mes</span></div><div><strong>' + recPend + '</strong><span>Reclamos en tratamiento</span></div>' : '') +
                     (cfg.mostrarMultas ? '<div><strong>' + mulCursadas.length + '</strong><span>Multas cursadas</span></div><div><strong>' + mulAnul + '</strong><span>Multas anuladas</span></div>' : '');
             }
-            window._bitacoraCache = { reclamos: reclamos, multas: multas, mes: mes };
+            window._bitacoraCache = { reclamos: reclamos, multas: multas, casos: casos, mes: mes };
+            bitacoraAplicarPermisoRegistro();
+            bitacoraPintarTablaCasos();
             if (tbR) {
                 if (!reclamos.length) {
                     tbR.innerHTML = '<tr><td colspan="5" style="color:var(--text-tertiary);">No hay reclamos en este mes.</td></tr>';
@@ -29156,7 +29744,8 @@ document.getElementById('chatForm').onsubmit = function (e) {
             if (busc && busc.value) bitacoraFiltrarFilas(busc.value);
             var abierto = window._bitacoraCasoAbierto;
             if (abierto && abierto.id) {
-                var sigue = (abierto.tipo === 'reclamo' ? reclamos : multas).some(function (x) { return x && String(x.id) === String(abierto.id); });
+                var fuente = abierto.tipo === 'reclamo' ? reclamos : (abierto.tipo === 'caso' ? casos : multas);
+                var sigue = fuente.some(function (x) { return x && String(x.id) === String(abierto.id); });
                 if (sigue) abrirBitacoraCaso(abierto.tipo, abierto.id);
             }
         }
