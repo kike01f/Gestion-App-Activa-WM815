@@ -695,6 +695,169 @@
             color: var(--text-primary);
         }
 
+        #notificaciones.tab-content {
+            max-width: 920px;
+        }
+        #notificaciones .notif-head {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: flex-end;
+            justify-content: space-between;
+            gap: 0.75rem 1.25rem;
+            margin-bottom: 1rem;
+        }
+        #notificaciones .notif-head h2 {
+            margin: 0;
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: var(--gray-900);
+            display: flex;
+            align-items: center;
+            gap: 0.55rem;
+        }
+        #notificaciones .notif-head p {
+            margin: 0.3rem 0 0;
+            font-size: 0.8125rem;
+            color: var(--gray-600);
+            max-width: 36rem;
+            line-height: 1.4;
+        }
+        #notificaciones .notif-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.45rem;
+        }
+        #notificaciones .notif-chip {
+            border: 1px solid var(--border-color);
+            background: var(--bg-primary);
+            color: var(--text-secondary);
+            border-radius: 999px;
+            padding: 0.35rem 0.7rem;
+            font-size: 0.75rem;
+            cursor: pointer;
+            line-height: 1.2;
+        }
+        #notificaciones .notif-chip strong {
+            color: var(--text-primary);
+            font-weight: 700;
+            margin-right: 0.2rem;
+        }
+        #notificaciones .notif-chip:hover { border-color: var(--primary); color: var(--text-primary); }
+        #notificaciones .notif-subnav {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4rem;
+            margin-bottom: 1rem;
+            padding: 0.3rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+        }
+        #notificaciones .notif-subnav-btn {
+            border: 0;
+            background: transparent;
+            color: var(--text-secondary);
+            border-radius: 9px;
+            padding: 0.5rem 0.85rem;
+            font-size: 0.8125rem;
+            font-weight: 600;
+            cursor: pointer;
+            flex: 1 1 auto;
+            min-width: 8.5rem;
+        }
+        #notificaciones .notif-subnav-btn.is-on {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+        #notificaciones.tab-content .form-section {
+            padding: 1.1rem 1.2rem;
+            margin-bottom: 0;
+        }
+        #notificaciones.tab-content .form-section h3 {
+            margin: 0 0 0.35rem;
+            font-size: 1.02rem;
+        }
+        #notificaciones.tab-content .form-group {
+            margin-bottom: 0.65rem;
+        }
+        #notificaciones .notif-hint {
+            margin: 0 0 0.85rem;
+            font-size: 0.78rem;
+            color: var(--text-tertiary);
+            line-height: 1.4;
+        }
+        #notificaciones .notif-tabla {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--bg-primary);
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+        #notificaciones .notif-tabla th {
+            padding: 0.55rem 0.7rem;
+            text-align: left;
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.03em;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+        }
+        #notificaciones .notif-tabla td {
+            padding: 0.55rem 0.7rem;
+            font-size: 0.8125rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+        #notificaciones .notif-details {
+            margin-top: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            background: var(--bg-secondary);
+            padding: 0.15rem 0.85rem 0.75rem;
+        }
+        #notificaciones .notif-details > summary {
+            cursor: pointer;
+            font-size: 0.8125rem;
+            font-weight: 650;
+            padding: 0.7rem 0;
+            list-style: none;
+        }
+        #notificaciones .notif-details > summary::-webkit-details-marker { display: none; }
+        #notificaciones .notif-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.85rem 1.1rem;
+            align-items: start;
+        }
+        #notificaciones .notif-card {
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 0.85rem 0.95rem;
+            background: var(--bg-secondary);
+        }
+        #notificaciones .notif-card h4 {
+            margin: 0 0 0.55rem;
+            font-size: 0.8125rem;
+            font-weight: 700;
+        }
+        #notificaciones .notif-ph {
+            display: inline-block;
+            font-size: 0.72rem;
+            padding: 0.1rem 0.35rem;
+            border-radius: 4px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            margin: 0 0.15rem 0.15rem 0;
+            font-family: ui-monospace, monospace;
+        }
+        @media (max-width: 760px) {
+            #notificaciones .notif-grid { grid-template-columns: 1fr; }
+            #notificaciones.tab-content { max-width: none; }
+        }
+
         /* Autocompletado residentes: lista desplegable */
         .form-group-residente { position: relative; }
         .residente-autocomplete-list {
@@ -9416,186 +9579,193 @@
 
         <!-- MÓDULO: CENTRAL DE NOTIFICACIÓN -->
         <div id="notificaciones" class="tab-content">
-            <div style="margin-bottom: 1.5rem;">
-                <h2 style="margin: 0; color: var(--gray-900); font-size: 1.5rem; font-weight: 700; display: flex; align-items: center; gap: 0.75rem;">
-                    <span style="display: inline-flex; align-items: center; width: 1.75rem; height: 1.75rem;">📧</span>
-                    Central de Notificación
-                </h2>
-                <p style="color: var(--gray-600); font-size: 0.875rem; margin: 0.5rem 0 0 0;">Gestión de correos administrativos y notificaciones por módulo</p>
+            <div class="notif-head">
+                <div>
+                    <h2>Central de Notificación</h2>
+                    <p>Quién recibe los correos, quién va en copia oculta y cómo se ven los mensajes.</p>
+                </div>
+                <div class="notif-chips" aria-label="Resumen">
+                    <button type="button" class="notif-chip" data-notif-sub="notifSubDest"><strong id="notifChipAdmin">0</strong> destinatarios</button>
+                    <button type="button" class="notif-chip" data-notif-sub="notifSubCco"><strong id="notifChipCco">0</strong> copias CCO</button>
+                    <button type="button" class="notif-chip" data-notif-sub="notifSubPlant"><strong id="notifChipPlant">0</strong> plantillas</button>
+                </div>
             </div>
+            <nav class="notif-subnav" aria-label="Secciones de notificación">
+                <button type="button" class="notif-subnav-btn is-on" data-notif-sub="notifSubDest">Destinatarios</button>
+                <button type="button" class="notif-subnav-btn" data-notif-sub="notifSubCco">Copias (CCO)</button>
+                <button type="button" class="notif-subnav-btn" data-notif-sub="notifSubPlant">Textos</button>
+            </nav>
 
-            <!-- Gestión de Correos Administrativos -->
-            <div class="form-section" style="margin-bottom: 2rem;">
-                <h3 style="margin: 0 0 0.75rem 0; font-size: 1rem; font-weight: 700;">Correos Administrativos</h3>
+            <div id="notifSubDest" class="form-section">
+                <h3>Destinatarios de reportes</h3>
+                <p class="notif-hint">Aparecen como destinatarios al enviar reportes. Puede pegar varios correos a la vez.</p>
                 <form id="formCorreoAdmin">
-                    <div class="form-row" style="gap: 0.5rem; margin-bottom: 0.5rem;">
-                        <div class="form-group" style="flex: 1; margin-bottom: 0.5rem;">
-                            <label style="margin-bottom: 0.25rem; font-size: 0.875rem;">Nombre *</label>
-                            <input type="text" id="correoAdminNombre" required placeholder="Ej: Administrador, Jefe de Edificio" style="padding: 0.5rem; font-size: 0.875rem;">
+                    <div class="form-row" style="gap: 0.5rem; margin-bottom: 0.35rem; align-items: flex-end;">
+                        <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                            <label>Nombre</label>
+                            <input type="text" id="correoAdminNombre" placeholder="Administrador, comité…">
                         </div>
-                        <div class="form-group" style="flex: 1; margin-bottom: 0.5rem;">
-                            <label style="margin-bottom: 0.25rem; font-size: 0.875rem;">Correo Electrónico *</label>
-                            <input type="email" id="correoAdminEmail" required placeholder="correo@ejemplo.com" style="padding: 0.5rem; font-size: 0.875rem;">
+                        <div class="form-group" style="flex: 1.7; margin-bottom: 0;">
+                            <label>Correo(s) *</label>
+                            <textarea id="correoAdminEmail" required rows="2" placeholder="correo@ejemplo.com, otro@ejemplo.com"></textarea>
                         </div>
-                        <div class="form-group" style="display: flex; align-items: flex-end; margin-bottom: 0.5rem;">
-                            <button type="submit" class="btn btn-primary" style="padding: 0.5rem 1rem; font-size: 0.875rem;">Agregar</button>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <button type="submit" class="btn btn-primary">Agregar</button>
                         </div>
                     </div>
                 </form>
-                
-                <div style="margin-top: 1rem;">
-                    <table id="tablaCorreosAdmin" style="width: 100%; border-collapse: collapse; background: var(--bg-primary); border-radius: 8px; overflow: hidden;">
+                <div style="margin-top: 0.85rem;">
+                    <table id="tablaCorreosAdmin" class="notif-tabla">
                         <thead>
-                            <tr style="background: linear-gradient(135deg, #75bb21 0%, #5a9219 100%); color: white;">
-                                <th style="padding: 0.75rem; text-align: left; font-weight: 600;">Nombre</th>
-                                <th style="padding: 0.75rem; text-align: left; font-weight: 600;">Correo</th>
-                                <th style="padding: 0.75rem; text-align: center; font-weight: 600; width: 100px;">Acciones</th>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Correo</th>
+                                <th style="text-align: center; width: 96px;">Acciones</th>
                             </tr>
                         </thead>
-                        <tbody id="tbodyCorreosAdmin">
-                            <!-- Se llena dinámicamente -->
-                        </tbody>
+                        <tbody id="tbodyCorreosAdmin"></tbody>
                     </table>
                 </div>
             </div>
 
-            <!-- Correos de consejería: CCO en todos los módulos -->
-            <div class="form-section" style="margin-bottom: 2rem;">
-                <h3 style="margin: 0 0 0.75rem 0; font-size: 1rem; font-weight: 700;">Correos de consejería</h3>
-                <p style="color: var(--text-tertiary); font-size: 0.8125rem; margin: 0 0 0.75rem 0; line-height: 1.45;">Estas direcciones son el <strong>CCO global</strong> (buzón del edificio y copias extra). Cada módulo, más abajo, puede incluirlas o no, desactivar el CCO automático o agregar correos propios. En cada envío también puede desmarcar copias.</p>
-                <div style="margin: 0 0 1rem 0; padding: 0.85rem 1rem; border: 1px solid var(--border-color); border-radius: 10px; background: var(--bg-secondary);">
-                    <p style="margin: 0 0 0.65rem 0; font-size: 0.8125rem; font-weight: 700; color: var(--text-primary);">Buzón de conserjería del edificio</p>
-                    <label style="display: flex; align-items: flex-start; gap: 0.5rem; margin-bottom: 0.65rem; cursor: pointer; font-size: 0.8125rem; color: var(--text-secondary);">
-                        <input type="checkbox" id="correoConsejeriaBuzonActivo" checked style="margin-top: 0.15rem; flex-shrink: 0;">
-                        <span>Incluir este correo en el CCO global (los módulos que hereden el CCO global lo recibirán; puede desmarcarlo al enviar)</span>
+            <div id="notifSubCco" class="form-section" hidden>
+                <h3>Copias ocultas (CCO)</h3>
+                <p class="notif-hint">El buzón y las copias extra se envían en todos los módulos, salvo que un tipo de correo las desactive. En cada envío puede desmarcar copias.</p>
+                <div class="notif-grid">
+                    <div class="notif-card">
+                        <h4>Buzón del edificio</h4>
+                        <label style="display: flex; align-items: flex-start; gap: 0.45rem; margin-bottom: 0.55rem; cursor: pointer; font-size: 0.8125rem; color: var(--text-secondary);">
+                            <input type="checkbox" id="correoConsejeriaBuzonActivo" checked style="margin-top: 0.15rem; flex-shrink: 0;">
+                            <span>Incluir en el CCO global</span>
+                        </label>
+                        <div class="form-group">
+                            <label for="correoConsejeriaBuzonNombre">Nombre</label>
+                            <input type="text" id="correoConsejeriaBuzonNombre" placeholder="Conserjería">
+                        </div>
+                        <div class="form-group">
+                            <label for="correoConsejeriaBuzonEmail">Correo</label>
+                            <input type="email" id="correoConsejeriaBuzonEmail" placeholder="conserjeria.wm815@gmail.com">
+                        </div>
+                        <button type="button" class="btn btn-primary" id="btnGuardarBuzonConsejeria">Guardar buzón</button>
+                    </div>
+                    <div class="notif-card">
+                        <h4>Copias extra</h4>
+                        <form id="formCorreoConsejeria">
+                            <div class="form-group">
+                                <label>Nombre *</label>
+                                <input type="text" id="correoConsejeriaNombre" required placeholder="Turno noche, reemplazo…">
+                            </div>
+                            <div class="form-group">
+                                <label>Correo *</label>
+                                <input type="email" id="correoConsejeriaEmail" required placeholder="copia@ejemplo.com">
+                            </div>
+                            <button type="submit" class="btn btn-primary">Agregar</button>
+                        </form>
+                    </div>
+                </div>
+                <div style="margin-top: 0.85rem;">
+                    <table id="tablaCorreosConsejeria" class="notif-tabla">
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Correo</th>
+                                <th style="text-align: center; width: 96px;">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyCorreosConsejeria"></tbody>
+                    </table>
+                </div>
+
+                <details class="notif-details">
+                    <summary>Ajustar CCO por tipo de correo</summary>
+                    <p class="notif-hint" style="margin-top: 0;">Elija un reporte o comprobante para activar, heredar el CCO global o agregar copias solo a ese envío.</p>
+                    <div class="form-group">
+                        <label>Tipo de correo</label>
+                        <select id="ccoCorreoModuloSel"></select>
+                    </div>
+                    <label style="display: flex; align-items: flex-start; gap: 0.45rem; margin-bottom: 0.4rem; cursor: pointer; font-size: 0.8125rem; color: var(--text-secondary);">
+                        <input type="checkbox" id="ccoCorreoModuloActivo" checked style="margin-top: 0.15rem; flex-shrink: 0;">
+                        <span>Enviar CCO automático</span>
                     </label>
-                    <div class="form-row" style="gap: 0.5rem; margin-bottom: 0;">
-                        <div class="form-group" style="flex: 1; margin-bottom: 0.5rem;">
-                            <label for="correoConsejeriaBuzonNombre" style="margin-bottom: 0.25rem; font-size: 0.8125rem;">Nombre</label>
-                            <input type="text" id="correoConsejeriaBuzonNombre" placeholder="Conserjería" style="padding: 0.5rem; font-size: 0.875rem; width: 100%; box-sizing: border-box;">
-                        </div>
-                        <div class="form-group" style="flex: 1.4; margin-bottom: 0.5rem;">
-                            <label for="correoConsejeriaBuzonEmail" style="margin-bottom: 0.25rem; font-size: 0.8125rem;">Correo</label>
-                            <input type="email" id="correoConsejeriaBuzonEmail" placeholder="conserjeria.wm815@gmail.com" style="padding: 0.5rem; font-size: 0.875rem; width: 100%; box-sizing: border-box;">
-                        </div>
-                        <div class="form-group" style="display: flex; align-items: flex-end; margin-bottom: 0.5rem;">
-                            <button type="button" class="btn btn-primary" id="btnGuardarBuzonConsejeria" style="padding: 0.5rem 1rem; font-size: 0.875rem;">Guardar buzón</button>
-                        </div>
-                    </div>
-                </div>
-                <p style="color: var(--text-tertiary); font-size: 0.8125rem; margin: 0 0 0.5rem 0;">Copias adicionales (turnos, reemplazos, etc.):</p>
-                <form id="formCorreoConsejeria">
-                    <div class="form-row" style="gap: 0.5rem; margin-bottom: 0.5rem;">
-                        <div class="form-group" style="flex: 1; margin-bottom: 0.5rem;">
-                            <label style="margin-bottom: 0.25rem; font-size: 0.875rem;">Nombre *</label>
-                            <input type="text" id="correoConsejeriaNombre" required placeholder="Ej: Conserje, turno noche" style="padding: 0.5rem; font-size: 0.875rem;">
-                        </div>
-                        <div class="form-group" style="flex: 1; margin-bottom: 0.5rem;">
-                            <label style="margin-bottom: 0.25rem; font-size: 0.875rem;">Correo electrónico *</label>
-                            <input type="email" id="correoConsejeriaEmail" required placeholder="consejeria@ejemplo.com" style="padding: 0.5rem; font-size: 0.875rem;">
-                        </div>
-                        <div class="form-group" style="display: flex; align-items: flex-end; margin-bottom: 0.5rem;">
-                            <button type="submit" class="btn btn-primary" style="padding: 0.5rem 1rem; font-size: 0.875rem;">Agregar</button>
-                        </div>
-                    </div>
-                </form>
-                <div style="margin-top: 1rem;">
-                    <table id="tablaCorreosConsejeria" style="width: 100%; border-collapse: collapse; background: var(--bg-primary); border-radius: 8px; overflow: hidden;">
+                    <label style="display: flex; align-items: flex-start; gap: 0.45rem; margin-bottom: 0.7rem; cursor: pointer; font-size: 0.8125rem; color: var(--text-secondary);">
+                        <input type="checkbox" id="ccoCorreoModuloIncluirGlobal" checked style="margin-top: 0.15rem; flex-shrink: 0;">
+                        <span>Incluir el CCO global</span>
+                    </label>
+                    <p class="notif-hint" style="margin-bottom: 0.4rem;">Copias extra de este tipo</p>
+                    <table class="notif-tabla" style="margin-bottom: 0.7rem;">
                         <thead>
-                            <tr style="background: linear-gradient(135deg, #75bb21 0%, #5a9219 100%); color: white;">
-                                <th style="padding: 0.75rem; text-align: left; font-weight: 600;">Nombre</th>
-                                <th style="padding: 0.75rem; text-align: left; font-weight: 600;">Correo</th>
-                                <th style="padding: 0.75rem; text-align: center; font-weight: 600; width: 100px;">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tbodyCorreosConsejeria">
-                            <!-- Se llena dinámicamente -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- CCO automático por módulo -->
-            <div class="form-section" style="margin-bottom: 2rem;">
-                <h3 style="margin: 0 0 0.5rem 0; font-size: 1rem; font-weight: 700;">CCO automático por módulo</h3>
-                <p style="color: var(--text-tertiary); font-size: 0.8125rem; margin: 0 0 1rem 0; line-height: 1.45;">Defina, para cada tipo de correo de la app, si se envía CCO, si se heredan las direcciones globales y qué copias extra se agregan. Los cambios se aplican al enviar reportes, comprobantes, mudanzas, aperturas, espacios, bienvenida y demás módulos.</p>
-                <div class="form-group" style="margin-bottom: 0.75rem;">
-                    <label style="margin-bottom: 0.25rem; font-size: 0.875rem; display: block;">Módulo / tipo de correo</label>
-                    <select id="ccoCorreoModuloSel" style="width: 100%; max-width: 520px; padding: 0.5rem; font-size: 0.875rem; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-primary); color: var(--text-primary);"></select>
-                </div>
-                <label style="display: flex; align-items: flex-start; gap: 0.5rem; margin-bottom: 0.55rem; cursor: pointer; font-size: 0.8125rem; color: var(--text-secondary);">
-                    <input type="checkbox" id="ccoCorreoModuloActivo" checked style="margin-top: 0.15rem; flex-shrink: 0;">
-                    <span>Enviar CCO automático en este módulo</span>
-                </label>
-                <label style="display: flex; align-items: flex-start; gap: 0.5rem; margin-bottom: 0.85rem; cursor: pointer; font-size: 0.8125rem; color: var(--text-secondary);">
-                    <input type="checkbox" id="ccoCorreoModuloIncluirGlobal" checked style="margin-top: 0.15rem; flex-shrink: 0;">
-                    <span>Incluir el CCO global (buzón y copias adicionales de conserjería)</span>
-                </label>
-                <p style="color: var(--text-tertiary); font-size: 0.8125rem; margin: 0 0 0.5rem 0;">Copias extra solo para este módulo:</p>
-                <form id="formCcoCorreoModulo">
-                    <div class="form-row" style="gap: 0.5rem; margin-bottom: 0.5rem;">
-                        <div class="form-group" style="flex: 1; margin-bottom: 0.5rem;">
-                            <label style="margin-bottom: 0.25rem; font-size: 0.875rem;">Nombre *</label>
-                            <input type="text" id="ccoCorreoModuloNombre" required placeholder="Ej: Comité, administración" style="padding: 0.5rem; font-size: 0.875rem;">
-                        </div>
-                        <div class="form-group" style="flex: 1; margin-bottom: 0.5rem;">
-                            <label style="margin-bottom: 0.25rem; font-size: 0.875rem;">Correo electrónico *</label>
-                            <input type="email" id="ccoCorreoModuloEmail" required placeholder="copia@ejemplo.com" style="padding: 0.5rem; font-size: 0.875rem;">
-                        </div>
-                        <div class="form-group" style="display: flex; align-items: flex-end; margin-bottom: 0.5rem;">
-                            <button type="submit" class="btn btn-primary" style="padding: 0.5rem 1rem; font-size: 0.875rem;">Agregar a este módulo</button>
-                        </div>
-                    </div>
-                </form>
-                <div style="margin-top: 0.5rem;">
-                    <table style="width: 100%; border-collapse: collapse; background: var(--bg-primary); border-radius: 8px; overflow: hidden;">
-                        <thead>
-                            <tr style="background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); color: white;">
-                                <th style="padding: 0.75rem; text-align: left; font-weight: 600;">Nombre</th>
-                                <th style="padding: 0.75rem; text-align: left; font-weight: 600;">Correo</th>
-                                <th style="padding: 0.75rem; text-align: center; font-weight: 600; width: 100px;">Acciones</th>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Correo</th>
+                                <th style="text-align: center; width: 96px;">Acciones</th>
                             </tr>
                         </thead>
                         <tbody id="tbodyCcoCorreoModulo"></tbody>
                     </table>
-                </div>
-                <div style="margin-top: 0.75rem; display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center;">
-                    <button type="button" class="btn btn-primary" id="btnGuardarCcoCorreoModulo" style="padding: 0.5rem 1rem; font-size: 0.875rem;">Guardar CCO de este módulo</button>
-                    <button type="button" class="btn btn-secondary" id="btnRestablecerCcoCorreoModulo" style="padding: 0.5rem 1rem; font-size: 0.875rem;">Restablecer a CCO global</button>
-                </div>
-                <div id="resumenCcoCorreoModulos" style="margin-top: 1rem;"></div>
+                    <details style="margin-bottom: 0.7rem;">
+                        <summary style="cursor: pointer; font-size: 0.8125rem; font-weight: 650; margin-bottom: 0.45rem;">Agregar desde destinatarios</summary>
+                        <div id="ccoDesdeAdminLista" style="max-height: 160px; overflow: auto; margin-bottom: 0.45rem;"></div>
+                        <button type="button" class="btn btn-primary" id="btnCcoAgregarDesdeAdmin">Agregar seleccionados</button>
+                    </details>
+                    <form id="formCcoCorreoModulo">
+                        <div class="form-row" style="gap: 0.5rem; align-items: flex-end;">
+                            <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                                <label>Nombre</label>
+                                <input type="text" id="ccoCorreoModuloNombre" placeholder="Opcional">
+                            </div>
+                            <div class="form-group" style="flex: 1.7; margin-bottom: 0;">
+                                <label>Correo(s) extra *</label>
+                                <textarea id="ccoCorreoModuloEmail" required rows="2" placeholder="copia@ejemplo.com"></textarea>
+                            </div>
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <button type="submit" class="btn btn-primary">Agregar</button>
+                            </div>
+                        </div>
+                    </form>
+                    <div style="margin-top: 0.7rem; display: flex; gap: 0.45rem; flex-wrap: wrap;">
+                        <button type="button" class="btn btn-primary" id="btnGuardarCcoCorreoModulo">Guardar</button>
+                        <button type="button" class="btn btn-secondary" id="btnRestablecerCcoCorreoModulo">Usar solo CCO global</button>
+                    </div>
+                    <div id="resumenCcoCorreoModulos" style="margin-top: 0.85rem;"></div>
+                </details>
             </div>
 
-            <!-- Plantillas de asunto y cuerpo (correos por módulo) -->
-            <div class="form-section" style="margin-bottom: 2rem;">
-                <h3 style="margin: 0 0 0.5rem 0; font-size: 1rem; font-weight: 700;">Plantillas de correo por módulo</h3>
-                <p style="color: var(--text-tertiary); font-size: 0.8125rem; margin: 0 0 1rem 0; line-height: 1.45;">Configure el <strong>asunto</strong> y el <strong>mensaje al inicio</strong> que se mostrarán por defecto al enviar correo desde cada módulo (siempre podrá cambiarlos en la ventana de envío). En asunto y texto puede usar: <code style="font-size: 0.78rem;">{{comunidad}}</code>, <code style="font-size: 0.78rem;">{{mes}}</code>, <code style="font-size: 0.78rem;">{{fecha}}</code>, <code style="font-size: 0.78rem;">{{espacio}}</code>, <code style="font-size: 0.78rem;">{{departamento}}</code>, <code style="font-size: 0.78rem;">{{residente}}</code>. Deje el asunto vacío para conservar el texto automático del sistema.</p>
-                <div class="form-group" style="margin-bottom: 0.75rem;">
-                    <label style="margin-bottom: 0.25rem; font-size: 0.875rem; display: block;">Módulo</label>
-                    <select id="plantillaCorreoModuloSel" style="width: 100%; max-width: 520px; padding: 0.5rem; font-size: 0.875rem; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-primary); color: var(--text-primary);"></select>
+            <div id="notifSubPlant" class="form-section" hidden>
+                <h3>Textos por tipo de correo</h3>
+                <p class="notif-hint">Asunto y mensaje inicial al enviar. Si deja el asunto vacío, se usa el del sistema. Placeholders:
+                    <span class="notif-ph">{{comunidad}}</span>
+                    <span class="notif-ph">{{mes}}</span>
+                    <span class="notif-ph">{{fecha}}</span>
+                    <span class="notif-ph">{{espacio}}</span>
+                    <span class="notif-ph">{{departamento}}</span>
+                    <span class="notif-ph">{{residente}}</span>
+                </p>
+                <div class="form-group">
+                    <label>Tipo de correo</label>
+                    <select id="plantillaCorreoModuloSel"></select>
                 </div>
-                <div class="form-group" style="margin-bottom: 0.65rem;">
-                    <label style="margin-bottom: 0.25rem; font-size: 0.875rem; display: block;">Asunto predeterminado <span style="font-weight: 400; color: var(--text-tertiary);">(vacío = asunto del sistema)</span></label>
-                    <input type="text" id="plantillaCorreoAsunto" placeholder="Ej.: Reporte de Caja Chica - {{comunidad}} - {{mes}}" style="width: 100%; padding: 0.5rem; font-size: 0.875rem; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-primary); color: var(--text-primary); box-sizing: border-box;">
+                <div class="form-group">
+                    <label>Asunto <span style="font-weight: 400; color: var(--text-tertiary);">(vacío = automático)</span></label>
+                    <input type="text" id="plantillaCorreoAsunto" placeholder="Reporte de Caja Chica - {{comunidad}} - {{mes}}">
                 </div>
-                <div class="form-group" style="margin-bottom: 0.65rem;">
-                    <label style="margin-bottom: 0.25rem; font-size: 0.875rem; display: block;">Mensaje al inicio del correo</label>
-                    <textarea id="plantillaCorreoCuerpo" rows="4" placeholder="Párrafo opcional que aparece antes del contenido generado (reporte o comprobante)." style="width: 100%; padding: 0.5rem; font-size: 0.875rem; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-primary); color: var(--text-primary); font-family: inherit; resize: vertical; box-sizing: border-box;"></textarea>
+                <div class="form-group">
+                    <label>Mensaje al inicio</label>
+                    <textarea id="plantillaCorreoCuerpo" rows="4" placeholder="Párrafo opcional antes del reporte o comprobante."></textarea>
                 </div>
-                <div id="plantillaCorreoPostventaPendExtra" style="display: none; margin-bottom: 0.65rem; padding: 0.75rem; background: var(--bg-tertiary); border-radius: 8px; border: 1px solid var(--border-color);">
-                    <p style="font-size: 0.8125rem; color: var(--text-secondary); margin: 0 0 0.5rem 0;">Solo para <strong>Postventa — correo con selección de registros</strong>: textos del primer paso (elegir filas antes de destinatarios).</p>
-                    <div class="form-group" style="margin-bottom: 0.5rem;">
-                        <label style="font-size: 0.8125rem; display: block; margin-bottom: 0.25rem;">Saludo inicial</label>
-                        <input type="text" id="plantillaCorreoSaludoLista" placeholder="Estimado/a," style="width: 100%; padding: 0.45rem; font-size: 0.8125rem; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-primary); color: var(--text-primary); box-sizing: border-box;">
+                <div id="plantillaCorreoPostventaPendExtra" style="display: none; margin-bottom: 0.65rem; padding: 0.75rem; background: var(--bg-secondary); border-radius: 8px; border: 1px solid var(--border-color);">
+                    <p class="notif-hint" style="margin-bottom: 0.5rem;">Solo Postventa con selección de registros: textos del primer paso.</p>
+                    <div class="form-group">
+                        <label>Saludo inicial</label>
+                        <input type="text" id="plantillaCorreoSaludoLista" placeholder="Estimado/a,">
                     </div>
                     <div class="form-group" style="margin-bottom: 0;">
-                        <label style="font-size: 0.8125rem; display: block; margin-bottom: 0.25rem;">Párrafo introductorio</label>
-                        <textarea id="plantillaCorreoTextoIntroLista" rows="2" placeholder="Junto con saludar…" style="width: 100%; padding: 0.45rem; font-size: 0.8125rem; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-primary); color: var(--text-primary); font-family: inherit; box-sizing: border-box;"></textarea>
+                        <label>Párrafo introductorio</label>
+                        <textarea id="plantillaCorreoTextoIntroLista" rows="2" placeholder="Junto con saludar…"></textarea>
                     </div>
                 </div>
-                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center;">
-                    <button type="button" class="btn btn-primary" id="btnGuardarPlantillaCorreoModulo" style="padding: 0.5rem 1rem; font-size: 0.875rem;">Guardar plantilla</button>
-                    <button type="button" class="btn btn-secondary" id="btnLimpiarPlantillaCorreoModulo" style="padding: 0.5rem 1rem; font-size: 0.875rem;">Quitar plantilla de este módulo</button>
+                <div style="display: flex; gap: 0.45rem; flex-wrap: wrap;">
+                    <button type="button" class="btn btn-primary" id="btnGuardarPlantillaCorreoModulo">Guardar texto</button>
+                    <button type="button" class="btn btn-secondary" id="btnLimpiarPlantillaCorreoModulo">Quitar texto guardado</button>
                 </div>
             </div>
         </div>
@@ -12641,6 +12811,7 @@
                         if (typeof cargarFormBuzonConsejeria === 'function') cargarFormBuzonConsejeria();
                         if (typeof refrescarEditorPlantillasCorreoModulos === 'function') refrescarEditorPlantillasCorreoModulos();
                         if (typeof refrescarEditorCcoCorreoModulos === 'function') refrescarEditorCcoCorreoModulos();
+                        if (typeof actualizarResumenNotificaciones === 'function') actualizarResumenNotificaciones();
                     } else if (tabName === 'personalizacion') {
                         if (typeof cargarPersonalizacion === 'function') {
                             cargarPersonalizacion();
@@ -14716,6 +14887,36 @@
             if (!id) return normalizarConfigCcoModulo(null);
             const map = await obtenerMapaCcoCorreoModulos();
             return normalizarConfigCcoModulo(map[id]);
+        }
+
+        function parsearEntradasCorreoLista(texto, nombreDefault) {
+            const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            const out = [];
+            const seen = new Set();
+            const push = function (nombre, correo) {
+                const em = String(correo || '').trim();
+                if (!emailRe.test(em)) return;
+                const k = em.toLowerCase();
+                if (seen.has(k)) return;
+                seen.add(k);
+                out.push({
+                    nombre: String(nombre || '').trim() || String(nombreDefault || '').trim() || (em.split('@')[0] || 'Administración'),
+                    correo: em
+                });
+            };
+            String(texto || '').split(/[\n;,]+/).forEach(function (chunk) {
+                const t = String(chunk || '').trim();
+                if (!t) return;
+                const ang = t.match(/^(.*)<\s*([^>\s]+@[^>\s]+)\s*>$/);
+                if (ang) {
+                    push(String(ang[1] || '').replace(/^["']|["']$/g, '').trim(), ang[2]);
+                    return;
+                }
+                t.split(/\s+/).forEach(function (tok) {
+                    push('', String(tok || '').replace(/^<|>$/g, ''));
+                });
+            });
+            return out;
         }
 
         function obtenerBloquePlantillaModulo(map, idModulo) {
@@ -32978,21 +33179,21 @@ document.getElementById('chatForm').onsubmit = function (e) {
             if (!tbody) return;
 
             if (correosConsejeria.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="3" style="padding: 2rem; text-align: center; color: var(--text-tertiary); font-style: italic; background: var(--bg-primary);"><p>No hay copias adicionales. El buzón del edificio se programa arriba.</p></td></tr>';
+                tbody.innerHTML = '<tr><td colspan="3" style="padding: 1.1rem; text-align: center; color: var(--text-tertiary); font-style: italic;">Sin copias extra. El buzón se configura arriba.</td></tr>';
+                actualizarResumenNotificaciones();
                 return;
             }
 
             tbody.innerHTML = correosConsejeria.map((correo, index) => `
-                <tr style="background: ${index % 2 === 0 ? 'var(--bg-primary)' : 'var(--bg-secondary)'}; border-bottom: 1px solid var(--border-color);">
-                    <td style="padding: 0.75rem; color: var(--text-primary); font-weight: 500;">${correo.nombre || 'Sin nombre'}</td>
-                    <td style="padding: 0.75rem; color: var(--text-secondary); font-size: 0.875rem;">${correo.correo || ''}</td>
-                    <td style="padding: 0.75rem; text-align: center;">
-                        <div class="tabla-acciones">
-                        <button class="btn btn-danger btn-sm" onclick="eliminarCorreoConsejeria(${index})" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">Eliminar</button>
-                        </div>
+                <tr>
+                    <td style="font-weight: 500;">${correo.nombre || 'Sin nombre'}</td>
+                    <td style="color: var(--text-secondary);">${correo.correo || ''}</td>
+                    <td style="text-align: center;">
+                        <button class="btn btn-danger btn-sm" onclick="eliminarCorreoConsejeria(${index})" style="padding: 0.2rem 0.45rem; font-size: 0.75rem;">Eliminar</button>
                     </td>
                 </tr>
             `).join('');
+            actualizarResumenNotificaciones();
         }
 
         async function agregarCorreoConsejeria(event) {
@@ -33033,6 +33234,45 @@ document.getElementById('chatForm').onsubmit = function (e) {
             }
         }
 
+        function mostrarSubtabNotificaciones(id) {
+            const panes = ['notifSubDest', 'notifSubCco', 'notifSubPlant'];
+            const destino = panes.indexOf(id) >= 0 ? id : 'notifSubDest';
+            panes.forEach(function (p) {
+                const el = document.getElementById(p);
+                if (el) el.hidden = p !== destino;
+            });
+            document.querySelectorAll('#notificaciones [data-notif-sub]').forEach(function (b) {
+                if (b.classList.contains('notif-subnav-btn')) {
+                    b.classList.toggle('is-on', b.getAttribute('data-notif-sub') === destino);
+                }
+            });
+            if (destino === 'notifSubCco' && typeof refrescarEditorCcoCorreoModulos === 'function') {
+                refrescarEditorCcoCorreoModulos();
+            }
+            if (destino === 'notifSubPlant' && typeof refrescarEditorPlantillasCorreoModulos === 'function') {
+                refrescarEditorPlantillasCorreoModulos();
+            }
+            actualizarResumenNotificaciones();
+        }
+        window.mostrarSubtabNotificaciones = mostrarSubtabNotificaciones;
+
+        function actualizarResumenNotificaciones() {
+            const nAdmin = Array.isArray(correosAdministrativos) ? correosAdministrativos.length : 0;
+            const nCco = Array.isArray(correosConsejeria) ? correosConsejeria.length : 0;
+            const mapPlant = window._plantillasCorreoModulosEditable || {};
+            let nPlant = 0;
+            Object.keys(mapPlant).forEach(function (k) {
+                const row = mapPlant[k];
+                if (row && (String(row.asunto || '').trim() || String(row.cuerpoInicio || '').trim())) nPlant += 1;
+            });
+            const elA = document.getElementById('notifChipAdmin');
+            const elC = document.getElementById('notifChipCco');
+            const elP = document.getElementById('notifChipPlant');
+            if (elA) elA.textContent = String(nAdmin);
+            if (elC) elC.textContent = String(nCco);
+            if (elP) elP.textContent = String(nPlant);
+        }
+
         // Cargar correos administrativos al iniciar
         async function cargarCorreosAdministrativos() {
             try {
@@ -33052,52 +33292,64 @@ document.getElementById('chatForm').onsubmit = function (e) {
             if (!tbody) return;
             
             if (correosAdministrativos.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="3" style="padding: 2rem; text-align: center; color: var(--text-tertiary); font-style: italic; background: var(--bg-primary);"><p>No hay correos administrativos registrados</p></td></tr>';
+                tbody.innerHTML = '<tr><td colspan="3" style="padding: 1.1rem; text-align: center; color: var(--text-tertiary); font-style: italic;">Sin destinatarios todavía</td></tr>';
+                actualizarResumenNotificaciones();
                 return;
             }
             
             tbody.innerHTML = correosAdministrativos.map((correo, index) => `
-                <tr style="background: ${index % 2 === 0 ? 'var(--bg-primary)' : 'var(--bg-secondary)'}; border-bottom: 1px solid var(--border-color);">
-                    <td style="padding: 0.75rem; color: var(--text-primary); font-weight: 500;">${correo.nombre || 'Sin nombre'}</td>
-                    <td style="padding: 0.75rem; color: var(--text-secondary); font-size: 0.875rem;">${correo.correo || ''}</td>
-                    <td style="padding: 0.75rem; text-align: center;">
-                        <div class="tabla-acciones">
-                        <button class="btn btn-danger btn-sm" onclick="eliminarCorreoAdmin(${index})" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">Eliminar</button>
-                        </div>
+                <tr>
+                    <td style="font-weight: 500;">${correo.nombre || 'Sin nombre'}</td>
+                    <td style="color: var(--text-secondary);">${correo.correo || ''}</td>
+                    <td style="text-align: center;">
+                        <button class="btn btn-danger btn-sm" onclick="eliminarCorreoAdmin(${index})" style="padding: 0.2rem 0.45rem; font-size: 0.75rem;">Eliminar</button>
                     </td>
                 </tr>
             `).join('');
+            actualizarResumenNotificaciones();
         }
         
         // Agregar correo administrativo
         async function agregarCorreoAdmin(event) {
             event.preventDefault();
             const nombre = document.getElementById('correoAdminNombre').value.trim();
-            const correo = document.getElementById('correoAdminEmail').value.trim();
-            
-            if (!nombre || !correo) {
-                mostrarAlerta('Complete todos los campos', 'Error');
+            const textoCorreos = document.getElementById('correoAdminEmail').value.trim();
+            const entradas = typeof parsearEntradasCorreoLista === 'function'
+                ? parsearEntradasCorreoLista(textoCorreos, nombre)
+                : [];
+
+            if (!textoCorreos) {
+                mostrarAlerta('Ingrese al menos un correo electrónico', 'Error');
                 return;
             }
-            
-            // Validar formato de correo
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailRegex.test(correo)) {
-                mostrarAlerta('Ingrese un correo electrónico válido', 'Error');
+            if (!entradas.length) {
+                mostrarAlerta('No se encontró ningún correo válido. Separe varios con coma o salto de línea.', 'Error');
                 return;
             }
-            
-            // Verificar si ya existe
-            if (correosAdministrativos.some(c => c.correo.toLowerCase() === correo.toLowerCase())) {
-                mostrarAlerta('Este correo ya está registrado', 'Error');
+            if (entradas.length === 1 && !nombre && !textoCorreos.includes('<')) {
+                mostrarAlerta('Indique un nombre para este correo, o pegue varios de una vez.', 'Error');
                 return;
             }
-            
-            correosAdministrativos.push({ nombre, correo });
+
+            const existentes = new Set(
+                (correosAdministrativos || []).map(function (c) { return String((c && c.correo) || '').trim().toLowerCase(); }).filter(Boolean)
+            );
+            const nuevos = entradas.filter(function (e) { return e.correo && !existentes.has(e.correo.toLowerCase()); });
+            const omitidos = entradas.length - nuevos.length;
+            if (!nuevos.length) {
+                mostrarAlerta('Esos correos ya están en el listado administrativo.', 'Error');
+                return;
+            }
+
+            nuevos.forEach(function (e) { correosAdministrativos.push({ nombre: e.nombre, correo: e.correo }); });
             await guardarDatos('correosAdministrativos', correosAdministrativos);
             document.getElementById('formCorreoAdmin').reset();
             renderizarCorreosAdmin();
-            mostrarAlerta('Correo administrativo agregado correctamente', 'Éxito');
+            if (typeof renderizarListaCcoDesdeAdmin === 'function') renderizarListaCcoDesdeAdmin();
+            const msg = nuevos.length === 1
+                ? 'Correo administrativo agregado correctamente'
+                : (nuevos.length + ' correos administrativos agregados');
+            mostrarAlerta(omitidos ? (msg + '. ' + omitidos + ' ya estaban registrados.') : msg, 'Éxito');
         }
         
         // Eliminar correo administrativo
@@ -33161,6 +33413,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
             map[id] = entry;
             await guardarDatos('plantillasCorreoModulos', map);
             window._plantillasCorreoModulosEditable = map;
+            actualizarResumenNotificaciones();
             mostrarAlerta('Plantilla guardada. Se aplicará al enviar correos desde ese módulo.', 'Éxito');
         }
 
@@ -33175,6 +33428,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
             await guardarDatos('plantillasCorreoModulos', map);
             window._plantillasCorreoModulosEditable = map;
             actualizarCamposPlantillaCorreoModuloUI();
+            actualizarResumenNotificaciones();
             mostrarAlerta('Plantilla eliminada.', 'Éxito');
         }
 
@@ -33210,7 +33464,87 @@ document.getElementById('chatForm').onsubmit = function (e) {
             if (act) act.checked = cfg.activo !== false;
             if (glob) glob.checked = cfg.incluirGlobal !== false;
             renderizarTablaCcoCorreoModulo(cfg.correos);
+            renderizarListaCcoDesdeAdmin();
         }
+
+        function renderizarListaCcoDesdeAdmin() {
+            const wrap = document.getElementById('ccoDesdeAdminLista');
+            if (!wrap) return;
+            const id = idCcoCorreoModuloSeleccionado();
+            const map = window._ccoCorreoModulosEditable || {};
+            const cfg = normalizarConfigCcoModulo(id ? map[id] : null);
+            const ya = new Set((cfg.correos || []).map(function (c) {
+                return String((c && c.correo) || '').trim().toLowerCase();
+            }).filter(Boolean));
+            const lista = Array.isArray(correosAdministrativos) ? correosAdministrativos : [];
+            const disponibles = lista.filter(function (c) {
+                const em = String((c && c.correo) || '').trim();
+                return em && em.indexOf('@') > 0 && !ya.has(em.toLowerCase());
+            });
+            if (!lista.length) {
+                wrap.innerHTML = '<p style="margin: 0; font-size: 0.8125rem; color: var(--text-tertiary); font-style: italic;">No hay correos en el listado administrativo. Agréguelos arriba y vuelva a esta sección.</p>';
+                return;
+            }
+            if (!disponibles.length) {
+                wrap.innerHTML = '<p style="margin: 0; font-size: 0.8125rem; color: var(--text-tertiary); font-style: italic;">Todos los correos administrativos ya están en el CCO de este módulo.</p>';
+                return;
+            }
+            wrap.innerHTML = '<label style="display:flex;align-items:center;gap:0.45rem;margin-bottom:0.45rem;font-size:0.8125rem;cursor:pointer;">' +
+                '<input type="checkbox" id="ccoDesdeAdminTodos"> Seleccionar todos (' + disponibles.length + ')</label>' +
+                disponibles.map(function (c, i) {
+                    const em = String(c.correo || '').replace(/"/g, '&quot;');
+                    const nm = String(c.nombre || 'Administración').replace(/</g, '&lt;');
+                    return '<label style="display:flex;align-items:flex-start;gap:0.45rem;margin-bottom:0.35rem;font-size:0.8125rem;cursor:pointer;">' +
+                        '<input type="checkbox" class="cco-desde-admin-item" data-cco-admin-idx="' + i + '" data-cco-admin-email="' + em + '" style="margin-top:0.15rem;flex-shrink:0;">' +
+                        '<span><strong>' + nm + '</strong><br><span style="color:var(--text-secondary);word-break:break-all;">' + String(c.correo || '').replace(/</g, '&lt;') + '</span></span></label>';
+                }).join('');
+            const todos = document.getElementById('ccoDesdeAdminTodos');
+            if (todos && !todos.dataset.listenerCco) {
+                todos.dataset.listenerCco = '1';
+                todos.addEventListener('change', function () {
+                    wrap.querySelectorAll('.cco-desde-admin-item').forEach(function (cb) { cb.checked = todos.checked; });
+                });
+            }
+        }
+
+        async function agregarCcoDesdeAdminSeleccionados() {
+            const wrap = document.getElementById('ccoDesdeAdminLista');
+            if (!wrap) return;
+            const id = idCcoCorreoModuloSeleccionado();
+            if (!id) return;
+            const checks = Array.from(wrap.querySelectorAll('.cco-desde-admin-item:checked'));
+            if (!checks.length) {
+                mostrarAlerta('Marque al menos un correo administrativo.', 'Error');
+                return;
+            }
+            const mapaAdmin = {};
+            (correosAdministrativos || []).forEach(function (c) {
+                const k = String((c && c.correo) || '').trim().toLowerCase();
+                if (k) mapaAdmin[k] = c;
+            });
+            const nuevos = [];
+            const seen = new Set();
+            checks.forEach(function (cb) {
+                const em = String(cb.getAttribute('data-cco-admin-email') || '').trim();
+                const k = em.toLowerCase();
+                if (!em || seen.has(k)) return;
+                seen.add(k);
+                const src = mapaAdmin[k] || {};
+                nuevos.push({
+                    nombre: String(src.nombre || '').trim() || (em.split('@')[0] || 'Administración'),
+                    correo: em
+                });
+            });
+            try {
+                const n = await agregarCorreosCcoModuloLista(nuevos);
+                if (n > 0) {
+                    mostrarAlerta(n === 1 ? 'Correo administrativo agregado al CCO de este módulo' : (n + ' correos administrativos agregados al CCO de este módulo'), 'Éxito');
+                }
+            } catch (e) {
+                mostrarAlerta('No se pudieron agregar: ' + (e && e.message ? e.message : 'error'), 'Error');
+            }
+        }
+        window.agregarCcoDesdeAdminSeleccionados = agregarCcoDesdeAdminSeleccionados;
 
         function renderizarTablaCcoCorreoModulo(correos) {
             const tbody = document.getElementById('tbodyCcoCorreoModulo');
@@ -33248,9 +33582,9 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 return '<tr><td style="padding: 0.4rem 0.55rem; border-bottom: 1px solid var(--border-color);">' + String(m.label).replace(/</g, '&lt;') + '</td>' +
                     '<td style="padding: 0.4rem 0.55rem; border-bottom: 1px solid var(--border-color); color: var(--text-secondary); font-size: 0.8125rem;">' + estado.replace(/</g, '&lt;') + '</td></tr>';
             }).join('');
-            wrap.innerHTML = '<p style="margin: 0 0 0.4rem 0; font-size: 0.8125rem; font-weight: 700;">Resumen por módulo</p>' +
-                '<div style="overflow: auto; max-height: 220px; border: 1px solid var(--border-color); border-radius: 8px;">' +
-                '<table style="width: 100%; border-collapse: collapse; font-size: 0.8125rem;"><thead><tr style="background: var(--bg-secondary);"><th style="text-align:left; padding: 0.45rem 0.55rem;">Módulo</th><th style="text-align:left; padding: 0.45rem 0.55rem;">CCO automático</th></tr></thead><tbody>' +
+            wrap.innerHTML = '<p style="margin: 0 0 0.35rem 0; font-size: 0.78rem; font-weight: 700;">Estado por tipo</p>' +
+                '<div style="overflow: auto; max-height: 160px; border: 1px solid var(--border-color); border-radius: 8px;">' +
+                '<table class="notif-tabla"><thead><tr><th>Tipo</th><th>CCO</th></tr></thead><tbody>' +
                 filas + '</tbody></table></div>';
         }
 
@@ -33284,6 +33618,41 @@ document.getElementById('chatForm').onsubmit = function (e) {
             }
         }
 
+        async function agregarCorreosCcoModuloLista(entradas) {
+            const id = idCcoCorreoModuloSeleccionado();
+            if (!id) return 0;
+            const lista = Array.isArray(entradas) ? entradas : [];
+            const map = window._ccoCorreoModulosEditable || {};
+            const prev = normalizarConfigCcoModulo(map[id]);
+            const act = document.getElementById('ccoCorreoModuloActivo');
+            const glob = document.getElementById('ccoCorreoModuloIncluirGlobal');
+            const ya = new Set((prev.correos || []).map(function (c) {
+                return String((c && c.correo) || '').trim().toLowerCase();
+            }).filter(Boolean));
+            const nuevos = [];
+            lista.forEach(function (e) {
+                const correo = String((e && e.correo) || '').trim();
+                const k = correo.toLowerCase();
+                if (!correo || ya.has(k)) return;
+                ya.add(k);
+                nuevos.push({
+                    nombre: String((e && e.nombre) || '').trim() || (correo.split('@')[0] || 'CCO'),
+                    correo: correo
+                });
+            });
+            if (!nuevos.length) {
+                mostrarAlerta('Esos correos ya están en el CCO de este módulo.', 'Error');
+                return 0;
+            }
+            prev.correos = (prev.correos || []).concat(nuevos);
+            await persistirConfigCcoModuloActual({
+                activo: !!(act && act.checked),
+                incluirGlobal: !!(glob && glob.checked),
+                correos: prev.correos
+            }, true);
+            return nuevos.length;
+        }
+
         async function agregarCorreoCcoModulo(event) {
             if (event) event.preventDefault();
             const id = idCcoCorreoModuloSeleccionado();
@@ -33291,34 +33660,23 @@ document.getElementById('chatForm').onsubmit = function (e) {
             const nombreEl = document.getElementById('ccoCorreoModuloNombre');
             const emailEl = document.getElementById('ccoCorreoModuloEmail');
             const nombre = nombreEl ? String(nombreEl.value || '').trim() : '';
-            const correo = emailEl ? String(emailEl.value || '').trim() : '';
-            if (!nombre || !correo) {
-                mostrarAlerta('Complete nombre y correo', 'Error');
+            const texto = emailEl ? String(emailEl.value || '').trim() : '';
+            const entradas = parsearEntradasCorreoLista(texto, nombre);
+            if (!texto) {
+                mostrarAlerta('Ingrese al menos un correo electrónico', 'Error');
                 return;
             }
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailRegex.test(correo)) {
-                mostrarAlerta('Ingrese un correo electrónico válido', 'Error');
+            if (!entradas.length) {
+                mostrarAlerta('No se encontró ningún correo válido. Separe varios con coma o salto de línea.', 'Error');
                 return;
             }
-            const map = window._ccoCorreoModulosEditable || {};
-            const prev = normalizarConfigCcoModulo(map[id]);
-            const act = document.getElementById('ccoCorreoModuloActivo');
-            const glob = document.getElementById('ccoCorreoModuloIncluirGlobal');
-            if (prev.correos.some(function (c) { return String(c.correo || '').toLowerCase() === correo.toLowerCase(); })) {
-                mostrarAlerta('Este correo ya está en el CCO de este módulo', 'Error');
-                return;
-            }
-            prev.correos.push({ nombre: nombre, correo: correo });
             try {
-                await persistirConfigCcoModuloActual({
-                    activo: !!(act && act.checked),
-                    incluirGlobal: !!(glob && glob.checked),
-                    correos: prev.correos
-                }, true);
-                if (nombreEl) nombreEl.value = '';
-                if (emailEl) emailEl.value = '';
-                mostrarAlerta('Correo agregado al CCO de este módulo', 'Éxito');
+                const n = await agregarCorreosCcoModuloLista(entradas);
+                if (n > 0) {
+                    if (nombreEl) nombreEl.value = '';
+                    if (emailEl) emailEl.value = '';
+                    mostrarAlerta(n === 1 ? 'Correo agregado al CCO de este módulo' : (n + ' correos agregados al CCO de este módulo'), 'Éxito');
+                }
             } catch (e) {
                 mostrarAlerta('No se pudo agregar el correo: ' + (e && e.message ? e.message : 'error'), 'Error');
             }
@@ -34741,6 +35099,18 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 if (btnGuardarCcoMod) btnGuardarCcoMod.addEventListener('click', function () { guardarCcoCorreoModuloDesdeUI(); });
                 const btnRestCcoMod = document.getElementById('btnRestablecerCcoCorreoModulo');
                 if (btnRestCcoMod) btnRestCcoMod.addEventListener('click', function () { restablecerCcoCorreoModuloDesdeUI(); });
+                const btnCcoAdmin = document.getElementById('btnCcoAgregarDesdeAdmin');
+                if (btnCcoAdmin) btnCcoAdmin.addEventListener('click', function () { agregarCcoDesdeAdminSeleccionados(); });
+                const wrapNotif = document.getElementById('notificaciones');
+                if (wrapNotif && !wrapNotif.dataset.listenerSub) {
+                    wrapNotif.dataset.listenerSub = '1';
+                    wrapNotif.addEventListener('click', function (ev) {
+                        const btn = ev.target && ev.target.closest ? ev.target.closest('[data-notif-sub]') : null;
+                        if (!btn || !wrapNotif.contains(btn)) return;
+                        const id = btn.getAttribute('data-notif-sub');
+                        if (id) mostrarSubtabNotificaciones(id);
+                    });
+                }
             });
         }
 
