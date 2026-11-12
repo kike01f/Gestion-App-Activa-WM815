@@ -7633,6 +7633,18 @@
         .perfil-avatar--sm { width: 1.55rem; height: 1.55rem; font-size: 0.85rem; }
         .perfil-avatar--lg { width: 4.4rem; height: 4.4rem; font-size: 2rem; }
         .perfil-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .login-user-face { display: none; flex-direction: column; align-items: center; gap: 0.3rem; margin: 0 auto 1rem; }
+        .login-user-face.is-on { display: flex; }
+        .login-user-face .perfil-avatar { width: 4.8rem; height: 4.8rem; font-size: 2.15rem; border: 2px solid rgba(190, 242, 100, 0.55); box-shadow: 0 10px 28px rgba(0,0,0,0.35); background: rgba(15, 23, 42, 0.75); }
+        .login-user-face-name { font-size: 0.86rem; font-weight: 650; color: #f1f5f9; max-width: 16rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        #modalPerfilRecorte.modal-overlay.active { display: flex; }
+        .perfil-crop-stage { width: min(280px, 72vw); height: min(280px, 72vw); margin: 0 auto; border-radius: 18px; overflow: hidden; background: #0f172a; touch-action: none; cursor: grab; position: relative; }
+        .perfil-crop-stage.is-drag { cursor: grabbing; }
+        .perfil-crop-stage canvas { display: block; width: 100%; height: 100%; }
+        .perfil-crop-hint { margin: 0.55rem 0 0.35rem; font-size: 0.75rem; color: var(--text-secondary); text-align: center; }
+        .perfil-crop-tools { display: flex; align-items: center; gap: 0.55rem; margin: 0.35rem 0 0.85rem; }
+        .perfil-crop-tools label { flex: 1; font-size: 0.75rem; color: var(--text-secondary); }
+        .perfil-crop-tools input[type="range"] { width: 100%; }
         #btnMiPerfil { gap: 0.45rem; }
         #presenciaAdminBar { display: none; align-items: center; gap: 0.55rem; flex-wrap: wrap; margin: 0 0 0.85rem; padding: 0.45rem 0.7rem; border: 1px solid var(--border-color); border-radius: 10px; background: var(--bg-secondary); font-size: 0.78rem; }
         body.presencia-admin #presenciaAdminBar { display: flex; }
@@ -7734,6 +7746,10 @@
                 <div class="login-brand">
                     <div class="login-brand-icon" aria-hidden="true">
                         <img src="https://img.mailinblue.com/8323725/images/content_library/original/6844749040dd0f16c5341248.png" alt="WM818" style="width: 100%; height: 100%; object-fit: contain;">
+                    </div>
+                    <div class="login-user-face" id="loginAvatarSlot" hidden>
+                        <span class="perfil-avatar" id="loginAvatar" aria-hidden="true">👤</span>
+                        <div class="login-user-face-name" id="loginAvatarNombre"></div>
                     </div>
                     <h1>Gestión de Comunidad</h1>
                     <p class="subtitle">Administración — Inicie sesión para continuar</p>
@@ -12055,10 +12071,29 @@
             <div class="form-group">
                 <label>O subir una foto</label>
                 <input type="file" id="perfilFotoFile" accept="image/*">
+                <small style="display:block;margin-top:0.3rem;color:var(--text-tertiary);font-size:0.72rem;">Después de elegirla podrá recortar, acercar y encuadrar.</small>
             </div>
             <div class="modal-buttons">
                 <button type="button" class="btn btn-secondary" id="perfilBtnCerrar">Cerrar</button>
                 <button type="button" class="btn btn-primary" id="perfilBtnGuardar">Guardar perfil</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modalPerfilRecorte" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modalPerfilRecorteTitulo">
+        <div class="modal-confirm" style="max-width: 380px; width: 100%; text-align: left;">
+            <h3 id="modalPerfilRecorteTitulo" style="margin: 0 0 0.35rem;">Ajustar foto</h3>
+            <p class="perfil-crop-hint" style="margin-top:0;">Arrastre para mover y use el zoom para encuadrar el recorte circular.</p>
+            <div class="perfil-crop-stage" id="perfilCropStage">
+                <canvas id="perfilCropCanvas" width="280" height="280"></canvas>
+            </div>
+            <div class="perfil-crop-tools">
+                <label>Zoom<br><input type="range" id="perfilCropZoom" min="100" max="300" value="100"></label>
+                <button type="button" class="btn btn-secondary" id="perfilCropRotar" style="padding:0.4rem 0.65rem;font-size:0.78rem;align-self:flex-end;">Girar</button>
+            </div>
+            <div class="modal-buttons">
+                <button type="button" class="btn btn-secondary" id="perfilCropCancelar">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="perfilCropAplicar">Usar esta foto</button>
             </div>
         </div>
     </div>
@@ -12241,6 +12276,9 @@
             }
             var submitBtn = document.getElementById('loginSubmit');
             if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Iniciar sesión'; }
+            if (typeof loginPerfilBindUi === 'function') loginPerfilBindUi();
+            var emLogin = document.getElementById('loginEmail');
+            if (typeof loginMostrarAvatarCorreo === 'function' && emLogin) loginMostrarAvatarCorreo(emLogin.value);
             var okEl = document.getElementById('loginResetSuccess');
             if (okEl) { okEl.textContent = ''; okEl.classList.remove('visible'); }
         }
@@ -12332,6 +12370,9 @@
             }
         }
 
+        if (typeof loginPerfilBindUi === 'function') {
+            try { loginPerfilBindUi(); } catch (eLoginAv) {}
+        }
         document.getElementById('loginForm') && document.getElementById('loginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             var emailEl = document.getElementById('loginEmail');
@@ -26239,6 +26280,84 @@ document.getElementById('chatForm').onsubmit = function (e) {
             return mapa[bitacoraNormCorreo(correo)] || null;
         }
 
+        var PERFIL_LOGIN_LS = 'gestion_wm_login_perfil_v1';
+
+        function perfilLoginMapaLocal() {
+            try {
+                var o = JSON.parse(localStorage.getItem(PERFIL_LOGIN_LS) || '{}');
+                return o && typeof o === 'object' ? o : {};
+            } catch (eL) { return {}; }
+        }
+
+        function guardarPerfilLoginLocal(row) {
+            if (!row || !row.correo) return;
+            var mail = bitacoraNormCorreo(row.correo);
+            var map = perfilLoginMapaLocal();
+            map[mail] = {
+                correo: mail,
+                nombre: row.nombre || '',
+                avatarId: row.avatarId || '',
+                fotoUrl: row.fotoUrl || ''
+            };
+            try {
+                localStorage.setItem(PERFIL_LOGIN_LS, JSON.stringify(map));
+            } catch (eQ) {
+                map[mail].fotoUrl = '';
+                try { localStorage.setItem(PERFIL_LOGIN_LS, JSON.stringify(map)); } catch (eQ2) {}
+            }
+            try { localStorage.setItem(PERFIL_LOGIN_LS + '_ultimo', mail); } catch (eU) {}
+        }
+
+        function loginPintarAvatarNodo(el, p) {
+            if (!el) return;
+            if (p && p.fotoUrl) el.innerHTML = '<img src="' + String(p.fotoUrl).replace(/"/g, '') + '" alt="">';
+            else {
+                var meta = perfilAvatarMeta(p && p.avatarId);
+                el.textContent = meta ? meta.emoji : '👤';
+            }
+        }
+
+        function loginMostrarAvatarCorreo(correo) {
+            var slot = document.getElementById('loginAvatarSlot');
+            var av = document.getElementById('loginAvatar');
+            var nom = document.getElementById('loginAvatarNombre');
+            var mail = bitacoraNormCorreo(correo);
+            var p = perfilDeCorreo(mail) || perfilLoginMapaLocal()[mail] || null;
+            if (!mail || !p || (!p.fotoUrl && !p.avatarId && !p.nombre)) {
+                if (slot) {
+                    slot.hidden = true;
+                    slot.classList.remove('is-on');
+                }
+                return;
+            }
+            loginPintarAvatarNodo(av, p);
+            if (nom) nom.textContent = p.nombre || mail.split('@')[0];
+            if (slot) {
+                slot.hidden = false;
+                slot.classList.add('is-on');
+            }
+        }
+
+        function loginPerfilBindUi() {
+            if (window._loginPerfilBound) return;
+            window._loginPerfilBound = true;
+            var em = document.getElementById('loginEmail');
+            if (!em) return;
+            var t = null;
+            var run = function () { loginMostrarAvatarCorreo(em.value); };
+            em.addEventListener('input', function () {
+                clearTimeout(t);
+                t = setTimeout(run, 160);
+            });
+            em.addEventListener('change', run);
+            em.addEventListener('blur', run);
+            setTimeout(run, 350);
+            setTimeout(run, 1100);
+        }
+        if (document.getElementById('loginEmail')) {
+            try { loginPerfilBindUi(); } catch (eBindLogin) {}
+        }
+
         function perfilHtmlAvatar(correo, cls) {
             var p = perfilDeCorreo(correo);
             var klass = cls || 'perfil-avatar';
@@ -26265,6 +26384,8 @@ document.getElementById('chatForm').onsubmit = function (e) {
             var mail = bitacoraNormCorreo(auth && auth.currentUser && auth.currentUser.email);
             perfilPintarNodo(document.getElementById('btnMiPerfilAvatar'), mail);
             perfilPintarNodo(document.getElementById('perfilPreview'), mail);
+            var pNow = perfilDeCorreo(mail);
+            if (pNow) guardarPerfilLoginLocal(pNow);
         }
 
         function perfilBindUi() {
@@ -26290,19 +26411,14 @@ document.getElementById('chatForm').onsubmit = function (e) {
             if (file) {
                 file.addEventListener('change', function () {
                     var f = file.files && file.files[0];
+                    file.value = '';
                     if (!f) return;
-                    perfilComprimirFoto(f).then(function (url) {
-                        window._perfilDraft = window._perfilDraft || {};
-                        window._perfilDraft.fotoUrl = url;
-                        window._perfilDraft.avatarId = '';
-                        var g = document.getElementById('perfilAvatarGrid');
-                        if (g) g.querySelectorAll('button').forEach(function (x) { x.classList.remove('is-on'); });
-                        perfilPintarNodoDraft();
-                    }).catch(function (err) {
+                    perfilCropAbrir(f).catch(function (err) {
                         if (typeof mostrarAlerta === 'function') mostrarAlerta((err && err.message) || 'No se pudo leer la imagen.', 'Perfil');
                     });
                 });
             }
+            perfilCropBindUi();
             var abrir = document.getElementById('btnMiPerfil');
             if (abrir) abrir.addEventListener('click', function (e) {
                 e.preventDefault();
@@ -26332,28 +26448,181 @@ document.getElementById('chatForm').onsubmit = function (e) {
         }
 
         function perfilComprimirFoto(file) {
+            return perfilCropAbrir(file);
+        }
+
+        function perfilCropBindUi() {
+            if (window._perfilCropBound) return;
+            window._perfilCropBound = true;
+            var stage = document.getElementById('perfilCropStage');
+            var zoom = document.getElementById('perfilCropZoom');
+            var rot = document.getElementById('perfilCropRotar');
+            var ok = document.getElementById('perfilCropAplicar');
+            var cancel = document.getElementById('perfilCropCancelar');
+            var modal = document.getElementById('modalPerfilRecorte');
+            if (zoom) zoom.addEventListener('input', function () {
+                var st = window._perfilCrop;
+                if (!st) return;
+                st.scale = st.minScale * (Number(zoom.value) / 100);
+                perfilCropLimitar();
+                perfilCropPintar();
+            });
+            if (rot) rot.addEventListener('click', function () {
+                var st = window._perfilCrop;
+                if (!st) return;
+                st.rot = ((st.rot || 0) + 90) % 360;
+                perfilCropRecalcularMin();
+                perfilCropPintar();
+            });
+            if (ok) ok.addEventListener('click', perfilCropAplicar);
+            if (cancel) cancel.addEventListener('click', perfilCropCerrar);
+            if (modal) modal.addEventListener('click', function (e) { if (e.target === modal) perfilCropCerrar(); });
+            if (stage) {
+                stage.addEventListener('pointerdown', function (e) {
+                    var st = window._perfilCrop;
+                    if (!st) return;
+                    stage.classList.add('is-drag');
+                    st.drag = { x: e.clientX, y: e.clientY, panX: st.panX, panY: st.panY };
+                    try { stage.setPointerCapture(e.pointerId); } catch (eCap) {}
+                });
+                stage.addEventListener('pointermove', function (e) {
+                    var st = window._perfilCrop;
+                    if (!st || !st.drag) return;
+                    st.panX = st.drag.panX + (e.clientX - st.drag.x);
+                    st.panY = st.drag.panY + (e.clientY - st.drag.y);
+                    perfilCropLimitar();
+                    perfilCropPintar();
+                });
+                var endDrag = function () {
+                    var st = window._perfilCrop;
+                    if (st) st.drag = null;
+                    stage.classList.remove('is-drag');
+                };
+                stage.addEventListener('pointerup', endDrag);
+                stage.addEventListener('pointercancel', endDrag);
+            }
+        }
+
+        function perfilCropCargarImagen(file) {
             return new Promise(function (resolve, reject) {
                 if (!file || !/^image\//.test(file.type || '')) return reject(new Error('Elija una imagen.'));
                 var img = new Image();
                 var url = URL.createObjectURL(file);
                 img.onload = function () {
-                    try {
-                        var max = 256;
-                        var w = img.width;
-                        var h = img.height;
-                        var scale = Math.min(1, max / Math.max(w, h));
-                        var c = document.createElement('canvas');
-                        c.width = Math.max(1, Math.round(w * scale));
-                        c.height = Math.max(1, Math.round(h * scale));
-                        var ctx = c.getContext('2d');
-                        ctx.drawImage(img, 0, 0, c.width, c.height);
-                        URL.revokeObjectURL(url);
-                        resolve(c.toDataURL('image/jpeg', 0.72));
-                    } catch (eC) { reject(eC); }
+                    URL.revokeObjectURL(url);
+                    resolve(img);
                 };
-                img.onerror = function () { URL.revokeObjectURL(url); reject(new Error('Imagen no válida.')); };
+                img.onerror = function () {
+                    URL.revokeObjectURL(url);
+                    reject(new Error('Imagen no válida.'));
+                };
                 img.src = url;
             });
+        }
+
+        function perfilCropSize() {
+            var c = document.getElementById('perfilCropCanvas');
+            return c ? c.width : 280;
+        }
+
+        function perfilCropDims(st) {
+            var rot = (st.rot || 0) % 180 !== 0;
+            return { w: rot ? st.img.height : st.img.width, h: rot ? st.img.width : st.img.height };
+        }
+
+        function perfilCropRecalcularMin() {
+            var st = window._perfilCrop;
+            if (!st || !st.img) return;
+            var size = perfilCropSize();
+            var d = perfilCropDims(st);
+            st.minScale = size / Math.min(d.w, d.h);
+            st.scale = Math.max(st.minScale, st.scale || st.minScale);
+            var zoom = document.getElementById('perfilCropZoom');
+            if (zoom) zoom.value = String(Math.round((st.scale / st.minScale) * 100));
+            perfilCropLimitar();
+        }
+
+        function perfilCropLimitar() {
+            var st = window._perfilCrop;
+            if (!st || !st.img) return;
+            var size = perfilCropSize();
+            var d = perfilCropDims(st);
+            var dw = d.w * st.scale;
+            var dh = d.h * st.scale;
+            var maxX = Math.max(0, (dw - size) / 2);
+            var maxY = Math.max(0, (dh - size) / 2);
+            st.panX = Math.max(-maxX, Math.min(maxX, st.panX || 0));
+            st.panY = Math.max(-maxY, Math.min(maxY, st.panY || 0));
+        }
+
+        function perfilCropDibujarEn(ctx, size, conMascara) {
+            var st = window._perfilCrop;
+            if (!st || !st.img) return;
+            ctx.clearRect(0, 0, size, size);
+            ctx.save();
+            ctx.translate(size / 2 + (st.panX || 0), size / 2 + (st.panY || 0));
+            ctx.rotate(((st.rot || 0) * Math.PI) / 180);
+            var dw = st.img.width * st.scale;
+            var dh = st.img.height * st.scale;
+            ctx.drawImage(st.img, -dw / 2, -dh / 2, dw, dh);
+            ctx.restore();
+            if (!conMascara) return;
+            ctx.save();
+            ctx.fillStyle = 'rgba(0,0,0,0.48)';
+            ctx.beginPath();
+            ctx.rect(0, 0, size, size);
+            ctx.arc(size / 2, size / 2, size / 2 - 4, 0, Math.PI * 2, true);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(size / 2, size / 2, size / 2 - 4, 0, Math.PI * 2);
+            ctx.strokeStyle = 'rgba(255,255,255,0.9)';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            ctx.restore();
+        }
+
+        function perfilCropPintar() {
+            var c = document.getElementById('perfilCropCanvas');
+            if (!c) return;
+            perfilCropDibujarEn(c.getContext('2d'), c.width, true);
+        }
+
+        async function perfilCropAbrir(file) {
+            perfilCropBindUi();
+            var img = await perfilCropCargarImagen(file);
+            window._perfilCrop = { img: img, scale: 1, minScale: 1, panX: 0, panY: 0, rot: 0, drag: null };
+            perfilCropRecalcularMin();
+            perfilCropPintar();
+            var modal = document.getElementById('modalPerfilRecorte');
+            if (modal) modal.classList.add('active');
+        }
+
+        function perfilCropCerrar() {
+            var modal = document.getElementById('modalPerfilRecorte');
+            if (modal) modal.classList.remove('active');
+            window._perfilCrop = null;
+        }
+
+        function perfilCropAplicar() {
+            var st = window._perfilCrop;
+            if (!st || !st.img) return;
+            var out = document.createElement('canvas');
+            out.width = 256;
+            out.height = 256;
+            var ctx = out.getContext('2d');
+            var factor = 256 / perfilCropSize();
+            ctx.save();
+            ctx.scale(factor, factor);
+            perfilCropDibujarEn(ctx, perfilCropSize(), false);
+            ctx.restore();
+            var url = out.toDataURL('image/jpeg', 0.84);
+            window._perfilDraft = window._perfilDraft || {};
+            window._perfilDraft.fotoUrl = url;
+            window._perfilDraft.avatarId = '';
+            var g = document.getElementById('perfilAvatarGrid');
+            if (g) g.querySelectorAll('button').forEach(function (x) { x.classList.remove('is-on'); });
+            perfilPintarNodoDraft();
+            perfilCropCerrar();
         }
 
         async function abrirModalPerfil() {
@@ -26407,6 +26676,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
             await guardarDatos(PERFILES_DOC, lista);
             window._perfilesMapa = mapa;
             if (window._permisosSesion) window._permisosSesion.nombre = row.nombre;
+            if (typeof guardarPerfilLoginLocal === 'function') guardarPerfilLoginLocal(row);
             pintarAvatarMenu();
             cerrarModalPerfil();
             if (typeof latidoPresenciaUsuario === 'function') latidoPresenciaUsuario();
@@ -47151,7 +47421,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
             if (typeof usuarioPuedeEditar === 'function' && !usuarioPuedeEditar()) {
                 const skip = function (el) {
                     if (!el) return true;
-                    if (el.closest && (el.closest('#loginScreen') || el.closest('#modalPerfilUsuario') || el.closest('#bitacoraPublica') || el.closest('#consultaRapida') || el.id === 'bitacoraMesSel' || el.id === 'bitacoraBuscar' || el.id === 'mesConsulta')) return true;
+                    if (el.closest && (el.closest('#loginScreen') || el.closest('#modalPerfilUsuario') || el.closest('#modalPerfilRecorte') || el.closest('#bitacoraPublica') || el.closest('#consultaRapida') || el.id === 'bitacoraMesSel' || el.id === 'bitacoraBuscar' || el.id === 'mesConsulta')) return true;
                     return false;
                 };
                 forms.forEach(function (form) {
