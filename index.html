@@ -8318,6 +8318,468 @@
             .tab-content.active { animation: none !important; }
         }
 
+        /* ===== Botones de acción con color ===== */
+        .tab-content td .btn,
+        .tab-content .tabla-acciones .btn,
+        .tab-content .moroso-acciones .btn,
+        .tab-content .btn.btn-sm {
+            --acc: #64748b;
+            --acc2: #475569;
+            color: #fff !important;
+            border: none !important;
+            font-weight: 600 !important;
+            border-radius: 7px !important;
+            background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.18), rgba(0, 0, 0, 0.08)) !important;
+            box-shadow: 0 2px 6px -2px color-mix(in srgb, var(--acc) 70%, transparent) !important;
+            text-shadow: 0 1px 0 rgba(0, 0, 0, 0.12);
+            transition: transform 0.15s ease, box-shadow 0.2s ease, filter 0.15s ease !important;
+        }
+        .tab-content td .btn:not([style*="background"]),
+        .tab-content .tabla-acciones .btn:not([style*="background"]),
+        .tab-content .moroso-acciones .btn:not([style*="background"]),
+        .tab-content .btn.btn-sm:not([style*="background"]) {
+            background-color: var(--acc) !important;
+        }
+        .tab-content td .btn-primary,
+        .tab-content .tabla-acciones .btn-primary,
+        .tab-content .moroso-acciones .btn-primary,
+        .tab-content .btn-sm.btn-primary { --acc: #3b82f6; }
+        .tab-content td .btn-danger,
+        .tab-content .tabla-acciones .btn-danger,
+        .tab-content .moroso-acciones .btn-danger,
+        .tab-content .btn-sm.btn-danger { --acc: #ef4444; }
+        .tab-content td .btn-success,
+        .tab-content .tabla-acciones .btn-success,
+        .tab-content .moroso-acciones .btn-success,
+        .tab-content .btn-sm.btn-success { --acc: #10b981; }
+        .tab-content td .btn-info,
+        .tab-content .tabla-acciones .btn-info,
+        .tab-content .moroso-acciones .btn-info,
+        .tab-content .btn-sm.btn-info { --acc: #06b6d4; }
+        .tab-content td .btn-warning,
+        .tab-content .tabla-acciones .btn-warning,
+        .tab-content .moroso-acciones .btn-warning,
+        .tab-content .btn-sm.btn-warning { --acc: #f59e0b; }
+        .tab-content td .btn-secondary,
+        .tab-content .tabla-acciones .btn-secondary,
+        .tab-content .moroso-acciones .btn-secondary,
+        .tab-content .btn-sm.btn-secondary { --acc: #8b5cf6; }
+        .tab-content td .btn:hover:not(:disabled),
+        .tab-content .tabla-acciones .btn:hover:not(:disabled),
+        .tab-content .moroso-acciones .btn:hover:not(:disabled),
+        .tab-content .btn.btn-sm:hover:not(:disabled) {
+            transform: translateY(-1px) !important;
+            filter: brightness(1.08) saturate(1.1);
+            box-shadow: 0 6px 14px -4px color-mix(in srgb, var(--acc) 80%, transparent) !important;
+        }
+        .tab-content td .btn:active:not(:disabled),
+        .tab-content .tabla-acciones .btn:active:not(:disabled),
+        .tab-content .moroso-acciones .btn:active:not(:disabled),
+        .tab-content .btn.btn-sm:active:not(:disabled) {
+            transform: translateY(0) scale(0.97) !important;
+        }
+
+        /* ===== Animación al cambiar de módulo ===== */
+        .tab-content.active { animation: moduloEntra 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+        .tab-content:not(#dashboard).active > * { animation: moduloBloque 0.55s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+        .tab-content:not(#dashboard).active > *:nth-child(2) { animation-delay: 0.06s; }
+        .tab-content:not(#dashboard).active > *:nth-child(3) { animation-delay: 0.12s; }
+        .tab-content:not(#dashboard).active > *:nth-child(4) { animation-delay: 0.18s; }
+        .tab-content:not(#dashboard).active > *:nth-child(n+5) { animation-delay: 0.24s; }
+        @keyframes moduloEntra {
+            from { opacity: 0; transform: translateX(18px); filter: blur(4px); }
+            to { opacity: 1; transform: none; filter: none; }
+        }
+        @keyframes moduloBloque {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: none; }
+        }
+        #mainContent::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            z-index: 6000;
+            pointer-events: none;
+            background: linear-gradient(90deg, transparent, var(--primary-light), var(--primary), #22d3ee, transparent);
+            transform: scaleX(0);
+            transform-origin: left center;
+            opacity: 0;
+        }
+        body.modulo-cambiando #mainContent::after { animation: moduloBarra 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+        @keyframes moduloBarra {
+            0% { transform: scaleX(0); opacity: 1; }
+            70% { transform: scaleX(1); opacity: 1; }
+            100% { transform: scaleX(1); opacity: 0; }
+        }
+
+        /* ===== Bienvenida: saludo grande + accesos a módulos ===== */
+        .bv2 {
+            position: relative;
+            z-index: 2;
+            width: min(46rem, 100%);
+            margin: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            color: #f8fafc;
+        }
+        .bv2-arturito {
+            width: 8.5rem;
+            height: 8.5rem;
+            display: grid;
+            place-items: center;
+            border-radius: 50%;
+            background: radial-gradient(circle at 50% 40%, rgba(143, 203, 26, 0.35), transparent 65%);
+            animation: bv2ArturitoIn 0.9s cubic-bezier(0.34, 1.4, 0.64, 1) 0.15s both, bv2Flotar 3.2s ease-in-out 1.1s infinite;
+        }
+        .bv2-arturito .arturito-dashboard { width: 7.2rem !important; height: 7.2rem !important; filter: drop-shadow(0 12px 22px rgba(0, 0, 0, 0.45)); }
+        @keyframes bv2ArturitoIn {
+            from { opacity: 0; transform: translateY(60px) scale(0.6) rotate(-8deg); }
+            to { opacity: 1; transform: none; }
+        }
+        @keyframes bv2Flotar {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+        .bv2-fecha {
+            margin: 0.4rem 0 0;
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: rgba(190, 242, 100, 0.92);
+            animation: bv2Sube 0.6s ease 0.45s both;
+        }
+        .bv2-titulo {
+            margin: 0.25rem 0 0;
+            font-size: clamp(1.8rem, 4.5vw, 2.8rem);
+            font-weight: 750;
+            letter-spacing: -0.035em;
+            line-height: 1.1;
+            color: #fff;
+            text-shadow: 0 4px 24px rgba(0, 0, 0, 0.45);
+            animation: bv2Sube 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) 0.55s both;
+        }
+        .bv2-sub {
+            min-height: 1.5em;
+            margin: 0.6rem 0 0;
+            max-width: 34rem;
+            font-size: 1rem;
+            line-height: 1.5;
+            color: rgba(226, 232, 240, 0.92);
+            text-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
+        }
+        .bv2-sub .bienvenida-cursor {
+            display: inline-block;
+            width: 0.45em;
+            border-right: 2px solid var(--primary-light);
+            animation: bienvenidaCursor 0.85s step-end infinite;
+        }
+        @keyframes bv2Sube {
+            from { opacity: 0; transform: translateY(14px); }
+            to { opacity: 1; transform: none; }
+        }
+        .bv2-modulos {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 0.6rem;
+            margin: 1.4rem 0 0;
+            max-width: 42rem;
+        }
+        .bv2-modulo {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.6rem 0.95rem;
+            border-radius: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            background: rgba(15, 23, 42, 0.45);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            color: #f1f5f9;
+            font: inherit;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            opacity: 0;
+            transform: translateY(16px) scale(0.92);
+            transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .bv2-modulos.is-on .bv2-modulo { animation: bv2Pop 0.5s cubic-bezier(0.34, 1.5, 0.64, 1) both; }
+        .bv2-modulo:hover {
+            background: rgba(117, 187, 33, 0.35);
+            border-color: rgba(190, 242, 100, 0.6);
+            box-shadow: 0 10px 24px -10px rgba(117, 187, 33, 0.8);
+            transform: translateY(-3px) !important;
+        }
+        .bv2-modulo-ico { display: inline-flex; width: 1.15rem; height: 1.15rem; color: #bef264; }
+        .bv2-modulo-ico svg { width: 100%; height: 100%; fill: currentColor; }
+        .bv2-modulo-ico svg[fill="none"] { fill: none; stroke: currentColor; }
+        @keyframes bv2Pop {
+            from { opacity: 0; transform: translateY(16px) scale(0.92); }
+            to { opacity: 1; transform: none; }
+        }
+        .bv2-acciones { margin-top: 1.5rem; }
+        .bv2-acciones .btn {
+            min-height: 2.9rem;
+            padding: 0.7rem 2.2rem;
+            border-radius: 999px;
+            font-size: 1rem;
+            font-weight: 700;
+            background: linear-gradient(180deg, #9fe04a 0%, var(--primary) 50%, var(--primary-dark) 100%);
+            box-shadow: 0 10px 28px -10px rgba(117, 187, 33, 0.9);
+        }
+        .bv2-acciones .btn span { display: inline-block; transition: transform 0.2s ease; }
+        .bv2-acciones .btn:hover span { transform: translateX(4px); }
+        body.bienvenida-usuario-out .bv2 { animation: bienvenidaPanelOut 0.42s ease forwards; }
+        @media (max-width: 600px) {
+            .bv2-arturito { width: 6.5rem; height: 6.5rem; }
+            .bv2-arturito .arturito-dashboard { width: 5.6rem !important; height: 5.6rem !important; }
+            .bv2-sub { font-size: 0.9rem; }
+        }
+
+        /* ===== Carga: Arturito manejando ===== */
+        #permisosCargando {
+            position: fixed;
+            inset: 0;
+            z-index: 13500;
+            max-width: none;
+            margin: 0;
+            padding: 1.5rem;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.35rem;
+            text-align: center;
+            background:
+                radial-gradient(ellipse 80% 60% at 50% 30%, rgba(117, 187, 33, 0.14), transparent 60%),
+                linear-gradient(180deg, #0b1220 0%, #0f172a 60%, #0b1120 100%);
+            color: #e2e8f0;
+            animation: bienvenidaOverlayIn 0.5s ease both;
+        }
+        body.permisos-cargando #permisosCargando { display: flex !important; }
+        .carga-escena {
+            position: relative;
+            width: min(30rem, 92vw);
+            height: 12rem;
+            margin-bottom: 1rem;
+            border-radius: 22px;
+            overflow: hidden;
+            background: linear-gradient(180deg, #172554 0%, #1e3a8a 45%, #7c3aed 78%, #f97316 100%);
+            box-shadow: 0 24px 60px -20px rgba(0, 0, 0, 0.7), inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+        }
+        .carga-luna {
+            position: absolute;
+            top: 16px;
+            right: 34px;
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: #fef3c7;
+            box-shadow: 0 0 30px 8px rgba(254, 243, 199, 0.35);
+        }
+        .carga-estrellas {
+            position: absolute;
+            inset: 0 0 50% 0;
+            background-image:
+                radial-gradient(1.5px 1.5px at 12% 20%, #fff, transparent),
+                radial-gradient(1px 1px at 30% 35%, #fff, transparent),
+                radial-gradient(1.5px 1.5px at 48% 14%, #fff, transparent),
+                radial-gradient(1px 1px at 66% 30%, #fff, transparent),
+                radial-gradient(1px 1px at 82% 46%, #fff, transparent),
+                radial-gradient(1.5px 1.5px at 22% 48%, #fff, transparent);
+            animation: cargaTitila 2.4s ease-in-out infinite alternate;
+        }
+        @keyframes cargaTitila { from { opacity: 0.45; } to { opacity: 1; } }
+        .carga-nube {
+            position: absolute;
+            height: 14px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.22);
+            filter: blur(1px);
+            animation: cargaNube 9s linear infinite;
+        }
+        .carga-nube::before {
+            content: '';
+            position: absolute;
+            left: 22%;
+            bottom: 5px;
+            width: 45%;
+            height: 16px;
+            border-radius: 999px;
+            background: inherit;
+        }
+        .carga-nube--1 { top: 34px; width: 70px; }
+        .carga-nube--2 { top: 62px; width: 50px; animation-duration: 13s; animation-delay: -6s; opacity: 0.7; }
+        @keyframes cargaNube {
+            from { transform: translateX(32rem); }
+            to { transform: translateX(-6rem); }
+        }
+        .carga-ciudad {
+            position: absolute;
+            left: 0;
+            right: 0;
+            background-repeat: repeat-x;
+            background-position: 0 100%;
+        }
+        .carga-ciudad--lejos {
+            bottom: 44px;
+            height: 70px;
+            opacity: 0.55;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='70'%3E%3Cg fill='%231e1b4b'%3E%3Crect x='0' y='30' width='26' height='40'/%3E%3Crect x='30' y='12' width='20' height='58'/%3E%3Crect x='54' y='38' width='30' height='32'/%3E%3Crect x='88' y='20' width='18' height='50'/%3E%3Crect x='110' y='44' width='34' height='26'/%3E%3Crect x='148' y='6' width='22' height='64'/%3E%3Crect x='174' y='32' width='28' height='38'/%3E%3Crect x='206' y='24' width='34' height='46'/%3E%3C/g%3E%3C/svg%3E");
+            background-size: 240px 70px;
+            animation: cargaParallax 16s linear infinite;
+        }
+        .carga-ciudad--cerca {
+            bottom: 44px;
+            height: 56px;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='56'%3E%3Cg fill='%230f172a'%3E%3Crect x='0' y='20' width='34' height='36'/%3E%3Crect x='40' y='6' width='24' height='50'/%3E%3Crect x='70' y='28' width='40' height='28'/%3E%3Crect x='116' y='12' width='28' height='44'/%3E%3Crect x='150' y='24' width='50' height='32'/%3E%3C/g%3E%3Cg fill='%23fde68a' opacity='0.85'%3E%3Crect x='46' y='14' width='4' height='4'/%3E%3Crect x='54' y='24' width='4' height='4'/%3E%3Crect x='122' y='20' width='4' height='4'/%3E%3Crect x='132' y='32' width='4' height='4'/%3E%3Crect x='8' y='30' width='4' height='4'/%3E%3Crect x='160' y='32' width='4' height='4'/%3E%3C/g%3E%3C/svg%3E");
+            background-size: 200px 56px;
+            animation: cargaParallax 7s linear infinite;
+        }
+        @keyframes cargaParallax {
+            from { background-position-x: 0; }
+            to { background-position-x: -240px; }
+        }
+        .carga-ciudad--cerca { animation-name: cargaParallaxCerca; }
+        @keyframes cargaParallaxCerca {
+            from { background-position-x: 0; }
+            to { background-position-x: -200px; }
+        }
+        .carga-camino {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            height: 44px;
+            background:
+                linear-gradient(90deg, #fde68a 0 26px, transparent 26px 56px) 0 21px / 56px 3px repeat-x,
+                linear-gradient(180deg, #334155 0%, #1e293b 100%);
+            border-top: 2px solid #475569;
+            animation: cargaCamino 0.55s linear infinite;
+        }
+        @keyframes cargaCamino {
+            from { background-position: 0 21px, 0 0; }
+            to { background-position: -56px 21px, 0 0; }
+        }
+        .carga-auto {
+            position: absolute;
+            left: 50%;
+            bottom: 14px;
+            width: 9.5rem;
+            margin-left: -4.75rem;
+            animation: cargaAutoRebote 0.42s ease-in-out infinite alternate, cargaAutoAvance 3.2s ease-in-out infinite;
+        }
+        .carga-auto svg { display: block; width: 100%; height: auto; overflow: visible; }
+        @keyframes cargaAutoRebote {
+            from { translate: 0 0; }
+            to { translate: 0 -2px; }
+        }
+        @keyframes cargaAutoAvance {
+            0%, 100% { transform: translateX(-14px) rotate(0deg); }
+            50% { transform: translateX(14px) rotate(-1.2deg); }
+        }
+        .carga-rueda { animation: cargaRueda 0.45s linear infinite; }
+        @keyframes cargaRueda { to { transform: rotate(360deg); } }
+        .carga-arturito { animation: cargaCabeza 0.84s ease-in-out infinite alternate; transform-origin: 80px 40px; }
+        @keyframes cargaCabeza {
+            from { transform: rotate(-2deg) translateY(0); }
+            to { transform: rotate(2deg) translateY(-1px); }
+        }
+        .carga-antena { animation: cargaAntena 0.9s ease-in-out infinite alternate; }
+        @keyframes cargaAntena { from { opacity: 0.4; } to { opacity: 1; } }
+        .carga-haz {
+            position: absolute;
+            right: -54px;
+            top: 50%;
+            width: 64px;
+            height: 26px;
+            margin-top: -8px;
+            background: linear-gradient(90deg, rgba(254, 240, 138, 0.55), transparent);
+            clip-path: polygon(0 40%, 100% 0, 100% 100%, 0 60%);
+            animation: cargaTitila 0.9s ease-in-out infinite alternate;
+        }
+        .carga-humo {
+            position: absolute;
+            left: -6px;
+            bottom: 18px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(226, 232, 240, 0.55);
+            animation: cargaHumo 1.2s ease-out infinite;
+        }
+        .carga-humo:nth-child(2) { animation-delay: 0.4s; }
+        .carga-humo:nth-child(3) { animation-delay: 0.8s; }
+        @keyframes cargaHumo {
+            from { transform: translate(0, 0) scale(0.5); opacity: 0.8; }
+            to { transform: translate(-46px, -16px) scale(1.8); opacity: 0; }
+        }
+        .carga-titulo {
+            margin: 0;
+            font-size: 1.15rem;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+            color: #f8fafc;
+        }
+        .carga-puntos i {
+            font-style: normal;
+            display: inline-block;
+            animation: cargaPunto 1.2s ease-in-out infinite;
+        }
+        .carga-puntos i:nth-child(2) { animation-delay: 0.15s; }
+        .carga-puntos i:nth-child(3) { animation-delay: 0.3s; }
+        @keyframes cargaPunto {
+            0%, 70%, 100% { transform: translateY(0); opacity: 0.4; }
+            35% { transform: translateY(-5px); opacity: 1; }
+        }
+        .carga-sub {
+            margin: 0;
+            min-height: 1.4em;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: rgba(190, 242, 100, 0.9);
+        }
+        .carga-sub.is-cambio { animation: bv2Sube 0.4s ease both; }
+        .carga-barra {
+            position: relative;
+            width: min(16rem, 70vw);
+            height: 5px;
+            margin-top: 0.8rem;
+            border-radius: 999px;
+            overflow: hidden;
+            background: rgba(255, 255, 255, 0.1);
+        }
+        .carga-barra span {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 40%;
+            border-radius: inherit;
+            background: linear-gradient(90deg, var(--primary-light), #22d3ee);
+            animation: cargaBarra 1.3s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+        }
+        @keyframes cargaBarra {
+            from { left: -40%; }
+            to { left: 100%; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .tab-content.active,
+            .tab-content:not(#dashboard).active > *,
+            body.modulo-cambiando #mainContent::after,
+            .bv2-arturito, .bv2-fecha, .bv2-titulo,
+            .carga-escena *, .carga-puntos i, .carga-barra span {
+                animation: none !important;
+            }
+            .bv2-modulo { opacity: 1; transform: none; }
+        }
+
     </style>
 </head>
 <body class="app-loading">
@@ -8605,7 +9067,61 @@
                 <strong id="presenciaAdminTitulo">Nadie más conectado</strong>
                 <div id="presenciaAdminChips"></div>
             </div>
-            <div id="permisosCargando" aria-live="polite">Preparando tu acceso…</div>
+            <div id="permisosCargando" role="status" aria-live="polite">
+                <div class="carga-escena" aria-hidden="true">
+                    <div class="carga-luna"></div>
+                    <div class="carga-estrellas"></div>
+                    <div class="carga-nube carga-nube--1"></div>
+                    <div class="carga-nube carga-nube--2"></div>
+                    <div class="carga-ciudad carga-ciudad--lejos"></div>
+                    <div class="carga-ciudad carga-ciudad--cerca"></div>
+                    <div class="carga-camino"></div>
+                    <div class="carga-auto">
+                        <span class="carga-humo"></span>
+                        <span class="carga-humo"></span>
+                        <span class="carga-humo"></span>
+                        <span class="carga-haz"></span>
+                        <svg viewBox="0 0 160 92" xmlns="http://www.w3.org/2000/svg">
+                            <defs><clipPath id="arturitoFaceClipAuto"><rect x="66" y="13" width="28" height="18" rx="3"/></clipPath></defs>
+                            <g class="carga-arturito">
+                                <line x1="80" y1="9" x2="80" y2="2" stroke="#5a8501" stroke-width="2"/>
+                                <circle class="carga-antena" cx="80" cy="2" r="2.6" fill="#FFD700"/>
+                                <rect x="62" y="8" width="36" height="32" rx="7" fill="#7FBA02"/>
+                                <rect x="64" y="10" width="32" height="28" rx="5" fill="#8FCB1A"/>
+                                <rect x="66" y="13" width="28" height="18" rx="3" fill="#1a1a1a"/>
+                                <g clip-path="url(#arturitoFaceClipAuto)">
+                                    <ellipse cx="75" cy="21" rx="2.4" ry="2.4" fill="#7FBA02"><animate attributeName="ry" values="2.4;2.4;0.25;2.4;2.4" keyTimes="0;0.86;0.91;0.96;1" dur="3.6s" repeatCount="indefinite"/></ellipse>
+                                    <ellipse cx="85" cy="21" rx="2.4" ry="2.4" fill="#7FBA02"><animate attributeName="ry" values="2.4;2.4;0.25;2.4;2.4" keyTimes="0;0.86;0.91;0.96;1" dur="3.6s" repeatCount="indefinite"/></ellipse>
+                                    <path d="M74 26 Q80 30.5 86 26" stroke="#7FBA02" stroke-width="2" stroke-linecap="round" fill="none"/>
+                                </g>
+                                <circle cx="102" cy="40" r="3.4" fill="#7FBA02"/>
+                            </g>
+                            <circle cx="104" cy="44" r="6" fill="none" stroke="#334155" stroke-width="2.4"/>
+                            <line x1="112" y1="44" x2="121" y2="29" stroke="#bae6fd" stroke-width="3" stroke-linecap="round" opacity="0.85"/>
+                            <path d="M10 64 Q10 50 26 48 L56 46 L62 42 L118 42 L128 48 L144 52 Q154 54 154 64 L154 68 Q154 74 148 74 L16 74 Q10 74 10 68 Z" fill="#f97316"/>
+                            <path d="M10 64 Q10 50 26 48 L56 46 L62 42 L118 42 L128 48 L144 52 Q154 54 154 64" fill="none" stroke="#fdba74" stroke-width="1.6" opacity="0.8"/>
+                            <rect x="28" y="56" width="110" height="3" rx="1.5" fill="#fff" opacity="0.55"/>
+                            <rect x="12" y="56" width="5" height="6" rx="1.5" fill="#ef4444"/>
+                            <circle cx="150" cy="60" r="3.4" fill="#fde68a"/>
+                            <g class="carga-rueda" style="transform-origin: 40px 74px">
+                                <circle cx="40" cy="74" r="12" fill="#1f2937"/>
+                                <circle cx="40" cy="74" r="6" fill="#9ca3af"/>
+                                <rect x="39" y="63" width="2" height="22" fill="#e5e7eb"/>
+                                <rect x="29" y="73" width="22" height="2" fill="#e5e7eb"/>
+                            </g>
+                            <g class="carga-rueda" style="transform-origin: 124px 74px">
+                                <circle cx="124" cy="74" r="12" fill="#1f2937"/>
+                                <circle cx="124" cy="74" r="6" fill="#9ca3af"/>
+                                <rect x="123" y="63" width="2" height="22" fill="#e5e7eb"/>
+                                <rect x="113" y="73" width="22" height="2" fill="#e5e7eb"/>
+                            </g>
+                        </svg>
+                    </div>
+                </div>
+                <p class="carga-titulo">Preparando tu acceso<span class="carga-puntos" aria-hidden="true"><i>.</i><i>.</i><i>.</i></span></p>
+                <p class="carga-sub" id="permisosCargandoSub">Arturito enciende el motor…</p>
+                <div class="carga-barra" aria-hidden="true"><span></span></div>
+            </div>
             <div id="permisosBloqueo">
                 <h2 style="margin:0 0 0.5rem;">Sin permisos asignados</h2>
                 <p style="margin:0 0 1rem;color:var(--text-secondary);font-size:0.9rem;">Esta cuenta inició sesión, pero el administrador principal aún no le asignó módulos. Solicite acceso a <strong>edificio.wm815@gmail.com</strong>.</p>
@@ -8639,8 +9155,8 @@
                     <img src="https://img.mailinblue.com/8323725/images/content_library/original/69ba261f18850cebd86809d3.png" alt="" decoding="async">
                 </div>
                 <div class="bienvenida-foto-velo" aria-hidden="true"></div>
-                <div class="bienvenida-usuario-card">
-                <div class="bienvenida-arturito-wrap">
+                <div class="bv2">
+                <div class="bv2-arturito">
                 <div class="arturito-dashboard expression-happy" id="bienvenidaArturito" title="Arturito" aria-hidden="true">
                     <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <defs><clipPath id="arturitoFaceClipWelcome"><rect x="20" y="32" width="24" height="18" rx="2"/></clipPath></defs>
@@ -8666,13 +9182,12 @@
                     </svg>
                 </div>
                 </div>
-                <div class="bienvenida-chat">
-                    <p class="bienvenida-kicker">Arturito</p>
-                    <h2 class="bienvenida-nombre" id="bienvenidaUsuarioNombre">Hola</h2>
-                    <div id="bienvenidaChatHilo" aria-live="polite"></div>
-                    <div class="bienvenida-acciones" id="bienvenidaAcciones">
-                        <button type="button" class="btn btn-primary" id="bienvenidaUsuarioContinuar" onclick="bienvenidaUsuarioCerrar()">Iniciar</button>
-                    </div>
+                <p class="bv2-fecha" id="bienvenidaFecha"></p>
+                <h2 class="bv2-titulo" id="bienvenidaUsuarioNombre">Hola</h2>
+                <p class="bv2-sub" id="bienvenidaSub" aria-live="polite"></p>
+                <div class="bv2-modulos" id="bienvenidaChatHilo"></div>
+                <div class="bienvenida-acciones bv2-acciones" id="bienvenidaAcciones">
+                    <button type="button" class="btn btn-primary" id="bienvenidaUsuarioContinuar" onclick="bienvenidaUsuarioCerrar()">Iniciar <span aria-hidden="true">→</span></button>
                 </div>
                 </div>
             </div>
@@ -12969,6 +13484,7 @@
                         window._permisosSesion = { todos: false, tabs: [], chat: false, notif: false, restringido: true, bloqueado: true, pendiente: true };
                         document.body.classList.remove('permisos-bloqueado');
                         document.body.classList.add('permisos-cargando', 'permisos-sin-chat', 'permisos-sin-notif', 'permisos-sin-busqueda');
+                        window._permisosCargandoDesde = Date.now();
                     }
                     showApp();
                     var aplicar = (typeof aplicarPermisosSesion === 'function')
@@ -13976,6 +14492,15 @@
                 const targetContent = document.getElementById(tabName);
                 if (targetContent) {
                     targetContent.classList.add('active');
+                }
+                if (idActual && idActual !== tabName) {
+                    document.body.classList.remove('modulo-cambiando');
+                    void document.body.offsetWidth;
+                    document.body.classList.add('modulo-cambiando');
+                    clearTimeout(window._moduloCambioTimer);
+                    window._moduloCambioTimer = setTimeout(function () {
+                        document.body.classList.remove('modulo-cambiando');
+                    }, 900);
                 }
                 if (tabName === 'registroRetirosBodega' && typeof pintarMovimientosInventario === 'function') {
                     pintarMovimientosInventario();
@@ -26603,8 +27128,28 @@ document.getElementById('chatForm').onsubmit = function (e) {
             var mail = bitacoraNormCorreo(auth && auth.currentUser && auth.currentUser.email);
             var cfgP = { usuarios: {} };
             var cfgB = { correos: [] };
+            var cargandoUi = document.body.classList.contains('permisos-cargando');
+            var subCarga = document.getElementById('permisosCargandoSub');
+            var frasesCarga = ['Arturito enciende el motor…', 'Revisando tus permisos…', 'Cargando tus módulos…', 'Ya casi llegamos…'];
+            var ixFrase = 0;
+            var intFrase = null;
+            if (cargandoUi && subCarga) {
+                subCarga.textContent = frasesCarga[0];
+                intFrase = setInterval(function () {
+                    ixFrase = (ixFrase + 1) % frasesCarga.length;
+                    subCarga.classList.remove('is-cambio');
+                    void subCarga.offsetWidth;
+                    subCarga.classList.add('is-cambio');
+                    subCarga.textContent = frasesCarga[ixFrase];
+                }, 900);
+            }
             try { cfgP = await obtenerPermisosUsuarios(); } catch (e1) {}
             try { cfgB = await obtenerBitacoraPortalConfig(); } catch (e2) {}
+            if (cargandoUi && window._permisosCargandoDesde) {
+                var resta = 2600 - (Date.now() - window._permisosCargandoDesde);
+                if (resta > 0) await new Promise(function (r) { setTimeout(r, resta); });
+            }
+            if (intFrase) clearInterval(intFrase);
             window._permisosSesion = resolverPermisosSesion(mail, cfgP, cfgB);
             if (window._permisosSesion.restringido && !window._permisosSesion.bloqueado && !window._permisosSesion.todos && !window._bienvenidaMostradaEstaSesion) {
                 document.body.classList.add('bienvenida-usuario-on');
@@ -26661,16 +27206,17 @@ document.getElementById('chatForm').onsubmit = function (e) {
             window._bienvenidaActiva = false;
         }
 
-        function bienvenidaUsuarioCerrar() {
+        function bienvenidaUsuarioCerrar(destTab) {
             if (window._bienvenidaCerrando) return;
             window._bienvenidaCerrando = true;
+            var destPedido = typeof destTab === 'string' ? destTab : '';
             bienvenidaUsuarioDetener();
             window._bienvenidaMostradaEstaSesion = true;
             document.body.classList.add('bienvenida-usuario-out');
             var terminar = function () {
                 document.body.classList.remove('bienvenida-usuario-on', 'bienvenida-usuario-out');
                 window._bienvenidaCerrando = false;
-                var dest = typeof primeraTabPermitida === 'function' ? primeraTabPermitida() : '';
+                var dest = destPedido || (typeof primeraTabPermitida === 'function' ? primeraTabPermitida() : '');
                 if (dest && typeof window.showTab === 'function') window.showTab(dest);
                 if (typeof continuarTrasLoginAutorizado === 'function') continuarTrasLoginAutorizado();
             };
@@ -26707,7 +27253,38 @@ document.getElementById('chatForm').onsubmit = function (e) {
             var panelNom = document.getElementById('bienvenidaUsuarioNombre');
             if (barNom) barNom.textContent = 'Hola, ' + nombre;
             if (barTxt) barTxt.textContent = bienvenidaUsuarioModulosTexto();
-            if (panelNom) panelNom.textContent = 'Hola, ' + nombre;
+            if (panelNom) panelNom.textContent = bienvenidaSaludoHora() + ', ' + nombre;
+            var fecha = document.getElementById('bienvenidaFecha');
+            if (fecha) {
+                var txtF = '';
+                try { txtF = new Date().toLocaleDateString('es-CL', { weekday: 'long', day: 'numeric', month: 'long' }); } catch (eF) {}
+                fecha.textContent = txtF;
+            }
+        }
+
+        function bienvenidaSaludoHora() {
+            var h = new Date().getHours();
+            if (h >= 6 && h < 12) return 'Buenos días';
+            if (h >= 12 && h < 20) return 'Buenas tardes';
+            return 'Buenas noches';
+        }
+
+        function bienvenidaUsuarioModulosLista() {
+            var ses = window._permisosSesion || {};
+            var vistos = {};
+            var out = [];
+            (ses.tabs || []).forEach(function (id) {
+                if (id === 'personalizacion' || vistos[id]) return;
+                vistos[id] = true;
+                var t = typeof permisosItemCatalogo === 'function' ? permisosItemCatalogo(id) : null;
+                var btnMenu = document.querySelector('#tabsMenu .tab-button[data-tab="' + id + '"]');
+                var icono = '';
+                var spanIco = btnMenu ? btnMenu.querySelector('span:first-child') : null;
+                if (spanIco) icono = spanIco.innerHTML;
+                var nombre = (t && t.nombre) || (btnMenu ? String(btnMenu.textContent || '').trim() : '') || id;
+                out.push({ id: id, nombre: nombre, icono: icono });
+            });
+            return out;
         }
 
         function bienvenidaUsuarioIniciar() {
@@ -26737,42 +27314,46 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 btnIni.style.pointerEvents = 'auto';
             }
             document.body.classList.add('bienvenida-usuario-on');
-            var lineas = [
-                'Soy Arturito. Te doy la bienvenida.',
-                bienvenidaUsuarioModulosTexto(),
-                'Cuando quieras, pulsa Iniciar. Recién ahí verás el menú.'
-            ];
-            function mostrarEscribiendo() {
-                var d = document.createElement('div');
-                d.className = 'bienvenida-escribiendo';
-                d.innerHTML = '<span></span><span></span><span></span>';
-                hilo.appendChild(d);
-                return d;
-            }
-            function addBurbuja(texto, next) {
-                var dots = mostrarEscribiendo();
-                var tWait = setTimeout(function () {
-                    if (dots && dots.parentNode) dots.parentNode.removeChild(dots);
-                    var b = document.createElement('div');
-                    b.className = 'bienvenida-burbuja';
-                    hilo.appendChild(b);
-                    requestAnimationFrame(function () { b.classList.add('is-on'); });
-                    bienvenidaUsuarioEscribir(b, texto, function () {
-                        var t = setTimeout(next, 380);
-                        window._bienvenidaTimers.push(t);
-                    });
-                }, 520);
-                window._bienvenidaTimers.push(tWait);
-            }
-            function run(ix) {
-                if (window._bienvenidaStop) return;
-                if (ix >= lineas.length) {
+            hilo.classList.remove('is-on');
+            var sub = document.getElementById('bienvenidaSub');
+            if (sub) sub.textContent = '';
+            var mods = bienvenidaUsuarioModulosLista();
+            mods.forEach(function (m, ix) {
+                var b = document.createElement('button');
+                b.type = 'button';
+                b.className = 'bv2-modulo';
+                b.style.animationDelay = (ix * 0.07) + 's';
+                b.title = 'Ir a ' + m.nombre;
+                var ico = document.createElement('span');
+                ico.className = 'bv2-modulo-ico';
+                ico.setAttribute('aria-hidden', 'true');
+                if (m.icono) ico.innerHTML = m.icono;
+                else ico.textContent = '•';
+                var nom = document.createElement('span');
+                nom.className = 'bv2-modulo-nom';
+                nom.textContent = m.nombre;
+                b.appendChild(ico);
+                b.appendChild(nom);
+                b.addEventListener('click', function () { bienvenidaUsuarioCerrar(m.id); });
+                hilo.appendChild(b);
+            });
+            var texto = mods.length
+                ? 'Soy Arturito. Preparé tu espacio con ' + (mods.length === 1 ? 'tu módulo' : 'tus ' + mods.length + ' módulos') + '. Elige uno o pulsa Iniciar.'
+                : 'Soy Arturito. Tu espacio de trabajo está listo.';
+            var t0 = setTimeout(function () {
+                if (!sub) {
+                    hilo.classList.add('is-on');
                     if (acc) acc.classList.add('is-ready');
                     return;
                 }
-                addBurbuja(lineas[ix], function () { run(ix + 1); });
-            }
-            var t0 = setTimeout(function () { run(0); }, 360);
+                bienvenidaUsuarioEscribir(sub, texto, function () {
+                    hilo.classList.add('is-on');
+                    var t1 = setTimeout(function () {
+                        if (acc) acc.classList.add('is-ready');
+                    }, 220 + mods.length * 70);
+                    window._bienvenidaTimers.push(t1);
+                });
+            }, 900);
             window._bienvenidaTimers.push(t0);
         }
 
