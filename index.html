@@ -7582,13 +7582,42 @@
         body.permisos-bloqueado #avisoSoloLecturaMesArchivado { display: none !important; }
         body.permisos-bloqueado .tab-content { display: none !important; }
         #permisosBloqueo { display: none; max-width: 32rem; margin: 4rem auto; padding: 1.5rem; border: 1px solid var(--border-color); border-radius: 12px; background: var(--bg-secondary); }
-        body.permisos-bloqueado #permisosBloqueo { display: block !important; }
+        body.permisos-bloqueado:not(.permisos-cargando) #permisosBloqueo { display: block !important; }
+        #permisosCargando { display: none; max-width: 28rem; margin: 4rem auto; padding: 1.5rem; text-align: center; color: var(--text-secondary); font-weight: 600; }
+        body.permisos-cargando #permisosCargando { display: block !important; }
+        body.permisos-cargando #tabsMenu,
+        body.permisos-cargando #notifBellWrap,
+        body.permisos-cargando #menuToggleBtn,
+        body.permisos-cargando #presenciaAdminBar,
+        body.permisos-cargando #permisosBloqueo,
+        body.permisos-cargando #bienvenidaUsuarioBar,
+        body.permisos-cargando #chatDock,
+        body.permisos-cargando .tab-content,
+        body.permisos-cargando #avisoPermisoSoloLectura,
+        body.permisos-cargando #avisoSoloLecturaMesArchivado { display: none !important; }
         #bienvenidaUsuario {
             display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 14000;
+            margin: 0;
+            max-width: none;
+            padding: 1.25rem;
+            border: none;
+            border-radius: 0;
+            background: rgba(8, 12, 18, 0.62);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: none;
+            align-items: center;
+            justify-content: center;
+            overflow: auto;
+        }
+        .bienvenida-usuario-card {
             position: relative;
             overflow: hidden;
-            max-width: 44rem;
-            margin: 1.1rem auto 1.4rem;
+            width: min(44rem, 100%);
+            margin: auto;
             padding: 1.45rem 1.5rem 1.25rem;
             border: 1px solid color-mix(in srgb, var(--primary, #7FBA02) 35%, var(--border-color));
             border-radius: 22px;
@@ -7597,12 +7626,13 @@
                 radial-gradient(800px 240px at 110% 120%, color-mix(in srgb, #facc15 18%, transparent), transparent 50%),
                 linear-gradient(165deg, color-mix(in srgb, var(--primary, #7FBA02) 16%, var(--bg-secondary)) 0%, var(--bg-secondary) 58%);
             box-shadow: 0 18px 48px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.08);
+            display: flex;
             gap: 1.25rem;
             align-items: flex-start;
             animation: bienvenidaPanelIn 0.55s cubic-bezier(0.22, 1.2, 0.36, 1);
         }
-        #bienvenidaUsuario::before,
-        #bienvenidaUsuario::after {
+        .bienvenida-usuario-card::before,
+        .bienvenida-usuario-card::after {
             content: '';
             position: absolute;
             border-radius: 50%;
@@ -7611,8 +7641,8 @@
             opacity: 0.22;
             animation: bienvenidaFloat 5.5s ease-in-out infinite;
         }
-        #bienvenidaUsuario::before { width: 10px; height: 10px; top: 18%; right: 12%; animation-delay: 0.4s; }
-        #bienvenidaUsuario::after { width: 7px; height: 7px; bottom: 16%; right: 22%; animation-delay: 1.6s; opacity: 0.35; }
+        .bienvenida-usuario-card::before { width: 10px; height: 10px; top: 18%; right: 12%; animation-delay: 0.4s; }
+        .bienvenida-usuario-card::after { width: 7px; height: 7px; bottom: 16%; right: 22%; animation-delay: 1.6s; opacity: 0.35; }
         @keyframes bienvenidaPanelIn {
             from { opacity: 0; transform: translateY(18px) scale(0.96); }
             to { opacity: 1; transform: none; }
@@ -7622,6 +7652,16 @@
             50% { transform: translateY(-10px); }
         }
         body.bienvenida-usuario-on #bienvenidaUsuario { display: flex !important; }
+        body.bienvenida-usuario-on #tabsMenu,
+        body.bienvenida-usuario-on #notifBellWrap,
+        body.bienvenida-usuario-on #menuToggleBtn,
+        body.bienvenida-usuario-on #menuMobileBackdrop,
+        body.bienvenida-usuario-on #presenciaAdminBar,
+        body.bienvenida-usuario-on #permisosBloqueo,
+        body.bienvenida-usuario-on #permisosCargando,
+        body.bienvenida-usuario-on #bienvenidaUsuarioBar,
+        body.bienvenida-usuario-on #chatDock,
+        body.bienvenida-usuario-on #chatBtn,
         body.bienvenida-usuario-on .tab-content,
         body.bienvenida-usuario-on #avisoPermisoSoloLectura,
         body.bienvenida-usuario-on #avisoSoloLecturaMesArchivado { display: none !important; }
@@ -7743,7 +7783,7 @@
         #bienvenidaUsuarioBarNombre { font-weight: 700; font-size: 0.92rem; }
         #bienvenidaUsuarioBarTxt { font-size: 0.8rem; color: var(--text-secondary); }
         @media (max-width: 720px) {
-            #bienvenidaUsuario { flex-direction: column; align-items: center; text-align: left; }
+            .bienvenida-usuario-card { flex-direction: column; align-items: center; text-align: left; }
         }
         body.permisos-solo-lectura #avisoPermisoSoloLectura { display: block !important; }
         body.permisos-solo-lectura #dashboard #btnCerrarMes,
@@ -8144,6 +8184,7 @@
                 <strong id="presenciaAdminTitulo">Nadie más conectado</strong>
                 <div id="presenciaAdminChips"></div>
             </div>
+            <div id="permisosCargando" aria-live="polite">Preparando tu acceso…</div>
             <div id="permisosBloqueo">
                 <h2 style="margin:0 0 0.5rem;">Sin permisos asignados</h2>
                 <p style="margin:0 0 1rem;color:var(--text-secondary);font-size:0.9rem;">Esta cuenta inició sesión, pero el administrador principal aún no le asignó módulos. Solicite acceso a <strong>edificio.wm815@gmail.com</strong>.</p>
@@ -8173,6 +8214,7 @@
                 </div>
             </div>
             <div id="bienvenidaUsuario" role="dialog" aria-labelledby="bienvenidaUsuarioNombre" aria-modal="true">
+                <div class="bienvenida-usuario-card">
                 <div class="bienvenida-arturito-wrap">
                 <div class="arturito-dashboard expression-happy" id="bienvenidaArturito" title="Arturito" aria-hidden="true">
                     <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -8204,8 +8246,9 @@
                     <h2 class="bienvenida-nombre" id="bienvenidaUsuarioNombre">Hola</h2>
                     <div id="bienvenidaChatHilo" aria-live="polite"></div>
                     <div class="bienvenida-acciones" id="bienvenidaAcciones">
-                        <button type="button" class="btn btn-primary" id="bienvenidaUsuarioContinuar">Continuar</button>
+                        <button type="button" class="btn btn-primary" id="bienvenidaUsuarioContinuar">Iniciar</button>
                     </div>
+                </div>
                 </div>
             </div>
             <!-- Aviso visible en todos los módulos cuando se consulta un mes archivado (solo lectura) -->
@@ -12397,7 +12440,7 @@
             if (appContainer) appContainer.style.display = 'none';
             document.body.classList.remove('chat-activo');
             document.body.classList.remove('bitacora-solo');
-            document.body.classList.remove('permisos-restringido', 'permisos-sin-chat', 'permisos-sin-notif', 'permisos-sin-busqueda', 'permisos-bloqueado', 'permisos-solo-lectura', 'bienvenida-usuario-on');
+            document.body.classList.remove('permisos-restringido', 'permisos-sin-chat', 'permisos-sin-notif', 'permisos-sin-busqueda', 'permisos-bloqueado', 'permisos-cargando', 'permisos-solo-lectura', 'bienvenida-usuario-on');
             window._bienvenidaMostradaEstaSesion = false;
             if (typeof bienvenidaUsuarioDetener === 'function') bienvenidaUsuarioDetener();
             window._permisosSesion = null;
@@ -12444,7 +12487,8 @@
 
         function continuarTrasLoginAutorizado() {
             try {
-                if (document.body.classList.contains('permisos-bloqueado')) return;
+                if (document.body.classList.contains('permisos-bloqueado') || document.body.classList.contains('permisos-cargando')) return;
+                if (document.body.classList.contains('bienvenida-usuario-on')) return;
                 if (typeof iniciarPresenciaUsuario === 'function') iniciarPresenciaUsuario();
                 if (typeof pintarAvatarMenu === 'function') pintarAvatarMenu();
                 if (document.body.classList.contains('permisos-sin-chat')) return;
@@ -12469,9 +12513,11 @@
                     var mailLogin = String(user.email || '').trim().toLowerCase();
                     if (esAdminPrincipalApp(mailLogin)) {
                         window._permisosSesion = { todos: true, tabs: [], chat: true, notif: true, nivel: 'administracion', restringido: false, bloqueado: false };
+                        document.body.classList.remove('permisos-bloqueado', 'permisos-cargando');
                     } else {
                         window._permisosSesion = { todos: false, tabs: [], chat: false, notif: false, restringido: true, bloqueado: true, pendiente: true };
-                        document.body.classList.add('permisos-bloqueado', 'permisos-sin-chat', 'permisos-sin-notif', 'permisos-sin-busqueda');
+                        document.body.classList.remove('permisos-bloqueado');
+                        document.body.classList.add('permisos-cargando', 'permisos-sin-chat', 'permisos-sin-notif', 'permisos-sin-busqueda');
                     }
                     showApp();
                     var aplicar = (typeof aplicarPermisosSesion === 'function')
@@ -26082,8 +26128,9 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 if (tab === 'personalizacion') ok = esAdminPrincipal(auth && auth.currentUser && auth.currentUser.email);
                 btn.classList.toggle('permiso-oculto', !ok);
             });
-            document.body.classList.toggle('permisos-bloqueado', !!s.bloqueado);
-            document.body.classList.toggle('permisos-restringido', !!(s.restringido && !s.bloqueado));
+            document.body.classList.toggle('permisos-cargando', !!s.pendiente);
+            document.body.classList.toggle('permisos-bloqueado', !!s.bloqueado && !s.pendiente);
+            document.body.classList.toggle('permisos-restringido', !!(s.restringido && !s.bloqueado && !s.pendiente));
             document.body.classList.toggle('permisos-sin-chat', !s.chat || !!s.bloqueado);
             document.body.classList.toggle('permisos-sin-notif', !s.notif || !!s.bloqueado);
             document.body.classList.toggle('permisos-sin-busqueda', !!(s.bloqueado || (s.restringido && (s.tabs || []).indexOf('dashboard') < 0)));
@@ -26095,7 +26142,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
             }
             if (!s.chat || s.bloqueado) document.body.classList.remove('chat-activo');
             var bloq = document.getElementById('permisosBloqueo');
-            if (bloq) bloq.style.display = s.bloqueado ? 'block' : 'none';
+            if (bloq) bloq.style.display = '';
             if (typeof actualizarEtiquetasMenuLateral === 'function') actualizarEtiquetasMenuLateral();
         }
 
@@ -26108,18 +26155,22 @@ document.getElementById('chatForm').onsubmit = function (e) {
             try { cfgP = await obtenerPermisosUsuarios(); } catch (e1) {}
             try { cfgB = await obtenerBitacoraPortalConfig(); } catch (e2) {}
             window._permisosSesion = resolverPermisosSesion(mail, cfgP, cfgB);
+            if (window._permisosSesion.restringido && !window._permisosSesion.bloqueado && !window._permisosSesion.todos && !window._bienvenidaMostradaEstaSesion) {
+                document.body.classList.add('bienvenida-usuario-on');
+            }
             aplicarPermisosEnMenu(window._permisosSesion);
             if (typeof perfilBindUi === 'function') perfilBindUi();
             if (window._permisosSesion.bloqueado) {
+                document.body.classList.remove('bienvenida-usuario-on');
                 if (typeof detenerPresenciaUsuario === 'function') detenerPresenciaUsuario();
                 return;
             }
             if (typeof iniciarPresenciaUsuario === 'function') iniciarPresenciaUsuario();
-            if (window._permisosSesion.restringido && typeof window.showTab === 'function') {
+            if (typeof bienvenidaUsuarioIniciar === 'function') bienvenidaUsuarioIniciar();
+            if (window._permisosSesion.restringido && !document.body.classList.contains('bienvenida-usuario-on') && typeof window.showTab === 'function') {
                 var dest = primeraTabPermitida();
                 if (dest) window.showTab(dest);
             }
-            if (typeof bienvenidaUsuarioIniciar === 'function') bienvenidaUsuarioIniciar();
         }
 
         function bienvenidaUsuarioNombre() {
@@ -26165,6 +26216,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
             document.body.classList.remove('bienvenida-usuario-on');
             var dest = typeof primeraTabPermitida === 'function' ? primeraTabPermitida() : '';
             if (dest && typeof window.showTab === 'function') window.showTab(dest);
+            if (typeof continuarTrasLoginAutorizado === 'function') continuarTrasLoginAutorizado();
         }
 
         function bienvenidaUsuarioEscribir(el, texto, done) {
@@ -26221,7 +26273,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
             var lineas = [
                 'Soy Arturito. Te doy la bienvenida.',
                 bienvenidaUsuarioModulosTexto(),
-                'Cuando quieras, continúa y trabaja desde el menú.'
+                'Cuando quieras, pulsa Iniciar. Recién ahí verás el menú.'
             ];
             function mostrarEscribiendo() {
                 var d = document.createElement('div');
