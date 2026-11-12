@@ -19969,10 +19969,13 @@
                 if (cat && n.catClave !== cat) return false;
                 if (soloDest && !novedadEstaDestacadaGestion(n)) return false;
                 if (!q) return true;
-                var qNum = String(q).replace(/^#/, '').trim();
-                if (/^\d+$/.test(qNum) && Number(n.numeroLibro) === Number(qNum)) return true;
+                var qNums = String(q).match(/#?\d{3,}/g) || [];
+                var iN;
+                for (iN = 0; iN < qNums.length; iN++) {
+                    if (Number(n.numeroLibro) === Number(String(qNums[iN]).replace(/\D/g, ''))) return true;
+                }
                 var notasTxt = (n.notas || []).map(function (x) { return x && x.texto; }).join(' ');
-                var blob = [etiquetaLibroNovedadGestion(n), n.numeroLibro, n.texto, n.conserje, n.categoria, n.fecha, n.hora, n.notaInterna, notasTxt].join(' ');
+                var blob = [etiquetaLibroNovedadGestion(n), n.numeroLibro, n.correlativo, n.texto, n.conserje, n.categoria, n.fecha, n.hora, n.notaInterna, notasTxt].join(' ');
                 return coincidirFiltroInteligente(blob, q);
             });
             var vis = (cache.visitas || []).filter(function (v) {
@@ -21809,18 +21812,61 @@ function pcshChatIdentidadMensaje() {
   };
 }
 
-function pcshChatReadLastTs() {
+function pcshChatLastReadStorageKey() {
+  var who = '';
   try {
-    return parseInt(localStorage.getItem(PCSH_CHAT_LAST_READ_KEY) || '0', 10) || 0;
-  } catch (e) {
-    return 0;
+    if (typeof bitacoraNormCorreo === 'function' && typeof auth !== 'undefined' && auth && auth.currentUser && auth.currentUser.email) {
+      who = bitacoraNormCorreo(auth.currentUser.email);
+    }
+  } catch (eW) {}
+  if (!who && typeof pcshChatAutorActual === 'function') who = pcshChatAutorActual();
+  who = String(who || 'anon').toLowerCase().replace(/[^a-z0-9@._-]+/g, '_');
+  return 'pcsh_wm_chat_last_read_ts:' + who;
+}
+
+function pcshChatLecturaDocId() {
+  return pcshChatLastReadStorageKey().replace(/[^a-z0-9]+/gi, '_').slice(0, 80);
+}
+
+function pcshChatReadLastTs() {
+  var keys = [pcshChatLastReadStorageKey(), PCSH_CHAT_LAST_READ_KEY, 'pcsh_demo_v1_chat_last_read_ts', 'pcsh_gestion_v1_chat_last_read_ts'];
+  var best = 0;
+  var i;
+  for (i = 0; i < keys.length; i++) {
+    try {
+      var n = parseInt(localStorage.getItem(keys[i]) || '0', 10) || 0;
+      if (n > best) best = n;
+    } catch (eR) {}
   }
+  return best;
+}
+
+function pcshChatPersistLastReadNube(n) {
+  try {
+    var sdb = (typeof pcshChatDb === 'function' && pcshChatDb()) || window._chatDbConserjeria;
+    if (!sdb) return;
+    sdb.collection('chat_lecturas').doc(pcshChatLecturaDocId()).set({ ts: n, at: Date.now() }, { merge: true }).catch(function () {});
+  } catch (eP) {}
+}
+
+function pcshChatHydrateLastReadNube(sdb) {
+  if (!sdb) return Promise.resolve();
+  return sdb.collection('chat_lecturas').doc(pcshChatLecturaDocId()).get().then(function (doc) {
+    if (!doc || !doc.exists) return;
+    var ts = Number((doc.data() || {}).ts) || 0;
+    if (ts > pcshChatReadLastTs()) {
+      try { localStorage.setItem(pcshChatLastReadStorageKey(), String(ts)); } catch (eS) {}
+    }
+  }).catch(function () {});
 }
 
 function pcshChatWriteLastTs(ts) {
-  try {
-    localStorage.setItem(PCSH_CHAT_LAST_READ_KEY, String(ts));
-  } catch (e) {}
+  var n = Number(ts) || 0;
+  var prev = pcshChatReadLastTs();
+  if (n < prev) n = prev;
+  try { localStorage.setItem(pcshChatLastReadStorageKey(), String(n)); } catch (e) {}
+  try { localStorage.setItem(PCSH_CHAT_LAST_READ_KEY, String(n)); } catch (e2) {}
+  pcshChatPersistLastReadNube(n);
 }
 
 function pcshChatFormatDayLabel(ts) {
@@ -21842,12 +21888,57 @@ function pcshChatFormatTime(ts) {
 }
 
 function pcshChatMsgTimestamp(m) {
-  if (typeof m.timestamp === 'number' && !isNaN(m.timestamp)) return m.timestamp;
+  if (!m) return 0;
+  var t = m.timestamp;
+  if (t && typeof t.toMillis === 'function') {
+    var msT = t.toMillis();
+    if (isFinite(msT) && msT > 0) return msT;
+  }
+  if (t && typeof t.seconds === 'number') {
+    var msS = t.seconds * 1000 + Math.floor((t.nanoseconds || 0) / 1e6);
+    if (msS > 0) return msS;
+  }
+  if (typeof t === 'number' && isFinite(t) && t > 0) {
+    return t < 1e12 ? Math.round(t * 1000) : t;
+  }
+  if (typeof t === 'string' && t) {
+    var n = Number(t);
+    if (isFinite(n) && n > 0) return n < 1e12 ? Math.round(n * 1000) : n;
+    var pIso = Date.parse(t);
+    if (!isNaN(pIso)) return pIso;
+  }
   if (m.fecha && m.hora) {
     var parsed = Date.parse(String(m.fecha) + 'T' + String(m.hora));
     if (!isNaN(parsed)) return parsed;
   }
   return 0;
+}
+
+function pcshChatContarNoLeidos(rows) {
+  if (typeof chatVisible !== 'undefined' && chatVisible) return 0;
+  var lastRead = pcshChatReadLastTs();
+  var me = typeof pcshChatAutorActual === 'function' ? pcshChatAutorActual() : '';
+  var unread = 0;
+  (rows || []).forEach(function (r) {
+    var d = r && (r.d || r);
+    if (!d) return;
+    var tsm = pcshChatMsgTimestamp(d);
+    if (!tsm || tsm <= lastRead) return;
+    var author = d.autor || '';
+    if (!author || author === me) return;
+    unread += 1;
+  });
+  return unread;
+}
+
+function pcshChatSembrarLeidosSiVacio(rows) {
+  if (pcshChatReadLastTs()) return;
+  var maxTs = 0;
+  (rows || []).forEach(function (r) {
+    var t = pcshChatMsgTimestamp(r && (r.d || r));
+    if (t > maxTs) maxTs = t;
+  });
+  pcshChatWriteLastTs(maxTs || Date.now());
 }
 
 /** Solo URLs https para mostrar stickers ya enviados (evita javascript: y datos maliciosos). */
@@ -22699,16 +22790,7 @@ function pcshChatRenderMessages(snap) {
     box.appendChild(msgRow);
   });
 
-  var unread = 0;
-  if (!chatVisible) {
-    var lastRead = pcshChatReadLastTs();
-    all.forEach(function (r) {
-      var tsm = pcshChatMsgTimestamp(r.d);
-      var author = r.d.autor || '';
-      if (tsm > lastRead && author !== pcshChatAutorActual()) unread++;
-    });
-  }
-  pcshChatUpdateFabBadge(unread);
+  pcshChatUpdateFabBadge(pcshChatContarNoLeidos(all));
 
   box.scrollTop = box.scrollHeight;
 }
@@ -22802,28 +22884,40 @@ async function initChat() {
   window._chatInternoGestionInited = true;
   if (typeof pcshChatStartPresenciaListener === 'function') pcshChatStartPresenciaListener(sdb);
   chatCollection = sdb.collection('chat');
-  var chatPrimerSnapshot = true;
-  chatCollection.orderBy('timestamp', 'asc').limitToLast(150).onSnapshot(function (snap) {
-    if (!chatPrimerSnapshot) {
-      var prevIds = {};
-      chatLastSnapshotDocs.forEach(function (r) {
-        prevIds[r.id] = true;
-      });
+  window._pcshChatSeenIds = window._pcshChatSeenIds || {};
+  window._pcshChatBaselineReady = false;
+  function pcshChatSuscribirMensajes() {
+    chatCollection.orderBy('timestamp', 'asc').limitToLast(150).onSnapshot(function (snap) {
+      var seen = window._pcshChatSeenIds;
+      var baseline = !!window._pcshChatBaselineReady;
+      var nuevos = [];
       snap.forEach(function (doc) {
-        var id = doc.id;
-        if (prevIds[id]) return;
-        var d = doc.data();
+        if (!seen[doc.id]) {
+          seen[doc.id] = true;
+          if (baseline) nuevos.push(doc);
+        }
+      });
+      if (!baseline) {
+        var rows = [];
+        snap.forEach(function (doc) { rows.push({ id: doc.id, d: doc.data() }); });
+        if (typeof pcshChatSembrarLeidosSiVacio === 'function') pcshChatSembrarLeidosSiVacio(rows);
+        window._pcshChatBaselineReady = snap.size > 0 || !(snap.metadata && snap.metadata.fromCache);
+        pcshChatRenderMessages(snap);
+        return;
+      }
+      nuevos.forEach(function (doc) {
+        var d = doc.data() || {};
         var autor = d.autor || '';
         if (!autor || autor === pcshChatAutorActual()) return;
         pcshChatPlayIncomingSound();
         pcshChatVibrateIncoming();
       });
-    }
-    chatPrimerSnapshot = false;
-    pcshChatRenderMessages(snap);
-  }, function (err) {
-    console.warn('[pcsh] chat listener', err);
-  });
+      pcshChatRenderMessages(snap);
+    }, function (err) {
+      console.warn('[pcsh] chat listener', err);
+    });
+  }
+  Promise.resolve(pcshChatHydrateLastReadNube(sdb)).finally(pcshChatSuscribirMensajes);
 
   try {
     if (_pcshChatTypingUnsub) {
@@ -27132,7 +27226,8 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     tbR.innerHTML = reclamos.map(function (r) {
                         var motivo = r.motivo || (typeof reclamoMotivoDesdeTexto === 'function' ? reclamoMotivoDesdeTexto(r.texto) : (r.texto || '—'));
                         var est = (typeof reclamoHtmlEstado === 'function') ? reclamoHtmlEstado(r) : bitacoraEsc((r.estadoGestion || 'pendiente'));
-                        var q = [r.fecha, r.depto, motivo, r.texto, r.conserje, r.estadoGestion].join(' ').toLowerCase();
+                        var libroQ = r.novedadLibro != null ? r.novedadLibro : r.correlativo;
+                        var q = ['reclamo', '#' + (libroQ != null ? libroQ : ''), r.fecha, r.depto, motivo, r.texto, r.conserje, r.estadoGestion, r.novedadLibro, r.correlativo].join(' ').toLowerCase();
                         return '<tr class="bit-fila" data-bit-tipo="reclamo" data-bit-caso="' + bitacoraEsc(r.id) + '" data-bit-q="' + bitacoraEsc(q) + '">' +
                             '<td>' + bitacoraEsc(r.fecha || '—') + (r.hora ? '<br><span style="opacity:.7">' + bitacoraEsc(String(r.hora).slice(0, 5)) + '</span>' : '') +
                             '</td><td>' + bitacoraEsc(r.depto || '—') +
@@ -27150,7 +27245,8 @@ document.getElementById('chatForm').onsubmit = function (e) {
                         var esAnulReg = typeof multaEsRegistroAnulacion === 'function' && multaEsRegistroAnulacion(m);
                         var est = esAnulReg ? 'Anulación' : ((typeof multaEstaAnulada === 'function' && multaEstaAnulada(m)) ? 'Anulada' : (typeof multaHtmlEstado === 'function' ? multaHtmlEstado(m) : 'Cursada'));
                         var fecha = typeof formatearFecha === 'function' ? formatearFecha(m.fecha) : (m.fecha || '—');
-                        var q = [fecha, m.departamento, m.nombre, m.motivo, m.folio, m.estadoGestion].join(' ').toLowerCase();
+                        var libroM = m.novedadLibro != null && m.novedadLibro !== '' ? m.novedadLibro : '';
+                        var q = ['multa', libroM ? ('#' + libroM) : '', fecha, m.departamento, m.nombre, m.motivo, m.folio, m.estadoGestion, m.novedadLibro].join(' ').toLowerCase();
                         return '<tr class="bit-fila" data-bit-tipo="multa" data-bit-caso="' + bitacoraEsc(m.id) + '" data-bit-q="' + bitacoraEsc(q) + '">' +
                             '<td>' + bitacoraEsc(fecha) +
                             '</td><td>' + bitacoraEsc(m.departamento || '—') +
@@ -62558,7 +62654,9 @@ document.getElementById('chatForm').onsubmit = function (e) {
             });
             var stop = {
                 de: 1, la: 1, el: 1, del: 1, los: 1, las: 1, un: 1, una: 1, y: 1, o: 1, en: 1, a: 1, al: 1,
-                depto: 1, dpto: 1, departamento: 1, dept: 1, unidad: 1, nro: 1, numero: 1, num: 1, folio: 1
+                depto: 1, dpto: 1, departamento: 1, dept: 1, unidad: 1, nro: 1, numero: 1, num: 1, folio: 1,
+                reclamo: 1, reclamos: 1, multa: 1, multas: 1, novedad: 1, novedades: 1, libro: 1,
+                correlativo: 1, caso: 1, cita: 1, tag: 1
             };
             var tokens = tokensFiltroPrecisos(raw).filter(function (t) {
                 if (!t) return false;
