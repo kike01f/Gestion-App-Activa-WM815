@@ -12054,7 +12054,6 @@
     <div id="modalPerfilUsuario" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modalPerfilTitulo">
         <div class="modal-confirm" style="max-width: 420px; width: 100%; text-align: left;">
             <h3 id="modalPerfilTitulo" style="margin: 0 0 0.35rem;">Mi perfil</h3>
-            <p style="margin: 0 0 0.85rem; font-size: 0.8rem; color: var(--text-secondary);">Foto o un avatar divertido. Se verá cuando esté conectado.</p>
             <div style="display:flex;gap:0.85rem;align-items:center;margin-bottom:0.85rem;">
                 <span class="perfil-avatar perfil-avatar--lg" id="perfilPreview" aria-hidden="true">👤</span>
                 <div>
@@ -12064,14 +12063,13 @@
             </div>
             <div class="form-group">
                 <label>Nombre visible</label>
-                <input type="text" id="perfilNombreVisible" placeholder="Cómo lo verá el administrador">
+                <input type="text" id="perfilNombreVisible" placeholder="Nombre">
             </div>
-            <p style="font-size:0.75rem;font-weight:600;margin:0.2rem 0;">Avatar divertido</p>
+            <p style="font-size:0.75rem;font-weight:600;margin:0.2rem 0;">Avatar</p>
             <div id="perfilAvatarGrid"></div>
             <div class="form-group">
-                <label>O subir una foto</label>
+                <label>Foto</label>
                 <input type="file" id="perfilFotoFile" accept="image/*">
-                <small style="display:block;margin-top:0.3rem;color:var(--text-tertiary);font-size:0.72rem;">Después de elegirla podrá recortar, acercar y encuadrar.</small>
             </div>
             <div class="modal-buttons">
                 <button type="button" class="btn btn-secondary" id="perfilBtnCerrar">Cerrar</button>
@@ -12083,7 +12081,6 @@
     <div id="modalPerfilRecorte" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modalPerfilRecorteTitulo">
         <div class="modal-confirm" style="max-width: 380px; width: 100%; text-align: left;">
             <h3 id="modalPerfilRecorteTitulo" style="margin: 0 0 0.35rem;">Ajustar foto</h3>
-            <p class="perfil-crop-hint" style="margin-top:0;">Arrastre para mover y use el zoom para encuadrar el recorte circular.</p>
             <div class="perfil-crop-stage" id="perfilCropStage">
                 <canvas id="perfilCropCanvas" width="280" height="280"></canvas>
             </div>
@@ -18637,9 +18634,15 @@
         }
 
         function extraerUnidadesTextoNovedad(texto) {
-            var out = [];
-            var re = /(?:dpto\.?|depto\.?|departamento|unidad)\s*(\d{2,4})/gi;
             var s = String(texto || '');
+            s = s.replace(/\b\d{1,2}:\d{2}(?::\d{2})?\b/g, ' ');
+            s = s.replace(/\b\d{1,2}\s*[;hH]\s*\d{2}\b/g, ' ');
+            s = s.replace(/\b\d{1,2}\.?\d{3}\.?\d{3}-[\dkK]\b/g, ' ');
+            s = s.replace(/\+?56\s*9[\s-]?\d{4}[\s-]?\d{4}/g, ' ');
+            s = s.replace(/(?:novedad|libro|folio|reclamo|multa|correlativo|caso|aviso)\s*#?\s*\d{2,6}/gi, ' ');
+            s = s.replace(/#\s*\d{2,6}/g, ' ');
+            var out = [];
+            var re = /(?:dpto\.?|depto\.?|departamento|dept\.?|unidad)\s*(?:n[o°º.]?\s*|nro\.?\s*|num(?:ero)?\s*)?(\d{2,4}(?:-[a-zA-Z])?)\b/gi;
             var m;
             while ((m = re.exec(s))) {
                 var id = String(m[1]);
@@ -31798,16 +31801,51 @@ document.getElementById('chatForm').onsubmit = function (e) {
             } catch (eOp) {}
             return 'Administración';
         }
-        function multaInferirDeptoTexto(texto) {
-            var s = String(texto || '');
-            var m = s.match(/(?:dpto\.?|depto\.?|departamento|unidad|#)\s*(\d{2,4})\b/i);
-            if (m) return m[1];
-            if (typeof extraerUnidadesTextoNovedad === 'function') {
-                var uns = extraerUnidadesTextoNovedad(s);
-                if (uns && uns[0]) return String(uns[0]);
+        function deptoSoloApareceComoNovedad(depto, texto) {
+            var d = String(depto || '').replace(/\D/g, '');
+            if (!d) return false;
+            var t = String(texto || '');
+            var comoUnidad = new RegExp('(?:dpto\\.?|depto\\.?|departamento|dept\\.?|unidad)\\s*(?:n[o°º.]?\\s*|nro\\.?\\s*|num(?:ero)?\\s*)?' + d + '\\b', 'i');
+            if (comoUnidad.test(t)) return false;
+            var comoLibro = new RegExp('(?:novedad|libro|folio|reclamo|multa|correlativo|caso|#)\\s*' + d + '\\b', 'i');
+            return comoLibro.test(t);
+        }
+        function deptoCoincideNumeroLibro(depto, meta) {
+            var d = String(depto || '').replace(/\D/g, '');
+            if (!d) return true;
+            meta = meta || {};
+            var cand = [meta.numeroLibro, meta.novedadLibro, meta.correlativo, meta.libro];
+            var i;
+            for (i = 0; i < cand.length; i++) {
+                if (cand[i] != null && String(cand[i]) !== '' && isFinite(Number(cand[i])) && String(Number(cand[i])) === String(Number(d))) return true;
             }
-            var m2 = s.match(/\b(\d{3,4})\b/);
-            return m2 ? m2[1] : '';
+            return false;
+        }
+        function listaUnidadesOcupacionConocidas() {
+            var units = (typeof window !== 'undefined' && Array.isArray(window.vinculacionUnits)) ? window.vinculacionUnits : [];
+            var mapa = Object.create(null);
+            units.forEach(function (u) {
+                if (!u) return;
+                var crudo = String(u.unitNumber || u.departamento || u.unidad || '').trim();
+                if (crudo) mapa[crudo] = true;
+                var n = crudo.replace(/\D/g, '');
+                if (n) mapa[n] = true;
+            });
+            return mapa;
+        }
+        function multaInferirDeptoTexto(texto, meta) {
+            var uns = typeof extraerUnidadesTextoNovedad === 'function' ? extraerUnidadesTextoNovedad(texto) : [];
+            meta = meta || {};
+            uns = (uns || []).filter(function (d) { return !deptoCoincideNumeroLibro(d, meta); });
+            var conocidos = listaUnidadesOcupacionConocidas();
+            if (Object.keys(conocidos).length) {
+                var hit = uns.filter(function (d) {
+                    var n = String(d).replace(/\D/g, '');
+                    return conocidos[String(d)] || conocidos[n];
+                });
+                if (hit.length) return String(hit[0]);
+            }
+            return uns[0] ? String(uns[0]) : '';
         }
         function multaMotivoDesdeTexto(texto) {
             var s = String(texto || '').replace(/\s+/g, ' ').trim();
@@ -32163,7 +32201,12 @@ document.getElementById('chatForm').onsubmit = function (e) {
         function multaPayloadDesdeNovedad(n, libroNum) {
             var cor = Number(n.correlativo);
             var texto = n.texto || '';
-            var depto = String(n.depto || n.departamento || multaInferirDeptoTexto(texto) || '').trim();
+            var metaDepto = { numeroLibro: libroNum != null ? libroNum : n.numeroLibro, correlativo: n.correlativo, novedadLibro: n.novedadLibro };
+            var inferido = multaInferirDeptoTexto(texto, metaDepto);
+            var deptoRaw = String(n.depto || n.departamento || '').trim();
+            if (deptoCoincideNumeroLibro(deptoRaw, metaDepto) || deptoSoloApareceComoNovedad(deptoRaw, texto)) deptoRaw = '';
+            if (inferido && deptoRaw && String(deptoRaw).replace(/\D/g, '') !== String(inferido).replace(/\D/g, '')) deptoRaw = '';
+            var depto = String(deptoRaw || inferido || '').trim();
             var nombre = String(n.nombre || multaResidenteDesdeDepto(depto) || '').trim() || 'Por confirmar';
             var ymd = multaYmdIso(n.fecha);
             if (!ymd) return null;
@@ -32306,8 +32349,8 @@ document.getElementById('chatForm').onsubmit = function (e) {
                                 var frescoHtml = multaPayloadDesdeNovedad(n, libro != null ? libro : exist.novedadLibro);
                                 if (frescoHtml && frescoHtml.contenidoHtml) exist.contenidoHtml = frescoHtml.contenidoHtml;
                             }
-                            var deptoN = multaInferirDeptoTexto(n.texto || '');
-                            if (deptoN && (!exist.departamento || exist.departamento === '—')) exist.departamento = deptoN;
+                            var deptoN = multaInferirDeptoTexto(n.texto || '', n);
+                            if (deptoN && (!exist.departamento || exist.departamento === '—' || deptoCoincideNumeroLibro(exist.departamento, { numeroLibro: libro, correlativo: n.correlativo, novedadLibro: exist.novedadLibro }))) exist.departamento = deptoN;
                             if ((!exist.nombre || exist.nombre === 'Por confirmar') && deptoN) {
                                 var nom = multaResidenteDesdeDepto(deptoN);
                                 if (nom) exist.nombre = nom;
@@ -32671,13 +32714,10 @@ document.getElementById('chatForm').onsubmit = function (e) {
         function reclamoEscHtml(v) {
             return String(v == null ? '' : v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
         }
-        function reclamoInferirDepto(texto) {
-            if (typeof multaInferirDeptoTexto === 'function') return multaInferirDeptoTexto(texto);
-            var s = String(texto || '');
-            var m = s.match(/(?:dpto\.?|depto\.?|departamento|unidad|#)\s*(\d{2,4})\b/i);
-            if (m) return m[1];
-            var m2 = s.match(/\b(\d{3,4})\b/);
-            return m2 ? m2[1] : '';
+        function reclamoInferirDepto(texto, meta) {
+            if (typeof multaInferirDeptoTexto === 'function') return multaInferirDeptoTexto(texto, meta);
+            var uns = typeof extraerUnidadesTextoNovedad === 'function' ? extraerUnidadesTextoNovedad(texto) : [];
+            return (uns && uns[0]) ? String(uns[0]) : '';
         }
         function reclamoMotivoDesdeTexto(texto) {
             var s = String(texto || '').replace(/\s+/g, ' ').trim();
@@ -32759,7 +32799,12 @@ document.getElementById('chatForm').onsubmit = function (e) {
         function reclamoPayloadDesdeNovedad(n, libroNum) {
             var cor = Number(n.correlativo);
             var texto = n.texto || '';
-            var depto = String(n.depto || n.departamento || reclamoInferirDepto(texto) || '').trim();
+            var metaDepto = { numeroLibro: libroNum != null ? libroNum : n.numeroLibro, correlativo: n.correlativo, novedadLibro: n.novedadLibro };
+            var inferido = reclamoInferirDepto(texto, metaDepto);
+            var deptoRaw = String(n.depto || n.departamento || '').trim();
+            if (deptoCoincideNumeroLibro(deptoRaw, metaDepto) || deptoSoloApareceComoNovedad(deptoRaw, texto)) deptoRaw = '';
+            if (inferido && deptoRaw && String(deptoRaw).replace(/\D/g, '') !== String(inferido).replace(/\D/g, '')) deptoRaw = '';
+            var depto = String(deptoRaw || inferido || '').trim();
             var num = libroNum != null ? libroNum : (n.numeroLibro != null ? n.numeroLibro : cor);
             return {
                 id: reclamoIdDesdeNovedad(cor),
@@ -32860,6 +32905,19 @@ document.getElementById('chatForm').onsubmit = function (e) {
                             if (Array.isArray(n.historialEstados) && n.historialEstados.length) exist.historialEstados = n.historialEstados;
                             cambiadas = true;
                         }
+                        var metaDep = { numeroLibro: libro, correlativo: cor, novedadLibro: exist.novedadLibro || libro };
+                        var txtDep = n.texto || exist.texto || '';
+                        var deptoN = reclamoInferirDepto(txtDep, metaDep);
+                        var deptoMal = !exist.depto || exist.depto === '—' || deptoCoincideNumeroLibro(exist.depto, metaDep) || deptoSoloApareceComoNovedad(exist.depto, txtDep);
+                        if (deptoN && deptoMal) {
+                            exist.depto = deptoN;
+                            cambiadas = true;
+                            reclamoPersistirEnCola(exist);
+                        } else if (!deptoN && deptoMal && exist.depto && exist.depto !== '—') {
+                            exist.depto = '—';
+                            cambiadas = true;
+                            reclamoPersistirEnCola(exist);
+                        }
                         if (exist.huella === huella && exist.activa !== false) return;
                         exist.fecha = n.fecha || exist.fecha;
                         exist.hora = n.hora || exist.hora;
@@ -32872,8 +32930,6 @@ document.getElementById('chatForm').onsubmit = function (e) {
                         if (reclamoRequiereTratamiento(exist) && n.texto) {
                             exist.texto = String(n.texto);
                             exist.motivo = reclamoMotivoDesdeTexto(n.texto);
-                            var deptoN = reclamoInferirDepto(n.texto);
-                            if (deptoN && (!exist.depto || exist.depto === '—')) exist.depto = deptoN;
                         }
                         cambiadas = true;
                     });
