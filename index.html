@@ -13756,6 +13756,9 @@
                         ? aplicarPermisosSesion()
                         : Promise.resolve();
                     Promise.resolve(aplicar).then(function () {
+                        return user.getIdToken();
+                    }).then(function () {
+                        if (typeof iniciarMotorBienvenidaEnNube === 'function') iniciarMotorBienvenidaEnNube();
                         continuarTrasLoginAutorizado();
                     }).catch(function () {
                         continuarTrasLoginAutorizado();
@@ -25731,6 +25734,10 @@ document.getElementById('chatForm').onsubmit = function (e) {
         }
 
         async function iniciarEscuchaHuellasBienvenida() {
+            var usuarioHuellas = null;
+            try { usuarioHuellas = auth && auth.currentUser; } catch (eHu) {}
+            if (!usuarioHuellas) return;
+            try { await usuarioHuellas.getIdToken(); } catch (eTokH) { return; }
             iniciarEscuchaHuellasBienvenidaPuente();
             iniciarEscuchaColaBienvenidaConserjeria();
             if (_unsubHuellasBienvenida) return;
@@ -25748,7 +25755,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     } catch (eS) {}
                     scheduleRefrescarEstadoBienvenidaUnidades();
                 }, function (err) {
-                    console.warn('[bienvenida] listener huellas Gestión:', err);
+                    if (err && err.code === 'permission-denied') return;
                     if (_unsubHuellasBienvenida) {
                         try { _unsubHuellasBienvenida(); } catch (eU) {}
                         _unsubHuellasBienvenida = null;
@@ -50419,6 +50426,9 @@ document.getElementById('chatForm').onsubmit = function (e) {
         }
 
         function iniciarMotorBienvenidaEnNube() {
+            var usuarioMotor = null;
+            try { usuarioMotor = auth && auth.currentUser; } catch (eMot) {}
+            if (!usuarioMotor) return;
             try {
                 if (typeof iniciarEscuchaHuellasBienvenida === 'function') iniciarEscuchaHuellasBienvenida();
                 if (typeof iniciarEscuchaColaBienvenidaConserjeria === 'function') iniciarEscuchaColaBienvenidaConserjeria();
@@ -62679,6 +62689,10 @@ document.getElementById('chatForm').onsubmit = function (e) {
 
         async function iniciarEscuchaDashboardTiempoReal() {
             if (!firebaseInitialized || !db) return;
+            var usuarioDash = null;
+            try { usuarioDash = auth && auth.currentUser; } catch (eDash) {}
+            if (!usuarioDash) return;
+            try { await usuarioDash.getIdToken(); } catch (eTokD) { return; }
             detenerEscuchaDashboardTiempoReal();
             var mesConsulta = window.mesEnConsulta || (typeof obtenerMesActual === 'function' ? obtenerMesActual() : '');
             if (!mesConsulta) return;
@@ -62706,7 +62720,22 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 try {
                     var unsub = db.collection('comunidad').doc(docId).onSnapshot(function() {
                         _refrescarDashboardDebounced();
-                    }, function(err) { console.warn('Dashboard onSnapshot error for ' + docId + ':', err); });
+                    }, function(err) {
+                        if (err && err.code === 'permission-denied') {
+                            if (!window._dashboardPermisoReintento) {
+                                window._dashboardPermisoReintento = true;
+                                detenerEscuchaDashboardTiempoReal();
+                                var u2 = auth && auth.currentUser;
+                                if (u2 && u2.getIdToken) {
+                                    u2.getIdToken(true).then(function () {
+                                        iniciarEscuchaDashboardTiempoReal();
+                                    }).catch(function () {});
+                                }
+                            }
+                            return;
+                        }
+                        console.warn('Dashboard onSnapshot error for ' + docId + ':', err);
+                    });
                     window._dashboardUnsubscribes.push(unsub);
                 } catch (e) {
                     console.warn('Dashboard listener for ' + docId + ':', e);
