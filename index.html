@@ -7582,6 +7582,15 @@
         body.permisos-sin-notif #notifBell,
         body.permisos-sin-notif .notif-bell { display: none !important; }
         body.permisos-sin-busqueda #consultaRapida { display: none !important; }
+        body.permisos-bloqueado #tabsMenu .tab-button:not(#btnLogout),
+        body.permisos-bloqueado #tabsMenu .tabs-group-label,
+        body.permisos-bloqueado #tabsMenu .tabs-menu-dev-logo,
+        body.permisos-bloqueado #notifBellWrap,
+        body.permisos-bloqueado #chatDock,
+        body.permisos-bloqueado #avisoSoloLecturaMesArchivado { display: none !important; }
+        body.permisos-bloqueado .tab-content { display: none !important; }
+        #permisosBloqueo { display: none; max-width: 32rem; margin: 4rem auto; padding: 1.5rem; border: 1px solid var(--border-color); border-radius: 12px; background: var(--bg-secondary); }
+        body.permisos-bloqueado #permisosBloqueo { display: block !important; }
         #permisosCfgMods { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 0.35rem 0.75rem; margin: 0.5rem 0 0.85rem; }
         #permisosCfgMods label { display: flex; gap: 0.4rem; align-items: center; font-size: 0.8rem; cursor: pointer; }
         #permisosCfgLista .perm-user { display: flex; justify-content: space-between; gap: 0.75rem; align-items: center; padding: 0.5rem 0.7rem; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-secondary); margin-bottom: 0.4rem; }
@@ -7910,6 +7919,11 @@
             <button class="menu-toggle-btn" id="menuToggleBtn" title="Mostrar/Ocultar Menú">
                 ☰
             </button>
+            <div id="permisosBloqueo">
+                <h2 style="margin:0 0 0.5rem;">Sin permisos asignados</h2>
+                <p style="margin:0 0 1rem;color:var(--text-secondary);font-size:0.9rem;">Esta cuenta inició sesión, pero el administrador principal aún no le asignó módulos. Solicite acceso a <strong>edificio.wm815@gmail.com</strong>.</p>
+                <button type="button" class="btn btn-secondary" id="permisosBloqueoSalir">Cerrar sesión</button>
+            </div>
             <!-- Aviso visible en todos los módulos cuando se consulta un mes archivado (solo lectura) -->
             <div id="avisoSoloLecturaMesArchivado" style="display: none; margin: 0 0 1rem 0; padding: 0.625rem 1rem; background: linear-gradient(90deg, rgba(245, 158, 11, 0.12) 0%, rgba(251, 191, 36, 0.08) 100%); border: 1px solid rgba(245, 158, 11, 0.35); border-radius: 8px; font-size: 0.875rem; color: #422006; font-weight: 600;">
                 📋 Consultando mes archivado (solo lectura). Los datos no se pueden editar. Para editar, reabra el mes desde el Panel de Control.
@@ -10756,7 +10770,7 @@
             <div class="form-section" style="margin-top: 2rem;">
                 <h3>Permisos de usuarios</h3>
                 <p style="font-size:0.82rem;color:var(--text-secondary);margin:0 0 1rem;">
-                    Defina el nivel de cada cuenta autenticada y los módulos que puede abrir. Quien no esté en esta lista conserva acceso de administración. Las cuentas deben existir en Firebase Authentication.
+                    Solo <strong>edificio.wm815@gmail.com</strong> administra la app. Aquí crea las cuentas de los demás y les asigna módulos. Quien no esté en la lista puede iniciar sesión, pero no verá ningún módulo.
                 </p>
                 <div class="form-row">
                     <div class="form-group">
@@ -10764,8 +10778,12 @@
                         <input type="text" id="permisosCfgNombre" placeholder="Ej: Comité de administración">
                     </div>
                     <div class="form-group">
-                        <label>Correo</label>
+                        <label>Correo de acceso</label>
                         <input type="email" id="permisosCfgCorreo" placeholder="usuario@entrecerros.cl">
+                    </div>
+                    <div class="form-group">
+                        <label>Contraseña (crear cuenta)</label>
+                        <input type="password" id="permisosCfgClave" placeholder="Mínimo 6 caracteres" autocomplete="new-password">
                     </div>
                     <div class="form-group">
                         <label>Nivel</label>
@@ -10780,7 +10798,7 @@
                 <p style="font-size:0.75rem;color:var(--text-tertiary);margin:0 0 0.35rem;">Módulos permitidos (en nivel Personalizado se eligen uno a uno; en los demás se muestran como referencia)</p>
                 <div id="permisosCfgMods"></div>
                 <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:1rem;">
-                    <button type="button" class="btn btn-secondary" id="permisosCfgAgregar">Agregar o actualizar usuario</button>
+                    <button type="button" class="btn btn-secondary" id="permisosCfgAgregar">Crear cuenta y agregar</button>
                     <button type="button" class="btn btn-primary" id="permisosCfgGuardar">Guardar permisos</button>
                 </div>
                 <div id="permisosCfgLista"></div>
@@ -12054,6 +12072,9 @@
                 } catch (eFs) {}
                 storage = firebase.storage();
                 auth = firebase.auth();
+                try {
+                    auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+                } catch (ePers) {}
                 firebaseInitialized = true;
                 liberarRespaldosLocalesObsoletos();
             } else {
@@ -12088,6 +12109,8 @@
             if (appContainer) appContainer.style.display = 'none';
             document.body.classList.remove('chat-activo');
             document.body.classList.remove('bitacora-solo');
+            document.body.classList.remove('permisos-restringido', 'permisos-sin-chat', 'permisos-sin-notif', 'permisos-sin-busqueda', 'permisos-bloqueado');
+            window._permisosSesion = null;
             if (typeof setChatOpen === 'function') {
                 try { setChatOpen(false); } catch (eChatClose) {}
             }
@@ -12099,6 +12122,8 @@
         function showApp() {
             if (loginScreen) loginScreen.classList.add('hidden');
             if (appContainer) appContainer.style.display = 'flex';
+            var submitBtnApp = document.getElementById('loginSubmit');
+            if (submitBtnApp) { submitBtnApp.disabled = false; submitBtnApp.textContent = 'Iniciar sesión'; }
             document.body.classList.add('chat-activo');
             if (typeof pcshChatPinDockToBody === 'function') pcshChatPinDockToBody();
             if (typeof pcshChatResetStackAnchor === 'function') pcshChatResetStackAnchor();
@@ -12117,27 +12142,48 @@
             });
         }
 
+        function esAdminPrincipalApp(mail) {
+            return String(mail || '').trim().toLowerCase() === 'edificio.wm815@gmail.com';
+        }
+        window._permisosSesion = { todos: false, tabs: [], chat: false, notif: false, restringido: true, bloqueado: true, pendiente: true };
+
+        function continuarTrasLoginAutorizado() {
+            try {
+                if (document.body.classList.contains('permisos-bloqueado') || document.body.classList.contains('permisos-sin-chat')) return;
+                if (typeof window.iniciarChatInternoGestion === 'function') window.iniciarChatInternoGestion();
+                if (typeof sincronizarEstadoBienvenidaHaciaConserjeria === 'function') {
+                    sincronizarEstadoBienvenidaHaciaConserjeria();
+                }
+                if (typeof iniciarEscuchaColaBienvenidaConserjeria === 'function') {
+                    iniciarEscuchaColaBienvenidaConserjeria();
+                }
+                if (typeof procesarColaBienvenidaConserjeria === 'function') {
+                    procesarColaBienvenidaConserjeria();
+                }
+            } catch (eBien) {
+                console.warn('[bienvenida] Tras login:', eBien);
+            }
+        }
+
         if (auth) {
             auth.onAuthStateChanged(function(user) {
                 if (user) {
-                    showApp();
-                    try {
-                        if (typeof aplicarModoBitacoraPortal === 'function') {
-                            aplicarModoBitacoraPortal();
-                        }
-                        if (typeof window.iniciarChatInternoGestion === 'function') window.iniciarChatInternoGestion();
-                        if (typeof sincronizarEstadoBienvenidaHaciaConserjeria === 'function') {
-                            sincronizarEstadoBienvenidaHaciaConserjeria();
-                        }
-                        if (typeof iniciarEscuchaColaBienvenidaConserjeria === 'function') {
-                            iniciarEscuchaColaBienvenidaConserjeria();
-                        }
-                        if (typeof procesarColaBienvenidaConserjeria === 'function') {
-                            procesarColaBienvenidaConserjeria();
-                        }
-                    } catch (eBien) {
-                        console.warn('[bienvenida] Tras login:', eBien);
+                    var mailLogin = String(user.email || '').trim().toLowerCase();
+                    if (esAdminPrincipalApp(mailLogin)) {
+                        window._permisosSesion = { todos: true, tabs: [], chat: true, notif: true, nivel: 'administracion', restringido: false, bloqueado: false };
+                    } else {
+                        window._permisosSesion = { todos: false, tabs: [], chat: false, notif: false, restringido: true, bloqueado: true, pendiente: true };
+                        document.body.classList.add('permisos-bloqueado', 'permisos-sin-chat', 'permisos-sin-notif', 'permisos-sin-busqueda');
                     }
+                    showApp();
+                    var aplicar = (typeof aplicarPermisosSesion === 'function')
+                        ? aplicarPermisosSesion()
+                        : Promise.resolve();
+                    Promise.resolve(aplicar).then(function () {
+                        continuarTrasLoginAutorizado();
+                    }).catch(function () {
+                        continuarTrasLoginAutorizado();
+                    });
                 } else {
                     showLogin();
                     if (typeof window !== 'undefined' && window.location && window.location.protocol === 'file:') {
@@ -12150,7 +12196,12 @@
                 }
             });
         } else {
-            showApp();
+            showLogin();
+            var errAuth = document.getElementById('loginError');
+            if (errAuth) {
+                errAuth.textContent = 'Firebase Auth no está disponible. Revise la conexión e intente de nuevo.';
+                errAuth.classList.add('visible');
+            }
         }
 
         document.getElementById('loginForm') && document.getElementById('loginForm').addEventListener('submit', async function(e) {
@@ -12180,6 +12231,7 @@
                 var msg = 'Error al iniciar sesión.';
                 if (err && err.code === 'auth/user-not-found') msg = 'No existe una cuenta con este correo.';
                 else if (err && err.code === 'auth/wrong-password') msg = 'Contraseña incorrecta.';
+                else if (err && (err.code === 'auth/invalid-credential' || err.code === 'auth/invalid-login-credentials')) msg = 'Correo o contraseña incorrectos.';
                 else if (err && err.code === 'auth/invalid-email') msg = 'Correo electrónico no válido.';
                 else if (err && err.code === 'auth/unauthorized-domain') msg = 'Este sitio no está autorizado en Firebase. En la consola de Firebase → Autenticación → Configuración → Dominios autorizados, agregue: ' + (window.location.hostname || 'su dominio') + '.';
                 else if (err && err.code === 'auth/network-request-failed') msg = 'Sin conexión o red bloqueada. Compruebe datos/Wi‑Fi y que no bloquee scripts de Google.';
@@ -12258,13 +12310,15 @@
             });
         })();
 
-        document.getElementById('btnLogout') && document.getElementById('btnLogout').addEventListener('click', function() {
+        function cerrarSesionApp() {
             if (auth) {
                 auth.signOut().then(function() { showLogin(); }).catch(function() { showLogin(); });
             } else {
                 showLogin();
             }
-        });
+        }
+        document.getElementById('btnLogout') && document.getElementById('btnLogout').addEventListener('click', cerrarSesionApp);
+        document.getElementById('permisosBloqueoSalir') && document.getElementById('permisosBloqueoSalir').addEventListener('click', cerrarSesionApp);
 
         // ============================================
         // NOTIFICACIONES - REGISTRO DE MOVIMIENTOS (CAMPANA + PANEL TIPO CHATBOT)
@@ -13094,8 +13148,10 @@
         // Función para mostrar/ocultar pestañas - DISPONIBLE GLOBALMENTE DESDE EL INICIO
         window.showTab = function(tabName) {
             try {
+                if (window._permisosSesion && window._permisosSesion.bloqueado) return;
                 if (typeof usuarioPuedeVerTab === 'function' && !usuarioPuedeVerTab(tabName)) {
-                    tabName = (typeof primeraTabPermitida === 'function' && primeraTabPermitida()) || 'dashboard';
+                    tabName = (typeof primeraTabPermitida === 'function' && primeraTabPermitida()) || '';
+                    if (!tabName) return;
                 } else if (document.body.classList.contains('bitacora-solo') && tabName !== 'bitacoraPublica') {
                     tabName = 'bitacoraPublica';
                 }
@@ -25255,7 +25311,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
             { id: 'personalizacion', nombre: 'Personalización' }
         ];
         var PERMISOS_NIVELES = {
-            administracion: { label: 'Administración', desc: 'Acceso total, incluida la personalización y la gestión de permisos.', todos: true, chat: true, notif: true },
+            administracion: { label: 'Administración', desc: 'Reservado a edificio.wm815@gmail.com. No se asigna a otras cuentas.', todos: true, chat: true, notif: true },
             gestion: { label: 'Gestión operativa', desc: 'Operación diaria de la comunidad, sin personalización ni permisos.', excluir: ['personalizacion'], chat: true, notif: true },
             finanzas: { label: 'Finanzas', desc: 'Panel, caja, lecturas, aseo, nómina, insumos y mantenciones.', tabs: ['dashboard', 'caja', 'lecturasAgua', 'pagos-aseo', 'nomina', 'insumos', 'mantenciones'], chat: true, notif: true },
             convivencia: { label: 'Convivencia', desc: 'Panel, multas, morosos, postventa, comité y bitácora.', tabs: ['dashboard', 'multas', 'morosos', 'postventa', 'comite', 'bitacoraPublica'], chat: false, notif: true },
@@ -25317,29 +25373,44 @@ document.getElementById('chatForm').onsubmit = function (e) {
             return { usuarios: usuarios };
         }
 
-        function permisosSesionPorDefecto() {
-            return { todos: true, tabs: permisosIdsCatalogo().slice(), chat: true, notif: true, nivel: 'administracion', restringido: false };
+        function permisosSesionAdminPrincipal() {
+            return { todos: true, tabs: permisosIdsCatalogo().slice(), chat: true, notif: true, nivel: 'administracion', restringido: false, bloqueado: false };
+        }
+
+        function permisosSesionBloqueada(mail) {
+            return { todos: false, tabs: [], chat: false, notif: false, nivel: '', restringido: true, bloqueado: true, correo: mail || '' };
+        }
+
+        function esAdminPrincipal(mail) {
+            if (typeof esAdminPrincipalApp === 'function') return esAdminPrincipalApp(mail);
+            return bitacoraNormCorreo(mail) === 'edificio.wm815@gmail.com';
         }
 
         function resolverPermisosSesion(mail, cfgPermisos, cfgBitacora) {
             var email = bitacoraNormCorreo(mail);
-            var base = permisosSesionPorDefecto();
-            if (!email) return base;
+            if (esAdminPrincipal(email)) return permisosSesionAdminPrincipal();
+            if (!email) return permisosSesionBloqueada('');
             var row = cfgPermisos && cfgPermisos.usuarios && cfgPermisos.usuarios[email];
             if (!row && cfgBitacora && Array.isArray(cfgBitacora.correos)) {
                 var bit = cfgBitacora.correos.filter(function (c) { return bitacoraNormCorreo(c.correo) === email; })[0];
                 if (bit) row = { nombre: bit.nombre, correo: email, nivel: 'bitacora' };
             }
-            if (!row) return base;
+            if (!row) return permisosSesionBloqueada(email);
             var u = permisosNormalizarUsuario(row, email);
-            var todos = u.nivel === 'administracion';
+            if (u.nivel === 'administracion') {
+                u.nivel = 'gestion';
+                u.tabs = permisosTabsDeNivel('gestion', u);
+            }
+            u.tabs = (u.tabs || []).filter(function (id) { return id !== 'personalizacion'; });
+            if (!u.tabs.length) return permisosSesionBloqueada(email);
             return {
-                todos: todos,
+                todos: false,
                 tabs: u.tabs.slice(),
                 chat: !!u.chat,
                 notif: !!u.notif,
                 nivel: u.nivel,
-                restringido: !todos,
+                restringido: true,
+                bloqueado: false,
                 nombre: u.nombre,
                 correo: u.correo
             };
@@ -25349,32 +25420,39 @@ document.getElementById('chatForm').onsubmit = function (e) {
             var t = String(tabName || '');
             if (t === 'inventarioBodega' || t === 'registroRetirosBodega') t = 'insumos';
             var ses = window._permisosSesion;
-            if (!ses || ses.todos) return true;
+            if (!ses || ses.bloqueado) return false;
+            if (ses.todos) return true;
             return (ses.tabs || []).indexOf(t) >= 0;
         }
 
         function primeraTabPermitida() {
             var ses = window._permisosSesion;
-            if (!ses || ses.todos) return 'dashboard';
+            if (!ses || ses.bloqueado) return '';
+            if (ses.todos) return 'dashboard';
             var tabs = ses.tabs || [];
             if (tabs.indexOf('dashboard') >= 0) return 'dashboard';
-            return tabs[0] || 'bitacoraPublica';
+            return tabs[0] || '';
         }
 
         function aplicarPermisosEnMenu(ses) {
-            var s = ses || window._permisosSesion || permisosSesionPorDefecto();
+            var s = ses || window._permisosSesion || permisosSesionBloqueada('');
+            window._permisosSesion = s;
             document.querySelectorAll('#tabsMenu .tab-button[data-tab]').forEach(function (btn) {
                 var tab = btn.getAttribute('data-tab');
-                var ok = !s.restringido || usuarioPuedeVerTab(tab);
+                var ok = !s.bloqueado && (s.todos || usuarioPuedeVerTab(tab));
+                if (tab === 'personalizacion') ok = esAdminPrincipal(auth && auth.currentUser && auth.currentUser.email);
                 btn.classList.toggle('permiso-oculto', !ok);
             });
-            document.body.classList.toggle('permisos-restringido', !!s.restringido);
-            document.body.classList.toggle('permisos-sin-chat', !s.chat);
-            document.body.classList.toggle('permisos-sin-notif', !s.notif);
-            document.body.classList.toggle('permisos-sin-busqueda', !!(s.restringido && (s.tabs || []).indexOf('dashboard') < 0));
-            var soloBit = s.restringido && (s.tabs || []).length === 1 && s.tabs[0] === 'bitacoraPublica';
+            document.body.classList.toggle('permisos-bloqueado', !!s.bloqueado);
+            document.body.classList.toggle('permisos-restringido', !!(s.restringido && !s.bloqueado));
+            document.body.classList.toggle('permisos-sin-chat', !s.chat || !!s.bloqueado);
+            document.body.classList.toggle('permisos-sin-notif', !s.notif || !!s.bloqueado);
+            document.body.classList.toggle('permisos-sin-busqueda', !!(s.bloqueado || (s.restringido && (s.tabs || []).indexOf('dashboard') < 0)));
+            var soloBit = !s.bloqueado && s.restringido && (s.tabs || []).length === 1 && s.tabs[0] === 'bitacoraPublica';
             document.body.classList.toggle('bitacora-solo', soloBit);
-            if (!s.chat) document.body.classList.remove('chat-activo');
+            if (!s.chat || s.bloqueado) document.body.classList.remove('chat-activo');
+            var bloq = document.getElementById('permisosBloqueo');
+            if (bloq) bloq.style.display = s.bloqueado ? 'block' : 'none';
             if (typeof actualizarEtiquetasMenuLateral === 'function') actualizarEtiquetasMenuLateral();
         }
 
@@ -25388,8 +25466,10 @@ document.getElementById('chatForm').onsubmit = function (e) {
             try { cfgB = await obtenerBitacoraPortalConfig(); } catch (e2) {}
             window._permisosSesion = resolverPermisosSesion(mail, cfgP, cfgB);
             aplicarPermisosEnMenu(window._permisosSesion);
+            if (window._permisosSesion.bloqueado) return;
             if (window._permisosSesion.restringido && typeof window.showTab === 'function') {
-                window.showTab(primeraTabPermitida());
+                var dest = primeraTabPermitida();
+                if (dest) window.showTab(dest);
             }
         }
 
@@ -25403,22 +25483,30 @@ document.getElementById('chatForm').onsubmit = function (e) {
             var sel = document.getElementById('permisosCfgNivel');
             if (sel && !sel.options.length) {
                 Object.keys(PERMISOS_NIVELES).forEach(function (k) {
+                    if (k === 'administracion') return;
                     var o = document.createElement('option');
                     o.value = k;
                     o.textContent = PERMISOS_NIVELES[k].label;
                     sel.appendChild(o);
                 });
+                sel.value = 'comite';
             }
             var mods = document.getElementById('permisosCfgMods');
             if (mods && !mods.getAttribute('data-ready')) {
                 mods.setAttribute('data-ready', '1');
-                mods.innerHTML = PERMISOS_CATALOGO_TABS.map(function (t) {
+                mods.innerHTML = PERMISOS_CATALOGO_TABS.filter(function (t) { return t.id !== 'personalizacion'; }).map(function (t) {
                     return '<label><input type="checkbox" data-perm-tab="' + t.id + '"> ' + bitacoraEsc(t.nombre) + '</label>';
                 }).join('');
             }
             if (sel) sel.addEventListener('change', permisosRefrescarEditorNivel);
             var add = document.getElementById('permisosCfgAgregar');
-            if (add) add.addEventListener('click', permisosAgregarUsuarioEditor);
+            if (add) add.addEventListener('click', function () {
+                permisosAgregarUsuarioEditor().catch(function (err) {
+                    if (typeof mostrarAlerta === 'function') {
+                        mostrarAlerta((err && err.message) || 'No se pudo crear el usuario.', 'Error');
+                    }
+                });
+            });
             var save = document.getElementById('permisosCfgGuardar');
             if (save) save.addEventListener('click', function () {
                 guardarPermisosUsuarios().catch(function (err) {
@@ -25515,11 +25603,46 @@ document.getElementById('chatForm').onsubmit = function (e) {
             }
         }
 
-        function permisosAgregarUsuarioEditor() {
+        async function permisosCrearCuentaFirebase(correo, clave) {
+            if (typeof firebase === 'undefined' || !firebaseConfig) {
+                throw new Error('Firebase no está disponible para crear cuentas.');
+            }
+            var app2;
+            try { app2 = firebase.app('permisosAdmin'); } catch (eApp) {
+                app2 = firebase.initializeApp(firebaseConfig, 'permisosAdmin');
+            }
+            var auth2 = app2.auth();
+            try {
+                await auth2.createUserWithEmailAndPassword(correo, clave);
+                try { await auth2.signOut(); } catch (eOut) {}
+                return 'creada';
+            } catch (err) {
+                try { await auth2.signOut(); } catch (eOut2) {}
+                if (err && err.code === 'auth/email-already-in-use') return 'existe';
+                if (err && err.code === 'auth/weak-password') throw new Error('La contraseña debe tener al menos 6 caracteres.');
+                if (err && err.code === 'auth/invalid-email') throw new Error('Correo electrónico no válido.');
+                if (err && err.code === 'auth/operation-not-allowed') throw new Error('En Firebase Authentication active el proveedor Correo/contraseña.');
+                throw new Error((err && err.message) || 'No se pudo crear la cuenta.');
+            }
+        }
+
+        async function permisosAgregarUsuarioEditor() {
+            if (!esAdminPrincipal(auth && auth.currentUser && auth.currentUser.email)) {
+                if (typeof mostrarAlerta === 'function') mostrarAlerta('Solo el administrador principal puede crear usuarios.', 'Permisos');
+                return;
+            }
             var u = permisosLeerEditor();
             if (!u.correo || u.correo.indexOf('@') < 0) {
                 if (typeof mostrarAlerta === 'function') mostrarAlerta('Ingrese un correo válido.', 'Permisos');
                 return;
+            }
+            if (esAdminPrincipal(u.correo)) {
+                if (typeof mostrarAlerta === 'function') mostrarAlerta('La cuenta edificio.wm815@gmail.com ya es el administrador principal.', 'Permisos');
+                return;
+            }
+            if (u.nivel === 'administracion') {
+                u.nivel = 'gestion';
+                u.tabs = permisosTabsDeNivel('gestion', u);
             }
             if (u.nivel === 'personalizado' && !(u.tabs || []).length) {
                 if (typeof mostrarAlerta === 'function') mostrarAlerta('En nivel Personalizado marque al menos un módulo.', 'Permisos');
@@ -25527,6 +25650,17 @@ document.getElementById('chatForm').onsubmit = function (e) {
             }
             var list = window._permisosCfgUsuarios || [];
             var idx = list.findIndex(function (x) { return bitacoraNormCorreo(x.correo) === u.correo; });
+            var esNuevo = idx < 0;
+            var claveEl = document.getElementById('permisosCfgClave');
+            var clave = claveEl ? String(claveEl.value || '') : '';
+            if (esNuevo && clave.length < 6) {
+                if (typeof mostrarAlerta === 'function') mostrarAlerta('Para un usuario nuevo indique una contraseña de al menos 6 caracteres. Así se crea su cuenta de acceso.', 'Permisos');
+                return;
+            }
+            var estadoCuenta = '';
+            if (clave.length >= 6) {
+                estadoCuenta = await permisosCrearCuentaFirebase(u.correo, clave);
+            }
             if (idx >= 0) list[idx] = u;
             else list.push(u);
             window._permisosCfgUsuarios = list;
@@ -25535,6 +25669,12 @@ document.getElementById('chatForm').onsubmit = function (e) {
             var em = document.getElementById('permisosCfgCorreo');
             if (nom) nom.value = '';
             if (em) em.value = '';
+            if (claveEl) claveEl.value = '';
+            await guardarPermisosUsuarios(true);
+            var extra = estadoCuenta === 'creada'
+                ? ' Se creó la cuenta: esa persona ya puede entrar con su correo y contraseña.'
+                : (estadoCuenta === 'existe' ? ' La cuenta de acceso ya existía; se actualizaron los módulos.' : ' Recuerde pulsar Guardar permisos si agregó más cambios.');
+            if (typeof mostrarAlerta === 'function') mostrarAlerta('Usuario listo y permisos guardados.' + extra, 'Permisos');
         }
 
         function permisosPintarLista() {
@@ -25578,7 +25718,10 @@ document.getElementById('chatForm').onsubmit = function (e) {
             permisosRefrescarEditorNivel();
         }
 
-        async function guardarPermisosUsuarios() {
+        async function guardarPermisosUsuarios(silencio) {
+            if (!esAdminPrincipal(auth && auth.currentUser && auth.currentUser.email)) {
+                throw new Error('Solo el administrador principal puede guardar permisos.');
+            }
             var list = window._permisosCfgUsuarios || [];
             var mapa = { usuarios: {} };
             list.forEach(function (u) {
@@ -25593,8 +25736,8 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 };
             });
             await guardarMapaNube(PERMISOS_DOC, mapa);
-            if (typeof mostrarAlerta === 'function') {
-                mostrarAlerta('Permisos guardados. Cada usuario verá solo los módulos de su nivel al iniciar sesión.', 'Permisos');
+            if (!silencio && typeof mostrarAlerta === 'function') {
+                mostrarAlerta('Permisos guardados. Los demás usuarios verán solo los módulos que usted les asignó.', 'Permisos');
             }
             await aplicarPermisosSesion();
         }
