@@ -8240,6 +8240,112 @@
             .tab-content:not(#dashboard) .table-section { padding: 1rem; }
         }
 
+        /* ===== Densidad compacta: texto más chico y tablas sin scroll excesivo ===== */
+        .tab-content:not(#dashboard) {
+            padding: 1.1rem 1.4rem !important;
+            font-size: 0.82rem;
+        }
+        .tab-content:not(#dashboard) h2 {
+            font-size: 1.15rem !important;
+            line-height: 1.25;
+        }
+        .tab-content:not(#dashboard) h2 + p,
+        .tab-content:not(#dashboard) > :first-child p {
+            font-size: 0.76rem !important;
+        }
+        .tab-content:not(#dashboard) h3 {
+            font-size: 0.95rem !important;
+            margin-bottom: 0.7rem !important;
+        }
+        .tab-content:not(#dashboard) h4 { font-size: 0.85rem; }
+        .tab-content:not(#dashboard) > :first-child:has(> h2),
+        .tab-content:not(#dashboard) > :first-child:has(> div > h2),
+        .tab-content:not(#dashboard) > .notif-head,
+        .tab-content:not(#dashboard) > .perso-head,
+        .tab-content:not(#dashboard) > .mailer-head,
+        .tab-content:not(#dashboard) > .inv-head {
+            padding: 0.85rem 1.1rem !important;
+            margin-bottom: 1rem !important;
+            border-radius: 16px;
+        }
+        .tab-content:not(#dashboard) .form-section {
+            padding: 1rem 1.15rem;
+            margin-bottom: 1rem;
+        }
+        .tab-content:not(#dashboard) .table-section {
+            padding: 0.9rem 1rem;
+            margin-top: 1rem;
+            margin-bottom: 1rem;
+        }
+        .tab-content:not(#dashboard) .form-group { margin-bottom: 0.7rem; }
+        .tab-content:not(#dashboard) .form-row { gap: 0.85rem; }
+        .tab-content:not(#dashboard) .form-group label {
+            font-size: 0.74rem;
+            margin-bottom: 0.25rem;
+        }
+        .tab-content:not(#dashboard) .form-group input,
+        .tab-content:not(#dashboard) .form-group select,
+        .tab-content:not(#dashboard) .form-group textarea {
+            padding: 0.5rem 0.7rem;
+            font-size: 0.8rem;
+        }
+        .tab-content:not(#dashboard) .form-group textarea { min-height: 70px; }
+        .tab-content:not(#dashboard) .form-group small { font-size: 0.72rem; margin-top: 0.3rem; }
+        .tab-content:not(#dashboard) .btn {
+            padding: 0.48rem 0.95rem;
+            font-size: 0.78rem;
+            margin-right: 0.45rem;
+            margin-top: 0.45rem;
+        }
+        .tab-content:not(#dashboard) .stat-card { padding: 0.85rem 1rem; }
+        .tab-content:not(#dashboard) .stat-card .stat-value { font-size: 1.2rem; }
+        .tab-content:not(#dashboard) .stat-card h4,
+        .tab-content:not(#dashboard) .stat-card .stat-label { font-size: 0.68rem; }
+
+        .tab-content:not(#dashboard) table {
+            width: 100%;
+            max-width: 100%;
+            table-layout: auto;
+        }
+        .tab-content:not(#dashboard) th {
+            padding: 0.5rem 0.6rem !important;
+            font-size: 0.64rem !important;
+            line-height: 1.25;
+            white-space: normal;
+        }
+        .tab-content:not(#dashboard) td {
+            padding: 0.42rem 0.6rem !important;
+            font-size: 0.76rem !important;
+            line-height: 1.35;
+            white-space: normal;
+            overflow-wrap: anywhere;
+            word-break: normal;
+            vertical-align: top;
+        }
+        .tab-content:not(#dashboard) td .btn.btn-sm,
+        .tab-content:not(#dashboard) .tabla-acciones .btn,
+        .tab-content:not(#dashboard) .moroso-acciones .btn {
+            margin: 0 !important;
+            padding: 0.12rem 0.3rem !important;
+            font-size: 0.62rem !important;
+        }
+        .tab-content:not(#dashboard) .tabla-acciones,
+        .tab-content:not(#dashboard) .moroso-acciones {
+            min-width: 0;
+            grid-template-columns: repeat(auto-fit, minmax(3.6rem, 1fr));
+        }
+        .tab-content:not(#dashboard) .filtro-inteligente {
+            padding: 0.3rem 0.55rem;
+            margin-bottom: 0.55rem;
+        }
+        .tab-content:not(#dashboard) .filtro-inteligente input { font-size: 0.78rem; }
+        @media (min-width: 1025px) {
+            .tab-content:not(#dashboard) .table-section > div,
+            .tab-content:not(#dashboard) [style*="overflow-x"] {
+                overflow-x: auto;
+            }
+        }
+
     </style>
 </head>
 <body class="app-loading">
