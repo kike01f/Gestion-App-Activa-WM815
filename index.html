@@ -18180,6 +18180,13 @@
                     return atRaw.toMillis();
                 }
             } catch (eFb) {}
+            if (typeof atRaw === 'string') {
+                var sAt = String(atRaw).trim();
+                if (/[zZ]$/.test(sAt) || /[+-]\d{2}:?\d{2}$/.test(sAt.replace(/\.\d+/, ''))) {
+                    var tAbs = Date.parse(sAt);
+                    if (isFinite(tAbs)) return tAbs;
+                }
+            }
             var d = new Date(atRaw);
             return d.getTime();
         }
@@ -18210,15 +18217,15 @@
             var grace = 15 * 60 * 1000;
             var fineThreshold = allowed + grace;
             var t0 = visitaAtMsGestion(v.at);
-            if (!isFinite(t0)) return null;
+            if (!isFinite(t0) || t0 <= 0) return null;
             if (!v.outAt) {
                 var elapsed = Date.now() - t0;
-                return elapsed > fineThreshold ? { elapsed: elapsed, abierta: true } : null;
+                return elapsed >= fineThreshold ? { elapsed: elapsed, abierta: true } : null;
             }
             var t1 = visitaAtMsGestion(v.outAt);
             if (!isFinite(t1) || t1 < t0) return null;
             var stay = t1 - t0;
-            return stay > fineThreshold ? { elapsed: stay, abierta: false } : null;
+            return stay >= fineThreshold ? { elapsed: stay, abierta: false } : null;
         }
 
         function visitaPerteneceAlMesGestion(v, mes) {
