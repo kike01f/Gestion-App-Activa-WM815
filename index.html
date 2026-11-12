@@ -7625,6 +7625,31 @@
         #bitacoraPublica .bit-kpi div { background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 10px; padding: 0.75rem 0.9rem; }
         #bitacoraPublica .bit-kpi strong { display: block; font-size: 1.35rem; }
         #bitacoraPublica .bit-kpi span { font-size: 0.75rem; color: var(--text-tertiary); }
+        #bitacoraPublica.tab-content { max-width: none; }
+        #bitacoraPublica .bit-layout { display: grid; grid-template-columns: minmax(280px, 1fr) minmax(320px, 1.15fr); gap: 1rem; align-items: start; }
+        #bitacoraPublica .bit-lista { min-width: 0; }
+        #bitacoraPublica .bit-detalle { position: sticky; top: 0.75rem; border: 1px solid var(--border-color); border-radius: 12px; background: var(--bg-secondary); padding: 1rem 1.1rem; min-height: 22rem; }
+        #bitacoraPublica .bit-detalle h3 { margin: 0 0 0.35rem; font-size: 1.05rem; }
+        #bitacoraPublica .bit-detalle-vacio { color: var(--text-tertiary); font-size: 0.85rem; padding: 2rem 0.5rem; text-align: center; }
+        #bitacoraPublica .bit-dl { display: grid; grid-template-columns: 7.5rem 1fr; gap: 0.28rem 0.65rem; font-size: 0.8rem; margin: 0 0 0.85rem; }
+        #bitacoraPublica .bit-dl dt { color: var(--text-tertiary); }
+        #bitacoraPublica .bit-dl dd { margin: 0; color: var(--text-primary); }
+        #bitacoraPublica .bit-texto { font-size: 0.84rem; line-height: 1.5; white-space: pre-wrap; background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 8px; padding: 0.7rem 0.8rem; margin: 0 0 0.9rem; }
+        #bitacoraPublica .bit-sec { margin: 0 0 0.95rem; }
+        #bitacoraPublica .bit-sec h4 { margin: 0 0 0.35rem; font-size: 0.78rem; letter-spacing: 0.04em; text-transform: uppercase; color: var(--text-tertiary); }
+        #bitacoraPublica .bit-hist { margin: 0; padding-left: 1.05rem; font-size: 0.78rem; line-height: 1.45; }
+        #bitacoraPublica .bit-com { border-top: 1px solid var(--border-color); padding-top: 0.65rem; margin-top: 0.35rem; }
+        #bitacoraPublica .bit-com-item { font-size: 0.8rem; padding: 0.5rem 0.6rem; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-primary); margin-bottom: 0.4rem; }
+        #bitacoraPublica .bit-com-item strong { display: block; font-size: 0.75rem; }
+        #bitacoraPublica .bit-com-item span { color: var(--text-tertiary); font-size: 0.7rem; }
+        #bitacoraPublica .bit-com-item p { margin: 0.3rem 0 0; white-space: pre-wrap; }
+        #bitacoraPublica tr.bit-fila { cursor: pointer; }
+        #bitacoraPublica tr.bit-fila.is-on { outline: 2px solid var(--primary); background: color-mix(in srgb, var(--primary) 12%, transparent); }
+        #bitacoraPublica .notif-tabla th, #bitacoraPublica .notif-tabla td { padding: 0.45rem 0.5rem; font-size: 0.78rem; border-bottom: 1px solid var(--border-color); vertical-align: top; }
+        @media (max-width: 900px) {
+            #bitacoraPublica .bit-layout { grid-template-columns: 1fr; }
+            #bitacoraPublica .bit-detalle { position: static; }
+        }
         @media (max-width: 768px) {
             .consulta-rapida input {
                 width: min(8.8rem, 36vw) !important;
@@ -10671,31 +10696,44 @@
             <div style="display:flex;flex-wrap:wrap;justify-content:space-between;gap:0.75rem;margin-bottom:1rem;align-items:flex-end;">
                 <div>
                     <h2 id="bitacoraTituloVista" style="margin:0;font-size:1.45rem;">Bitácora de reclamos y multas</h2>
-                    <p id="bitacoraSubtituloVista" style="margin:0.3rem 0 0;font-size:0.82rem;color:var(--text-secondary);">Resumen mensual para consulta de usuarios autorizados.</p>
+                    <p id="bitacoraSubtituloVista" style="margin:0.3rem 0 0;font-size:0.82rem;color:var(--text-secondary);">Abra cada caso para ver el detalle, las gestiones y dejar comentarios.</p>
                 </div>
-                <div class="form-group" style="margin:0;min-width:12rem;">
-                    <label>Mes</label>
-                    <select id="bitacoraMesSel"></select>
+                <div style="display:flex;gap:0.65rem;flex-wrap:wrap;align-items:flex-end;">
+                    <div class="form-group" style="margin:0;min-width:11rem;">
+                        <label>Mes</label>
+                        <select id="bitacoraMesSel"></select>
+                    </div>
+                    <div class="form-group" style="margin:0;min-width:12rem;">
+                        <label>Buscar</label>
+                        <input type="search" id="bitacoraBuscar" placeholder="Depto, motivo, residente…">
+                    </div>
                 </div>
             </div>
             <div class="bit-kpi" id="bitacoraKpis"></div>
-            <div id="bitacoraSecReclamos" class="form-section">
-                <h3>Reclamos</h3>
-                <div style="overflow:auto;">
-                    <table class="notif-tabla" style="width:100%;border-collapse:collapse;">
-                        <thead><tr><th>Fecha</th><th>Depto</th><th>Motivo / detalle</th><th>Estado</th><th>Origen</th></tr></thead>
-                        <tbody id="bitacoraTbodyReclamos"></tbody>
-                    </table>
+            <div class="bit-layout">
+                <div class="bit-lista">
+                    <div id="bitacoraSecReclamos" class="form-section" style="margin-top:0;">
+                        <h3>Reclamos</h3>
+                        <div style="overflow:auto;">
+                            <table class="notif-tabla" style="width:100%;border-collapse:collapse;">
+                                <thead><tr><th>Fecha</th><th>Depto</th><th>Motivo</th><th>Estado</th><th></th></tr></thead>
+                                <tbody id="bitacoraTbodyReclamos"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div id="bitacoraSecMultas" class="form-section">
+                        <h3>Multas cursadas</h3>
+                        <div style="overflow:auto;">
+                            <table class="notif-tabla" style="width:100%;border-collapse:collapse;">
+                                <thead><tr><th>Fecha</th><th>Depto</th><th>Residente</th><th>Motivo</th><th>Estado</th><th></th></tr></thead>
+                                <tbody id="bitacoraTbodyMultas"></tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
-            </div>
-            <div id="bitacoraSecMultas" class="form-section">
-                <h3>Multas cursadas</h3>
-                <div style="overflow:auto;">
-                    <table class="notif-tabla" style="width:100%;border-collapse:collapse;">
-                        <thead><tr><th>Fecha</th><th>Depto</th><th>Residente</th><th>Motivo</th><th>Monto</th><th>Estado</th></tr></thead>
-                        <tbody id="bitacoraTbodyMultas"></tbody>
-                    </table>
-                </div>
+                <aside class="bit-detalle" id="bitacoraDetalle" aria-live="polite">
+                    <div class="bit-detalle-vacio">Elija un reclamo o una multa para leer el caso completo, ver las gestiones y registrar un comentario.</div>
+                </aside>
             </div>
         </div>
 
@@ -25337,6 +25375,28 @@ document.getElementById('chatForm').onsubmit = function (e) {
             }
             var sel = document.getElementById('bitacoraMesSel');
             if (sel) sel.addEventListener('change', function () { cargarBitacoraPortal(); });
+            var wrap = document.getElementById('bitacoraPublica');
+            if (wrap) {
+                wrap.addEventListener('click', function (e) {
+                    var btn = e.target && e.target.closest ? e.target.closest('[data-bit-caso]') : null;
+                    if (btn) {
+                        abrirBitacoraCaso(btn.getAttribute('data-bit-tipo'), btn.getAttribute('data-bit-caso'));
+                        return;
+                    }
+                    var send = e.target && e.target.closest ? e.target.closest('#bitacoraBtnComentar') : null;
+                    if (send) {
+                        guardarComentarioBitacora().catch(function (err) {
+                            if (typeof mostrarAlerta === 'function') {
+                                mostrarAlerta((err && err.message) || 'No se pudo guardar el comentario.', 'Bitácora');
+                            }
+                        });
+                    }
+                });
+            }
+            var buscar = document.getElementById('bitacoraBuscar');
+            if (buscar) {
+                buscar.addEventListener('input', function () { bitacoraFiltrarFilas(buscar.value); });
+            }
         }
 
         var PERMISOS_DOC = 'permisosUsuarios';
@@ -25828,6 +25888,219 @@ document.getElementById('chatForm').onsubmit = function (e) {
         window.aplicarPermisosEnMenu = aplicarPermisosEnMenu;
         window.cargarFormularioPermisosUsuarios = cargarFormularioPermisosUsuarios;
 
+        var BITACORA_COMENTARIOS_DOC = 'bitacoraComentarios';
+
+        function bitacoraAutorActual() {
+            var ses = window._permisosSesion;
+            try {
+                if (auth && auth.currentUser) {
+                    return {
+                        nombre: (ses && ses.nombre) || auth.currentUser.displayName || (auth.currentUser.email || '').split('@')[0] || 'Usuario',
+                        correo: bitacoraNormCorreo(auth.currentUser.email)
+                    };
+                }
+            } catch (eA) {}
+            return { nombre: (ses && ses.nombre) || 'Usuario', correo: '' };
+        }
+
+        function bitacoraTextoPlano(v) {
+            var s = String(v == null ? '' : v);
+            s = s.replace(/<br\s*\/?>/gi, '\n').replace(/<\/p>/gi, '\n').replace(/<[^>]+>/g, '');
+            var d = document.createElement('textarea');
+            d.innerHTML = s;
+            return String(d.value || s).replace(/\n{3,}/g, '\n\n').trim();
+        }
+
+        function bitacoraCuando(iso) {
+            if (!iso) return '';
+            try { return new Date(iso).toLocaleString('es-CL'); } catch (eF) { return String(iso); }
+        }
+
+        async function obtenerComentariosBitacora() {
+            var lista = [];
+            try { lista = await obtenerDatos(BITACORA_COMENTARIOS_DOC); } catch (eC) { lista = []; }
+            return Array.isArray(lista) ? lista : [];
+        }
+
+        function bitacoraComentariosDeCaso(lista, tipo, id) {
+            return (lista || []).filter(function (c) {
+                return c && String(c.casoTipo) === String(tipo) && String(c.casoId) === String(id);
+            }).sort(function (a, b) {
+                return String(a.at || '').localeCompare(String(b.at || ''));
+            });
+        }
+
+        function bitacoraHtmlComentarios(items) {
+            if (!items || !items.length) {
+                return '<p style="font-size:0.78rem;color:var(--text-tertiary);margin:0 0 0.5rem;">Aún no hay comentarios en este caso.</p>';
+            }
+            return items.map(function (c) {
+                return '<div class="bit-com-item"><strong>' + bitacoraEsc(c.autor || 'Usuario') + '</strong>' +
+                    '<span>' + bitacoraEsc(bitacoraCuando(c.at)) + (c.correo ? ' · ' + bitacoraEsc(c.correo) : '') + '</span>' +
+                    '<p>' + bitacoraEsc(c.texto || '') + '</p></div>';
+            }).join('');
+        }
+
+        function bitacoraHtmlGestionReclamo(r) {
+            var hist = (r && r.historialEstados) || [];
+            var obs = r && r.observacionAdmin;
+            var html = '';
+            if (obs) html += '<p style="font-size:0.82rem;margin:0 0 0.45rem;"><strong>Nota de administración:</strong> ' + bitacoraEsc(obs) + '</p>';
+            if (r && r.revisadoAt) {
+                html += '<p style="font-size:0.75rem;color:var(--text-tertiary);margin:0 0 0.45rem;">Última revisión: ' + bitacoraEsc(bitacoraCuando(r.revisadoAt)) + (r.revisadoPor ? ' · ' + bitacoraEsc(r.revisadoPor) : '') + '</p>';
+            }
+            if (!hist.length) {
+                html += '<p style="font-size:0.78rem;color:var(--text-tertiary);margin:0;">Sin movimientos de gestión todavía.</p>';
+                return html;
+            }
+            html += '<ul class="bit-hist">' + hist.map(function (h) {
+                var est = h.estado && typeof RECLAMO_ESTADOS_GESTION !== 'undefined' && RECLAMO_ESTADOS_GESTION[h.estado] ? RECLAMO_ESTADOS_GESTION[h.estado].label : (h.estado || '');
+                return '<li>' + bitacoraEsc(bitacoraCuando(h.at)) + (h.por ? ' · ' + bitacoraEsc(h.por) : '') +
+                    (h.accion ? ' · ' + bitacoraEsc(h.accion) : '') +
+                    (est ? ' → ' + bitacoraEsc(est) : '') +
+                    (h.obs ? ' — ' + bitacoraEsc(h.obs) : '') + '</li>';
+            }).join('') + '</ul>';
+            return html;
+        }
+
+        function bitacoraHtmlGestionMulta(m) {
+            var hist = (m && m.historialEstados) || [];
+            var obs = m && m.observacionAdmin;
+            var html = '';
+            if (obs) html += '<p style="font-size:0.82rem;margin:0 0 0.45rem;"><strong>Nota de administración:</strong> ' + bitacoraEsc(obs) + '</p>';
+            if (m && m.revisadoAt) {
+                html += '<p style="font-size:0.75rem;color:var(--text-tertiary);margin:0 0 0.45rem;">Última revisión: ' + bitacoraEsc(bitacoraCuando(m.revisadoAt)) + (m.revisadoPor ? ' · ' + bitacoraEsc(m.revisadoPor) : '') + '</p>';
+            }
+            if (!hist.length) {
+                html += '<p style="font-size:0.78rem;color:var(--text-tertiary);margin:0;">Sin movimientos de gestión todavía.</p>';
+                return html;
+            }
+            html += '<ul class="bit-hist">' + hist.slice().reverse().map(function (h) {
+                var est = h.estado && typeof MULTA_ESTADOS_GESTION !== 'undefined' && MULTA_ESTADOS_GESTION[h.estado] ? MULTA_ESTADOS_GESTION[h.estado].label : (h.estado || '');
+                return '<li>' + bitacoraEsc(bitacoraCuando(h.at)) + (h.usuario ? ' · ' + bitacoraEsc(h.usuario) : '') +
+                    (h.accion ? ' · ' + bitacoraEsc(h.accion) : '') +
+                    (est ? ' → ' + bitacoraEsc(est) : '') +
+                    (h.obs ? ' — ' + bitacoraEsc(h.obs) : '') + '</li>';
+            }).join('') + '</ul>';
+            return html;
+        }
+
+        function bitacoraFiltrarFilas(q) {
+            var t = String(q || '').toLowerCase().trim();
+            document.querySelectorAll('#bitacoraPublica tr.bit-fila').forEach(function (tr) {
+                var hay = !t || String(tr.getAttribute('data-bit-q') || '').indexOf(t) >= 0;
+                tr.hidden = !hay;
+            });
+        }
+
+        function bitacoraMarcarFilaActiva(tipo, id) {
+            document.querySelectorAll('#bitacoraPublica tr.bit-fila').forEach(function (tr) {
+                var on = tr.getAttribute('data-bit-tipo') === String(tipo) && tr.getAttribute('data-bit-caso') === String(id);
+                tr.classList.toggle('is-on', on);
+            });
+        }
+
+        async function abrirBitacoraCaso(tipo, id) {
+            var cache = window._bitacoraCache || { reclamos: [], multas: [] };
+            var caso = null;
+            if (tipo === 'reclamo') {
+                caso = (cache.reclamos || []).filter(function (r) { return r && String(r.id) === String(id); })[0];
+            } else {
+                caso = (cache.multas || []).filter(function (m) { return m && String(m.id) === String(id); })[0];
+            }
+            var box = document.getElementById('bitacoraDetalle');
+            if (!box) return;
+            if (!caso) {
+                box.innerHTML = '<div class="bit-detalle-vacio">No se encontró el caso.</div>';
+                return;
+            }
+            window._bitacoraCasoAbierto = { tipo: tipo, id: String(id) };
+            bitacoraMarcarFilaActiva(tipo, id);
+            var comentarios = [];
+            try { comentarios = bitacoraComentariosDeCaso(await obtenerComentariosBitacora(), tipo, id); } catch (eCo) {}
+            var html = '';
+            if (tipo === 'reclamo') {
+                var est = (typeof reclamoHtmlEstado === 'function') ? reclamoHtmlEstado(caso) : bitacoraEsc(caso.estadoGestion || 'pendiente');
+                var libro = caso.novedadLibro != null ? '#' + caso.novedadLibro : (caso.correlativo != null ? '#' + caso.correlativo : '—');
+                var detalle = bitacoraTextoPlano(caso.texto || caso.motivo || '');
+                html =
+                    '<h3>Reclamo ' + bitacoraEsc(libro) + '</h3>' +
+                    '<div class="bit-dl">' +
+                    '<dt>Estado</dt><dd>' + est + '</dd>' +
+                    '<dt>Fecha</dt><dd>' + bitacoraEsc(caso.fecha || '—') + (caso.hora ? ' · ' + bitacoraEsc(String(caso.hora).slice(0, 5)) : '') + '</dd>' +
+                    '<dt>Departamento</dt><dd>' + bitacoraEsc(caso.depto || '—') + '</dd>' +
+                    '<dt>Conserje</dt><dd>' + bitacoraEsc(caso.conserje || '—') + '</dd>' +
+                    '<dt>Origen</dt><dd>' + bitacoraEsc(caso.origen || 'Conserjería') + '</dd>' +
+                    '</div>' +
+                    '<div class="bit-sec"><h4>Descripción del caso</h4><div class="bit-texto">' + bitacoraEsc(detalle || 'Sin descripción.') + '</div></div>' +
+                    (caso.notaInterna ? '<div class="bit-sec"><h4>Nota interna</h4><div class="bit-texto">' + bitacoraEsc(caso.notaInterna) + '</div></div>' : '') +
+                    '<div class="bit-sec"><h4>Gestiones realizadas</h4>' + bitacoraHtmlGestionReclamo(caso) + '</div>';
+            } else {
+                var estM = (typeof multaHtmlEstado === 'function') ? multaHtmlEstado(caso) : bitacoraEsc(caso.estadoGestion || '');
+                var libroM = caso.novedadLibro != null && caso.novedadLibro !== '' ? '#' + caso.novedadLibro : '—';
+                var fechaM = typeof formatearFecha === 'function' ? formatearFecha(caso.fecha) : (caso.fecha || '—');
+                var detalleM = bitacoraTextoPlano(caso.contenido || caso.contenidoHtml || caso.motivo || '');
+                var evidencias = caso.evidencias || [];
+                var archivos = caso.archivos || [];
+                var evHtml = (typeof renderizarArchivos === 'function') ? renderizarArchivos(archivos, evidencias) : '';
+                var esAnul = typeof multaEsRegistroAnulacion === 'function' && multaEsRegistroAnulacion(caso);
+                html =
+                    '<h3>Multa' + (caso.folio ? ' · folio ' + bitacoraEsc(caso.folio) : '') + '</h3>' +
+                    '<div class="bit-dl">' +
+                    '<dt>Estado</dt><dd>' + estM + '</dd>' +
+                    '<dt>Tipo</dt><dd>' + bitacoraEsc(esAnul ? 'Anulación' : 'Multa') + '</dd>' +
+                    '<dt>Fecha</dt><dd>' + bitacoraEsc(fechaM) + (caso.novedadHora ? ' · ' + bitacoraEsc(String(caso.novedadHora).slice(0, 5)) : '') + '</dd>' +
+                    '<dt>Departamento</dt><dd>' + bitacoraEsc(caso.departamento || caso.depto || '—') + '</dd>' +
+                    '<dt>Residente</dt><dd>' + bitacoraEsc(caso.nombre || '—') + '</dd>' +
+                    '<dt>Motivo</dt><dd>' + bitacoraEsc(caso.motivo || '—') + '</dd>' +
+                    '<dt>Monto</dt><dd>' + bitacoraEsc(esAnul ? '—' : ((caso.monto || 0) + ' ' + (caso.tipoUnidad || 'UF'))) + '</dd>' +
+                    '<dt>Novedad</dt><dd>' + bitacoraEsc(libroM) + '</dd>' +
+                    '<dt>Conserje</dt><dd>' + bitacoraEsc(caso.novedadConserje || '—') + '</dd>' +
+                    (caso.patente ? '<dt>Patente</dt><dd>' + bitacoraEsc(caso.patente) + '</dd>' : '') +
+                    '</div>' +
+                    '<div class="bit-sec"><h4>Descripción del caso</h4><div class="bit-texto">' + bitacoraEsc(detalleM || 'Sin descripción.') + '</div></div>' +
+                    (evHtml ? '<div class="bit-sec"><h4>Evidencias</h4>' + evHtml + '</div>' : '') +
+                    '<div class="bit-sec"><h4>Gestiones realizadas</h4>' + bitacoraHtmlGestionMulta(caso) + '</div>';
+            }
+            html +=
+                '<div class="bit-com"><div class="bit-sec"><h4>Comentarios</h4>' + bitacoraHtmlComentarios(comentarios) + '</div>' +
+                '<div class="form-group" style="margin:0.5rem 0 0.45rem;"><label>Registrar comentario</label>' +
+                '<textarea id="bitacoraComentarioTxt" rows="3" placeholder="Observación, seguimiento o acuerdo sobre este caso…"></textarea></div>' +
+                '<button type="button" class="btn btn-primary" id="bitacoraBtnComentar">Publicar comentario</button></div>';
+            box.innerHTML = html;
+            if (window.matchMedia && window.matchMedia('(max-width: 900px)').matches) {
+                box.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+
+        async function guardarComentarioBitacora() {
+            var abierto = window._bitacoraCasoAbierto;
+            if (!abierto || !abierto.id) return;
+            var ta = document.getElementById('bitacoraComentarioTxt');
+            var texto = ta ? String(ta.value || '').trim() : '';
+            if (!texto) {
+                if (typeof mostrarAlerta === 'function') mostrarAlerta('Escriba un comentario antes de publicar.', 'Bitácora');
+                return;
+            }
+            var autor = bitacoraAutorActual();
+            var lista = await obtenerComentariosBitacora();
+            lista.push({
+                id: (typeof generarId === 'function' ? generarId() : String(Date.now())),
+                casoTipo: abierto.tipo,
+                casoId: String(abierto.id),
+                texto: texto,
+                autor: autor.nombre,
+                correo: autor.correo,
+                at: new Date().toISOString()
+            });
+            await guardarDatos(BITACORA_COMENTARIOS_DOC, lista);
+            if (ta) ta.value = '';
+            await abrirBitacoraCaso(abierto.tipo, abierto.id);
+            if (typeof mostrarToast === 'function') mostrarToast('Comentario registrado en la bitácora.', 'success');
+        }
+
+        window.abrirBitacoraCaso = abrirBitacoraCaso;
+
         async function cargarBitacoraPortal() {
             bitacoraBindUi();
             bitacoraLlenarMeses();
@@ -25857,6 +26130,8 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 if (kpis) kpis.innerHTML = '';
                 if (tbR) tbR.innerHTML = '<tr><td colspan="5">Portal desactivado.</td></tr>';
                 if (tbM) tbM.innerHTML = '<tr><td colspan="6">Portal desactivado.</td></tr>';
+                var detOff = document.getElementById('bitacoraDetalle');
+                if (detOff) detOff.innerHTML = '<div class="bit-detalle-vacio">El portal está desactivado.</div>';
                 return;
             }
             var reclamos = [];
@@ -25901,19 +26176,21 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     (cfg.mostrarReclamos ? '<div><strong>' + reclamos.length + '</strong><span>Reclamos del mes</span></div><div><strong>' + recPend + '</strong><span>Reclamos en tratamiento</span></div>' : '') +
                     (cfg.mostrarMultas ? '<div><strong>' + mulCursadas.length + '</strong><span>Multas cursadas</span></div><div><strong>' + mulAnul + '</strong><span>Multas anuladas</span></div>' : '');
             }
+            window._bitacoraCache = { reclamos: reclamos, multas: multas, mes: mes };
             if (tbR) {
                 if (!reclamos.length) {
                     tbR.innerHTML = '<tr><td colspan="5" style="color:var(--text-tertiary);">No hay reclamos en este mes.</td></tr>';
                 } else {
                     tbR.innerHTML = reclamos.map(function (r) {
-                        var origen = r.origen || r.conserje || (r.novedadLibro != null ? 'Novedad #' + r.novedadLibro : 'Conserjería');
                         var motivo = r.motivo || (typeof reclamoMotivoDesdeTexto === 'function' ? reclamoMotivoDesdeTexto(r.texto) : (r.texto || '—'));
                         var est = (typeof reclamoHtmlEstado === 'function') ? reclamoHtmlEstado(r) : bitacoraEsc((r.estadoGestion || 'pendiente'));
-                        return '<tr><td>' + bitacoraEsc(r.fecha || '—') + (r.hora ? '<br><span style="opacity:.7">' + bitacoraEsc(String(r.hora).slice(0, 5)) + '</span>' : '') +
+                        var q = [r.fecha, r.depto, motivo, r.texto, r.conserje, r.estadoGestion].join(' ').toLowerCase();
+                        return '<tr class="bit-fila" data-bit-tipo="reclamo" data-bit-caso="' + bitacoraEsc(r.id) + '" data-bit-q="' + bitacoraEsc(q) + '">' +
+                            '<td>' + bitacoraEsc(r.fecha || '—') + (r.hora ? '<br><span style="opacity:.7">' + bitacoraEsc(String(r.hora).slice(0, 5)) + '</span>' : '') +
                             '</td><td>' + bitacoraEsc(r.depto || '—') +
                             '</td><td>' + bitacoraEsc(motivo) +
                             '</td><td>' + est +
-                            '</td><td>' + bitacoraEsc(origen) + '</td></tr>';
+                            '</td><td><button type="button" class="btn btn-secondary" data-bit-tipo="reclamo" data-bit-caso="' + bitacoraEsc(r.id) + '" style="padding:0.2rem 0.5rem;font-size:0.72rem;">Ver</button></td></tr>';
                     }).join('');
                 }
             }
@@ -25924,16 +26201,24 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     tbM.innerHTML = multas.map(function (m) {
                         var esAnulReg = typeof multaEsRegistroAnulacion === 'function' && multaEsRegistroAnulacion(m);
                         var est = esAnulReg ? 'Anulación' : ((typeof multaEstaAnulada === 'function' && multaEstaAnulada(m)) ? 'Anulada' : (typeof multaHtmlEstado === 'function' ? multaHtmlEstado(m) : 'Cursada'));
-                        var monto = esAnulReg ? '—' : ((m.monto || 0) + ' ' + (m.tipoUnidad || 'UF'));
                         var fecha = typeof formatearFecha === 'function' ? formatearFecha(m.fecha) : (m.fecha || '—');
-                        return '<tr><td>' + bitacoraEsc(fecha) +
+                        var q = [fecha, m.departamento, m.nombre, m.motivo, m.folio, m.estadoGestion].join(' ').toLowerCase();
+                        return '<tr class="bit-fila" data-bit-tipo="multa" data-bit-caso="' + bitacoraEsc(m.id) + '" data-bit-q="' + bitacoraEsc(q) + '">' +
+                            '<td>' + bitacoraEsc(fecha) +
                             '</td><td>' + bitacoraEsc(m.departamento || '—') +
                             '</td><td>' + bitacoraEsc(m.nombre || '—') +
                             '</td><td>' + bitacoraEsc(m.motivo || '—') +
-                            '</td><td>' + bitacoraEsc(monto) +
-                            '</td><td>' + (est.indexOf('<') === 0 ? est : bitacoraEsc(est)) + '</td></tr>';
+                            '</td><td>' + (String(est).indexOf('<') === 0 ? est : bitacoraEsc(est)) +
+                            '</td><td><button type="button" class="btn btn-secondary" data-bit-tipo="multa" data-bit-caso="' + bitacoraEsc(m.id) + '" style="padding:0.2rem 0.5rem;font-size:0.72rem;">Ver</button></td></tr>';
                     }).join('');
                 }
+            }
+            var busc = document.getElementById('bitacoraBuscar');
+            if (busc && busc.value) bitacoraFiltrarFilas(busc.value);
+            var abierto = window._bitacoraCasoAbierto;
+            if (abierto && abierto.id) {
+                var sigue = (abierto.tipo === 'reclamo' ? reclamos : multas).some(function (x) { return x && String(x.id) === String(abierto.id); });
+                if (sigue) abrirBitacoraCaso(abierto.tipo, abierto.id);
             }
         }
 
