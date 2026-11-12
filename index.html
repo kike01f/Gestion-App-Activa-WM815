@@ -25331,13 +25331,15 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 var enviadosOk = 0;
                 for (var i = 0; i < jobs.length; i++) {
                     var job = jobs[i];
-                    if (!job || job.status !== 'pending') continue;
+                    if (!job) continue;
                     var htmlPropio = job.html ? String(job.html) : '';
                     var origenJob = String(job.origen || '');
                     var esOperativo = job.tipo === 'operativo'
-                        || origenJob.indexOf('conserjeria') === 0
+                        || origenJob === 'conserjeria-encomienda'
+                        || origenJob === 'conserjeria-visita'
                         || origenJob.indexOf('prueba') === 0
                         || htmlPropio.indexOf('Correo automático') >= 0;
+                    if (job.status !== 'pending' && !(job.status === 'html' && esOperativo)) continue;
                     var asunto = esOperativo
                         ? (job.asunto || 'Aviso de conserjería')
                         : (job.asunto || 'Te damos la bienvenida a la Comunidad WM 815');
