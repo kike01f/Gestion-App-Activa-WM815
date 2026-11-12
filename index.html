@@ -1933,6 +1933,18 @@
             min-width: 6.9rem;
             max-width: 7.6rem;
         }
+        #nomina #tablaNomina th {
+            font-size: 0.58rem !important;
+            padding: 0.32rem 0.28rem !important;
+            letter-spacing: 0.01em !important;
+            line-height: 1.2 !important;
+            text-transform: none !important;
+        }
+        #nomina #tablaNomina td {
+            font-size: 0.68rem !important;
+            padding: 0.3rem 0.32rem !important;
+            line-height: 1.25 !important;
+        }
         #nomina .nomina-estado-select {
             width: 100%;
             min-height: 2.25rem;
@@ -25312,7 +25324,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 if (typeof obtenerConfigCorreosConsejeria === 'function') {
                     try { await obtenerConfigCorreosConsejeria(); } catch (eCfgQ) {}
                 }
-                var html = typeof htmlCorreoBienvenidaNuevoResidente === 'function' ? htmlCorreoBienvenidaNuevoResidente() : '';
+                var htmlBienvenida = typeof htmlCorreoBienvenidaNuevoResidente === 'function' ? htmlCorreoBienvenidaNuevoResidente() : '';
                 var textoDefault = 'Estimado Residente, es un gusto darle la bienvenida de parte del equipo de administración a su nuevo hogar.';
                 var huellas = parseHuellasDesdeWelcomeDoc(data);
                 var cambio = false;
@@ -25320,14 +25332,27 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 for (var i = 0; i < jobs.length; i++) {
                     var job = jobs[i];
                     if (!job || job.status !== 'pending') continue;
-                    var asunto = job.asunto || 'Te damos la bienvenida a la Comunidad WM 815';
-                    var texto = job.texto || textoDefault;
+                    var htmlPropio = job.html ? String(job.html) : '';
+                    var origenJob = String(job.origen || '');
+                    var esOperativo = job.tipo === 'operativo'
+                        || origenJob.indexOf('conserjeria') === 0
+                        || origenJob.indexOf('prueba') === 0
+                        || htmlPropio.indexOf('Correo automático') >= 0;
+                    var asunto = esOperativo
+                        ? (job.asunto || 'Aviso de conserjería')
+                        : (job.asunto || 'Te damos la bienvenida a la Comunidad WM 815');
+                    var texto = esOperativo ? (job.texto || '') : (job.texto || textoDefault);
+                    var html = esOperativo ? htmlPropio : htmlBienvenida;
                     var para = job.to;
                     var bcc = job.bcc;
                     var opciones = opcionesEnvioConCcConsejeria({
                         silencioso: true,
                         permitirSinLogin: false
                     });
+                    if (esOperativo) {
+                        if (job.cc) opciones.cc = job.cc;
+                        else delete opciones.cc;
+                    }
                     if (!opciones.cc) delete opciones.cc;
                     if (bcc && ((Array.isArray(bcc) && bcc.length) || (typeof bcc === 'string' && bcc))) {
                         opciones.bcc = bcc;
@@ -25344,7 +25369,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                         job.status = 'sent';
                         job.sentAt = new Date().toISOString();
                         job.mailId = resultado.docId;
-                        marcarHuellasBienvenidaEnviadas(job.huellas || [], resultado.docId, job.sentAt);
+                        if (!esOperativo) marcarHuellasBienvenidaEnviadas(job.huellas || [], resultado.docId, job.sentAt);
                         huellas = window._huellasBienvenidaCache || huellas;
                         cambio = true;
                         enviadosOk += 1;
@@ -25371,7 +25396,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     guardarHuellasBienvenidaLocal(huellas);
                     await guardarHuellasBienvenidaCloud(huellas);
                     if (enviadosOk && typeof mostrarToast === 'function') {
-                        mostrarToast('Se enviaron ' + enviadosOk + ' correo(s) de bienvenida pedidos desde Conserjería.', 'success');
+                        mostrarToast('Se enviaron ' + enviadosOk + ' correo(s) pedidos desde Conserjería.', 'success');
                     }
                 }
             } catch (e) {
@@ -25394,6 +25419,12 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     guardarHuellasBienvenidaLocal(window._huellasBienvenidaCache);
                     if (typeof scheduleRefrescarEstadoBienvenidaUnidades === 'function') {
                         scheduleRefrescarEstadoBienvenidaUnidades();
+                    }
+                    if (!window._procesadorCorreoMarcado) {
+                        window._procesadorCorreoMarcado = true;
+                        ref.set({
+                            procesadorCorreo: 'operativo-v2'
+                        }, { merge: true }).catch(function () {});
                     }
                     procesarColaBienvenidaConserjeria();
                 }, function (err) {
