@@ -7613,6 +7613,7 @@
         body.permisos-cargando #notifBellWrap,
         body.permisos-cargando #menuToggleBtn,
         body.permisos-cargando #presenciaAdminBar,
+        body.permisos-cargando #presenciaUsuarioBar,
         body.permisos-cargando #permisosBloqueo,
         body.permisos-cargando #bienvenidaUsuarioBar,
         body.permisos-cargando #chatDock,
@@ -7752,6 +7753,7 @@
         body.bienvenida-usuario-on #menuToggleBtn,
         body.bienvenida-usuario-on #menuMobileBackdrop,
         body.bienvenida-usuario-on #presenciaAdminBar,
+        body.bienvenida-usuario-on #presenciaUsuarioBar,
         body.bienvenida-usuario-on #permisosBloqueo,
         body.bienvenida-usuario-on #permisosCargando,
         body.bienvenida-usuario-on #bienvenidaUsuarioBar,
@@ -7906,8 +7908,10 @@
         .perfil-crop-tools input[type="range"] { width: 100%; }
         #btnMiPerfil { gap: 0.45rem; }
         #presenciaAdminBar { display: none; align-items: center; gap: 0.55rem; flex-wrap: wrap; margin: 0 0 0.85rem; padding: 0.45rem 0.7rem; border: 1px solid var(--border-color); border-radius: 10px; background: var(--bg-secondary); font-size: 0.78rem; }
+        #presenciaUsuarioBar { display: none; align-items: center; gap: 0.55rem; flex-wrap: wrap; margin: 0 0 0.85rem; padding: 0.45rem 0.7rem; border: 1px solid var(--border-color); border-radius: 10px; background: var(--bg-secondary); font-size: 0.78rem; }
         body.presencia-admin #presenciaAdminBar { display: flex; }
-        #presenciaAdminBar .pres-dot { width: 0.55rem; height: 0.55rem; border-radius: 50%; background: #22c55e; box-shadow: 0 0 0 3px rgba(34,197,94,0.25); }
+        body.presencia-admin-visible:not(.presencia-admin) #presenciaUsuarioBar { display: flex; }
+        #presenciaAdminBar .pres-dot, #presenciaUsuarioBar .pres-dot { width: 0.55rem; height: 0.55rem; border-radius: 50%; background: #22c55e; box-shadow: 0 0 0 3px rgba(34,197,94,0.25); }
         #presenciaAdminChips { display: flex; gap: 0.35rem; flex-wrap: wrap; }
         .pres-chip { display: inline-flex; align-items: center; gap: 0.3rem; padding: 0.15rem 0.45rem 0.15rem 0.2rem; border-radius: 999px; border: 1px solid var(--border-color); background: var(--bg-primary); }
         #modalPerfilUsuario.modal-overlay.active { display: flex; }
@@ -9338,6 +9342,11 @@
                 <span class="pres-dot" aria-hidden="true"></span>
                 <strong id="presenciaAdminTitulo">Nadie más conectado</strong>
                 <div id="presenciaAdminChips"></div>
+            </div>
+            <div id="presenciaUsuarioBar" aria-live="polite">
+                <span class="pres-dot" aria-hidden="true"></span>
+                <strong id="presenciaUsuarioTitulo">Administrador conectado</strong>
+                <div id="presenciaUsuarioChips"></div>
             </div>
             <div id="permisosCargando" role="status" aria-live="polite">
                 <div class="carga-escena" aria-hidden="true">
@@ -28872,6 +28881,18 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 admin: !!esAdminPrincipal(mail)
             };
             try { await ref.set(payload, { merge: true }); } catch (eW) {}
+            if (payload.admin) {
+                try {
+                    await db.collection('comunidad').doc('presenciaAdmin').set({
+                        correo: payload.correo,
+                        nombre: payload.nombre,
+                        avatarId: payload.avatarId,
+                        fotoUrl: payload.fotoUrl,
+                        online: true,
+                        lastSeen: payload.lastSeen
+                    }, { merge: true });
+                } catch (eAdm) {}
+            }
         }
 
         async function marcarPresenciaOffline() {
@@ -28880,6 +28901,11 @@ document.getElementById('chatForm').onsubmit = function (e) {
             var ref = presenciaRef(user.email);
             if (!ref) return;
             try { await ref.set({ online: false, lastSeen: Date.now() }, { merge: true }); } catch (eO) {}
+            if (esAdminPrincipal(user.email)) {
+                try {
+                    await db.collection('comunidad').doc('presenciaAdmin').set({ online: false, lastSeen: Date.now() }, { merge: true });
+                } catch (eAdm) {}
+            }
         }
 
         function detenerPresenciaUsuario() {
@@ -28891,8 +28917,13 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 try { window._presenciaUnsub(); } catch (eU) {}
                 window._presenciaUnsub = null;
             }
+            if (window._presenciaUserUnsub) {
+                try { window._presenciaUserUnsub(); } catch (eUs) {}
+                window._presenciaUserUnsub = null;
+            }
             marcarPresenciaOffline();
             document.body.classList.remove('presencia-admin');
+            document.body.classList.remove('presencia-admin-visible');
         }
 
         function pintarBarraPresencia(rows) {
@@ -28908,16 +28939,52 @@ document.getElementById('chatForm').onsubmit = function (e) {
             }
             tit.textContent = otros.length === 1 ? '1 usuario conectado' : (otros.length + ' usuarios conectados');
             chips.innerHTML = otros.map(function (r) {
-                var fake = { correo: r.correo, avatarId: r.avatarId, fotoUrl: r.fotoUrl };
-                window._perfilesMapa = window._perfilesMapa || {};
-                if (!window._perfilesMapa[r.correo]) window._perfilesMapa[r.correo] = fake;
-                else {
-                    if (r.fotoUrl) window._perfilesMapa[r.correo].fotoUrl = r.fotoUrl;
-                    if (r.avatarId) window._perfilesMapa[r.correo].avatarId = r.avatarId;
-                }
+                presenciaRecordarPerfil(r);
                 return '<span class="pres-chip">' + perfilHtmlAvatar(r.correo, 'perfil-avatar perfil-avatar--sm') +
                     bitacoraEsc(r.nombre || r.correo) + '</span>';
             }).join('');
+        }
+
+        function presenciaRecordarPerfil(r) {
+            if (!r || !r.correo) return;
+            window._perfilesMapa = window._perfilesMapa || {};
+            var prev = window._perfilesMapa[r.correo] || { correo: r.correo };
+            if (r.fotoUrl) prev.fotoUrl = r.fotoUrl;
+            if (r.avatarId) prev.avatarId = r.avatarId;
+            if (r.nombre) prev.nombre = r.nombre;
+            window._perfilesMapa[r.correo] = prev;
+        }
+
+        function pintarBarraAdminConectado(admins) {
+            var chips = document.getElementById('presenciaUsuarioChips');
+            var tit = document.getElementById('presenciaUsuarioTitulo');
+            if (!chips || !tit) return;
+            if (!admins || !admins.length) {
+                document.body.classList.remove('presencia-admin-visible');
+                chips.innerHTML = '';
+                return;
+            }
+            document.body.classList.add('presencia-admin-visible');
+            tit.textContent = 'Administrador conectado';
+            chips.innerHTML = admins.map(function (r) {
+                presenciaRecordarPerfil(r);
+                return '<span class="pres-chip">' + perfilHtmlAvatar(r.correo, 'perfil-avatar') +
+                    bitacoraEsc(r.nombre || 'Administración') + '</span>';
+            }).join('');
+        }
+
+        function escucharPresenciaParaUsuarios() {
+            if (!db || window._presenciaUserUnsub) return;
+            window._presenciaUserUnsub = db.collection('comunidad').doc('presenciaAdmin').onSnapshot(function (snap) {
+                var d = snap.exists ? (snap.data() || {}) : null;
+                var seen = d ? Number(d.lastSeen || 0) : 0;
+                var on = !!(d && d.online !== false && seen && (Date.now() - seen) < 90000);
+                pintarBarraAdminConectado(on ? [d] : []);
+            }, function (err) {
+                if (!(typeof errorEsPermisoFirestore === 'function' && errorEsPermisoFirestore(err))) {
+                    console.warn('[presencia-admin]', err);
+                }
+            });
         }
 
         function avisarAdminUsuarioConectado(row) {
@@ -28973,9 +29040,11 @@ document.getElementById('chatForm').onsubmit = function (e) {
             window._presenciaTimer = setInterval(function () { latidoPresenciaUsuario(); }, 25000);
             if (esAdminPrincipal(auth && auth.currentUser && auth.currentUser.email)) {
                 document.body.classList.add('presencia-admin');
+                document.body.classList.remove('presencia-admin-visible');
                 escucharPresenciaAdmin();
             } else {
                 document.body.classList.remove('presencia-admin');
+                escucharPresenciaParaUsuarios();
             }
             if (!window._presenciaVisBind) {
                 window._presenciaVisBind = true;
