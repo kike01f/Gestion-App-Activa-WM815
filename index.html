@@ -15775,6 +15775,11 @@
             return new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(monto);
         }
 
+        function correoCopiaConserjeriaBloqueado(correo) {
+            var e = String(correo || '').trim().toLowerCase();
+            return e === 'conserjeria.wm815@gmail.com' || e === 'conserjeria2.wm815@gmail.com';
+        }
+
         // Función para enviar correos usando Firebase Extensions (Trigger Email)
         /** Lista única de correos válidos: acepta string, string con comas, o array (para un solo envío a varios). */
         function normalizarListaCorreosDestino(correo) {
@@ -16071,7 +16076,7 @@
                         ? opciones.cc
                         : normalizarListaCorreosDestino(opciones.cc);
                     const ccLista = normalizarListaCorreosDestino(ccBruto);
-                    const ccFiltrado = ccLista.filter(e => e && !enParaSet.has(String(e).toLowerCase()));
+                    const ccFiltrado = ccLista.filter(e => e && !enParaSet.has(String(e).toLowerCase()) && !correoCopiaConserjeriaBloqueado(e));
                     if (ccFiltrado.length === 1) {
                         mailData.cc = ccFiltrado[0];
                     } else if (ccFiltrado.length > 1) {
@@ -16093,7 +16098,7 @@
                     }
                     const bccFiltrado = bccLista.filter(function (e) {
                         var k = String(e).toLowerCase();
-                        return e && !enParaSet.has(k) && !enCcSet.has(k);
+                        return e && !enParaSet.has(k) && !enCcSet.has(k) && !correoCopiaConserjeriaBloqueado(e);
                     });
                     if (bccFiltrado.length === 1) {
                         mailData.bcc = bccFiltrado[0];
@@ -25828,6 +25833,78 @@ document.getElementById('chatForm').onsubmit = function (e) {
             return { encolado: true };
         }
 
+        function jobColaCorreoEsOperativo(job) {
+            if (!job) return false;
+            var htmlPropio = job.html ? String(job.html) : '';
+            var origenJob = String(job.origen || '');
+            return job.tipo === 'operativo'
+                || origenJob === 'conserjeria-encomienda'
+                || origenJob === 'conserjeria-visita'
+                || origenJob.indexOf('prueba') === 0
+                || htmlPropio.indexOf('Correo automático') >= 0;
+        }
+
+        function jobColaCorreoEstaLibre(job, ahora) {
+            if (!job) return false;
+            var operativo = jobColaCorreoEsOperativo(job);
+            if (job.status === 'pending') return true;
+            if (job.status === 'html' && operativo) return true;
+            if (job.status !== 'enviando') return false;
+            var t = Date.parse(job.claimedAt || '');
+            return !isFinite(t) || (ahora - t) > 120000;
+        }
+
+        async function reclamarJobsColaCorreo(ref) {
+            var claimId = 'c_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
+            var ahora = Date.now();
+            var mios = await ref.firestore.runTransaction(async function (tx) {
+                var snap = await tx.get(ref);
+                if (!snap || !snap.exists) return [];
+                var data = snap.data() || {};
+                var cola = Array.isArray(data.queue) ? data.queue.slice() : [];
+                var tomados = [];
+                var cambio = false;
+                for (var i = 0; i < cola.length; i++) {
+                    var job = cola[i];
+                    if (!jobColaCorreoEstaLibre(job, ahora)) continue;
+                    if (!job.id) job.id = 'job_' + ahora + '_' + i;
+                    job.statusPrevio = job.status === 'enviando' ? (job.statusPrevio || 'pending') : job.status;
+                    job.status = 'enviando';
+                    job.claimId = claimId;
+                    job.claimedAt = new Date().toISOString();
+                    cola[i] = job;
+                    tomados.push(JSON.parse(JSON.stringify(job)));
+                    cambio = true;
+                }
+                if (cambio) {
+                    tx.set(ref, {
+                        queue: cola,
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    }, { merge: true });
+                }
+                return tomados;
+            });
+            return mios || [];
+        }
+
+        async function guardarEstadoJobColaCorreo(ref, jobId, claimId, patch) {
+            await ref.firestore.runTransaction(async function (tx) {
+                var snap = await tx.get(ref);
+                if (!snap || !snap.exists) return;
+                var data = snap.data() || {};
+                var cola = Array.isArray(data.queue) ? data.queue.slice() : [];
+                for (var i = 0; i < cola.length; i++) {
+                    if (!cola[i] || cola[i].id !== jobId || cola[i].claimId !== claimId) continue;
+                    Object.keys(patch).forEach(function (k) { cola[i][k] = patch[k]; });
+                    break;
+                }
+                tx.set(ref, {
+                    queue: cola,
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                }, { merge: true });
+            });
+        }
+
         var _colaBienvenidaConserjeriaEnCurso = false;
         async function procesarColaBienvenidaConserjeria() {
             if (_colaBienvenidaConserjeriaEnCurso) return;
@@ -25838,54 +25915,35 @@ document.getElementById('chatForm').onsubmit = function (e) {
             _colaBienvenidaConserjeriaEnCurso = true;
             try {
                 var ref = await obtenerRefWelcomeCompartido();
-                var snap = await ref.get();
-                if (!snap || !snap.exists) return;
-                var data = snap.data() || {};
-                var jobs = Array.isArray(data.queue) ? data.queue.slice() : [];
-                var pendientes = jobs.filter(function (j) {
-                    if (!j) return false;
-                    if (j.status === 'pending') return true;
-                    if (j.status !== 'html') return false;
-                    var origenPend = String(j.origen || '');
-                    var htmlPend = j.html ? String(j.html) : '';
-                    return j.tipo === 'operativo'
-                        || origenPend === 'conserjeria-encomienda'
-                        || origenPend === 'conserjeria-visita'
-                        || origenPend.indexOf('prueba') === 0
-                        || htmlPend.indexOf('Correo automático') >= 0;
-                });
-                if (!pendientes.length) return;
+                if (!ref || !ref.firestore || typeof ref.firestore.runTransaction !== 'function') return;
+                var jobs = await reclamarJobsColaCorreo(ref);
+                if (!jobs.length) return;
                 if (typeof obtenerConfigCorreosConsejeria === 'function') {
                     try { await obtenerConfigCorreosConsejeria(); } catch (eCfgQ) {}
                 }
                 var htmlBienvenida = typeof htmlCorreoBienvenidaNuevoResidente === 'function' ? htmlCorreoBienvenidaNuevoResidente() : '';
                 var textoDefault = 'Estimado Residente, es un gusto darle la bienvenida de parte del equipo de administración a su nuevo hogar.';
-                var huellas = parseHuellasDesdeWelcomeDoc(data);
-                var cambio = false;
+                var huellas = window._huellasBienvenidaCache;
+                var cambioHuellas = false;
                 var enviadosOk = 0;
                 for (var i = 0; i < jobs.length; i++) {
                     var job = jobs[i];
                     if (!job) continue;
-                    var htmlPropio = job.html ? String(job.html) : '';
-                    var origenJob = String(job.origen || '');
-                    var esOperativo = job.tipo === 'operativo'
-                        || origenJob === 'conserjeria-encomienda'
-                        || origenJob === 'conserjeria-visita'
-                        || origenJob.indexOf('prueba') === 0
-                        || htmlPropio.indexOf('Correo automático') >= 0;
-                    if (job.status !== 'pending' && !(job.status === 'html' && esOperativo)) continue;
+                    var esOperativo = jobColaCorreoEsOperativo(job);
                     var asunto = esOperativo
                         ? (job.asunto || 'Aviso de conserjería')
                         : (job.asunto || 'Te damos la bienvenida a la Comunidad WM 815');
                     var texto = esOperativo ? (job.texto || '') : (job.texto || textoDefault);
-                    var html = esOperativo ? htmlPropio : htmlBienvenida;
+                    var html = esOperativo ? (job.html ? String(job.html) : '') : htmlBienvenida;
                     var para = job.to;
                     var bcc = job.bcc;
                     var opciones = opcionesEnvioConCcConsejeria({
                         silencioso: true,
-                        permitirSinLogin: false
+                        permitirSinLogin: false,
+                        aplicarCcoGlobal: esOperativo ? false : undefined
                     });
                     if (esOperativo) {
+                        opciones.aplicarCcoGlobal = false;
                         if (job.cc) opciones.cc = job.cc;
                         else delete opciones.cc;
                     }
@@ -25901,39 +25959,44 @@ document.getElementById('chatForm').onsubmit = function (e) {
                         null,
                         opciones
                     );
+                    var patch;
                     if (resultado && resultado.exito && resultado.docId) {
-                        job.status = 'sent';
-                        job.sentAt = new Date().toISOString();
-                        job.mailId = resultado.docId;
-                        if (!esOperativo) marcarHuellasBienvenidaEnviadas(job.huellas || [], resultado.docId, job.sentAt);
+                        patch = {
+                            status: 'sent',
+                            sentAt: new Date().toISOString(),
+                            mailId: resultado.docId
+                        };
+                        if (!esOperativo) marcarHuellasBienvenidaEnviadas(job.huellas || [], resultado.docId, patch.sentAt);
                         huellas = window._huellasBienvenidaCache || huellas;
-                        cambio = true;
+                        cambioHuellas = true;
                         enviadosOk += 1;
                     } else if (resultado && resultado.reintentar) {
-                        job.status = 'pending';
+                        patch = { status: job.statusPrevio || 'pending', claimId: '', claimedAt: '' };
                     } else {
-                        job.intentos = (job.intentos || 0) + 1;
-                        if (job.intentos >= 5) {
-                            job.status = 'error';
-                            job.error = (resultado && resultado.error) || 'error desconocido';
-                            job.failedAt = new Date().toISOString();
-                            cambio = true;
-                        }
+                        var intentos = (job.intentos || 0) + 1;
+                        patch = intentos >= 5
+                            ? {
+                                status: 'error',
+                                intentos: intentos,
+                                error: (resultado && resultado.error) || 'error desconocido',
+                                failedAt: new Date().toISOString()
+                            }
+                            : { status: job.statusPrevio || 'pending', intentos: intentos, claimId: '', claimedAt: '' };
                     }
+                    await guardarEstadoJobColaCorreo(ref, job.id, job.claimId, patch);
                 }
-                if (cambio) {
+                if (cambioHuellas) {
                     var mapaH = mapaHuellasBienvenidaParaGuardar(huellas);
                     await ref.set({
-                        queue: jobs,
                         huellas: mapaH,
                         updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
                         origen: 'gestion-wm'
                     }, { merge: true });
                     guardarHuellasBienvenidaLocal(huellas);
                     await guardarHuellasBienvenidaCloud(huellas);
-                    if (enviadosOk && typeof mostrarToast === 'function') {
-                        mostrarToast('Se enviaron ' + enviadosOk + ' correo(s) pedidos desde Conserjería.', 'success');
-                    }
+                }
+                if (enviadosOk && typeof mostrarToast === 'function') {
+                    mostrarToast('Se enviaron ' + enviadosOk + ' correo(s) pedidos desde Conserjería.', 'success');
                 }
             } catch (e) {
                 console.warn('[bienvenida] Cola Conserjería:', e);
@@ -26399,7 +26462,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
             const cfg = window._configCorreosConsejeriaCache;
             if (!cfg || cfg.activo === false) return '';
             const e = String(cfg.correo || '').trim();
-            if (!e || e.toLowerCase() === 'conserjeria.wm815@gmail.com') return '';
+            if (!e || correoCopiaConserjeriaBloqueado(e)) return '';
             return e;
         }
 
@@ -32934,7 +32997,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 }
                 const d = snap.data() || {};
                 var correoGuardado = String(d.correo != null ? d.correo : '').trim();
-                if (correoGuardado.toLowerCase() === 'conserjeria.wm815@gmail.com') correoGuardado = '';
+                if (correoCopiaConserjeriaBloqueado(correoGuardado)) correoGuardado = '';
                 const cfg = {
                     activo: d.activo === true && !!correoGuardado,
                     correo: correoGuardado,
@@ -32978,7 +33041,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
             const seen = new Set();
             const add = function (nombre, correo) {
                 const e = String(correo || '').trim();
-                if (!e || e.indexOf('@') < 0) return;
+                if (!e || e.indexOf('@') < 0 || correoCopiaConserjeriaBloqueado(e)) return;
                 const k = e.toLowerCase();
                 if (seen.has(k)) return;
                 seen.add(k);
@@ -39474,7 +39537,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
             const seen = new Set();
             const add = function (nombre, correo, grupo) {
                 const e = String(correo || '').trim();
-                if (!e || e.indexOf('@') < 0) return;
+                if (!e || e.indexOf('@') < 0 || correoCopiaConserjeriaBloqueado(e)) return;
                 const k = e.toLowerCase();
                 if (seen.has(k)) return;
                 seen.add(k);
