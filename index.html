@@ -9462,12 +9462,12 @@
             <!-- Correos de consejería: CCO en todos los módulos -->
             <div class="form-section" style="margin-bottom: 2rem;">
                 <h3 style="margin: 0 0 0.75rem 0; font-size: 1rem; font-weight: 700;">Correos de consejería</h3>
-                <p style="color: var(--text-tertiary); font-size: 0.8125rem; margin: 0 0 0.75rem 0; line-height: 1.45;">Estas direcciones reciben <strong>copia oculta (CCO)</strong> en <strong>todos los correos de todos los módulos</strong> (reportes, comprobantes, mudanzas, aperturas, espacios, comité, etc.). Puede desactivar el buzón del edificio o desmarcarlo en cada envío.</p>
+                <p style="color: var(--text-tertiary); font-size: 0.8125rem; margin: 0 0 0.75rem 0; line-height: 1.45;">Estas direcciones son el <strong>CCO global</strong> (buzón del edificio y copias extra). Cada módulo, más abajo, puede incluirlas o no, desactivar el CCO automático o agregar correos propios. En cada envío también puede desmarcar copias.</p>
                 <div style="margin: 0 0 1rem 0; padding: 0.85rem 1rem; border: 1px solid var(--border-color); border-radius: 10px; background: var(--bg-secondary);">
                     <p style="margin: 0 0 0.65rem 0; font-size: 0.8125rem; font-weight: 700; color: var(--text-primary);">Buzón de conserjería del edificio</p>
                     <label style="display: flex; align-items: flex-start; gap: 0.5rem; margin-bottom: 0.65rem; cursor: pointer; font-size: 0.8125rem; color: var(--text-secondary);">
                         <input type="checkbox" id="correoConsejeriaBuzonActivo" checked style="margin-top: 0.15rem; flex-shrink: 0;">
-                        <span>Incluir este correo en CCO de todos los módulos (puede desmarcarlo también al enviar)</span>
+                        <span>Incluir este correo en el CCO global (los módulos que hereden el CCO global lo recibirán; puede desmarcarlo al enviar)</span>
                     </label>
                     <div class="form-row" style="gap: 0.5rem; margin-bottom: 0;">
                         <div class="form-group" style="flex: 1; margin-bottom: 0.5rem;">
@@ -9513,6 +9513,57 @@
                         </tbody>
                     </table>
                 </div>
+            </div>
+
+            <!-- CCO automático por módulo -->
+            <div class="form-section" style="margin-bottom: 2rem;">
+                <h3 style="margin: 0 0 0.5rem 0; font-size: 1rem; font-weight: 700;">CCO automático por módulo</h3>
+                <p style="color: var(--text-tertiary); font-size: 0.8125rem; margin: 0 0 1rem 0; line-height: 1.45;">Defina, para cada tipo de correo de la app, si se envía CCO, si se heredan las direcciones globales y qué copias extra se agregan. Los cambios se aplican al enviar reportes, comprobantes, mudanzas, aperturas, espacios, bienvenida y demás módulos.</p>
+                <div class="form-group" style="margin-bottom: 0.75rem;">
+                    <label style="margin-bottom: 0.25rem; font-size: 0.875rem; display: block;">Módulo / tipo de correo</label>
+                    <select id="ccoCorreoModuloSel" style="width: 100%; max-width: 520px; padding: 0.5rem; font-size: 0.875rem; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-primary); color: var(--text-primary);"></select>
+                </div>
+                <label style="display: flex; align-items: flex-start; gap: 0.5rem; margin-bottom: 0.55rem; cursor: pointer; font-size: 0.8125rem; color: var(--text-secondary);">
+                    <input type="checkbox" id="ccoCorreoModuloActivo" checked style="margin-top: 0.15rem; flex-shrink: 0;">
+                    <span>Enviar CCO automático en este módulo</span>
+                </label>
+                <label style="display: flex; align-items: flex-start; gap: 0.5rem; margin-bottom: 0.85rem; cursor: pointer; font-size: 0.8125rem; color: var(--text-secondary);">
+                    <input type="checkbox" id="ccoCorreoModuloIncluirGlobal" checked style="margin-top: 0.15rem; flex-shrink: 0;">
+                    <span>Incluir el CCO global (buzón y copias adicionales de conserjería)</span>
+                </label>
+                <p style="color: var(--text-tertiary); font-size: 0.8125rem; margin: 0 0 0.5rem 0;">Copias extra solo para este módulo:</p>
+                <form id="formCcoCorreoModulo">
+                    <div class="form-row" style="gap: 0.5rem; margin-bottom: 0.5rem;">
+                        <div class="form-group" style="flex: 1; margin-bottom: 0.5rem;">
+                            <label style="margin-bottom: 0.25rem; font-size: 0.875rem;">Nombre *</label>
+                            <input type="text" id="ccoCorreoModuloNombre" required placeholder="Ej: Comité, administración" style="padding: 0.5rem; font-size: 0.875rem;">
+                        </div>
+                        <div class="form-group" style="flex: 1; margin-bottom: 0.5rem;">
+                            <label style="margin-bottom: 0.25rem; font-size: 0.875rem;">Correo electrónico *</label>
+                            <input type="email" id="ccoCorreoModuloEmail" required placeholder="copia@ejemplo.com" style="padding: 0.5rem; font-size: 0.875rem;">
+                        </div>
+                        <div class="form-group" style="display: flex; align-items: flex-end; margin-bottom: 0.5rem;">
+                            <button type="submit" class="btn btn-primary" style="padding: 0.5rem 1rem; font-size: 0.875rem;">Agregar a este módulo</button>
+                        </div>
+                    </div>
+                </form>
+                <div style="margin-top: 0.5rem;">
+                    <table style="width: 100%; border-collapse: collapse; background: var(--bg-primary); border-radius: 8px; overflow: hidden;">
+                        <thead>
+                            <tr style="background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); color: white;">
+                                <th style="padding: 0.75rem; text-align: left; font-weight: 600;">Nombre</th>
+                                <th style="padding: 0.75rem; text-align: left; font-weight: 600;">Correo</th>
+                                <th style="padding: 0.75rem; text-align: center; font-weight: 600; width: 100px;">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyCcoCorreoModulo"></tbody>
+                    </table>
+                </div>
+                <div style="margin-top: 0.75rem; display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center;">
+                    <button type="button" class="btn btn-primary" id="btnGuardarCcoCorreoModulo" style="padding: 0.5rem 1rem; font-size: 0.875rem;">Guardar CCO de este módulo</button>
+                    <button type="button" class="btn btn-secondary" id="btnRestablecerCcoCorreoModulo" style="padding: 0.5rem 1rem; font-size: 0.875rem;">Restablecer a CCO global</button>
+                </div>
+                <div id="resumenCcoCorreoModulos" style="margin-top: 1rem;"></div>
             </div>
 
             <!-- Plantillas de asunto y cuerpo (correos por módulo) -->
@@ -12589,6 +12640,7 @@
                         if (typeof cargarCorreosConsejeria === 'function') cargarCorreosConsejeria();
                         if (typeof cargarFormBuzonConsejeria === 'function') cargarFormBuzonConsejeria();
                         if (typeof refrescarEditorPlantillasCorreoModulos === 'function') refrescarEditorPlantillasCorreoModulos();
+                        if (typeof refrescarEditorCcoCorreoModulos === 'function') refrescarEditorCcoCorreoModulos();
                     } else if (tabName === 'personalizacion') {
                         if (typeof cargarPersonalizacion === 'function') {
                             cargarPersonalizacion();
@@ -13187,7 +13239,7 @@
 
                 if (!(opciones && opciones.aplicarCcoGlobal === false) && typeof obtenerDestinatariosCcoConsejeria === 'function') {
                     try {
-                        const ccoGlob = await obtenerDestinatariosCcoConsejeria();
+                        const ccoGlob = await obtenerDestinatariosCcoConsejeria(opciones && opciones.ccoModulo);
                         const extraCco = (ccoGlob || []).map(function (d) { return d && d.correo ? String(d.correo).trim() : ''; }).filter(Boolean);
                         if (extraCco.length) {
                             opciones = Object.assign({}, opciones || {});
@@ -13484,7 +13536,7 @@
                 const cuerpoIni = resolverCuerpoInicioPlantillaCorreo(bloqueTpl, ctxTpl);
                 
                 // Mostrar modal para seleccionar destinatarios
-                await mostrarModalSeleccionDestinatarios(asuntoEnv, html, adjuntos, { mensajeInicialPrefill: cuerpoIni });
+                await mostrarModalSeleccionDestinatarios(asuntoEnv, html, adjuntos, { mensajeInicialPrefill: cuerpoIni, ccoModulo: 'reporteCaja' });
                 
             } catch (error) {
                 console.error('Error al enviar correo con reporte de caja chica:', error);
@@ -13538,7 +13590,7 @@
                 const cuerpoIni = resolverCuerpoInicioPlantillaCorreo(bloqueTpl, ctxTpl);
                 
                 // Mostrar modal para seleccionar destinatarios
-                await mostrarModalSeleccionDestinatarios(asuntoEnv, html, [adjunto], { mensajeInicialPrefill: cuerpoIni });
+                await mostrarModalSeleccionDestinatarios(asuntoEnv, html, [adjunto], { mensajeInicialPrefill: cuerpoIni, ccoModulo: 'reporteMantenciones' });
                 
             } catch (error) {
                 console.error('Error al enviar correo con reporte de mantenciones:', error);
@@ -13602,7 +13654,7 @@
                 ocultarProgreso();
                 
                 // Mostrar modal para seleccionar destinatarios
-                await mostrarModalSeleccionDestinatarios(asuntoEnv, html, [adjunto], { mensajeInicialPrefill: cuerpoIni });
+                await mostrarModalSeleccionDestinatarios(asuntoEnv, html, [adjunto], { mensajeInicialPrefill: cuerpoIni, ccoModulo: 'reporteInsumos' });
                 
             } catch (error) {
                 console.error('Error al enviar correo con reporte de insumos:', error);
@@ -14034,7 +14086,7 @@
                 ocultarProgreso();
                 
                 // Mostrar modal para seleccionar destinatarios
-                await mostrarModalSeleccionDestinatarios(asuntoEnv, html, [adjunto], { mensajeInicialPrefill: cuerpoIni });
+                await mostrarModalSeleccionDestinatarios(asuntoEnv, html, [adjunto], { mensajeInicialPrefill: cuerpoIni, ccoModulo: 'reportePostventa' });
                 
             } catch (error) {
                 console.error('Error al enviar correo con reporte de postventa:', error);
@@ -14233,7 +14285,7 @@
                         const asuntoPv = resolverAsuntoPlantillaCorreo(bloquePv2, asuntoDefPv, ctxPv2);
                         const cuerpoPrefPv = resolverCuerpoInicioPlantillaCorreo(bloquePv2, ctxPv2);
                         ocultarProgreso();
-                        await mostrarModalSeleccionDestinatarios(asuntoPv, html, [adjunto], { mensajeInicialPrefill: cuerpoPrefPv });
+                        await mostrarModalSeleccionDestinatarios(asuntoPv, html, [adjunto], { mensajeInicialPrefill: cuerpoPrefPv, ccoModulo: 'reportePostventaPendientes' });
                     } catch (err) {
                         console.error('Correo postventa pendientes:', err);
                         ocultarProgreso();
@@ -14490,7 +14542,7 @@
                 ocultarProgreso();
                 
                 // Mostrar modal para seleccionar destinatarios
-                await mostrarModalSeleccionDestinatarios(asuntoEnv, html, [adjunto], { mensajeInicialPrefill: cuerpoIni });
+                await mostrarModalSeleccionDestinatarios(asuntoEnv, html, [adjunto], { mensajeInicialPrefill: cuerpoIni, ccoModulo: 'reporteLecturasAgua' });
                 
             } catch (error) {
                 console.error('Error al enviar correo con reporte de lecturas de agua:', error);
@@ -14630,6 +14682,40 @@
                 console.warn('plantillasCorreoModulos', e);
             }
             return {};
+        }
+
+        function normalizarConfigCcoModulo(raw) {
+            const o = raw && typeof raw === 'object' && !Array.isArray(raw) ? raw : {};
+            const correos = Array.isArray(o.correos)
+                ? o.correos.map(function (c) {
+                    return {
+                        nombre: String((c && c.nombre) || '').trim() || 'CCO',
+                        correo: String((c && c.correo) || '').trim()
+                    };
+                }).filter(function (c) { return c.correo && c.correo.indexOf('@') > 0; })
+                : [];
+            return {
+                activo: o.activo !== false,
+                incluirGlobal: o.incluirGlobal !== false,
+                correos: correos
+            };
+        }
+
+        async function obtenerMapaCcoCorreoModulos() {
+            try {
+                const datos = await obtenerDatos('ccoCorreoModulos');
+                if (datos && typeof datos === 'object' && !Array.isArray(datos)) return datos;
+            } catch (e) {
+                console.warn('ccoCorreoModulos', e);
+            }
+            return {};
+        }
+
+        async function obtenerConfigCcoModulo(moduloId) {
+            const id = String(moduloId || '').trim();
+            if (!id) return normalizarConfigCcoModulo(null);
+            const map = await obtenerMapaCcoCorreoModulos();
+            return normalizarConfigCcoModulo(map[id]);
         }
 
         function obtenerBloquePlantillaModulo(map, idModulo) {
@@ -15123,7 +15209,7 @@
             let listaCcoReporte = [];
             try {
                 listaCcoReporte = typeof obtenerDestinatariosCcoConsejeria === 'function'
-                    ? (await obtenerDestinatariosCcoConsejeria()) : [];
+                    ? (await obtenerDestinatariosCcoConsejeria(opcionesModal.ccoModulo)) : [];
             } catch (eCcoR) { listaCcoReporte = []; }
             const wrapCco = modal.querySelector('#modalCcoReporteWrap');
             const listaCcoEl = modal.querySelector('#modalCcoReporteLista');
@@ -15241,20 +15327,25 @@
                 mensajeInicialPrefill = '',
                 destinatariosUnidad = null,
                 destinatariosDirectorio = null,
-                correosSiempreSeleccionados = null
+                correosSiempreSeleccionados = null,
+                ccoModulo = ''
             } = opciones || {};
             let destinatariosCco = Array.isArray(opciones && opciones.destinatariosCco) ? opciones.destinatariosCco.slice() : [];
             try {
                 const glob = typeof obtenerDestinatariosCcoConsejeria === 'function'
-                    ? await obtenerDestinatariosCcoConsejeria()
+                    ? await obtenerDestinatariosCcoConsejeria(ccoModulo)
                     : [];
-                const seenCco = new Set(destinatariosCco.map((d) => String((d && d.correo) || '').trim().toLowerCase()).filter(Boolean));
-                (glob || []).forEach((d) => {
-                    const k = String((d && d.correo) || '').trim().toLowerCase();
-                    if (!k || seenCco.has(k)) return;
-                    seenCco.add(k);
-                    destinatariosCco.push(d);
-                });
+                if (ccoModulo) {
+                    destinatariosCco = glob || [];
+                } else {
+                    const seenCco = new Set(destinatariosCco.map((d) => String((d && d.correo) || '').trim().toLowerCase()).filter(Boolean));
+                    (glob || []).forEach((d) => {
+                        const k = String((d && d.correo) || '').trim().toLowerCase();
+                        if (!k || seenCco.has(k)) return;
+                        seenCco.add(k);
+                        destinatariosCco.push(d);
+                    });
+                }
             } catch (eCcoG) { /* sin CCO global */ }
 
             const listaDestUnidad = Array.isArray(destinatariosUnidad)
@@ -23335,6 +23426,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
 
         function opcionesEnvioConCcConsejeria(base) {
             const o = Object.assign({}, base || {});
+            o.ccoModulo = o.ccoModulo || 'bienvenidaResidente';
             const cc = correoCcBienvenidaConserjeria();
             if (cc) o.cc = cc;
             else delete o.cc;
@@ -25819,8 +25911,8 @@ document.getElementById('chatForm').onsubmit = function (e) {
             return generarConfirmacionMudanzaHtml(mudanza, nombreComunidad);
         }
 
-        async function prepararCorreoMudanzaConsejeria() {
-            const destinatariosCco = await obtenerDestinatariosCcoConsejeria();
+        async function prepararCorreoMudanzaConsejeria(moduloId) {
+            const destinatariosCco = await obtenerDestinatariosCcoConsejeria(moduloId);
             const emails = typeof normalizarListaCorreosDestino === 'function'
                 ? normalizarListaCorreosDestino(destinatariosCco.map((d) => d.correo))
                 : destinatariosCco.map((d) => d.correo).filter(Boolean);
@@ -25945,7 +26037,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     return;
                 }
 
-                const { correoFijoConsejeria, destinatariosCco, enviarOpciones } = await prepararCorreoMudanzaConsejeria();
+                const { correoFijoConsejeria, destinatariosCco, enviarOpciones } = await prepararCorreoMudanzaConsejeria('confirmacionMudanza');
 
                 const esIngreso = mudanza.movimiento === 'ingreso';
                 const autorizada = mudanzaEstaAutorizada(mudanza);
@@ -25962,6 +26054,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 };
                 const asuntoBase = `Confirmación de mudanza de ${movimientoAsunto} (${estadoAsunto}) - Depto ${mudanza.departamento} - ${nombreComunidad}`;
                 const resultado = await mostrarModalPersonalizarCorreoYEnviar({
+                    ccoModulo: 'confirmacionMudanza',
                     titulo: 'Enviar confirmación de mudanza',
                     asuntoDefecto: resolverAsuntoPlantillaCorreo(bloque, asuntoBase, ctx),
                     mensajeInicialPrefill: resolverCuerpoInicioPlantillaCorreo(bloque, ctx),
@@ -26031,7 +26124,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     return;
                 }
 
-                const { correoFijoConsejeria, destinatariosCco, enviarOpciones } = await prepararCorreoMudanzaConsejeria();
+                const { correoFijoConsejeria, destinatariosCco, enviarOpciones } = await prepararCorreoMudanzaConsejeria('mudanzaPendienteDocs');
                 const movimientoAsunto = mudanza.movimiento === 'ingreso' ? 'ingreso' : (mudanza.movimiento === 'salida' ? 'salida' : 'mudanza');
                 const mapPlant = await obtenerPlantillasCorreoModulosMap();
                 const bloque = obtenerBloquePlantillaModulo(mapPlant, 'mudanzaPendienteDocs');
@@ -26046,6 +26139,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 const asuntoBase = `Mudanza pendiente de autorización — documentos faltantes (${movimientoAsunto}) - Depto ${mudanza.departamento} - ${nombreComunidad}`;
                 const prefillDocs = resolverCuerpoInicioPlantillaCorreo(bloque, ctx);
                 const resultado = await mostrarModalPersonalizarCorreoYEnviar({
+                    ccoModulo: 'mudanzaPendienteDocs',
                     titulo: 'Enviar comprobante de mudanza pendiente',
                     asuntoDefecto: resolverAsuntoPlantillaCorreo(bloque, asuntoBase, ctx),
                     mensajeInicialPrefill: prefillDocs,
@@ -26107,7 +26201,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     return;
                 }
 
-                const { correoFijoConsejeria, destinatariosCco, enviarOpciones } = await prepararCorreoMudanzaConsejeria();
+                const { correoFijoConsejeria, destinatariosCco, enviarOpciones } = await prepararCorreoMudanzaConsejeria('cancelacionMudanza');
                 const movimientoAsunto = mudanza.movimiento === 'ingreso' ? 'ingreso' : (mudanza.movimiento === 'salida' ? 'salida' : 'mudanza');
                 const mapPlant = await obtenerPlantillasCorreoModulosMap();
                 const bloque = obtenerBloquePlantillaModulo(mapPlant, 'cancelacionMudanza');
@@ -26119,6 +26213,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 };
                 const asuntoBase = `Cancelación de reserva de mudanza de ${movimientoAsunto} - Depto ${mudanza.departamento} - ${nombreComunidad}`;
                 const resultado = await mostrarModalPersonalizarCorreoYEnviar({
+                    ccoModulo: 'cancelacionMudanza',
                     titulo: 'Enviar cancelación de mudanza',
                     asuntoDefecto: resolverAsuntoPlantillaCorreo(bloque, asuntoBase, ctx),
                     mensajeInicialPrefill: resolverCuerpoInicioPlantillaCorreo(bloque, ctx),
@@ -26735,8 +26830,11 @@ document.getElementById('chatForm').onsubmit = function (e) {
             return next;
         }
 
-        async function obtenerDestinatariosCcoConsejeria() {
+        async function obtenerDestinatariosCcoConsejeria(moduloId) {
             await cargarCorreosConsejeria();
+            const idMod = String(moduloId || '').trim();
+            const cfgMod = idMod ? await obtenerConfigCcoModulo(idMod) : normalizarConfigCcoModulo(null);
+            if (idMod && cfgMod.activo === false) return [];
             const cfg = await obtenerConfigCorreosConsejeria();
             const out = [];
             const seen = new Set();
@@ -26752,8 +26850,13 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     tipo: 'CCO'
                 });
             };
-            if (cfg.activo && cfg.correo) add(cfg.nombre, cfg.correo);
-            (correosConsejeria || []).forEach(function (c) {
+            if (cfgMod.incluirGlobal !== false) {
+                if (cfg.activo && cfg.correo) add(cfg.nombre, cfg.correo);
+                (correosConsejeria || []).forEach(function (c) {
+                    if (c && c.correo) add(c.nombre, c.correo);
+                });
+            }
+            (cfgMod.correos || []).forEach(function (c) {
                 if (c && c.correo) add(c.nombre, c.correo);
             });
             return out;
@@ -26779,7 +26882,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     return;
                 }
 
-                const destinatariosCcoApertura = await obtenerDestinatariosCcoConsejeria();
+                const destinatariosCcoApertura = await obtenerDestinatariosCcoConsejeria('comprobanteApertura');
                 const emailsBccConsejeria = normalizarListaCorreosDestino(destinatariosCcoApertura.map((d) => d.correo));
                 const enviarOpcionesApertura = emailsBccConsejeria.length
                     ? { bcc: emailsBccConsejeria.length === 1 ? emailsBccConsejeria[0] : emailsBccConsejeria }
@@ -26795,6 +26898,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 };
                 const asuntoApBase = `Comprobante de Apertura de Puerta - ${nombreComunidad}`;
                 const resultado = await mostrarModalPersonalizarCorreoYEnviar({
+                    ccoModulo: 'comprobanteApertura',
                     titulo: 'Enviar comprobante de apertura',
                     asuntoDefecto: resolverAsuntoPlantillaCorreo(bloqueAp, asuntoApBase, ctxAp),
                     mensajeInicialPrefill: resolverCuerpoInicioPlantillaCorreo(bloqueAp, ctxAp),
@@ -27138,7 +27242,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     return;
                 }
 
-                const destinatariosCcoEvento = await obtenerDestinatariosCcoConsejeria();
+                const destinatariosCcoEvento = await obtenerDestinatariosCcoConsejeria('comprobanteReservaEspacio');
                 const emailsBccConsejeriaEvento = normalizarListaCorreosDestino(destinatariosCcoEvento.map((d) => d.correo));
                 const enviarOpcionesEvento = emailsBccConsejeriaEvento.length
                     ? { bcc: emailsBccConsejeriaEvento.length === 1 ? emailsBccConsejeriaEvento[0] : emailsBccConsejeriaEvento }
@@ -27155,6 +27259,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 };
                 const asuntoEvBase = `Confirmación de Reserva - ${espacio.espacio} - ${nombreComunidad}`;
                 const resultado = await mostrarModalPersonalizarCorreoYEnviar({
+                    ccoModulo: 'comprobanteReservaEspacio',
                     titulo: 'Enviar confirmación de reserva',
                     asuntoDefecto: resolverAsuntoPlantillaCorreo(bloqueEv, asuntoEvBase, ctxEv),
                     mensajeInicialPrefill: resolverCuerpoInicioPlantillaCorreo(bloqueEv, ctxEv),
@@ -27214,7 +27319,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     return;
                 }
 
-                const destinatariosCcoEvento = await obtenerDestinatariosCcoConsejeria();
+                const destinatariosCcoEvento = await obtenerDestinatariosCcoConsejeria('cancelacionReservaEspacio');
                 const emailsBccConsejeriaEvento = normalizarListaCorreosDestino(destinatariosCcoEvento.map((d) => d.correo));
                 const enviarOpcionesEvento = emailsBccConsejeriaEvento.length
                     ? { bcc: emailsBccConsejeriaEvento.length === 1 ? emailsBccConsejeriaEvento[0] : emailsBccConsejeriaEvento }
@@ -27231,6 +27336,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 };
                 const asuntoEvBase = `Cancelación de Reserva - ${espacio.espacio} - ${nombreComunidad}`;
                 const resultado = await mostrarModalPersonalizarCorreoYEnviar({
+                    ccoModulo: 'cancelacionReservaEspacio',
                     titulo: 'Enviar cancelación de reserva',
                     asuntoDefecto: resolverAsuntoPlantillaCorreo(bloqueEv, asuntoEvBase, ctxEv),
                     mensajeInicialPrefill: resolverCuerpoInicioPlantillaCorreo(bloqueEv, ctxEv),
@@ -27620,6 +27726,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     fechaEmision: fechaEmisionCorreoHoy()
                 };
                 const resultado = await mostrarModalPersonalizarCorreoYEnviar({
+                    ccoModulo: 'comprobanteTarjetaTag',
                     titulo: 'Enviar comprobante de tarjeta / TAG',
                     asuntoDefecto: resolverAsuntoPlantillaCorreo(bloqueTj, asuntoTarjeta, ctxTj),
                     mensajeInicialPrefill: resolverCuerpoInicioPlantillaCorreo(bloqueTj, ctxTj),
@@ -31024,6 +31131,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 };
                 const asuntoMlBase = esAnul ? `Anulación de multa - ${nombreComunidad}` : `Comprobante de Multa - ${nombreComunidad}`;
                 const resultado = await mostrarModalPersonalizarCorreoYEnviar({
+                    ccoModulo: plantillaKey,
                     titulo: esAnul ? 'Enviar notificación de anulación de multa' : 'Enviar comprobante de multa',
                     asuntoDefecto: resolverAsuntoPlantillaCorreo(bloqueMl, asuntoMlBase, ctxMl),
                     mensajeInicialPrefill: resolverCuerpoInicioPlantillaCorreo(bloqueMl, ctxMl),
@@ -31097,6 +31205,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 };
                 const asuntoAnBase = `Anulación de multa - ${nombreComunidad}`;
                 const resultado = await mostrarModalPersonalizarCorreoYEnviar({
+                    ccoModulo: 'comprobanteAnulacionMulta',
                     titulo: 'Enviar notificación de anulación de multa',
                     asuntoDefecto: resolverAsuntoPlantillaCorreo(bloqueAn, asuntoAnBase, ctxAn),
                     mensajeInicialPrefill: resolverCuerpoInicioPlantillaCorreo(bloqueAn, ctxAn),
@@ -32654,6 +32763,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 };
                 const asuntoMoBase = `Aviso de morosidad - Depto ${moroso.departamento} - ${nombreComunidad}`;
                 const resultado = await mostrarModalPersonalizarCorreoYEnviar({
+                    ccoModulo: 'comprobanteMoroso',
                     titulo: 'Enviar aviso de morosidad',
                     asuntoDefecto: resolverAsuntoPlantillaCorreo(bloqueMo, asuntoMoBase, ctxMo),
                     mensajeInicialPrefill: resolverCuerpoInicioPlantillaCorreo(bloqueMo, ctxMo),
@@ -32727,6 +32837,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 };
                 const asuntoClBase = `Aviso de corte de servicio eléctrico - Depto ${moroso.departamento} - ${nombreComunidad}`;
                 const resultado = await mostrarModalPersonalizarCorreoYEnviar({
+                    ccoModulo: 'avisoCorteLuz',
                     titulo: 'Enviar aviso de corte de luz',
                     asuntoDefecto: resolverAsuntoPlantillaCorreo(bloqueCl, asuntoClBase, ctxCl),
                     mensajeInicialPrefill: resolverCuerpoInicioPlantillaCorreo(bloqueCl, ctxCl),
@@ -33065,6 +33176,194 @@ document.getElementById('chatForm').onsubmit = function (e) {
             window._plantillasCorreoModulosEditable = map;
             actualizarCamposPlantillaCorreoModuloUI();
             mostrarAlerta('Plantilla eliminada.', 'Éxito');
+        }
+
+        async function refrescarEditorCcoCorreoModulos() {
+            const sel = document.getElementById('ccoCorreoModuloSel');
+            if (!sel || typeof PLANTILLAS_CORREO_MODULOS_LISTA === 'undefined') return;
+            if (!sel.dataset.poblado) {
+                sel.innerHTML = PLANTILLAS_CORREO_MODULOS_LISTA.map(function (m) {
+                    return '<option value="' + String(m.id).replace(/"/g, '&quot;') + '">' + String(m.label).replace(/&/g, '&amp;').replace(/</g, '&lt;') + '</option>';
+                }).join('');
+                sel.dataset.poblado = '1';
+            }
+            try {
+                window._ccoCorreoModulosEditable = await obtenerMapaCcoCorreoModulos();
+            } catch (e) {
+                window._ccoCorreoModulosEditable = {};
+            }
+            actualizarCamposCcoCorreoModuloUI();
+            renderizarResumenCcoCorreoModulos();
+        }
+
+        function idCcoCorreoModuloSeleccionado() {
+            const sel = document.getElementById('ccoCorreoModuloSel');
+            return sel && sel.value ? String(sel.value) : '';
+        }
+
+        function actualizarCamposCcoCorreoModuloUI() {
+            const id = idCcoCorreoModuloSeleccionado();
+            const map = window._ccoCorreoModulosEditable || {};
+            const cfg = normalizarConfigCcoModulo(id ? map[id] : null);
+            const act = document.getElementById('ccoCorreoModuloActivo');
+            const glob = document.getElementById('ccoCorreoModuloIncluirGlobal');
+            if (act) act.checked = cfg.activo !== false;
+            if (glob) glob.checked = cfg.incluirGlobal !== false;
+            renderizarTablaCcoCorreoModulo(cfg.correos);
+        }
+
+        function renderizarTablaCcoCorreoModulo(correos) {
+            const tbody = document.getElementById('tbodyCcoCorreoModulo');
+            if (!tbody) return;
+            const lista = Array.isArray(correos) ? correos : [];
+            if (!lista.length) {
+                tbody.innerHTML = '<tr><td colspan="3" style="padding: 1.25rem; text-align: center; color: var(--text-tertiary); font-style: italic;">Sin copias extra. Si el CCO está activo y hereda el global, se usan las direcciones de conserjería.</td></tr>';
+                return;
+            }
+            tbody.innerHTML = lista.map(function (c, index) {
+                return '<tr style="background: ' + (index % 2 === 0 ? 'var(--bg-primary)' : 'var(--bg-secondary)') + '; border-bottom: 1px solid var(--border-color);">' +
+                    '<td style="padding: 0.75rem; color: var(--text-primary); font-weight: 500;">' + String(c.nombre || 'CCO').replace(/</g, '&lt;') + '</td>' +
+                    '<td style="padding: 0.75rem; color: var(--text-secondary); font-size: 0.875rem;">' + String(c.correo || '').replace(/</g, '&lt;') + '</td>' +
+                    '<td style="padding: 0.75rem; text-align: center;"><button type="button" class="btn btn-danger btn-sm" onclick="eliminarCorreoCcoModulo(' + index + ')" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">Eliminar</button></td>' +
+                    '</tr>';
+            }).join('');
+        }
+
+        function renderizarResumenCcoCorreoModulos() {
+            const wrap = document.getElementById('resumenCcoCorreoModulos');
+            if (!wrap || typeof PLANTILLAS_CORREO_MODULOS_LISTA === 'undefined') return;
+            const map = window._ccoCorreoModulosEditable || {};
+            const filas = PLANTILLAS_CORREO_MODULOS_LISTA.map(function (m) {
+                const cfg = normalizarConfigCcoModulo(map[m.id]);
+                const personalizado = Object.prototype.hasOwnProperty.call(map, m.id);
+                let estado;
+                if (!cfg.activo) estado = 'CCO desactivado';
+                else if (!personalizado) estado = 'CCO global';
+                else {
+                    const partes = [];
+                    partes.push(cfg.incluirGlobal ? 'global' : 'sin global');
+                    if (cfg.correos.length) partes.push(cfg.correos.length + ' extra');
+                    estado = partes.join(' + ');
+                }
+                return '<tr><td style="padding: 0.4rem 0.55rem; border-bottom: 1px solid var(--border-color);">' + String(m.label).replace(/</g, '&lt;') + '</td>' +
+                    '<td style="padding: 0.4rem 0.55rem; border-bottom: 1px solid var(--border-color); color: var(--text-secondary); font-size: 0.8125rem;">' + estado.replace(/</g, '&lt;') + '</td></tr>';
+            }).join('');
+            wrap.innerHTML = '<p style="margin: 0 0 0.4rem 0; font-size: 0.8125rem; font-weight: 700;">Resumen por módulo</p>' +
+                '<div style="overflow: auto; max-height: 220px; border: 1px solid var(--border-color); border-radius: 8px;">' +
+                '<table style="width: 100%; border-collapse: collapse; font-size: 0.8125rem;"><thead><tr style="background: var(--bg-secondary);"><th style="text-align:left; padding: 0.45rem 0.55rem;">Módulo</th><th style="text-align:left; padding: 0.45rem 0.55rem;">CCO automático</th></tr></thead><tbody>' +
+                filas + '</tbody></table></div>';
+        }
+
+        async function persistirConfigCcoModuloActual(cfg, silencioso) {
+            const id = idCcoCorreoModuloSeleccionado();
+            if (!id) return;
+            const map = Object.assign({}, await obtenerMapaCcoCorreoModulos());
+            map[id] = normalizarConfigCcoModulo(cfg);
+            await guardarDatos('ccoCorreoModulos', map);
+            window._ccoCorreoModulosEditable = map;
+            actualizarCamposCcoCorreoModuloUI();
+            renderizarResumenCcoCorreoModulos();
+            if (!silencioso) mostrarAlerta('CCO de este módulo guardado. Se aplicará en los próximos envíos.', 'Éxito');
+        }
+
+        async function guardarCcoCorreoModuloDesdeUI() {
+            const id = idCcoCorreoModuloSeleccionado();
+            if (!id) return;
+            const map = window._ccoCorreoModulosEditable || {};
+            const prev = normalizarConfigCcoModulo(map[id]);
+            const act = document.getElementById('ccoCorreoModuloActivo');
+            const glob = document.getElementById('ccoCorreoModuloIncluirGlobal');
+            try {
+                await persistirConfigCcoModuloActual({
+                    activo: !!(act && act.checked),
+                    incluirGlobal: !!(glob && glob.checked),
+                    correos: prev.correos
+                }, false);
+            } catch (e) {
+                mostrarAlerta('No se pudo guardar el CCO del módulo: ' + (e && e.message ? e.message : 'error'), 'Error');
+            }
+        }
+
+        async function agregarCorreoCcoModulo(event) {
+            if (event) event.preventDefault();
+            const id = idCcoCorreoModuloSeleccionado();
+            if (!id) return;
+            const nombreEl = document.getElementById('ccoCorreoModuloNombre');
+            const emailEl = document.getElementById('ccoCorreoModuloEmail');
+            const nombre = nombreEl ? String(nombreEl.value || '').trim() : '';
+            const correo = emailEl ? String(emailEl.value || '').trim() : '';
+            if (!nombre || !correo) {
+                mostrarAlerta('Complete nombre y correo', 'Error');
+                return;
+            }
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(correo)) {
+                mostrarAlerta('Ingrese un correo electrónico válido', 'Error');
+                return;
+            }
+            const map = window._ccoCorreoModulosEditable || {};
+            const prev = normalizarConfigCcoModulo(map[id]);
+            const act = document.getElementById('ccoCorreoModuloActivo');
+            const glob = document.getElementById('ccoCorreoModuloIncluirGlobal');
+            if (prev.correos.some(function (c) { return String(c.correo || '').toLowerCase() === correo.toLowerCase(); })) {
+                mostrarAlerta('Este correo ya está en el CCO de este módulo', 'Error');
+                return;
+            }
+            prev.correos.push({ nombre: nombre, correo: correo });
+            try {
+                await persistirConfigCcoModuloActual({
+                    activo: !!(act && act.checked),
+                    incluirGlobal: !!(glob && glob.checked),
+                    correos: prev.correos
+                }, true);
+                if (nombreEl) nombreEl.value = '';
+                if (emailEl) emailEl.value = '';
+                mostrarAlerta('Correo agregado al CCO de este módulo', 'Éxito');
+            } catch (e) {
+                mostrarAlerta('No se pudo agregar el correo: ' + (e && e.message ? e.message : 'error'), 'Error');
+            }
+        }
+        window.agregarCorreoCcoModulo = agregarCorreoCcoModulo;
+
+        async function eliminarCorreoCcoModulo(index) {
+            const id = idCcoCorreoModuloSeleccionado();
+            if (!id) return;
+            const ok = await confirmarAccion('¿Eliminar este correo del CCO de este módulo?', 'Eliminar CCO');
+            if (!ok) return;
+            const map = window._ccoCorreoModulosEditable || {};
+            const prev = normalizarConfigCcoModulo(map[id]);
+            const act = document.getElementById('ccoCorreoModuloActivo');
+            const glob = document.getElementById('ccoCorreoModuloIncluirGlobal');
+            prev.correos.splice(index, 1);
+            try {
+                await persistirConfigCcoModuloActual({
+                    activo: !!(act && act.checked),
+                    incluirGlobal: !!(glob && glob.checked),
+                    correos: prev.correos
+                }, true);
+                mostrarAlerta('Correo eliminado del CCO de este módulo', 'Éxito');
+            } catch (e) {
+                mostrarAlerta('No se pudo eliminar: ' + (e && e.message ? e.message : 'error'), 'Error');
+            }
+        }
+        window.eliminarCorreoCcoModulo = eliminarCorreoCcoModulo;
+
+        async function restablecerCcoCorreoModuloDesdeUI() {
+            const id = idCcoCorreoModuloSeleccionado();
+            if (!id) return;
+            const ok = await confirmarAccion('¿Quitar la configuración de CCO de este módulo y volver a usar solo el CCO global?', 'CCO por módulo');
+            if (!ok) return;
+            try {
+                const map = Object.assign({}, await obtenerMapaCcoCorreoModulos());
+                delete map[id];
+                await guardarDatos('ccoCorreoModulos', map);
+                window._ccoCorreoModulosEditable = map;
+                actualizarCamposCcoCorreoModuloUI();
+                renderizarResumenCcoCorreoModulos();
+                mostrarAlerta('Este módulo vuelve a usar el CCO global.', 'Éxito');
+            } catch (e) {
+                mostrarAlerta('No se pudo restablecer: ' + (e && e.message ? e.message : 'error'), 'Error');
+            }
         }
         
         // Funciones auxiliares para generar reportes como adjuntos
@@ -34414,6 +34713,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                             cargarCorreosConsejeria();
                             cargarFormBuzonConsejeria();
                             refrescarEditorPlantillasCorreoModulos();
+                            if (typeof refrescarEditorCcoCorreoModulos === 'function') refrescarEditorCcoCorreoModulos();
                         }, 100);
                     });
                 }
@@ -34427,6 +34727,20 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 if (btnGuardarPlant) btnGuardarPlant.addEventListener('click', function () { guardarPlantillaCorreoModuloDesdeUI(); });
                 const btnLimpPlant = document.getElementById('btnLimpiarPlantillaCorreoModulo');
                 if (btnLimpPlant) btnLimpPlant.addEventListener('click', function () { limpiarPlantillaCorreoModuloDesdeUI(); });
+                const selCcoMod = document.getElementById('ccoCorreoModuloSel');
+                if (selCcoMod && !selCcoMod.dataset.listenerCco) {
+                    selCcoMod.dataset.listenerCco = '1';
+                    selCcoMod.addEventListener('change', actualizarCamposCcoCorreoModuloUI);
+                }
+                const formCcoMod = document.getElementById('formCcoCorreoModulo');
+                if (formCcoMod && !formCcoMod.dataset.listenerCco) {
+                    formCcoMod.dataset.listenerCco = '1';
+                    formCcoMod.addEventListener('submit', agregarCorreoCcoModulo);
+                }
+                const btnGuardarCcoMod = document.getElementById('btnGuardarCcoCorreoModulo');
+                if (btnGuardarCcoMod) btnGuardarCcoMod.addEventListener('click', function () { guardarCcoCorreoModuloDesdeUI(); });
+                const btnRestCcoMod = document.getElementById('btnRestablecerCcoCorreoModulo');
+                if (btnRestCcoMod) btnRestCcoMod.addEventListener('click', function () { restablecerCcoCorreoModuloDesdeUI(); });
             });
         }
 
@@ -34752,7 +35066,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 ocultarProgreso();
                 
                 // Mostrar modal para seleccionar destinatarios
-                await mostrarModalSeleccionDestinatarios(asuntoEnv, html, [adjunto], { mensajeInicialPrefill: cuerpoIni });
+                await mostrarModalSeleccionDestinatarios(asuntoEnv, html, [adjunto], { mensajeInicialPrefill: cuerpoIni, ccoModulo: 'reporteNomina' });
                 
             } catch (error) {
                 console.error('Error al enviar correo con reporte de nómina:', error);
@@ -34837,7 +35151,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 const asuntoEnv = resolverAsuntoPlantillaCorreo(bloqueTpl, asunto, ctxTpl);
                 const cuerpoIni = resolverCuerpoInicioPlantillaCorreo(bloqueTpl, ctxTpl);
                 ocultarProgreso();
-                await mostrarModalSeleccionDestinatarios(asuntoEnv, html, [adjuntoHtml, adjuntoExcel], { mensajeInicialPrefill: cuerpoIni });
+                await mostrarModalSeleccionDestinatarios(asuntoEnv, html, [adjuntoHtml, adjuntoExcel], { mensajeInicialPrefill: cuerpoIni, ccoModulo: 'reporteCierreMes' });
             } catch (error) {
                 console.error('Error al enviar correo con reporte de cierre de mes:', error);
                 mostrarAlerta('Ocurrió un error al preparar el correo: ' + (error.message || 'Error desconocido'), 'Error');
@@ -46221,7 +46535,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                         if (adjHtmlComite) adjuntosComite.push(adjHtmlComite);
                     }
                     if (xlsxRes.adjunto) adjuntosComite.push(xlsxRes.adjunto);
-                    await mostrarModalSeleccionDestinatarios(asuntoEnv, html, adjuntosComite, { mensajeInicialPrefill: cuerpoIni });
+                    await mostrarModalSeleccionDestinatarios(asuntoEnv, html, adjuntosComite, { mensajeInicialPrefill: cuerpoIni, ccoModulo: 'reporteComite' });
                 } catch (error) {
                     console.error('Error al enviar correo de comité:', error);
                     mostrarAlerta('Ocurrió un error al preparar el correo. Intente nuevamente.', 'Error');
@@ -46316,7 +46630,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     ? ('Requerimiento — ' + tituloUna + ' — ' + nombreComunidad)
                     : ('Requerimientos — ' + nombreComunidad + (nombreMes ? ' — ' + nombreMes : ''));
                 if (typeof ocultarProgreso === 'function') ocultarProgreso();
-                await mostrarModalSeleccionDestinatarios(asunto, html, adjuntos);
+                await mostrarModalSeleccionDestinatarios(asunto, html, adjuntos, { ccoModulo: 'reporteComite' });
             }
 
             function mostrarModalSeleccionPropuestasComite(candidatos, textoInicial) {
@@ -46508,6 +46822,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                         ? ('Mejora cerrada — ' + tituloUna + ' — ' + nombreComunidad)
                         : ('Mejoras cerradas — ' + nombreComunidad + (nombreMes ? ' — ' + nombreMes : ''));
                     await mostrarModalSeleccionDestinatarios(asunto, html, adjuntos, {
+                        ccoModulo: 'reporteComite',
                         mensajeInicialPrefill: tituloUna
                             ? ('Se informa el cierre de la mejora «' + tituloUna + '», con su comentario, fecha de realización y respaldos.')
                             : ('Se informan por separado las mejoras ya cerradas, con comentario, fecha de realización y respaldos.')
