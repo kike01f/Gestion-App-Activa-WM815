@@ -9056,6 +9056,158 @@
             .bv2-modulo { opacity: 1; transform: none; }
         }
 
+        /* Teléfono: una sola barra arriba y el módulo debajo, sin recortes */
+        @media (max-width: 820px) {
+            html {
+                -webkit-text-size-adjust: 100%;
+                text-size-adjust: 100%;
+            }
+            html, body, .container, #appContainer {
+                max-width: 100%;
+                overflow-x: hidden;
+            }
+            .menu-toggle-btn,
+            .main-content.menu-collapsed .menu-toggle-btn {
+                width: 2.75rem;
+                height: 2.75rem;
+                top: max(0.4rem, env(safe-area-inset-top, 0px)) !important;
+                left: max(0.4rem, env(safe-area-inset-left, 0px)) !important;
+            }
+            .notif-bell-wrap {
+                left: calc(3.75rem + env(safe-area-inset-left, 0px)) !important;
+                right: max(0.4rem, env(safe-area-inset-right, 0px)) !important;
+                top: max(0.4rem, env(safe-area-inset-top, 0px)) !important;
+                max-width: none !important;
+                width: auto !important;
+                z-index: 5101;
+            }
+            .consulta-rapida {
+                flex: 1 1 auto;
+                min-width: 0;
+            }
+            .consulta-rapida input {
+                width: 100% !important;
+                max-width: none !important;
+                min-width: 0 !important;
+                font-size: 16px !important;
+            }
+            .consulta-rapida-resultados {
+                position: fixed !important;
+                left: max(0.45rem, env(safe-area-inset-left, 0px)) !important;
+                right: max(0.45rem, env(safe-area-inset-right, 0px)) !important;
+                top: calc(3.7rem + env(safe-area-inset-top, 0px)) !important;
+                width: auto !important;
+                max-width: none !important;
+                max-height: min(62dvh, 26rem);
+                z-index: 5200;
+            }
+            .main-content,
+            .main-content.menu-collapsed {
+                margin-left: 0 !important;
+                max-width: 100% !important;
+                width: 100% !important;
+                padding-top: calc(4.15rem + env(safe-area-inset-top, 0px)) !important;
+                padding-left: max(0.55rem, env(safe-area-inset-left, 0px)) !important;
+                padding-right: max(0.55rem, env(safe-area-inset-right, 0px)) !important;
+                padding-bottom: calc(5.6rem + env(safe-area-inset-bottom, 0px)) !important;
+            }
+            #presenciaAdminBar,
+            #presenciaUsuarioBar {
+                width: 100%;
+                max-width: 100%;
+                box-sizing: border-box;
+            }
+            .header h1,
+            .dashboard2-titulo,
+            .tab-content h2,
+            .tab-content h3 {
+                overflow-wrap: anywhere;
+            }
+            .form-row,
+            .bit-caso-grid,
+            .tab-content:not(#dashboard) [style*="grid-template-columns"] {
+                grid-template-columns: 1fr !important;
+            }
+            .tab-content div[style*="display:flex"],
+            .tab-content div[style*="display: flex"] {
+                flex-wrap: wrap !important;
+            }
+            #bitacoraPublica .form-group,
+            .modulo-mes-consulta,
+            .modulo-mes-consulta select,
+            .filtro-inteligente,
+            .filtro-inteligente input {
+                min-width: 0 !important;
+                width: 100%;
+                max-width: 100%;
+                flex: 1 1 100%;
+            }
+            .form-section,
+            .table-section,
+            .tabla-scroll,
+            .tab-content [style*="overflow"] {
+                max-width: 100%;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                container-type: inline-size;
+            }
+            .tab-content table {
+                width: max-content !important;
+                min-width: 100% !important;
+                max-width: none !important;
+            }
+            .tab-content table th,
+            .tab-content table td {
+                white-space: nowrap !important;
+                word-break: normal !important;
+                overflow-wrap: normal !important;
+            }
+            .form-section > :not(table):not(:has(table)) {
+                position: sticky;
+                left: 0;
+                z-index: 1;
+                width: 100cqi;
+                max-width: 100cqi;
+                box-sizing: border-box;
+            }
+            .modal-overlay {
+                padding: max(0.55rem, env(safe-area-inset-top, 0px)) 0.55rem max(0.55rem, env(safe-area-inset-bottom, 0px));
+            }
+            .modal-confirm,
+            .login-dev-modal__panel {
+                width: 100% !important;
+                max-width: calc(100vw - 1.1rem) !important;
+                max-height: calc(100dvh - 1.4rem);
+                overflow: auto;
+            }
+            #loginScreen {
+                align-items: flex-start;
+                overflow-y: auto;
+                padding: max(0.85rem, env(safe-area-inset-top, 0px)) 0.75rem max(1rem, env(safe-area-inset-bottom, 0px));
+            }
+            .login-screen-stack,
+            .login-box {
+                width: 100%;
+                max-width: 100%;
+            }
+            .login-dev-logo img {
+                max-width: min(200px, 62vw) !important;
+                height: auto !important;
+            }
+            .toast-container {
+                left: max(0.5rem, env(safe-area-inset-left, 0px));
+                right: max(0.5rem, env(safe-area-inset-right, 0px));
+                width: auto;
+                max-width: none;
+            }
+        }
+        @media (max-width: 820px) and (orientation: landscape) {
+            .main-content,
+            .main-content.menu-collapsed {
+                padding-top: calc(3.7rem + env(safe-area-inset-top, 0px)) !important;
+            }
+        }
+
     </style>
 </head>
 <body class="app-loading">
