@@ -8367,6 +8367,161 @@
             box-shadow: 0 0 0 3px color-mix(in srgb, var(--acc-tono) 25%, transparent) !important;
         }
         .tab-content .btn.btn-acc:active:not(:disabled) { transform: scale(0.95) !important; }
+
+        /* Nómina: botones de tabla como antes (texto y color sólido) */
+        #nomina td .btn,
+        #nomina .tabla-acciones .btn {
+            display: inline-block !important;
+            width: 100% !important;
+            min-height: 1.35rem !important;
+            margin: 0 !important;
+            padding: 0.12rem 0.28rem !important;
+            border: none !important;
+            border-radius: 4px !important;
+            background-image: none !important;
+            box-shadow: none !important;
+            text-shadow: none !important;
+            font-size: 0.62rem !important;
+            font-weight: 600 !important;
+            line-height: 1.15 !important;
+            letter-spacing: 0 !important;
+            transform: none !important;
+            filter: none !important;
+        }
+        #nomina td .btn-primary,
+        #nomina .tabla-acciones .btn-primary { background: var(--primary) !important; color: #fff !important; }
+        #nomina td .btn-primary:hover,
+        #nomina .tabla-acciones .btn-primary:hover { background: var(--primary-dark) !important; color: #fff !important; }
+        #nomina td .btn-danger,
+        #nomina .tabla-acciones .btn-danger { background: var(--danger) !important; color: #fff !important; }
+        #nomina td .btn-danger:hover,
+        #nomina .tabla-acciones .btn-danger:hover { background: #dc2626 !important; color: #fff !important; }
+        #nomina td .btn-secondary,
+        #nomina .tabla-acciones .btn-secondary { background: var(--gray-200) !important; color: var(--gray-700) !important; }
+        #nomina td .btn-secondary:hover,
+        #nomina .tabla-acciones .btn-secondary:hover { background: var(--gray-300) !important; color: var(--gray-800) !important; }
+        #nomina .tabla-acciones {
+            display: grid !important;
+            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+            gap: 0.12rem !important;
+            min-width: 0 !important;
+            width: 6.6rem !important;
+        }
+
+        /* Carga de un módulo que tarda */
+        .tab-content { position: relative; }
+        .modulo-carga {
+            position: fixed;
+            inset: 0;
+            z-index: 12000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 1.5rem;
+            background: color-mix(in srgb, var(--bg-primary) 72%, transparent);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            animation: bienvenidaOverlayIn 0.28s ease both;
+        }
+        .modulo-carga.is-out { animation: bienvenidaOverlayOut 0.28s ease forwards; }
+        .modulo-carga-card { width: min(16rem, 88vw); text-align: center; }
+        .mini-carga {
+            position: relative;
+            width: 9.6rem;
+            height: 9.6rem;
+            margin: 0 auto 0.85rem;
+        }
+        .mini-carga::before {
+            content: '';
+            position: absolute;
+            inset: 0.2rem;
+            border-radius: 50%;
+            border: 1.5px dashed color-mix(in srgb, var(--primary) 60%, transparent);
+            animation: miniAnillo 9s linear infinite;
+        }
+        @keyframes miniAnillo { to { transform: rotate(-360deg); } }
+        .mini-arturito {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            z-index: 2;
+            width: 3.4rem;
+            height: 3.4rem;
+            margin: -1.7rem 0 0 -1.7rem;
+            display: grid;
+            place-items: center;
+            border-radius: 50%;
+            background: radial-gradient(circle at 50% 40%, rgba(143, 203, 26, 0.35), transparent 70%);
+            animation: miniFlota 1.6s ease-in-out infinite;
+        }
+        .mini-arturito svg { width: 3rem; height: 3rem; overflow: visible; filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.35)); }
+        @keyframes miniFlota {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-4px); }
+        }
+        .mini-ojo {
+            transform-box: fill-box;
+            transform-origin: center;
+            animation: miniParpadeo 3.4s ease-in-out infinite;
+        }
+        @keyframes miniParpadeo {
+            0%, 84%, 100% { transform: scaleY(1); }
+            90% { transform: scaleY(0.12); }
+        }
+        .mini-antena { animation: miniAntena 0.9s ease-in-out infinite alternate; }
+        @keyframes miniAntena { from { opacity: 0.35; } to { opacity: 1; } }
+        .mini-ficha {
+            --tono: #7FBA02;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            width: 2rem;
+            height: 2.45rem;
+            margin: -1.22rem 0 0 -1rem;
+            border-radius: 6px;
+            background: linear-gradient(180deg, #ffffff, #e8eef5);
+            box-shadow: 0 8px 14px -6px rgba(0, 0, 0, 0.45);
+            animation: miniGira 2.8s linear infinite;
+        }
+        .mini-ficha::before {
+            content: '';
+            display: block;
+            height: 4px;
+            margin: 0.38rem 0.35rem 0;
+            border-radius: 99px;
+            background: var(--tono);
+        }
+        .mini-ficha::after {
+            content: '';
+            display: block;
+            width: 62%;
+            height: 3px;
+            margin: 0.32rem 0.35rem 0;
+            border-radius: 99px;
+            background: #cbd5e1;
+            box-shadow: 0 0.38rem 0 #cbd5e1, 0 0.76rem 0 #e2e8f0;
+        }
+        .mini-ficha--2 { --tono: #22d3ee; animation-delay: -0.93s; }
+        .mini-ficha--3 { --tono: #f59e0b; animation-delay: -1.86s; }
+        @keyframes miniGira {
+            0% { transform: rotate(0deg) translateX(3.35rem) rotate(0deg) scale(1); z-index: 2; }
+            25% { transform: rotate(90deg) translateX(3.35rem) rotate(-90deg) scale(0.72); z-index: 1; }
+            50% { transform: rotate(180deg) translateX(3.35rem) rotate(-180deg) scale(1); z-index: 2; }
+            75% { transform: rotate(270deg) translateX(3.35rem) rotate(-270deg) scale(1.08); z-index: 3; }
+            100% { transform: rotate(360deg) translateX(3.35rem) rotate(-360deg) scale(1); z-index: 2; }
+        }
+        .modulo-carga .carga-titulo { font-size: 1rem; color: var(--text-primary); }
+        .modulo-carga .carga-sub { color: var(--primary); }
+        .modulo-carga .carga-barra { margin-left: auto; margin-right: auto; }
+        @media (prefers-reduced-motion: reduce) {
+            .mini-carga::before,
+            .mini-arturito,
+            .mini-ojo,
+            .mini-antena,
+            .mini-ficha { animation: none !important; }
+            .mini-ficha { transform: none; position: relative; left: auto; top: auto; margin: 0 0.25rem; display: inline-block; }
+            .mini-carga { display: flex; align-items: center; justify-content: center; gap: 0.35rem; height: auto; }
+        }
         .btn-acc-ico {
             width: 1.05rem;
             height: 1.05rem;
@@ -8426,6 +8581,87 @@
             0% { transform: scaleX(0); opacity: 1; }
             70% { transform: scaleX(1); opacity: 1; }
             100% { transform: scaleX(1); opacity: 0; }
+        }
+
+        /* ===== Dinamismo dentro de los módulos ===== */
+        .tab-button {
+            transition: background 0.2s ease, color 0.2s ease, transform 0.22s var(--m-ease) !important;
+        }
+        .tab-button:hover { transform: translateX(4px); }
+        .tab-button.active { transform: none; }
+        .tab-button span:first-child,
+        .tab-button svg { transition: transform 0.25s var(--m-ease); }
+        .tab-button:hover span:first-child,
+        .tab-button:hover svg { transform: scale(1.14); }
+        .tab-button.active span:first-child { animation: menuIcoPop 0.45s var(--m-ease); }
+        @keyframes menuIcoPop {
+            from { transform: scale(0.65) rotate(-10deg); }
+            to { transform: none; }
+        }
+        .tab-content:not(#dashboard).active h2::after {
+            content: '';
+            display: block;
+            width: 2.6rem;
+            height: 3px;
+            margin-top: 0.4rem;
+            border-radius: 99px;
+            background: linear-gradient(90deg, var(--primary), #22d3ee);
+            transform-origin: left center;
+            animation: moduloLinea 0.55s var(--m-ease) 0.12s both;
+        }
+        @keyframes moduloLinea {
+            from { transform: scaleX(0); opacity: 0; }
+            to { transform: scaleX(1); opacity: 1; }
+        }
+        .tab-content:not(#dashboard) .form-section,
+        .tab-content:not(#dashboard) .table-section,
+        .tab-content:not(#dashboard) .stat-card {
+            transition: transform 0.28s var(--m-ease), border-color 0.28s ease, box-shadow 0.28s ease;
+        }
+        .tab-content:not(#dashboard) .form-section:hover,
+        .tab-content:not(#dashboard) .table-section:hover,
+        .tab-content:not(#dashboard) .stat-card:hover {
+            transform: translateY(-3px);
+            border-color: color-mix(in srgb, var(--primary) 40%, var(--m-line));
+            box-shadow: 0 14px 30px -18px color-mix(in srgb, var(--primary) 80%, transparent);
+        }
+        .tab-content:not(#dashboard) .form-section .form-section:hover,
+        .tab-content:not(#dashboard) .form-section .table-section:hover,
+        .tab-content:not(#dashboard) .table-section .table-section:hover {
+            transform: none;
+            box-shadow: none;
+            border-color: var(--m-line);
+        }
+        .tab-content:not(#dashboard):not(#nomina) tbody tr {
+            transition: background 0.2s ease, box-shadow 0.22s ease;
+        }
+        .tab-content:not(#dashboard):not(#nomina) tbody tr:hover {
+            box-shadow: inset 3px 0 0 var(--primary);
+        }
+        .tab-content:not(#dashboard) .btn:not(.btn-sm):not(.btn-acc):hover:not(:disabled) {
+            transform: translateY(-2px) !important;
+            box-shadow: 0 8px 16px -10px color-mix(in srgb, var(--primary) 70%, transparent);
+        }
+        .tab-content:not(#dashboard) .btn:not(.btn-sm):not(.btn-acc):active:not(:disabled) {
+            transform: translateY(0) scale(0.98) !important;
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .tab-button,
+            .tab-button:hover,
+            .tab-button span:first-child,
+            .tab-button.active span:first-child,
+            .tab-content:not(#dashboard).active h2::after,
+            .tab-content:not(#dashboard) .form-section,
+            .tab-content:not(#dashboard) .form-section:hover,
+            .tab-content:not(#dashboard) .table-section,
+            .tab-content:not(#dashboard) .table-section:hover,
+            .tab-content:not(#dashboard) .stat-card,
+            .tab-content:not(#dashboard) .stat-card:hover,
+            .tab-content:not(#dashboard) .btn:not(.btn-sm):hover {
+                animation: none !important;
+                transform: none !important;
+                transition: none !important;
+            }
         }
 
         /* ===== Bienvenida: saludo grande + accesos a módulos ===== */
@@ -14477,6 +14713,65 @@
         }
         
         // Función para mostrar/ocultar pestañas - DISPONIBLE GLOBALMENTE DESDE EL INICIO
+        function lanzarCarga(fn) {
+            if (typeof fn !== 'function') return null;
+            try {
+                var r = fn();
+                return (r && typeof r.then === 'function') ? r : null;
+            } catch (eCarga) {
+                console.warn(eCarga);
+                return null;
+            }
+        }
+
+        function mostrarCargaModuloSiTarda(tabName, promesas) {
+            var lista = (promesas || []).filter(Boolean);
+            if (!tabName || tabName === 'dashboard' || !lista.length) return;
+            var tab = document.getElementById(tabName);
+            if (!tab) return;
+            var token = (tab._cargaToken || 0) + 1;
+            tab._cargaToken = token;
+            document.querySelectorAll('.modulo-carga[data-carga-tab="' + tabName + '"]').forEach(function (n) { n.remove(); });
+            var timer = setTimeout(function () {
+                if (tab._cargaToken !== token) return;
+                var velo = document.createElement('div');
+                velo.className = 'modulo-carga';
+                velo.setAttribute('data-carga-tab', tabName);
+                velo.setAttribute('role', 'status');
+                velo.setAttribute('aria-live', 'polite');
+                var card = document.createElement('div');
+                card.className = 'modulo-carga-card';
+                card.insertAdjacentHTML('beforeend',
+                    '<div class="mini-carga" aria-hidden="true">' +
+                        '<span class="mini-ficha"></span>' +
+                        '<span class="mini-ficha mini-ficha--2"></span>' +
+                        '<span class="mini-ficha mini-ficha--3"></span>' +
+                        '<div class="mini-arturito"><svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">' +
+                            '<line x1="32" y1="12" x2="32" y2="5" stroke="#5a8501" stroke-width="2.4"/>' +
+                            '<circle class="mini-antena" cx="32" cy="4.5" r="3.2" fill="#FFD700"/>' +
+                            '<rect x="10" y="14" width="44" height="42" rx="12" fill="#7FBA02"/>' +
+                            '<rect x="15" y="20" width="34" height="24" rx="6" fill="#1a1a1a"/>' +
+                            '<ellipse class="mini-ojo" cx="26" cy="31" rx="3.1" ry="3.1" fill="#7FBA02"/>' +
+                            '<ellipse class="mini-ojo" cx="38" cy="31" rx="3.1" ry="3.1" fill="#7FBA02"/>' +
+                            '<path d="M26 39 Q32 44 38 39" stroke="#7FBA02" stroke-width="2.2" fill="none" stroke-linecap="round"/>' +
+                        '</svg></div>' +
+                    '</div>' +
+                    '<p class="carga-titulo">Cargando<span class="carga-puntos" aria-hidden="true"><i>.</i><i>.</i><i>.</i></span></p>' +
+                    '<p class="carga-sub">Arturito ordena tus fichas…</p>' +
+                    '<div class="carga-barra" aria-hidden="true"><span></span></div>');
+                velo.appendChild(card);
+                document.body.appendChild(velo);
+            }, 380);
+            Promise.all(lista.map(function (p) { return Promise.resolve(p).catch(function () {}); })).finally(function () {
+                clearTimeout(timer);
+                if (tab._cargaToken !== token) return;
+                var velo = document.querySelector('.modulo-carga[data-carga-tab="' + tabName + '"]');
+                if (!velo) return;
+                velo.classList.add('is-out');
+                setTimeout(function () { if (velo.parentNode) velo.remove(); }, 280);
+            });
+        }
+
         window.showTab = function(tabName) {
             try {
                 if (window._permisosSesion && window._permisosSesion.bloqueado) return;
@@ -14560,10 +14855,9 @@
                         iniciarEscuchaSiDisponible();
                     }
                 }
+                var cargasModulo = [];
                 if (tabName === 'nomina') {
-                    if (typeof inicializarNomina === 'function') {
-                        inicializarNomina();
-                    }
+                    cargasModulo.push(lanzarCarga(typeof inicializarNomina === 'function' ? inicializarNomina : null));
                     // Actualizar encabezado automáticamente
                     if (typeof actualizarEncabezadoNomina === 'function') {
                         actualizarEncabezadoNomina();
@@ -14584,17 +14878,15 @@
                 // Cargar datos al cambiar de pestaña (solo si el DOM está listo)
                 if (document.readyState === 'complete' || document.readyState === 'interactive') {
                     if (tabName === 'pagos-aseo') {
-                        if (typeof cargarSelectPersonalAseo === 'function') cargarSelectPersonalAseo();
-                        if (typeof cargarPagosAseo === 'function') cargarPagosAseo();
-                        if (typeof cargarRegistrosEspaciosPendientes === 'function') cargarRegistrosEspaciosPendientes();
-                        if (typeof cargarEstadisticasPersonal === 'function') cargarEstadisticasPersonal();
+                        cargasModulo.push(lanzarCarga(typeof cargarSelectPersonalAseo === 'function' ? cargarSelectPersonalAseo : null));
+                        cargasModulo.push(lanzarCarga(typeof cargarPagosAseo === 'function' ? cargarPagosAseo : null));
+                        cargasModulo.push(lanzarCarga(typeof cargarRegistrosEspaciosPendientes === 'function' ? cargarRegistrosEspaciosPendientes : null));
+                        cargasModulo.push(lanzarCarga(typeof cargarEstadisticasPersonal === 'function' ? cargarEstadisticasPersonal : null));
                     } else if (tabName === 'mantenciones') {
-                        if (typeof cargarMantenciones === 'function') cargarMantenciones();
-                        if (typeof cargarVisitasExtraordinarias === 'function') cargarVisitasExtraordinarias();
-                        if (typeof cargarProveedores === 'function') cargarProveedores();
-                        if (typeof window.cargarLinkCarpetaGuiasMantenciones === 'function') {
-                            window.cargarLinkCarpetaGuiasMantenciones();
-                        }
+                        cargasModulo.push(lanzarCarga(typeof cargarMantenciones === 'function' ? cargarMantenciones : null));
+                        cargasModulo.push(lanzarCarga(typeof cargarVisitasExtraordinarias === 'function' ? cargarVisitasExtraordinarias : null));
+                        cargasModulo.push(lanzarCarga(typeof cargarProveedores === 'function' ? cargarProveedores : null));
+                        cargasModulo.push(lanzarCarga(typeof window.cargarLinkCarpetaGuiasMantenciones === 'function' ? window.cargarLinkCarpetaGuiasMantenciones : null));
                         if (typeof verificarAvisoCarpetaGuias === 'function') {
                             verificarAvisoCarpetaGuias();
                         }
@@ -14605,42 +14897,41 @@
                             }
                         }, 200);
                     } else if (tabName === 'insumos') {
-                        if (typeof cargarInsumos === 'function') cargarInsumos();
-                        if (typeof cargarInventario === 'function') cargarInventario();
+                        cargasModulo.push(lanzarCarga(typeof cargarInsumos === 'function' ? cargarInsumos : null));
+                        cargasModulo.push(lanzarCarga(typeof cargarInventario === 'function' ? cargarInventario : null));
                     } else if (tabName === 'inventarioBodega') {
-                        if (typeof cargarInventario === 'function') cargarInventario();
+                        cargasModulo.push(lanzarCarga(typeof cargarInventario === 'function' ? cargarInventario : null));
                     } else if (tabName === 'ocupacion') {
-                        if (typeof cargarUnidadesOcupacion === 'function') cargarUnidadesOcupacion();
+                        cargasModulo.push(lanzarCarga(typeof cargarUnidadesOcupacion === 'function' ? cargarUnidadesOcupacion : null));
                     } else if (tabName === 'conserjeria') {
-                        if (typeof window.cargarModuloConserjeriaGestion === 'function') window.cargarModuloConserjeriaGestion();
+                        cargasModulo.push(lanzarCarga(typeof window.cargarModuloConserjeriaGestion === 'function' ? window.cargarModuloConserjeriaGestion : null));
                     } else if (tabName === 'checklistTurnos') {
-                        if (typeof window.cargarChecklistTurnosGestion === 'function') window.cargarChecklistTurnosGestion();
+                        cargasModulo.push(lanzarCarga(typeof window.cargarChecklistTurnosGestion === 'function' ? window.cargarChecklistTurnosGestion : null));
                     } else if (tabName === 'postventa') {
-                        if (typeof window.cargarPostventa === 'function') window.cargarPostventa();
+                        cargasModulo.push(lanzarCarga(typeof window.cargarPostventa === 'function' ? window.cargarPostventa : null));
                     } else if (tabName === 'comite') {
-                        if (typeof window.cargarComite === 'function') window.cargarComite();
+                        cargasModulo.push(lanzarCarga(typeof window.cargarComite === 'function' ? window.cargarComite : null));
                     } else if (tabName === 'notificaciones') {
-                        if (typeof cargarCorreosAdministrativos === 'function') cargarCorreosAdministrativos();
-                        if (typeof cargarCorreosConsejeria === 'function') cargarCorreosConsejeria();
-                        if (typeof cargarFormBuzonConsejeria === 'function') cargarFormBuzonConsejeria();
+                        cargasModulo.push(lanzarCarga(typeof cargarCorreosAdministrativos === 'function' ? cargarCorreosAdministrativos : null));
+                        cargasModulo.push(lanzarCarga(typeof cargarCorreosConsejeria === 'function' ? cargarCorreosConsejeria : null));
+                        cargasModulo.push(lanzarCarga(typeof cargarFormBuzonConsejeria === 'function' ? cargarFormBuzonConsejeria : null));
                         if (typeof refrescarEditorPlantillasCorreoModulos === 'function') refrescarEditorPlantillasCorreoModulos();
                         if (typeof refrescarEditorCcoCorreoModulos === 'function') refrescarEditorCcoCorreoModulos();
                         if (typeof actualizarResumenNotificaciones === 'function') actualizarResumenNotificaciones();
                     } else if (tabName === 'personalizacion') {
-                        if (typeof cargarPersonalizacion === 'function') {
-                            cargarPersonalizacion();
-                        }
+                        cargasModulo.push(lanzarCarga(typeof cargarPersonalizacion === 'function' ? cargarPersonalizacion : null));
                     } else if (tabName === 'bitacoraPublica') {
-                        if (typeof cargarBitacoraPortal === 'function') cargarBitacoraPortal();
+                        cargasModulo.push(lanzarCarga(typeof cargarBitacoraPortal === 'function' ? cargarBitacoraPortal : null));
                     } else if (tabName === 'envioCorreos') {
                         if (typeof mailerBindUi === 'function') mailerBindUi();
-                        if (typeof cargarModuloEnvioCorreos === 'function') cargarModuloEnvioCorreos();
+                        cargasModulo.push(lanzarCarga(typeof cargarModuloEnvioCorreos === 'function' ? cargarModuloEnvioCorreos : null));
                     } else if (tabName !== 'dashboard' && window.mesEnConsulta && typeof window.cargarDatosMesConsulta === 'function') {
-                        window.cargarDatosMesConsulta(window.mesEnConsulta);
+                        cargasModulo.push(lanzarCarga(function () { return window.cargarDatosMesConsulta(window.mesEnConsulta); }));
                     } else if (tabName !== 'dashboard' && typeof window.cargarDatos === 'function') {
-                        window.cargarDatos();
+                        cargasModulo.push(lanzarCarga(function () { return window.cargarDatos(tabName); }));
                     }
                     // dashboard: no volver a cargar aquí; ya se maneja arriba (runPanel2 / cargarEstadisticasDashboard) para evitar recargas repetitivas
+                    mostrarCargaModuloSiTarda(tabName, cargasModulo);
                 }
                 if (typeof window.inicializarFiltrosInteligentes === 'function') {
                     window.inicializarFiltrosInteligentes();
@@ -27438,6 +27729,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     .replace(/[^\p{L}\p{N}\s]/gu, ' ').replace(/\s+/g, ' ').trim().toLowerCase();
             }
             function decorar(btn) {
+                if (btn.closest && btn.closest('#nomina')) return;
                 if (btn.children.length) return;
                 var original = (btn.textContent || '').trim();
                 var norm = normalizar(original);
@@ -64056,34 +64348,44 @@ document.getElementById('chatForm').onsubmit = function (e) {
         // CARGA INICIAL
         // ============================================
 
-        function cargarDatos() {
-            try {
-                if (typeof cargarDashboard === 'function') {
-                    cargarDashboard();
+        function cargarDatos(soloTab) {
+            var delTab = [];
+            function lanzar(tab, fn) {
+                if (typeof fn !== 'function') return null;
+                try {
+                    var r = fn();
+                    if (r && typeof r.then === 'function' && (!soloTab || soloTab === tab)) delTab.push(r);
+                    return r;
+                } catch (eLanzar) {
+                    console.warn(eLanzar);
+                    return null;
                 }
-                
-                if (typeof cargarMudanzas === 'function') cargarMudanzas();
-                if (typeof cargarAperturas === 'function') cargarAperturas();
-                if (typeof cargarTarjetas === 'function') cargarTarjetas();
-                if (typeof cargarEspacios === 'function') cargarEspacios();
-                if (typeof cargarMultas === 'function') cargarMultas();
-                if (typeof cargarMorosos === 'function') cargarMorosos();
-                if (typeof cargarLecturasAgua === 'function') cargarLecturasAgua();
-                if (typeof cargarCaja === 'function') cargarCaja();
-                if (typeof cargarProveedores === 'function') cargarProveedores();
+            }
+            try {
+                if (typeof cargarDashboard === 'function') cargarDashboard();
+                lanzar('mudanzas', typeof cargarMudanzas === 'function' ? cargarMudanzas : null);
+                lanzar('aperturas', typeof cargarAperturas === 'function' ? cargarAperturas : null);
+                lanzar('tarjetas', typeof cargarTarjetas === 'function' ? cargarTarjetas : null);
+                lanzar('espacios', typeof cargarEspacios === 'function' ? cargarEspacios : null);
+                lanzar('multas', typeof cargarMultas === 'function' ? cargarMultas : null);
+                lanzar('morosos', typeof cargarMorosos === 'function' ? cargarMorosos : null);
+                lanzar('lecturasAgua', typeof cargarLecturasAgua === 'function' ? cargarLecturasAgua : null);
+                lanzar('caja', typeof cargarCaja === 'function' ? cargarCaja : null);
+                lanzar('mantenciones', typeof cargarProveedores === 'function' ? cargarProveedores : null);
                 if (typeof cargarSelectProveedores === 'function') cargarSelectProveedores();
-                if (typeof cargarMantenciones === 'function') cargarMantenciones();
+                lanzar('mantenciones', typeof cargarMantenciones === 'function' ? cargarMantenciones : null);
                 if (typeof cargarSelectPersonalAseo === 'function') cargarSelectPersonalAseo();
-                if (typeof cargarPagosAseo === 'function') cargarPagosAseo();
-                if (typeof cargarRegistrosEspaciosPendientes === 'function') cargarRegistrosEspaciosPendientes();
-                if (typeof cargarInsumos === 'function') cargarInsumos();
+                lanzar('pagos-aseo', typeof cargarPagosAseo === 'function' ? cargarPagosAseo : null);
+                lanzar('pagos-aseo', typeof cargarRegistrosEspaciosPendientes === 'function' ? cargarRegistrosEspaciosPendientes : null);
+                lanzar('insumos', typeof cargarInsumos === 'function' ? cargarInsumos : null);
                 if (typeof window.cargarModuloConserjeriaGestion === 'function' && document.querySelector('#conserjeria.tab-content.active')) {
-                    window.cargarModuloConserjeriaGestion();
+                    lanzar('conserjeria', window.cargarModuloConserjeriaGestion);
                 }
             } catch (error) {
                 console.error('Error en cargarDatos:', error);
                 throw error;
             }
+            return Promise.all(delTab.map(function (p) { return Promise.resolve(p).catch(function () {}); }));
         }
 
         // Inicialización cuando el DOM está listo
