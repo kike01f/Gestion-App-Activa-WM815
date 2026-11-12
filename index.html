@@ -19051,9 +19051,14 @@
                             '<button type="button" class="btn btn-sm ' + (dest ? 'btn-warning' : 'btn-secondary') + '" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;" onclick="destacarNovedadConserjeriaGestion(' + cor + ')" title="' + (dest ? 'Quitar destacado' : 'Destacar novedad') + '">' + (dest ? '★ Destacada' : '☆ Destacar') + '</button>' +
                             '<button type="button" class="btn btn-info btn-sm" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; background: #06b6d4; color: white; border: none;" onclick="abrirNotasNovedadConserjeriaGestion(' + cor + ')" title="Ver y agregar notas">📝 Notas' + (nNotas ? ' (' + nNotas + ')' : '') + '</button>' +
                             '<button type="button" class="btn btn-primary btn-sm" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;" onclick="editarNovedadConserjeriaGestion(' + cor + ')">Editar</button>' +
+                            '<button type="button" class="btn btn-danger btn-sm" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;" onclick="eliminarNovedadConserjeriaGestion(' + cor + ')" title="Eliminar novedad">Eliminar</button>' +
                             '</div>';
                         var extra = '';
-                        if (n.notaInterna) extra += '<div style="margin-top:0.3rem;font-size:0.75rem;color:var(--gray-500);">Interna: ' + escaparHtmlModuloConserjeria(n.notaInterna) + '</div>';
+                        var notaIntVis = String(n.notaInterna || '').trim();
+                        if (/generada autom[aá]ticamente desde visitas/i.test(notaIntVis) || (/visita\s+[A-Za-z0-9_-]{10,}/i.test(notaIntVis) && /estacionamiento/i.test(notaIntVis))) {
+                            notaIntVis = '';
+                        }
+                        if (notaIntVis) extra += '<div style="margin-top:0.3rem;font-size:0.75rem;color:var(--gray-500);">Interna: ' + escaparHtmlModuloConserjeria(notaIntVis) + '</div>';
                         if (nNotas) extra += '<div style="margin-top:0.2rem;font-size:0.75rem;color:#0369a1;">' + nNotas + (nNotas === 1 ? ' nota' : ' notas') + '</div>';
                         return '<tr id="filaNovedadGestion-' + cor + '" style="border-left:3px solid ' + (st.accent || st.bd) + ';' + (dest ? 'background: rgba(245, 158, 11, 0.12);' : '') + '">' +
                             '<td>' + escaparHtmlModuloConserjeria(etiquetaLibroNovedadGestion(n)) + '</td>' +
@@ -22572,6 +22577,43 @@ document.getElementById('chatForm').onsubmit = function (e) {
             }
         }
 
+        window.eliminarNovedadConserjeriaGestion = async function (cor) {
+            var n = novedadDesdeCacheGestion(cor);
+            if (!n) {
+                if (typeof mostrarAlerta === 'function') mostrarAlerta('No se encontró la novedad.', 'Conserjería');
+                return;
+            }
+            var ok = typeof confirmarAccion === 'function'
+                ? await confirmarAccion('¿Eliminar la novedad ' + etiquetaLibroNovedadGestion(n) + ' del libro de Conserjería? Esta acción no se puede deshacer.', 'Eliminar novedad')
+                : window.confirm('¿Eliminar la novedad?');
+            if (!ok) return;
+            try {
+                var sdb = await obtenerDbConserjeriaOperativa();
+                await sdb.collection('novedades').doc(String(n.correlativo)).delete();
+                try {
+                    var now = new Date().toISOString();
+                    await sdb.collection('reclamos_desde_novedad').doc(String(n.correlativo)).set({ activa: false, updatedAt: now }, { merge: true });
+                    await sdb.collection('multas_desde_novedad').doc(String(n.correlativo)).set({ activa: false, updatedAt: now }, { merge: true });
+                } catch (eCola) {}
+                var cache = window._moduloConserjeriaCache || {};
+                if (Array.isArray(cache.novedades)) {
+                    cache.novedades = cache.novedades.filter(function (x) { return !x || Number(x.correlativo) !== Number(n.correlativo); });
+                }
+                if (Array.isArray(window._moduloConserjeriaNovedadesAll)) {
+                    window._moduloConserjeriaNovedadesAll = window._moduloConserjeriaNovedadesAll.filter(function (x) {
+                        return !x || Number(x.correlativo) !== Number(n.correlativo);
+                    });
+                }
+                pintarTablasModuloConserjeria();
+                if (typeof mostrarAlerta === 'function') mostrarAlerta('Novedad eliminada.', 'Conserjería');
+            } catch (eDel) {
+                console.warn('[conserjeria-modulo] Eliminar novedad:', eDel);
+                if (typeof mostrarAlerta === 'function') {
+                    mostrarAlerta('No se pudo eliminar la novedad. ' + ((eDel && eDel.message) ? eDel.message : 'Revise la conexión.'), 'Error');
+                }
+            }
+        };
+
         window.editarNovedadConserjeriaGestion = function (cor) {
             var n = novedadDesdeCacheGestion(cor);
             if (!n) {
@@ -22594,7 +22636,13 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 else cat.value = raw || (cat.options[0] ? cat.options[0].value : '');
             }
             if (txt) txt.value = n.texto || '';
-            if (ni) ni.value = n.notaInterna || '';
+            if (ni) {
+                var notaEd = String(n.notaInterna || '').trim();
+                if (/generada autom[aá]ticamente desde visitas/i.test(notaEd) || (/visita\s+[A-Za-z0-9_-]{10,}/i.test(notaEd) && /estacionamiento/i.test(notaEd))) {
+                    notaEd = '';
+                }
+                ni.value = notaEd;
+            }
             abrirOverlayGestion('modalEditarNovedadGestion');
         };
 
