@@ -34,6 +34,7 @@
     <!-- Chart.js y plugin para mostrar % en tortas -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+    <script src="mailer-plantillas-embebidas.js"></script>
     <style>
         * {
             margin: 0;
@@ -10671,7 +10672,7 @@
                     </div>
                     <div>
                         <label style="display:block;margin-bottom:0.35rem;font-size:0.8125rem;font-weight:600;">Vista previa</label>
-                        <iframe id="mailerPreview" class="mailer-preview" title="Vista previa del correo" sandbox="allow-same-origin"></iframe>
+                        <iframe id="mailerPreview" class="mailer-preview" title="Vista previa del correo" sandbox="allow-same-origin allow-popups allow-popups-to-escape-sandbox"></iframe>
                     </div>
                 </div>
             </div>
@@ -10702,7 +10703,7 @@
 
             <div id="mailerSubPlant" class="form-section" hidden>
                 <h3>Repertorio de plantillas</h3>
-                <p class="mailer-hint">Plantillas del sistema (bienvenida, circular, documentación del personal, avisos) y las que cree usted. Puede editar el HTML y ver el resultado al instante.</p>
+                <p class="mailer-hint">Incluye las plantillas HTML creadas en Cursor (Zumba, TAG, mudanzas, Mutual, Comunidad Feliz, firma, etc.), las genéricas y las que cree usted. Puede editarlas o eliminar una copia.</p>
                 <div class="mailer-grid">
                     <div>
                         <div style="display:flex;gap:0.4rem;flex-wrap:wrap;margin-bottom:0.65rem;">
@@ -10728,7 +10729,7 @@
                             <button type="button" class="btn btn-secondary" id="mailerBtnDuplicarPlantilla">Duplicar</button>
                             <button type="button" class="btn btn-danger" id="mailerBtnEliminarPlantilla">Eliminar</button>
                         </div>
-                        <iframe id="mailerTplPreview" class="mailer-preview" title="Vista previa de plantilla" sandbox="allow-same-origin" style="min-height:320px;"></iframe>
+                        <iframe id="mailerTplPreview" class="mailer-preview" title="Vista previa de plantilla" sandbox="allow-same-origin allow-popups allow-popups-to-escape-sandbox" style="min-height:320px;"></iframe>
                     </div>
                 </div>
             </div>
@@ -33977,14 +33978,61 @@ document.getElementById('chatForm').onsubmit = function (e) {
         let mailerExtras = [];
         let mailerPlantillaEdicionId = '';
         let mailerPreviewTimer = null;
-        let mailerHtmlDocumentacionCache = '';
+        let mailerHtmlArchivosCache = {};
         let mailerIniciado = false;
+
+        const MAILER_ARCHIVOS_CURSOR = [
+            { id: 'mailer_documentacion', archivo: 'correo-documentacion-personal-wm815.html', nombre: 'Documentación y capacitaciones del personal', asunto: 'Documentación y capacitaciones del personal — {{comunidad}}' },
+            { id: 'mailer_zumba', archivo: 'correo-confirmacion-clase-zumba.html', nombre: 'Confirmación de clase de Zumba', asunto: 'Confirmación de clase de Zumba — {{comunidad}}' },
+            { id: 'mailer_solicitud_tarjetas', archivo: 'correo-solicitud-tarjetas.html', nombre: 'Solicitud de tarjetas adicionales', asunto: 'Solicitud de tarjetas adicionales — {{comunidad}}' },
+            { id: 'mailer_certificado_residencia', archivo: 'correo-certificado-residencia.html', nombre: 'Certificado de residencia', asunto: 'Certificado de residencia — Depto {{departamento}} — {{comunidad}}' },
+            { id: 'mailer_horarios_mudanzas', archivo: 'correo-horarios-mudanzas.html', nombre: 'Horarios de mudanzas', asunto: 'Horarios de mudanzas — {{comunidad}}' },
+            { id: 'mailer_enrolamiento_jefe', archivo: 'correo-enrolamiento-jefe-edificio.html', nombre: 'Enrolamiento jefe de edificio', asunto: 'Enrolamiento Jefe de Edificio — {{comunidad}}' },
+            { id: 'mailer_mutual_adherente', archivo: 'correo-informacion-adherente-mutual.html', nombre: 'Información adherente Mutual de Seguridad', asunto: 'Información importante para adherentes — {{comunidad}}' },
+            { id: 'mailer_suspension_tag', archivo: 'correo-suspension-tag-mora.html', nombre: 'Suspensión de TAG por mora', asunto: 'Suspensión de TAG — Estacionamiento — {{comunidad}}' },
+            { id: 'mailer_arriendo_estac', archivo: 'correo-arriendo-estacionamientos.html', nombre: 'Arriendo de estacionamientos', asunto: 'Información sobre arriendo de estacionamientos — {{comunidad}}' },
+            { id: 'mailer_instructivo_cf', archivo: 'correo-instructivo-residentes.html', nombre: 'Instructivo Comunidad Feliz', asunto: 'App Comunidad Feliz — Cómo obtener acceso — {{comunidad}}' },
+            { id: 'mailer_tag_instalacion', archivo: 'correo-tag-estacionamiento.html', nombre: 'TAG de estacionamiento — instalación', asunto: 'TAG de estacionamiento — Instalación correcta — {{comunidad}}' },
+            { id: 'mailer_aviso_vacaciones', archivo: 'email-aviso-vacaciones.html', nombre: 'Aviso de vacaciones (respuesta automática)', asunto: 'Ausencia por vacaciones — {{comunidad}}' },
+            { id: 'mailer_respuesta_auto', archivo: 'email-automatico.html', nombre: 'Respuesta automática del edificio', asunto: 'Respuesta automática — {{comunidad}}' },
+            { id: 'mailer_firma_angel', archivo: 'firma-correo-gmail-angel-avendano.html', nombre: 'Firma de correo — Angel Avendaño', asunto: 'Firma de correo — {{comunidad}}' }
+        ];
 
         function mailerHtmlEnvoltorio(titulo, innerHtml, comunidad) {
             if (typeof generarPlantillaCorreoNotificacion === 'function') {
                 return generarPlantillaCorreoNotificacion(titulo || 'Comunicado', comunidad || '{{comunidad}}', '', innerHtml || '', false, true, 600);
             }
             return '<!DOCTYPE html><html lang="es"><body style="font-family:Arial,sans-serif;">' + (innerHtml || '') + '</body></html>';
+        }
+
+        function mailerHtmlEsIncompleto(html) {
+            const s = String(html || '');
+            if (!s.trim()) return true;
+            return /Plantilla original de Cursor|Ábrala en Envío de correos/i.test(s);
+        }
+
+        function mailerCompatibilizarHtml(html, titulo) {
+            let t = String(html || '').replace(/^\uFEFF/, '').trim();
+            if (!t) return '';
+            if (!/<html[\s>]/i.test(t)) {
+                t = mailerNormalizarHtmlArchivo(t, titulo);
+            }
+            if (!/<!DOCTYPE/i.test(t)) t = '<!DOCTYPE html>\n' + t;
+            if (/<head[\s>]/i.test(t) && !/<meta[^>]*charset/i.test(t)) {
+                t = t.replace(/<head([^>]*)>/i, '<head$1>\n  <meta charset="UTF-8">');
+            }
+            t = t.replace(/<\s*th(\s[^>]*)?>/gi, '<td$1>').replace(/<\s*\/\s*th\s*>/gi, '</td>');
+            return t;
+        }
+
+        function mailerHtmlCatalogo(id) {
+            const pack = (typeof window !== 'undefined' && window.MAILER_HTML_CURSOR && typeof window.MAILER_HTML_CURSOR === 'object')
+                ? window.MAILER_HTML_CURSOR
+                : {};
+            const raw = pack[id] || mailerHtmlArchivosCache[id] || '';
+            if (!raw || mailerHtmlEsIncompleto(raw)) return '';
+            const meta = MAILER_ARCHIVOS_CURSOR.find(function (x) { return x.id === id; });
+            return mailerCompatibilizarHtml(raw, meta ? meta.nombre : id);
         }
 
         function mailerInnerP(texto) {
@@ -34008,23 +34056,46 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 mailerInnerP('Registramos un saldo pendiente en gastos comunes. Le solicitamos regularizar a la brevedad para evitar acciones posteriores.') +
                 mailerInnerP('Si ya canceló, ignore este aviso o envíe el comprobante a administración.') +
                 mailerInnerP('{{comunidad}} · {{fecha}}');
-            const docInner = mailerInnerP('Se ha habilitado un repositorio con documentación de apoyo, capacitaciones y protocolos de consulta para el personal.') +
-                mailerInnerP('Revise periódicamente el material correspondiente a su cargo.') +
-                '<p style="margin:12px 0 6px;font-size:12px;font-weight:700;color:#5a9219;letter-spacing:.06em;text-transform:uppercase;">Carpetas</p>' +
-                '<p style="margin:0 0 8px;font-size:14px;line-height:1.55;"><a href="https://drive.google.com/drive/folders/1tnwZ0D6NPBHLbWhFLdoUTLUkLP4CXALK?usp=drive_link" style="color:#5a9219;font-weight:700;">Capacitaciones conserjes</a><br>' +
-                '<a href="https://drive.google.com/drive/folders/1v1ulMHUk7bzNHuOXJZ09yDwNMXX1wxVj?usp=drive_link" style="color:#5a9219;font-weight:700;">Protocolos conserjes</a><br>' +
-                '<a href="https://drive.google.com/drive/folders/1UL_5CxDfBWRAy0Io_7LhtNi9bOd3jPjp?usp=drive_link" style="color:#5a9219;font-weight:700;">Protocolo Ley Karin</a><br>' +
-                '<a href="https://drive.google.com/drive/folders/1v8yeNeGLtykE55guQNfmNhE8IqU2Sppn?usp=drive_link" style="color:#5a9219;font-weight:700;">Reglamento interno de seguridad e higiene</a><br>' +
-                '<a href="https://drive.google.com/drive/folders/1MLLXyzsDep4XU-vscHQvv6hQ3tatUi3W?usp=drive_link" style="color:#5a9219;font-weight:700;">Protocolo auxiliar de aseo</a></p>' +
-                mailerInnerP('Mutual de Seguridad · adherente 480324 · tasa 0,93 · RUT 53327026-3. Accidente grave: 1407.');
-            return [
+            const genericas = [
                 { id: 'mailer_circular', nombre: 'Circular a residentes', asunto: 'Comunicado de administración — {{comunidad}}', sistema: true, html: mailerHtmlEnvoltorio('Comunicado de administración', circularInner) },
                 { id: 'mailer_servicios', nombre: 'Aviso de trabajos / servicios', asunto: 'Aviso de intervención — {{comunidad}} — {{fecha}}', sistema: true, html: mailerHtmlEnvoltorio('Aviso de trabajos en el edificio', servInner) },
                 { id: 'mailer_reunion', nombre: 'Convocatoria a reunión', asunto: 'Convocatoria a reunión — {{comunidad}}', sistema: true, html: mailerHtmlEnvoltorio('Convocatoria a reunión', reunionInner) },
                 { id: 'mailer_morosidad', nombre: 'Aviso de morosidad (genérico)', asunto: 'Aviso de saldo pendiente — Depto {{departamento}} — {{comunidad}}', sistema: true, html: mailerHtmlEnvoltorio('Aviso de saldo pendiente', morInner) },
-                { id: 'mailer_documentacion', nombre: 'Documentación y capacitaciones del personal', asunto: 'Documentación y capacitaciones del personal — {{comunidad}}', sistema: true, html: mailerHtmlDocumentacionCache || mailerHtmlEnvoltorio('Documentación y capacitaciones del personal', docInner) },
                 { id: 'mailer_bienvenida', nombre: 'Bienvenida a nuevo residente', asunto: 'Le damos la bienvenida — {{comunidad}}', sistema: true, html: (typeof htmlCorreoBienvenidaNuevoResidente === 'function' ? htmlCorreoBienvenidaNuevoResidente() : mailerHtmlEnvoltorio('Bienvenida', mailerInnerP('Estimado/a {{residente}}, le damos la bienvenida a {{comunidad}}.'))) }
             ];
+            const desdeArchivo = MAILER_ARCHIVOS_CURSOR.map(function (item) {
+                const htmlArchivo = mailerHtmlCatalogo(item.id);
+                return {
+                    id: item.id,
+                    nombre: item.nombre,
+                    asunto: item.asunto,
+                    sistema: true,
+                    html: htmlArchivo || mailerHtmlEnvoltorio(item.nombre, mailerInnerP('No se pudo leer la plantilla ' + item.archivo + '.'))
+                };
+            });
+            return genericas.concat(desdeArchivo);
+        }
+
+        function mailerNormalizarHtmlArchivo(html, titulo) {
+            const t = String(html || '').trim();
+            if (!t) return '';
+            if (/<html[\s>]/i.test(t)) return t;
+            const nom = String(titulo || 'Comunicado').replace(/</g, '&lt;');
+            return '<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>' + nom + '</title></head><body style="margin:0;padding:0;background:#ffffff;">' + t + '</body></html>';
+        }
+
+        async function mailerFetchArchivo(archivo) {
+            const urls = [archivo, '../' + archivo];
+            for (let i = 0; i < urls.length; i++) {
+                try {
+                    const r = await fetch(urls[i]);
+                    if (r && r.ok) {
+                        const txt = await r.text();
+                        if (txt && txt.trim() && (txt.indexOf('<html') !== -1 || txt.trim().length > 80)) return txt;
+                    }
+                } catch (eFetch) { /* siguiente ruta */ }
+            }
+            return '';
         }
 
         function mailerTodasPlantillas() {
@@ -34034,6 +34105,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
             Object.keys(mailerPlantillasMap || {}).forEach(function (id) {
                 const row = mailerPlantillasMap[id];
                 if (!row) return;
+                if (mailerHtmlEsIncompleto(row.html) && mailerHtmlCatalogo(id)) return;
                 seen.add(id);
                 out.push(Object.assign({ id: id }, row));
             });
@@ -34044,21 +34116,36 @@ document.getElementById('chatForm').onsubmit = function (e) {
         }
 
         function mailerPlantillaPorId(id) {
-            if (mailerPlantillasMap[id]) return Object.assign({ id: id }, mailerPlantillasMap[id]);
+            const saved = mailerPlantillasMap[id];
+            if (saved && !mailerHtmlEsIncompleto(saved.html)) return Object.assign({ id: id }, saved);
             return mailerPlantillasBase().find(function (p) { return p.id === id; }) || null;
         }
 
+        function mailerSembrarCatalogoEmbebido() {
+            const pack = (typeof window !== 'undefined' && window.MAILER_HTML_CURSOR) ? window.MAILER_HTML_CURSOR : {};
+            MAILER_ARCHIVOS_CURSOR.forEach(function (item) {
+                if (pack[item.id]) {
+                    mailerHtmlArchivosCache[item.id] = mailerCompatibilizarHtml(pack[item.id], item.nombre);
+                }
+            });
+        }
+
         async function mailerCargarPlantillas() {
+            mailerSembrarCatalogoEmbebido();
             try {
                 mailerPlantillasMap = await obtenerMapaNube('plantillasCorreoEnvio');
             } catch (e) {
                 mailerPlantillasMap = {};
             }
             if (!mailerPlantillasMap || typeof mailerPlantillasMap !== 'object' || Array.isArray(mailerPlantillasMap)) mailerPlantillasMap = {};
-            try {
-                const htmlDoc = await fetch('correo-documentacion-personal-wm815.html').then(function (r) { return r.ok ? r.text() : ''; }).catch(function () { return ''; });
-                if (htmlDoc) mailerHtmlDocumentacionCache = htmlDoc;
-            } catch (eDoc) { /* usa fallback */ }
+            await Promise.all(MAILER_ARCHIVOS_CURSOR.map(async function (item) {
+                try {
+                    const html = await mailerFetchArchivo(item.archivo);
+                    if (html && !mailerHtmlEsIncompleto(html) && html.length >= String(mailerHtmlArchivosCache[item.id] || '').length * 0.6) {
+                        mailerHtmlArchivosCache[item.id] = mailerCompatibilizarHtml(html, item.nombre);
+                    }
+                } catch (eArch) { /* usa embebida */ }
+            }));
         }
 
         async function mailerGuardarPlantillas() {
