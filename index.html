@@ -11277,7 +11277,7 @@
                     <div class="notif-card">
                         <h4>Buzón del edificio</h4>
                         <label style="display: flex; align-items: flex-start; gap: 0.45rem; margin-bottom: 0.55rem; cursor: pointer; font-size: 0.8125rem; color: var(--text-secondary);">
-                            <input type="checkbox" id="correoConsejeriaBuzonActivo" checked style="margin-top: 0.15rem; flex-shrink: 0;">
+                            <input type="checkbox" id="correoConsejeriaBuzonActivo" style="margin-top: 0.15rem; flex-shrink: 0;">
                             <span>Incluir en el CCO global</span>
                         </label>
                         <div class="form-group">
@@ -11286,7 +11286,7 @@
                         </div>
                         <div class="form-group">
                             <label for="correoConsejeriaBuzonEmail">Correo</label>
-                            <input type="email" id="correoConsejeriaBuzonEmail" placeholder="conserjeria.wm815@gmail.com">
+                            <input type="email" id="correoConsejeriaBuzonEmail" placeholder="Correo de conserjería">
                         </div>
                         <button type="button" class="btn btn-primary" id="btnGuardarBuzonConsejeria">Guardar buzón</button>
                     </div>
@@ -25877,12 +25877,10 @@ document.getElementById('chatForm').onsubmit = function (e) {
 
         function correoCcBienvenidaConserjeria() {
             const cfg = window._configCorreosConsejeriaCache;
-            if (cfg) {
-                if (cfg.activo === false) return '';
-                const e = String(cfg.correo || '').trim();
-                return e || '';
-            }
-            return (typeof CORREO_CONSEJERIA_SUGERIDO !== 'undefined' ? CORREO_CONSEJERIA_SUGERIDO : 'conserjeria.wm815@gmail.com');
+            if (!cfg || cfg.activo === false) return '';
+            const e = String(cfg.correo || '').trim();
+            if (!e || e.toLowerCase() === 'conserjeria.wm815@gmail.com') return '';
+            return e;
         }
 
         function opcionesEnvioConCcConsejeria(base) {
@@ -31577,13 +31575,13 @@ document.getElementById('chatForm').onsubmit = function (e) {
 </html>`;
         }
 
-        const CORREO_CONSEJERIA_SUGERIDO = 'conserjeria.wm815@gmail.com';
+        const CORREO_CONSEJERIA_SUGERIDO = '';
         window._configCorreosConsejeriaCache = window._configCorreosConsejeriaCache || null;
 
         async function obtenerConfigCorreosConsejeria() {
             const def = {
-                activo: true,
-                correo: CORREO_CONSEJERIA_SUGERIDO,
+                activo: false,
+                correo: '',
                 nombre: 'Conserjería'
             };
             try {
@@ -31597,9 +31595,11 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     return def;
                 }
                 const d = snap.data() || {};
+                var correoGuardado = String(d.correo != null ? d.correo : '').trim();
+                if (correoGuardado.toLowerCase() === 'conserjeria.wm815@gmail.com') correoGuardado = '';
                 const cfg = {
-                    activo: d.activo !== false,
-                    correo: String(d.correo != null ? d.correo : def.correo).trim(),
+                    activo: d.activo === true && !!correoGuardado,
+                    correo: correoGuardado,
                     nombre: String(d.nombre || def.nombre).trim() || def.nombre
                 };
                 window._configCorreosConsejeriaCache = cfg;
@@ -37791,9 +37791,9 @@ document.getElementById('chatForm').onsubmit = function (e) {
             const em = document.getElementById('correoConsejeriaBuzonEmail');
             if (!act && !nom && !em) return;
             const cfg = await obtenerConfigCorreosConsejeria();
-            if (act) act.checked = cfg.activo !== false;
+            if (act) act.checked = cfg.activo === true && !!String(cfg.correo || '').trim();
             if (nom) nom.value = cfg.nombre || 'Conserjería';
-            if (em) em.value = cfg.correo || CORREO_CONSEJERIA_SUGERIDO;
+            if (em) em.value = cfg.correo || '';
         }
 
         async function guardarBuzonConsejeriaDesdeForm() {
@@ -37812,7 +37812,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
             try {
                 await guardarConfigCorreosConsejeria({
                     activo: activo,
-                    correo: correo || CORREO_CONSEJERIA_SUGERIDO,
+                    correo: correo,
                     nombre: nom ? String(nom.value || '').trim() : 'Conserjería'
                 });
                 mostrarAlerta(
