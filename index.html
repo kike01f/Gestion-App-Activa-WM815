@@ -877,6 +877,14 @@
         #envioCorreos .mailer-chip { display: inline-flex; align-items: center; gap: 0.3rem; border: 1px solid var(--border-color); border-radius: 999px; padding: 0.15rem 0.5rem; font-size: 0.72rem; margin: 0.15rem; }
         #envioCorreos .mailer-tpl-item { display: flex; justify-content: space-between; gap: 0.5rem; align-items: center; padding: 0.55rem 0.65rem; border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 0.4rem; cursor: pointer; }
         #envioCorreos .mailer-tpl-item.is-on { border-color: var(--primary); background: var(--bg-secondary); }
+        #envioCorreos .gmail-toolbar { display: flex; flex-wrap: wrap; gap: 0.45rem; align-items: flex-end; margin-bottom: 0.75rem; }
+        #envioCorreos .gmail-msg { display: block; width: 100%; text-align: left; border: 0; border-bottom: 1px solid var(--border-color); background: transparent; padding: 0.55rem 0.6rem; cursor: pointer; color: inherit; }
+        #envioCorreos .gmail-msg:hover, #envioCorreos .gmail-msg.is-on { background: var(--bg-secondary); }
+        #envioCorreos .gmail-msg.is-unread { font-weight: 700; }
+        #envioCorreos .gmail-from { font-size: 0.8rem; }
+        #envioCorreos .gmail-subj { font-size: 0.78rem; color: var(--text-secondary); }
+        #envioCorreos .gmail-snip { font-size: 0.72rem; color: var(--text-tertiary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        #envioCorreos .gmail-meta { font-size: 0.7rem; color: var(--text-tertiary); }
         @media (max-width: 860px) {
             #envioCorreos .mailer-grid { grid-template-columns: 1fr; }
         }
@@ -10621,11 +10629,12 @@
             <div class="mailer-head">
                 <div>
                     <h2>Envío de correos</h2>
-                    <p>Comunicados con formato profesional, destinatarios de ocupación y plantillas HTML editables.</p>
+                    <p>Comunicados con formato profesional, bandeja de Gmail, destinatarios de ocupación y plantillas HTML.</p>
                 </div>
             </div>
             <nav class="mailer-subnav" aria-label="Secciones de envío">
                 <button type="button" class="mailer-subnav-btn is-on" data-mailer-sub="mailerSubRedactar">Redactar y enviar</button>
+                <button type="button" class="mailer-subnav-btn" data-mailer-sub="mailerSubBandeja">Bandeja Gmail</button>
                 <button type="button" class="mailer-subnav-btn" data-mailer-sub="mailerSubDest">Destinatarios</button>
                 <button type="button" class="mailer-subnav-btn" data-mailer-sub="mailerSubPlant">Plantillas</button>
             </nav>
@@ -10672,6 +10681,51 @@
                     <div>
                         <label style="display:block;margin-bottom:0.35rem;font-size:0.8125rem;font-weight:600;">Vista previa</label>
                         <iframe id="mailerPreview" class="mailer-preview" title="Vista previa del correo" sandbox="allow-scripts allow-popups allow-popups-to-escape-sandbox"></iframe>
+                    </div>
+                </div>
+            </div>
+
+            <div id="mailerSubBandeja" class="form-section" hidden>
+                <h3>Bandeja de Gmail</h3>
+                <p class="mailer-hint">Conecte la cuenta de administración (p. ej. edificio.wm815@gmail.com) para leer la entrada y responder en el mismo hilo. La app debe abrirse por http:// (no file://). En Google Cloud: habilite Gmail API, cree un ID de cliente OAuth de tipo Aplicación web y agregue este origen en “Orígenes de JavaScript autorizados”.</p>
+                <div class="gmail-toolbar">
+                    <div class="form-group" style="flex:1.4;margin-bottom:0;">
+                        <label>ID de cliente OAuth (Google Cloud)</label>
+                        <input type="text" id="gmailClientId" placeholder="123456789-abc.apps.googleusercontent.com" autocomplete="off">
+                    </div>
+                    <button type="button" class="btn btn-secondary" id="gmailBtnGuardarCliente" style="padding:0.4rem 0.7rem;font-size:0.78rem;">Guardar ID</button>
+                    <button type="button" class="btn btn-primary" id="gmailBtnConectar" style="padding:0.4rem 0.7rem;font-size:0.78rem;">Conectar Gmail</button>
+                    <button type="button" class="btn btn-secondary" id="gmailBtnSalir" style="padding:0.4rem 0.7rem;font-size:0.78rem;">Desconectar</button>
+                </div>
+                <p class="mailer-hint" id="gmailEstado">Sin conectar.</p>
+                <div class="gmail-toolbar">
+                    <div class="form-group" style="flex:1;margin-bottom:0;">
+                        <label>Buscar en la bandeja</label>
+                        <input type="text" id="gmailBuscar" placeholder="in:inbox, from:, asunto…">
+                    </div>
+                    <button type="button" class="btn btn-secondary" id="gmailBtnCargar" style="padding:0.4rem 0.7rem;font-size:0.78rem;">Actualizar</button>
+                </div>
+                <div class="mailer-grid">
+                    <div id="gmailLista" class="mailer-lista" style="max-height:520px;"></div>
+                    <div>
+                        <div id="gmailLectura" style="min-height:180px;border:1px solid var(--border-color);border-radius:10px;padding:0.75rem;margin-bottom:0.75rem;background:#fff;color:#222;">
+                            <p class="mailer-hint" style="margin:0;">Seleccione un correo de la lista.</p>
+                        </div>
+                        <iframe id="gmailPreview" class="mailer-preview" title="Cuerpo del correo" sandbox="allow-scripts allow-popups allow-popups-to-escape-sandbox" style="min-height:220px;margin-bottom:0.75rem;"></iframe>
+                        <h3 style="margin-top:0;">Responder</h3>
+                        <div class="form-group">
+                            <label>Plantilla (opcional)</label>
+                            <select id="gmailReplyPlantilla"></select>
+                        </div>
+                        <div class="form-group">
+                            <label>Respuesta (HTML o texto)</label>
+                            <textarea id="gmailReplyHtml" rows="6" placeholder="Escriba la respuesta…"></textarea>
+                        </div>
+                        <label style="display:flex;gap:0.4rem;align-items:flex-start;font-size:0.8125rem;margin-bottom:0.65rem;cursor:pointer;">
+                            <input type="checkbox" id="gmailReplyEnvolver" checked style="margin-top:0.15rem;">
+                            <span>Enviar con formato profesional del edificio</span>
+                        </label>
+                        <button type="button" class="btn btn-primary" id="gmailBtnResponder">Enviar respuesta</button>
                     </div>
                 </div>
             </div>
@@ -34209,7 +34263,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
         }
 
         function mailerMostrarSub(id) {
-            ['mailerSubRedactar', 'mailerSubDest', 'mailerSubPlant'].forEach(function (p) {
+            ['mailerSubRedactar', 'mailerSubBandeja', 'mailerSubDest', 'mailerSubPlant'].forEach(function (p) {
                 const el = document.getElementById(p);
                 if (el) el.hidden = p !== id;
             });
@@ -34218,6 +34272,320 @@ document.getElementById('chatForm').onsubmit = function (e) {
             });
             if (id === 'mailerSubDest') mailerRenderDirectorio();
             if (id === 'mailerSubPlant') mailerRenderListaPlantillas();
+            if (id === 'mailerSubBandeja') gmailIniciarPanel();
+        }
+
+        let gmailToken = '';
+        let gmailEmailCuenta = '';
+        let gmailTokenClient = null;
+        let gmailListaCache = [];
+        let gmailMsgSel = null;
+        const GMAIL_SCOPES = 'https://www.googleapis.com/auth/gmail.modify https://www.googleapis.com/auth/userinfo.email';
+
+        function gmailEstado(texto) {
+            const el = document.getElementById('gmailEstado');
+            if (el) el.textContent = texto || '';
+        }
+
+        function gmailB64UrlEncode(str) {
+            return btoa(unescape(encodeURIComponent(String(str || '')))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+        }
+
+        function gmailB64UrlDecode(str) {
+            let s = String(str || '').replace(/-/g, '+').replace(/_/g, '/');
+            while (s.length % 4) s += '=';
+            try { return decodeURIComponent(escape(atob(s))); } catch (e) {
+                try { return atob(s); } catch (e2) { return ''; }
+            }
+        }
+
+        function gmailHeader(msg, nombre) {
+            const headers = (msg && msg.payload && msg.payload.headers) || [];
+            const hit = headers.find(function (h) { return String(h.name || '').toLowerCase() === String(nombre).toLowerCase(); });
+            return hit ? String(hit.value || '') : '';
+        }
+
+        function gmailExtraerCuerpo(payload) {
+            let html = '';
+            let text = '';
+            function walk(p) {
+                if (!p) return;
+                const mt = String(p.mimeType || '');
+                if (p.body && p.body.data) {
+                    const data = gmailB64UrlDecode(p.body.data);
+                    if (mt.indexOf('text/html') >= 0) html = html || data;
+                    else if (mt.indexOf('text/plain') >= 0) text = text || data;
+                    else if (mt.indexOf('multipart') < 0 && !html && !text) text = text || data;
+                }
+                (p.parts || []).forEach(walk);
+            }
+            walk(payload);
+            return { html: html, text: text };
+        }
+
+        function gmailCargarGis() {
+            return new Promise(function (resolve, reject) {
+                if (window.google && google.accounts && google.accounts.oauth2) { resolve(); return; }
+                const s = document.createElement('script');
+                s.src = 'https://accounts.google.com/gsi/client';
+                s.async = true;
+                s.onload = function () { resolve(); };
+                s.onerror = function () { reject(new Error('No se pudo cargar Google Identity')); };
+                document.head.appendChild(s);
+            });
+        }
+
+        async function gmailLeerClientId() {
+            const inp = document.getElementById('gmailClientId');
+            let id = inp ? String(inp.value || '').trim() : '';
+            if (id) return id;
+            try {
+                const mapa = await obtenerMapaNube('gmailBandejaConfig');
+                id = mapa && mapa.clientId ? String(mapa.clientId).trim() : '';
+                if (inp && id) inp.value = id;
+            } catch (e) {}
+            return id;
+        }
+
+        async function gmailGuardarClientId() {
+            const inp = document.getElementById('gmailClientId');
+            const id = inp ? String(inp.value || '').trim() : '';
+            if (!id || id.indexOf('.apps.googleusercontent.com') < 0) {
+                mostrarAlerta('Indique un ID de cliente OAuth válido (termina en .apps.googleusercontent.com).', 'Gmail');
+                return;
+            }
+            try {
+                await guardarMapaNube('gmailBandejaConfig', { clientId: id });
+                mostrarAlerta('ID de cliente guardado.', 'Gmail');
+            } catch (e) {
+                mostrarAlerta('No se pudo guardar el ID: ' + (e && e.message ? e.message : 'error'), 'Error');
+            }
+        }
+
+        async function gmailIniciarPanel() {
+            gmailPoblarPlantillasRespuesta();
+            await gmailLeerClientId();
+            if (gmailToken) {
+                gmailEstado('Conectado como ' + (gmailEmailCuenta || 'Gmail') + '.');
+                if (!gmailListaCache.length) gmailCargarBandeja();
+                else gmailPintarLista();
+            }
+        }
+
+        function gmailPoblarPlantillasRespuesta() {
+            const sel = document.getElementById('gmailReplyPlantilla');
+            if (!sel) return;
+            const cur = sel.value;
+            const lista = [{ id: '', nombre: 'Sin plantilla (solo el texto de respuesta)' }].concat(mailerTodasPlantillas());
+            sel.innerHTML = lista.map(function (p) {
+                return '<option value="' + String(p.id || '').replace(/"/g, '&quot;') + '">' + String(p.nombre || 'Plantilla').replace(/</g, '&lt;') + '</option>';
+            }).join('');
+            if (cur) sel.value = cur;
+        }
+
+        async function gmailConectar() {
+            const clientId = await gmailLeerClientId();
+            if (!clientId) {
+                mostrarAlerta('Primero pegue y guarde el ID de cliente OAuth de Google Cloud.', 'Gmail');
+                return;
+            }
+            if (String(location.protocol) === 'file:') {
+                mostrarAlerta('Gmail no autoriza file://. Abra la app con http://localhost (por ejemplo python3 -m http.server 5500).', 'Gmail');
+                return;
+            }
+            try {
+                await gmailCargarGis();
+            } catch (e) {
+                mostrarAlerta('No se pudo cargar el inicio de sesión de Google.', 'Gmail');
+                return;
+            }
+            gmailTokenClient = google.accounts.oauth2.initTokenClient({
+                client_id: clientId,
+                scope: GMAIL_SCOPES,
+                callback: function (resp) {
+                    if (resp && resp.error) {
+                        gmailEstado('No se autorizó Gmail: ' + resp.error);
+                        return;
+                    }
+                    gmailToken = (resp && resp.access_token) || '';
+                    gmailTrasConectar();
+                }
+            });
+            gmailTokenClient.requestAccessToken({ prompt: gmailToken ? '' : 'consent' });
+        }
+
+        async function gmailTrasConectar() {
+            try {
+                const r = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', { headers: { Authorization: 'Bearer ' + gmailToken } });
+                const info = await r.json();
+                gmailEmailCuenta = info && info.email ? info.email : '';
+                gmailEstado('Conectado como ' + (gmailEmailCuenta || 'Gmail') + '. Cargando bandeja…');
+                await gmailCargarBandeja();
+            } catch (e) {
+                gmailEstado('Conectado. No se pudo leer el perfil.');
+                await gmailCargarBandeja();
+            }
+        }
+
+        function gmailDesconectar() {
+            gmailToken = '';
+            gmailEmailCuenta = '';
+            gmailListaCache = [];
+            gmailMsgSel = null;
+            gmailEstado('Desconectado.');
+            const lista = document.getElementById('gmailLista');
+            if (lista) lista.innerHTML = '';
+            const lect = document.getElementById('gmailLectura');
+            if (lect) lect.innerHTML = '<p class="mailer-hint" style="margin:0;">Seleccione un correo de la lista.</p>';
+            const prev = document.getElementById('gmailPreview');
+            if (prev) prev.srcdoc = '';
+        }
+
+        async function gmailApi(path, opts) {
+            if (!gmailToken) throw new Error('Gmail no está conectado');
+            const r = await fetch('https://gmail.googleapis.com/gmail/v1/users/me/' + path, Object.assign({}, opts || {}, {
+                headers: Object.assign({ Authorization: 'Bearer ' + gmailToken, 'Content-Type': 'application/json' }, (opts && opts.headers) || {})
+            }));
+            if (r.status === 401) {
+                gmailToken = '';
+                throw new Error('La sesión de Gmail caducó. Vuelva a conectar.');
+            }
+            if (!r.ok) {
+                let det = '';
+                try { const j = await r.json(); det = (j.error && j.error.message) || JSON.stringify(j); } catch (e) { det = r.statusText; }
+                throw new Error(det || ('Error Gmail ' + r.status));
+            }
+            if (r.status === 204) return {};
+            return r.json();
+        }
+
+        async function gmailCargarBandeja() {
+            const qEl = document.getElementById('gmailBuscar');
+            const q = String((qEl && qEl.value) || '').trim() || 'in:inbox';
+            gmailEstado('Cargando bandeja…');
+            try {
+                const list = await gmailApi('messages?maxResults=40&q=' + encodeURIComponent(q));
+                const ids = (list.messages || []).map(function (m) { return m.id; });
+                gmailListaCache = [];
+                for (let i = 0; i < ids.length; i++) {
+                    const meta = await gmailApi('messages/' + encodeURIComponent(ids[i]) + '?format=metadata&metadataHeaders=From&metadataHeaders=Subject&metadataHeaders=Date');
+                    gmailListaCache.push(meta);
+                }
+                gmailPintarLista();
+                gmailEstado((gmailEmailCuenta ? gmailEmailCuenta + ' · ' : '') + gmailListaCache.length + ' mensaje(s).');
+            } catch (e) {
+                gmailEstado('Error al leer la bandeja: ' + (e && e.message ? e.message : e));
+            }
+        }
+
+        function gmailPintarLista() {
+            const wrap = document.getElementById('gmailLista');
+            if (!wrap) return;
+            if (!gmailListaCache.length) {
+                wrap.innerHTML = '<p class="mailer-hint" style="padding:0.75rem;">No hay mensajes o la bandeja está vacía.</p>';
+                return;
+            }
+            wrap.innerHTML = gmailListaCache.map(function (m) {
+                const unread = (m.labelIds || []).indexOf('UNREAD') >= 0;
+                const on = gmailMsgSel && gmailMsgSel.id === m.id ? ' is-on' : '';
+                return '<button type="button" class="gmail-msg' + (unread ? ' is-unread' : '') + on + '" data-gmail-id="' + String(m.id).replace(/"/g, '&quot;') + '">' +
+                    '<div class="gmail-from">' + String(gmailHeader(m, 'From') || '(sin remitente)').replace(/</g, '&lt;') + '</div>' +
+                    '<div class="gmail-subj">' + String(gmailHeader(m, 'Subject') || '(sin asunto)').replace(/</g, '&lt;') + '</div>' +
+                    '<div class="gmail-snip">' + String(m.snippet || '').replace(/</g, '&lt;') + '</div>' +
+                    '<div class="gmail-meta">' + String(gmailHeader(m, 'Date') || '').replace(/</g, '&lt;') + '</div></button>';
+            }).join('');
+        }
+
+        async function gmailAbrirMensaje(id) {
+            try {
+                const msg = await gmailApi('messages/' + encodeURIComponent(id) + '?format=full');
+                gmailMsgSel = msg;
+                const from = gmailHeader(msg, 'From');
+                const subj = gmailHeader(msg, 'Subject');
+                const date = gmailHeader(msg, 'Date');
+                const to = gmailHeader(msg, 'To');
+                const lect = document.getElementById('gmailLectura');
+                if (lect) {
+                    lect.innerHTML = '<p style="margin:0 0 0.35rem;font-size:0.78rem;"><strong>De:</strong> ' + String(from).replace(/</g, '&lt;') + '</p>' +
+                        '<p style="margin:0 0 0.35rem;font-size:0.78rem;"><strong>Para:</strong> ' + String(to).replace(/</g, '&lt;') + '</p>' +
+                        '<p style="margin:0 0 0.35rem;font-size:0.78rem;"><strong>Asunto:</strong> ' + String(subj).replace(/</g, '&lt;') + '</p>' +
+                        '<p style="margin:0;font-size:0.72rem;color:var(--text-tertiary);">' + String(date).replace(/</g, '&lt;') + '</p>';
+                }
+                const cuerpo = gmailExtraerCuerpo(msg.payload);
+                const prev = document.getElementById('gmailPreview');
+                if (prev) prev.srcdoc = mailerHtmlParaIframe(cuerpo.html || ('<pre style="white-space:pre-wrap;font-family:Arial;padding:12px;">' + String(cuerpo.text || msg.snippet || '').replace(/</g, '&lt;') + '</pre>'));
+                gmailPintarLista();
+                try { await gmailApi('messages/' + encodeURIComponent(id) + '/modify', { method: 'POST', body: JSON.stringify({ removeLabelIds: ['UNREAD'] }) }); } catch (eRead) {}
+            } catch (e) {
+                mostrarAlerta('No se pudo abrir el correo: ' + (e && e.message ? e.message : e), 'Gmail');
+            }
+        }
+
+        function gmailEmailDesdeFrom(from) {
+            const m = String(from || '').match(/<([^>]+)>/);
+            if (m) return m[1].trim();
+            const t = String(from || '').trim();
+            return t.indexOf('@') > 0 ? t : '';
+        }
+
+        async function gmailEnviarRespuesta() {
+            if (!gmailMsgSel) {
+                mostrarAlerta('Seleccione un correo de la bandeja.', 'Gmail');
+                return;
+            }
+            const texto = String((document.getElementById('gmailReplyHtml') || {}).value || '').trim();
+            if (!texto) {
+                mostrarAlerta('Escriba la respuesta.', 'Gmail');
+                return;
+            }
+            const to = gmailEmailDesdeFrom(gmailHeader(gmailMsgSel, 'From'));
+            if (!to) {
+                mostrarAlerta('No se encontró el correo del remitente.', 'Gmail');
+                return;
+            }
+            const origSubj = gmailHeader(gmailMsgSel, 'Subject') || '';
+            const asunto = /^re\s*:/i.test(origSubj) ? origSubj : ('Re: ' + origSubj);
+            const msgid = gmailHeader(gmailMsgSel, 'Message-ID') || gmailHeader(gmailMsgSel, 'Message-Id');
+            const refs = (gmailHeader(gmailMsgSel, 'References') + ' ' + msgid).trim();
+            let cuerpo = texto;
+            if (texto.indexOf('<') < 0) {
+                cuerpo = '<p style="margin:0 0 12px;font-size:14px;line-height:1.6;color:#333;">' + texto.replace(/</g, '&lt;').replace(/\n/g, '<br>') + '</p>';
+            }
+            const selPl = document.getElementById('gmailReplyPlantilla');
+            const pl = selPl && selPl.value ? mailerPlantillaPorId(selPl.value) : null;
+            if (pl && pl.html) {
+                const ctx = mailerContextoPlaceholders();
+                let base = typeof aplicarPlaceholdersPlantillaCorreo === 'function' ? aplicarPlaceholdersPlantillaCorreo(pl.html, ctx) : pl.html;
+                if (/<\/body>/i.test(base)) cuerpo = base.replace(/<\/body>/i, cuerpo + '</body>');
+                else cuerpo = base + cuerpo;
+            } else if (document.getElementById('gmailReplyEnvolver') && document.getElementById('gmailReplyEnvolver').checked) {
+                cuerpo = mailerHtmlEnvoltorio('Respuesta de administración', cuerpo);
+            }
+            const lineas = ['To: ' + to, 'Subject: ' + asunto];
+            if (msgid) lineas.push('In-Reply-To: ' + msgid);
+            if (refs) lineas.push('References: ' + refs);
+            lineas.push('MIME-Version: 1.0');
+            lineas.push('Content-Type: text/html; charset="UTF-8"');
+            lineas.push('');
+            lineas.push(cuerpo);
+            const raw = lineas.join('\r\n');
+            mostrarProgreso('Enviando respuesta…');
+            try {
+                await gmailApi('messages/send', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        threadId: gmailMsgSel.threadId,
+                        raw: gmailB64UrlEncode(raw)
+                    })
+                });
+                ocultarProgreso();
+                document.getElementById('gmailReplyHtml').value = '';
+                mostrarAlerta('Respuesta enviada a ' + to + '.', 'Gmail');
+                await gmailCargarBandeja();
+            } catch (e) {
+                ocultarProgreso();
+                mostrarAlerta('No se pudo enviar: ' + (e && e.message ? e.message : e), 'Error');
+            }
         }
 
         function mailerHtmlPreview(html) {
@@ -34546,6 +34914,8 @@ document.getElementById('chatForm').onsubmit = function (e) {
             mailerRenderListaPlantillas();
             mailerRenderListaOcupacion();
             mailerRenderDirectorio();
+            gmailPoblarPlantillasRespuesta();
+            try { await gmailLeerClientId(); } catch (eG) {}
         }
         window.cargarModuloEnvioCorreos = cargarModuloEnvioCorreos;
 
@@ -34558,6 +34928,8 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 if (sub) mailerMostrarSub(sub.getAttribute('data-mailer-sub'));
                 const tpl = ev.target && ev.target.closest ? ev.target.closest('[data-mailer-tpl]') : null;
                 if (tpl) mailerCargarEditorPlantilla(tpl.getAttribute('data-mailer-tpl'));
+                const gm = ev.target && ev.target.closest ? ev.target.closest('[data-gmail-id]') : null;
+                if (gm) gmailAbrirMensaje(gm.getAttribute('data-gmail-id'));
                 const del = ev.target && ev.target.closest ? ev.target.closest('[data-mailer-del-extra]') : null;
                 if (del) {
                     const i = parseInt(del.getAttribute('data-mailer-del-extra'), 10);
@@ -34616,6 +34988,15 @@ document.getElementById('chatForm').onsubmit = function (e) {
             document.getElementById('mailerBtnGuardarPlantilla') && document.getElementById('mailerBtnGuardarPlantilla').addEventListener('click', mailerGuardarPlantillaDesdeEditor);
             document.getElementById('mailerBtnDuplicarPlantilla') && document.getElementById('mailerBtnDuplicarPlantilla').addEventListener('click', mailerDuplicarPlantilla);
             document.getElementById('mailerBtnEliminarPlantilla') && document.getElementById('mailerBtnEliminarPlantilla').addEventListener('click', mailerEliminarPlantilla);
+            document.getElementById('gmailBtnGuardarCliente') && document.getElementById('gmailBtnGuardarCliente').addEventListener('click', gmailGuardarClientId);
+            document.getElementById('gmailBtnConectar') && document.getElementById('gmailBtnConectar').addEventListener('click', gmailConectar);
+            document.getElementById('gmailBtnSalir') && document.getElementById('gmailBtnSalir').addEventListener('click', gmailDesconectar);
+            document.getElementById('gmailBtnCargar') && document.getElementById('gmailBtnCargar').addEventListener('click', gmailCargarBandeja);
+            document.getElementById('gmailBtnResponder') && document.getElementById('gmailBtnResponder').addEventListener('click', gmailEnviarRespuesta);
+            const gmailBus = document.getElementById('gmailBuscar');
+            if (gmailBus) gmailBus.addEventListener('keydown', function (ev) {
+                if (ev.key === 'Enter') { ev.preventDefault(); gmailCargarBandeja(); }
+            });
         }
         if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', mailerBindUi);
         else mailerBindUi();
