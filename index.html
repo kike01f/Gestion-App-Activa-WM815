@@ -7923,9 +7923,9 @@
         #permisosCfgLista .perm-user { display: flex; justify-content: space-between; gap: 0.75rem; align-items: center; padding: 0.5rem 0.7rem; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-secondary); margin-bottom: 0.4rem; }
         #permisosCfgLista .perm-nivel { display: inline-block; font-size: 0.68rem; font-weight: 700; padding: 0.1rem 0.4rem; border-radius: 6px; background: #334155; color: #e2e8f0; }
         #bitacoraPublica .bit-kpi { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0.65rem; margin: 0 0 1rem; }
-        #bitacoraPublica .bit-kpi div { background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 10px; padding: 0.75rem 0.9rem; }
-        #bitacoraPublica .bit-kpi strong { display: block; font-size: 1.35rem; }
-        #bitacoraPublica .bit-kpi span { font-size: 0.75rem; color: var(--text-tertiary); }
+        #bitacoraPublica .bit-kpi > div { display: flex; align-items: center; gap: 0.55rem; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 10px; padding: 0.65rem 0.8rem; }
+        #bitacoraPublica .bit-kpi strong { display: block; font-size: 1.25rem; line-height: 1.1; }
+        #bitacoraPublica .bit-kpi span { font-size: 0.72rem; color: var(--text-tertiary); }
         #bitacoraPublica.tab-content { max-width: none; }
         #bitacoraPublica .bit-layout { display: grid; grid-template-columns: minmax(280px, 1fr) minmax(320px, 1.15fr); gap: 1rem; align-items: start; }
         #bitacoraPublica .bit-lista { min-width: 0; }
@@ -7951,7 +7951,22 @@
         #bitacoraPublica .bit-fotos img, #bitacoraPublica .bit-foto-prev img { width: 5.2rem; height: 5.2rem; object-fit: cover; border-radius: 8px; border: 1px solid var(--border-color); display: block; }
         #bitacoraPublica .bit-foto-prev { position: relative; }
         #bitacoraPublica .bit-foto-prev button { position: absolute; top: -0.35rem; right: -0.35rem; width: 1.25rem; height: 1.25rem; border-radius: 999px; border: 0; background: #b91c1c; color: #fff; cursor: pointer; line-height: 1; }
-        #bitacoraPublica .bit-tipo { display: inline-block; padding: 0.05rem 0.45rem; border-radius: 999px; font-size: 0.72rem; font-weight: 650; }
+        #bitacoraPublica .bit-ico { width: 1rem; height: 1rem; flex-shrink: 0; }
+        #bitacoraPublica .bit-ico-badge { width: 1.55rem; height: 1.55rem; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; background: rgba(100,116,139,0.16); color: #64748b; }
+        #bitacoraPublica .bit-ico-badge .bit-ico { width: 0.95rem; height: 0.95rem; }
+        #bitacoraPublica .bit-sec-title { display: flex; align-items: center; gap: 0.45rem; margin: 0; }
+        #bitacoraPublica .bit-sec-title span { min-width: 0; overflow-wrap: anywhere; }
+        #bitacoraPublica .bit-count { margin-left: auto; font-style: normal; font-size: 0.72rem; font-weight: 700; color: var(--text-tertiary); }
+        #bitacoraPublica .bit-th { display: inline-flex; align-items: center; gap: 0.28rem; }
+        #bitacoraPublica .bit-th .bit-ico { width: 0.82rem; height: 0.82rem; opacity: 0.75; }
+        #bitacoraPublica .bit-tipos { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-top: 0.6rem; }
+        #bitacoraPublica .bit-tipo-btn { display: inline-flex; align-items: center; gap: 0.28rem; border: 1px solid var(--border-color); background: var(--bg-primary); color: var(--text-primary); border-radius: 999px; padding: 0.18rem 0.55rem 0.18rem 0.28rem; font-size: 0.72rem; font-weight: 650; cursor: pointer; font-family: inherit; }
+        #bitacoraPublica .bit-tipo-btn em { font-style: normal; font-size: 0.68rem; opacity: 0.7; }
+        #bitacoraPublica .bit-tipo-btn.is-on { outline: 2px solid var(--primary); }
+        #bitacoraPublica .bit-tipo-sel { display: flex; align-items: center; gap: 0.4rem; }
+        #bitacoraPublica .bit-tipo-sel select { flex: 1; min-width: 0; }
+        #bitacoraPublica .bit-tipo { display: inline-flex; align-items: center; gap: 0.25rem; padding: 0.05rem 0.45rem; border-radius: 999px; font-size: 0.72rem; font-weight: 650; }
+        #bitacoraPublica .bit-tipo .bit-ico { width: 0.78rem; height: 0.78rem; }
         #bitacoraPublica .bit-filtros .is-on { outline: 2px solid var(--primary); }
         #bitacoraPublica .bit-prio { font-weight: 700; color: #b91c1c; }
         #bitacoraPublica .bit-caso-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr)); gap: 0.65rem; }
@@ -9206,6 +9221,138 @@
             .main-content.menu-collapsed {
                 padding-top: calc(3.7rem + env(safe-area-inset-top, 0px)) !important;
             }
+        }
+
+        /* Panel de control compacto: mismos bloques, menos altura */
+        #dashboard .dashboard2-banner {
+            padding: 0.4rem 0.7rem;
+        }
+        #dashboard .dashboard2-banner .arturito-dashboard {
+            width: 36px;
+            height: 36px;
+        }
+        #dashboard .dashboard2-titulo {
+            font-size: 1.05rem;
+            gap: 0.4rem;
+        }
+        #dashboard .dashboard2-banner .dashboard2-icon {
+            width: 1.15rem;
+            height: 1.15rem;
+        }
+        #dashboard .dashboard2-subtitulo,
+        #dashboard .dashboard2-mes-texto {
+            font-size: 0.72rem;
+            line-height: 1.3;
+        }
+        #dashboard .dashboard2-subtitulo { margin: 0.05rem 0 0; }
+        #dashboard .dashboard2-mes-texto { margin: 0; }
+        #dashboard .dashboard2-btn-link {
+            padding: 0.32rem 0.65rem;
+            font-size: 0.74rem;
+        }
+        #dashboard .dashboard2-body {
+            padding: 0.5rem 0.65rem 3.25rem;
+            gap: 0.5rem;
+        }
+        #dashboard .dashboard2-atencion { gap: 0.35rem; }
+        #dashboard .dashboard2-hero {
+            gap: 0.5rem 0.7rem;
+            padding: 0.5rem 0.65rem 0.6rem;
+            border-radius: 12px;
+        }
+        #dashboard .dashboard2-block-title {
+            margin-bottom: 0.3rem;
+            padding-bottom: 0.22rem;
+        }
+        #dashboard .dashboard2-hero .arturito-mensajes-box {
+            min-height: 0;
+            padding: 0.35rem 0.55rem;
+        }
+        #dashboard .dashboard2-kpi-row {
+            height: auto;
+            gap: 0.4rem;
+            grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+        }
+        #dashboard .dashboard2-kpi {
+            min-height: 0;
+            padding: 0.4rem 0.5rem 0.45rem;
+            border-radius: 10px;
+        }
+        #dashboard .dashboard2-kpi-icon {
+            width: 0.85rem;
+            height: 0.85rem;
+            margin-bottom: 0.12rem;
+        }
+        #dashboard .dashboard2-kpi-label {
+            font-size: 0.64rem;
+            margin-bottom: 0.05rem;
+        }
+        #dashboard .dashboard2-kpi-value { font-size: 1.12rem; }
+        #dashboard .dashboard2-kpi-tendencia { margin-top: 0.12rem; min-height: 0; }
+        #dashboard .dashboard2-kpi-tendencia:empty { display: none; }
+        #dashboard .dashboard2-workspace { gap: 0.5rem; }
+        #dashboard .dashboard2-workspace-main,
+        #dashboard .dashboard2-workspace-side { gap: 0.5rem; }
+        #dashboard .dashboard2-workspace-main > .dashboard2-block,
+        #dashboard .dashboard2-workspace-side > .dashboard2-block,
+        #dashboard .dashboard2-block--charts,
+        #dashboard .dashboard2-block--actions {
+            padding: 0.5rem 0.6rem 0.6rem;
+            border-radius: 12px;
+        }
+        #dashboard .dashboard2-stats-grid {
+            grid-template-columns: repeat(auto-fill, minmax(108px, 1fr));
+            gap: 0.35rem;
+        }
+        #dashboard .dashboard2-card { padding: 0.4rem 0.45rem; }
+        #dashboard .dashboard2-card-value { font-size: 0.98rem; }
+        #dashboard .dashboard2-chart-wrap { height: 92px; }
+        #dashboard .bloc-lista { max-height: 14rem; }
+        #dashboard .dashboard2-herramientas-header { padding: 0.4rem 0.55rem; }
+        #dashboard .dashboard2-herramientas-header-icon {
+            width: 1.7rem;
+            height: 1.7rem;
+            font-size: 0.95rem;
+        }
+        #dashboard .dashboard2-herramientas-header-text h2 { font-size: 0.9rem; }
+        @media (max-width: 820px) {
+            #dashboard .dashboard2-banner-inner,
+            #dashboard .dashboard2-banner-titulo-wrap {
+                padding-left: 0 !important;
+                padding-right: 0 !important;
+            }
+            #dashboard .dashboard2-banner-top {
+                flex-direction: row !important;
+                flex-wrap: nowrap !important;
+                align-items: center !important;
+            }
+            #dashboard .dashboard2-banner-titulo-wrap {
+                flex: 1 1 auto;
+                min-width: 0;
+                flex-wrap: nowrap !important;
+            }
+            #dashboard .dashboard2-banner-titulo-wrap > div {
+                min-width: 0;
+                flex: 1 1 auto;
+            }
+            #dashboard .dashboard2-subtitulo {
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            #dashboard .dashboard2-btn-link {
+                width: auto !important;
+                margin-top: 0 !important;
+            }
+            #dashboard .dashboard2-charts-grid {
+                grid-template-columns: 1fr 1fr !important;
+                gap: 0.45rem !important;
+            }
+            #dashboard .dashboard2-kpi-value {
+                font-size: clamp(0.78rem, 3.4vw, 0.95rem);
+                overflow-wrap: anywhere;
+            }
+            #dashboard .dashboard2-mail-grid { max-width: none; }
         }
 
     </style>
@@ -12341,7 +12488,10 @@
                 <div class="bit-caso-grid">
                     <div class="form-group" style="margin:0;">
                         <label for="bitacoraCasoTipo">Tipo de caso</label>
-                        <select id="bitacoraCasoTipo" required></select>
+                        <div class="bit-tipo-sel">
+                            <span id="bitacoraCasoTipoMarca" class="bit-ico-badge" aria-hidden="true"></span>
+                            <select id="bitacoraCasoTipo" required></select>
+                        </div>
                     </div>
                     <div class="form-group" style="margin:0;">
                         <label for="bitacoraCasoUnidad">Unidad o lugar</label>
@@ -12390,7 +12540,7 @@
                 <div class="bit-lista">
                     <div id="bitacoraSecCasos" class="form-section" style="margin-top:0;">
                         <div style="display:flex;justify-content:space-between;gap:0.55rem;flex-wrap:wrap;align-items:center;">
-                            <h3 style="margin:0;">Casos registrados</h3>
+                            <h3 class="bit-sec-title" id="bitacoraTituloCasos">Casos registrados</h3>
                             <div class="bit-filtros" id="bitacoraFiltroCasos" style="display:flex;gap:0.35rem;flex-wrap:wrap;">
                                 <button type="button" class="btn btn-secondary is-on" data-bit-filtro="pendientes" style="padding:0.2rem 0.55rem;font-size:0.72rem;">Pendientes</button>
                                 <button type="button" class="btn btn-secondary" data-bit-filtro="abierto" style="padding:0.2rem 0.55rem;font-size:0.72rem;">Abiertos</button>
@@ -12399,27 +12549,28 @@
                                 <button type="button" class="btn btn-secondary" data-bit-filtro="todos" style="padding:0.2rem 0.55rem;font-size:0.72rem;">Todos</button>
                             </div>
                         </div>
+                        <div class="bit-tipos" id="bitacoraTiposCaso"></div>
                         <div style="overflow:auto;margin-top:0.65rem;">
                             <table class="notif-tabla" style="width:100%;border-collapse:collapse;">
-                                <thead><tr><th>Fecha</th><th>Lugar</th><th>Tipo</th><th>Caso</th><th>Estado</th><th></th></tr></thead>
+                                <thead id="bitacoraHeadCasos"><tr><th>Fecha</th><th>Lugar</th><th>Tipo</th><th>Caso</th><th>Estado</th><th></th></tr></thead>
                                 <tbody id="bitacoraTbodyCasos"></tbody>
                             </table>
                         </div>
                     </div>
                     <div id="bitacoraSecReclamos" class="form-section" style="margin-top:0;">
-                        <h3>Reclamos</h3>
+                        <h3 class="bit-sec-title" id="bitacoraTituloReclamos">Reclamos</h3>
                         <div style="overflow:auto;">
                             <table class="notif-tabla" style="width:100%;border-collapse:collapse;">
-                                <thead><tr><th>Fecha</th><th>Depto</th><th>Motivo</th><th>Estado</th><th></th></tr></thead>
+                                <thead id="bitacoraHeadReclamos"><tr><th>Fecha</th><th>Depto</th><th>Motivo</th><th>Estado</th><th></th></tr></thead>
                                 <tbody id="bitacoraTbodyReclamos"></tbody>
                             </table>
                         </div>
                     </div>
                     <div id="bitacoraSecMultas" class="form-section">
-                        <h3>Multas cursadas</h3>
+                        <h3 class="bit-sec-title" id="bitacoraTituloMultas">Multas cursadas</h3>
                         <div style="overflow:auto;">
                             <table class="notif-tabla" style="width:100%;border-collapse:collapse;">
-                                <thead><tr><th>Fecha</th><th>Depto</th><th>Residente</th><th>Motivo</th><th>Estado</th><th></th></tr></thead>
+                                <thead id="bitacoraHeadMultas"><tr><th>Fecha</th><th>Depto</th><th>Residente</th><th>Motivo</th><th>Estado</th><th></th></tr></thead>
                                 <tbody id="bitacoraTbodyMultas"></tbody>
                             </table>
                         </div>
@@ -27424,6 +27575,12 @@ document.getElementById('chatForm').onsubmit = function (e) {
                         bitacoraQuitarFotoPendiente(parseInt(quitar.getAttribute('data-bit-foto-quitar'), 10));
                         return;
                     }
+                    var tipoF = e.target && e.target.closest ? e.target.closest('[data-bit-tipo-filtro]') : null;
+                    if (tipoF) {
+                        window._bitacoraFiltroTipo = tipoF.getAttribute('data-bit-tipo-filtro') || '';
+                        bitacoraPintarTablaCasos();
+                        return;
+                    }
                     var filtro = e.target && e.target.closest ? e.target.closest('[data-bit-filtro]') : null;
                     if (filtro) {
                         window._bitacoraFiltroCaso = filtro.getAttribute('data-bit-filtro') || 'pendientes';
@@ -27474,6 +27631,8 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     }
                 });
             }
+            var tipoSel = document.getElementById('bitacoraCasoTipo');
+            if (tipoSel) tipoSel.addEventListener('change', bitacoraPintarMarcaTipo);
             var buscar = document.getElementById('bitacoraBuscar');
             if (buscar) {
                 buscar.addEventListener('input', function () { bitacoraFiltrarFilas(buscar.value); });
@@ -29356,6 +29515,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 return '<option value="' + bitacoraEsc(e.id) + '">' + bitacoraEsc(e.label) + '</option>';
             }).join('');
             if (cur && sel.querySelector('option[value="' + String(cur).replace(/"/g, '') + '"]')) sel.value = cur;
+            bitacoraPintarMarcaTipo();
         }
         window.bitacoraLlenarTiposCaso = bitacoraLlenarTiposCaso;
 
@@ -29453,9 +29613,93 @@ document.getElementById('chatForm').onsubmit = function (e) {
             bitacoraPintarPreviewFotos();
         }
 
+        function bitacoraSvg(inner) {
+            return '<svg class="bit-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + inner + '</svg>';
+        }
+
+        function bitacoraIconoDe(texto) {
+            var k = String(texto || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+            var tabla = [
+                ['reclamo', '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>'],
+                ['multa', '<path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/>'],
+                ['apertur', '<circle cx="8" cy="15" r="4"/><path d="m10.85 12.15 8.15-8.15"/><path d="M18 4h3v3"/><path d="m15 7 3-3"/>'],
+                ['mudan', '<path d="M1 7h13v10H1z"/><path d="M14 10h4l3 3v4h-7z"/><circle cx="5.5" cy="18.5" r="1.5"/><circle cx="17.5" cy="18.5" r="1.5"/>'],
+                ['evento', '<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>'],
+                ['manten', '<path d="M14.7 6.3a4 4 0 0 0-5.6 5.6L3 18l3 3 6.1-6.1a4 4 0 0 0 5.6-5.6l-3 3-2-2 3-3z"/>'],
+                ['segur', '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>'],
+                ['ronda', '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>'],
+                ['provee', '<path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>'],
+                ['incident', '<path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/>'],
+                ['fecha', '<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>'],
+                ['lugar', '<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/>'],
+                ['depto', '<path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 21v-6h6v6"/>'],
+                ['residente', '<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>'],
+                ['estado', '<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>'],
+                ['ver', '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>'],
+                ['caso', '<path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M9 12h6M9 16h4"/>'],
+                ['general', '<path d="M12 2 2 7l10 5 10-5-10-5z"/><path d="m2 17 10 5 10-5"/><path d="m2 12 10 5 10-5"/>']
+            ];
+            var i;
+            for (i = 0; i < tabla.length; i++) {
+                if (k.indexOf(tabla[i][0]) !== -1) return bitacoraSvg(tabla[i][1]);
+            }
+            return bitacoraSvg('<circle cx="12" cy="12" r="8"/><path d="M12 8v8M8 12h8"/>');
+        }
+
+        function bitacoraColorTipo(color) {
+            return /^#[0-9a-fA-F]{6}$/.test(String(color || '')) ? String(color) : '#64748b';
+        }
+
+        function bitacoraIconoBadge(clave, color) {
+            var c = bitacoraColorTipo(color);
+            return '<span class="bit-ico-badge" style="color:' + c + ';background:' + c + '22">' + bitacoraIconoDe(clave) + '</span>';
+        }
+
+        function bitacoraTh(clave, texto) {
+            return '<span class="bit-th">' + bitacoraIconoDe(clave) + bitacoraEsc(texto) + '</span>';
+        }
+
+        function bitacoraPintarCabezas() {
+            var casos = document.getElementById('bitacoraHeadCasos');
+            var rec = document.getElementById('bitacoraHeadReclamos');
+            var mul = document.getElementById('bitacoraHeadMultas');
+            if (casos && !casos.dataset.iconos) {
+                casos.innerHTML = '<tr><th>' + bitacoraTh('fecha', 'Fecha') + '</th><th>' + bitacoraTh('lugar', 'Lugar') + '</th><th>' + bitacoraTh('general', 'Tipo') + '</th><th>' + bitacoraTh('caso', 'Caso') + '</th><th>' + bitacoraTh('estado', 'Estado') + '</th><th>' + bitacoraTh('ver', 'Ver') + '</th></tr>';
+                casos.dataset.iconos = '1';
+            }
+            if (rec && !rec.dataset.iconos) {
+                rec.innerHTML = '<tr><th>' + bitacoraTh('fecha', 'Fecha') + '</th><th>' + bitacoraTh('depto', 'Depto') + '</th><th>' + bitacoraTh('reclamo', 'Motivo') + '</th><th>' + bitacoraTh('estado', 'Estado') + '</th><th>' + bitacoraTh('ver', 'Ver') + '</th></tr>';
+                rec.dataset.iconos = '1';
+            }
+            if (mul && !mul.dataset.iconos) {
+                mul.innerHTML = '<tr><th>' + bitacoraTh('fecha', 'Fecha') + '</th><th>' + bitacoraTh('depto', 'Depto') + '</th><th>' + bitacoraTh('residente', 'Residente') + '</th><th>' + bitacoraTh('multa', 'Motivo') + '</th><th>' + bitacoraTh('estado', 'Estado') + '</th><th>' + bitacoraTh('ver', 'Ver') + '</th></tr>';
+                mul.dataset.iconos = '1';
+            }
+        }
+
+        function bitacoraPintarTituloSeccion(id, clave, texto, n, color) {
+            var el = document.getElementById(id);
+            if (!el) return;
+            el.innerHTML = bitacoraIconoBadge(clave, color) + '<span>' + bitacoraEsc(texto) + '</span><em class="bit-count">' + n + '</em>';
+        }
+
+        function bitacoraPintarMarcaTipo() {
+            var marca = document.getElementById('bitacoraCasoTipoMarca');
+            var sel = document.getElementById('bitacoraCasoTipo');
+            if (!marca || !sel) return;
+            var et = null;
+            if (typeof etiquetasNovedadGestion === 'function') {
+                et = etiquetasNovedadGestion().filter(function (e) { return e.id === sel.value; })[0] || null;
+            }
+            marca.innerHTML = bitacoraIconoDe((et && (et.label || et.id)) || sel.value || 'caso');
+            marca.style.color = bitacoraColorTipo(et && et.color);
+            marca.style.background = bitacoraColorTipo(et && et.color) + '22';
+        }
+
         function bitacoraHtmlTipo(c) {
-            var color = /^#[0-9a-fA-F]{6}$/.test(String(c && c.tipoColor || '')) ? String(c.tipoColor) : '#64748b';
-            return '<span class="bit-tipo" style="background:' + color + '22;color:' + color + ';border:1px solid ' + color + '55;">' + bitacoraEsc((c && c.tipoLabel) || 'Caso') + '</span>';
+            var color = bitacoraColorTipo(c && c.tipoColor);
+            var label = (c && c.tipoLabel) || 'Caso';
+            return '<span class="bit-tipo" style="background:' + color + '22;color:' + color + ';border:1px solid ' + color + '55;">' + bitacoraIconoDe(label) + bitacoraEsc(label) + '</span>';
         }
 
         function bitacoraHtmlFotosCaso(fotos) {
@@ -29496,7 +29740,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
 
         function bitacoraHtmlDetalleCaso(caso) {
             var est = BITACORA_ESTADOS_CASO[caso.estado] || 'Abierto';
-            var html = '<h3>' + bitacoraEsc(caso.titulo || 'Caso') + '</h3><div class="bit-dl">' +
+            var html = '<h3 class="bit-sec-title">' + bitacoraIconoBadge(caso.tipoLabel || 'caso', caso.tipoColor) + '<span>' + bitacoraEsc(caso.titulo || 'Caso') + '</span></h3><div class="bit-dl">' +
                 '<dt>Estado</dt><dd>' + bitacoraEsc(est) + (caso.prioridad === 'urgente' ? ' · <span class="bit-prio">Urgente</span>' : '') + '</dd>' +
                 '<dt>Tipo</dt><dd>' + bitacoraHtmlTipo(caso) + '</dd>' +
                 '<dt>Fecha</dt><dd>' + bitacoraEsc(caso.fecha || '—') + (caso.hora ? ' · ' + bitacoraEsc(String(caso.hora).slice(0, 5)) : '') + '</dd>' +
@@ -29524,7 +29768,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
             return html + '</div>';
         }
 
-        function bitacoraCasoVisible(c) {
+        function bitacoraCasoPasaEstado(c) {
             var filtro = window._bitacoraFiltroCaso || 'pendientes';
             var est = c && c.estado || 'abierto';
             if (filtro === 'todos') return true;
@@ -29532,14 +29776,49 @@ document.getElementById('chatForm').onsubmit = function (e) {
             return est === filtro;
         }
 
+        function bitacoraCasoVisible(c) {
+            if (!bitacoraCasoPasaEstado(c)) return false;
+            var tipo = window._bitacoraFiltroTipo || '';
+            if (!tipo) return true;
+            return String((c && c.tipoId) || '') === tipo;
+        }
+
+        function bitacoraPintarTiposCaso(casos) {
+            var host = document.getElementById('bitacoraTiposCaso');
+            if (!host) return;
+            var mapa = {};
+            (casos || []).forEach(function (c) {
+                var id = String((c && c.tipoId) || 'otros');
+                if (!mapa[id]) mapa[id] = { id: id, label: (c && c.tipoLabel) || 'Otros', color: c && c.tipoColor, n: 0 };
+                mapa[id].n += 1;
+            });
+            var activo = window._bitacoraFiltroTipo || '';
+            if (activo && !mapa[activo]) {
+                activo = '';
+                window._bitacoraFiltroTipo = '';
+            }
+            var ids = Object.keys(mapa).sort(function (a, b) { return mapa[b].n - mapa[a].n || mapa[a].label.localeCompare(mapa[b].label, 'es'); });
+            var html = '<button type="button" class="bit-tipo-btn' + (!activo ? ' is-on' : '') + '" data-bit-tipo-filtro="">' + bitacoraIconoDe('caso') + 'Todos</button>';
+            html += ids.map(function (id) {
+                var t = mapa[id];
+                return '<button type="button" class="bit-tipo-btn' + (activo === id ? ' is-on' : '') + '" data-bit-tipo-filtro="' + bitacoraEsc(id) + '">' +
+                    bitacoraIconoBadge(t.label, t.color) + bitacoraEsc(t.label) + '<em>' + t.n + '</em></button>';
+            }).join('');
+            host.innerHTML = html;
+        }
+
         function bitacoraPintarTablaCasos() {
             var tb = document.getElementById('bitacoraTbodyCasos');
             if (!tb) return;
+            bitacoraPintarCabezas();
             var filtro = window._bitacoraFiltroCaso || 'pendientes';
             document.querySelectorAll('#bitacoraFiltroCasos [data-bit-filtro]').forEach(function (b) {
                 b.classList.toggle('is-on', b.getAttribute('data-bit-filtro') === filtro);
             });
-            var casos = ((window._bitacoraCache && window._bitacoraCache.casos) || []).filter(bitacoraCasoVisible);
+            var todos = ((window._bitacoraCache && window._bitacoraCache.casos) || []).filter(bitacoraCasoPasaEstado);
+            bitacoraPintarTiposCaso(todos);
+            var casos = todos.filter(bitacoraCasoVisible);
+            bitacoraPintarTituloSeccion('bitacoraTituloCasos', 'caso', 'Casos registrados', casos.length, '#64748b');
             if (filtro !== 'resuelto' && filtro !== 'todos') {
                 casos.sort(function (a, b) {
                     var ua = a.prioridad === 'urgente' ? 0 : 1;
@@ -30071,13 +30350,20 @@ document.getElementById('chatForm').onsubmit = function (e) {
             var casAb = casos.filter(function (c) { return (c.estado || 'abierto') === 'abierto'; }).length;
             var casGes = casos.filter(function (c) { return c.estado === 'en_gestion'; }).length;
             if (kpis) {
+                function kpiBit(clave, color, n, txt) {
+                    return '<div>' + bitacoraIconoBadge(clave, color) + '<div><strong>' + n + '</strong><span>' + txt + '</span></div></div>';
+                }
                 kpis.innerHTML =
-                    '<div><strong>' + casAb + '</strong><span>Casos abiertos</span></div><div><strong>' + casGes + '</strong><span>Casos en gestión</span></div>' +
-                    (cfg.mostrarReclamos ? '<div><strong>' + reclamos.length + '</strong><span>Reclamos del mes</span></div><div><strong>' + recPend + '</strong><span>Reclamos en tratamiento</span></div>' : '') +
-                    (cfg.mostrarMultas ? '<div><strong>' + mulCursadas.length + '</strong><span>Multas cursadas</span></div><div><strong>' + mulAnul + '</strong><span>Multas anuladas</span></div>' : '');
+                    kpiBit('caso', '#64748b', casAb, 'Casos abiertos') +
+                    kpiBit('estado', '#0ea5e9', casGes, 'Casos en gestión') +
+                    (cfg.mostrarReclamos ? kpiBit('reclamo', '#be185d', reclamos.length, 'Reclamos del mes') + kpiBit('reclamo', '#f59e0b', recPend, 'Reclamos en tratamiento') : '') +
+                    (cfg.mostrarMultas ? kpiBit('multa', '#ea580c', mulCursadas.length, 'Multas cursadas') + kpiBit('multa', '#64748b', mulAnul, 'Multas anuladas') : '');
             }
             window._bitacoraCache = { reclamos: reclamos, multas: multas, casos: casos, mes: mes };
             bitacoraAplicarPermisoRegistro();
+            bitacoraPintarCabezas();
+            bitacoraPintarTituloSeccion('bitacoraTituloReclamos', 'reclamo', 'Reclamos', reclamos.length, '#be185d');
+            bitacoraPintarTituloSeccion('bitacoraTituloMultas', 'multa', 'Multas cursadas', multas.length, '#ea580c');
             bitacoraPintarTablaCasos();
             if (tbR) {
                 if (!reclamos.length) {
