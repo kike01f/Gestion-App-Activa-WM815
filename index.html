@@ -2226,6 +2226,33 @@
             font-size: 0.875rem;
         }
 
+        /* Icono de columna: cabe en el alto de la letra y no ensancha la celda */
+        .tab-content th.tiene-ico,
+        #tablaMudanzas th.tiene-ico,
+        #tablaTarjetas th.tiene-ico,
+        #tablaAperturas th.tiene-ico {
+            padding-left: 0.4rem;
+            padding-right: 0.4rem;
+            letter-spacing: 0.02em;
+        }
+        th .mod-th-ico,
+        h2 > span > .mod-titulo-ico {
+            display: inline-block;
+            width: 0.85em;
+            height: 0.85em;
+            margin: 0 0.28em 0 0;
+            vertical-align: -0.12em;
+            opacity: 0.8;
+            pointer-events: none;
+            flex-shrink: 0;
+        }
+        h2 > span > .mod-titulo-ico {
+            width: 1.15rem;
+            height: 1.15rem;
+            margin: 0;
+            opacity: 1;
+        }
+
         tbody tr:last-child td {
             border-bottom: none;
         }
@@ -29298,22 +29325,6 @@ document.getElementById('chatForm').onsubmit = function (e) {
             });
         }
 
-        function avisarAdminUsuarioConectado(row) {
-            if (!row || row.admin) return;
-            var key = String(row.correo || '');
-            window._presenciaAvisados = window._presenciaAvisados || {};
-            var prev = window._presenciaAvisados[key] || 0;
-            if (Date.now() - prev < 120000) return;
-            window._presenciaAvisados[key] = Date.now();
-            var nombre = row.nombre || row.correo;
-            if (typeof registrarMovimiento === 'function') {
-                registrarMovimiento('sesion', 'usuarios', nombre + ' se conectó a la app.');
-            }
-            if (typeof mostrarToast === 'function') {
-                mostrarToast(nombre + ' está conectado.', 'info');
-            }
-        }
-
         function escucharPresenciaAdmin() {
             if (!db || window._presenciaUnsub) return;
             var col = db.collection('comunidad').doc('presencia').collection('sesiones');
@@ -29326,15 +29337,6 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     var on = d.online !== false && seen && (now - seen) < 90000;
                     if (on) vivos.push(d);
                 });
-                var prev = window._presenciaOnline || [];
-                var prevSet = {};
-                prev.forEach(function (r) { if (r && r.correo) prevSet[r.correo] = true; });
-                vivos.forEach(function (r) {
-                    if (r && r.correo && !prevSet[r.correo] && !esAdminPrincipal(r.correo)) {
-                        avisarAdminUsuarioConectado(r);
-                    }
-                });
-                window._presenciaOnline = vivos;
                 pintarBarraPresencia(vivos);
             }, function (err) {
                 console.warn('[presencia]', err);
@@ -66081,6 +66083,145 @@ document.getElementById('chatForm').onsubmit = function (e) {
             aplicarFiltroTablaInteligente(table);
         }
 
+        function svgIconoModulo(inner, clase) {
+            return '<svg class="' + (clase || 'mod-th-ico') + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + inner + '</svg>';
+        }
+
+        function iconoModuloPorTexto(texto) {
+            var k = String(texto || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+            var reglas = [
+                ['autoriz', '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>'],
+                ['comentario', '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>'],
+                ['observ', '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>'],
+                ['document', '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/>'],
+                ['archivo', '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/>'],
+                ['adjunt', '<path d="M21.44 11.05 12.25 20.24a5 5 0 0 1-7.07-7.07l9.19-9.19a3 3 0 0 1 4.24 4.24l-9.2 9.19a1 1 0 0 1-1.41-1.41l8.49-8.49"/>'],
+                ['corredor', '<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>'],
+                ['movimiento', '<path d="M5 12h14M13 6l6 6-6 6"/>'],
+                ['residente', '<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>'],
+                ['nombre', '<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>'],
+                ['persona', '<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>'],
+                ['departamento', '<path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/>'],
+                ['depto', '<path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/>'],
+                ['unidad', '<path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/>'],
+                ['lugar', '<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/>'],
+                ['hora', '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>'],
+                ['fecha', '<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>'],
+                ['monto', '<path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>'],
+                ['valor', '<path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>'],
+                ['precio', '<path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>'],
+                ['cobro', '<rect x="1" y="4" width="22" height="16" rx="2"/><path d="M1 10h22"/>'],
+                ['aseo', '<path d="M3 21h18M6 21V9l6-5 6 5v12"/>'],
+                ['pago', '<rect x="1" y="4" width="22" height="16" rx="2"/><path d="M1 10h22"/>'],
+                ['saldo', '<path d="M3 16 7 8l4 4 5-8 4 4"/>'],
+                ['ingreso', '<path d="M12 19V5M5 12l7-7 7 7"/>'],
+                ['gasto', '<path d="M12 5v14M5 12l7 7 7-7"/>'],
+                ['correo', '<path d="M4 4h16v16H4z"/><path d="m22 6-10 7L2 6"/>'],
+                ['mail', '<path d="M4 4h16v16H4z"/><path d="m22 6-10 7L2 6"/>'],
+                ['telefono', '<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.35 1.9.66 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.31 1.85.53 2.81.66A2 2 0 0 1 22 16.92z"/>'],
+                ['estado', '<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>'],
+                ['motivo', '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h5"/>'],
+                ['detalle', '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h5"/>'],
+                ['descripcion', '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h5"/>'],
+                ['multa', '<path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4M12 17h.01"/>'],
+                ['reclamo', '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>'],
+                ['moroso', '<path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4M12 17h.01"/>'],
+                ['apertur', '<circle cx="8" cy="15" r="4"/><path d="m10.85 12.15 8.15-8.15M18 4h3v3"/>'],
+                ['mudan', '<path d="M1 7h13v10H1zM14 10h4l3 3v4h-7z"/><circle cx="5.5" cy="18.5" r="1.5"/><circle cx="17.5" cy="18.5" r="1.5"/>'],
+                ['manten', '<path d="M14.7 6.3a4 4 0 0 0-5.6 5.6L3 18l3 3 6.1-6.1a4 4 0 0 0 5.6-5.6l-3 3-2-2 3-3z"/>'],
+                ['provee', '<path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>'],
+                ['visita', '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>'],
+                ['tarjeta', '<rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/>'],
+                ['tag', '<path d="M20.59 13.41 13.42 20.6a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><circle cx="7" cy="7" r="1.2"/>'],
+                ['espacio', '<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>'],
+                ['lectura', '<path d="M3 12h4l2-7 4 14 2-7h6"/>'],
+                ['medidor', '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>'],
+                ['agua', '<path d="M12 2.5s6 6.2 6 10.2a6 6 0 0 1-12 0C6 8.7 12 2.5 12 2.5z"/>'],
+                ['caja', '<path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>'],
+                ['insumo', '<path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>'],
+                ['stock', '<path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>'],
+                ['cantidad', '<path d="M4 7h16M4 12h16M4 17h10"/>'],
+                ['pedido', '<path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><path d="M3 6h18M16 10a4 4 0 0 1-8 0"/>'],
+                ['caso', '<path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/>'],
+                ['nomina', '<path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/>'],
+                ['turno', '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>'],
+                ['checklist', '<path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>'],
+                ['novedad', '<path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/>'],
+                ['prioridad', '<path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><path d="M4 22v-7"/>'],
+                ['folio', '<path d="M4 7V4h16v3M9 20h6M12 4v16"/>'],
+                ['rut', '<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 9h4M7 13h10"/>'],
+                ['comite', '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>'],
+                ['postventa', '<path d="M14.7 6.3a4 4 0 0 0-5.6 5.6L3 18l3 3 6.1-6.1a4 4 0 0 0 5.6-5.6l-3 3-2-2 3-3z"/>'],
+                ['conserj', '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>'],
+                ['segur', '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>'],
+                ['tipo', '<path d="M20.59 13.41 13.42 20.6a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/>'],
+                ['categoria', '<path d="M20.59 13.41 13.42 20.6a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/>'],
+                ['accion', '<circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/>'],
+                ['ver', '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>'],
+                ['deuda', '<path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>'],
+                ['abonado', '<path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>'],
+                ['resumen', '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/>'],
+                ['respaldo', '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5M12 15V3"/>'],
+                ['consumo', '<path d="M3 12h4l2-7 4 14 2-7h6"/>'],
+                ['comprobante', '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/>'],
+                ['servicio', '<path d="M14.7 6.3a4 4 0 0 0-5.6 5.6L3 18l3 3 6.1-6.1a4 4 0 0 0 5.6-5.6l-3 3-2-2 3-3z"/>'],
+                ['plazo', '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>'],
+                ['periodo', '<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>'],
+                ['total', '<path d="M4 7h16M4 12h16M4 17h10"/>'],
+                ['mes', '<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>'],
+                ['producto', '<path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>'],
+                ['existencia', '<path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>'],
+                ['salida', '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>'],
+                ['patente', '<rect x="2" y="7" width="20" height="10" rx="2"/><path d="M6 12h.01M10 12h4"/>'],
+                ['permanencia', '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>'],
+                ['llave', '<circle cx="8" cy="15" r="4"/><path d="m10.85 12.15 8.15-8.15M18 4h3v3"/>'],
+                ['encomienda', '<path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>'],
+                ['evidencia', '<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/>'],
+                ['propuesta', '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/>'],
+                ['requisito', '<path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>'],
+                ['modalidad', '<path d="M20.59 13.41 13.42 20.6a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/>'],
+                ['cargo', '<rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>'],
+                ['licencia', '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/>'],
+                ['domingo', '<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>'],
+                ['dias', '<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>']
+            ];
+            var i;
+            for (i = 0; i < reglas.length; i++) {
+                if (k.indexOf(reglas[i][0]) !== -1) return reglas[i][1];
+            }
+            return '';
+        }
+
+        function pintarIconosModulos(root) {
+            var scope = root && root.querySelectorAll ? root : document;
+            scope.querySelectorAll('table thead th').forEach(function (th) {
+                if (th.dataset.icono === '1' || th.querySelector('svg')) {
+                    th.dataset.icono = '1';
+                    return;
+                }
+                if (th.closest('.reporte-pdf, #loginScreen')) return;
+                var texto = (th.textContent || '').replace(/\s+/g, ' ').trim();
+                var inner = iconoModuloPorTexto(texto);
+                if (!inner) {
+                    th.dataset.icono = '1';
+                    return;
+                }
+                th.insertAdjacentHTML('afterbegin', svgIconoModulo(inner, 'mod-th-ico'));
+                th.classList.add('tiene-ico');
+                th.dataset.icono = '1';
+            });
+            scope.querySelectorAll('h2 > span').forEach(function (span) {
+                if (span.dataset.icono === '1' || span.querySelector('svg')) return;
+                if ((span.textContent || '').trim()) return;
+                var titulo = span.parentElement ? span.parentElement.textContent : '';
+                var inner = iconoModuloPorTexto(titulo);
+                if (!inner) return;
+                span.innerHTML = svgIconoModulo(inner, 'mod-titulo-ico');
+                span.dataset.icono = '1';
+            });
+        }
+        window.pintarIconosModulos = pintarIconosModulos;
+
         function inicializarFiltrosInteligentes() {
             const tabs = document.querySelectorAll('.tab-content');
             tabs.forEach(function (tab) {
@@ -66091,6 +66232,18 @@ document.getElementById('chatForm').onsubmit = function (e) {
             });
             if (!window._consultaRapidaInicializada) {
                 inicializarConsultaRapidaGlobal();
+            }
+            pintarIconosModulos(document.getElementById('appContainer') || document);
+            if (!window._iconosModulosObs) {
+                var raizIconos = document.getElementById('appContainer') || document.body;
+                window._iconosModulosObs = new MutationObserver(function () {
+                    if (window._iconosModulosPend) return;
+                    window._iconosModulosPend = requestAnimationFrame(function () {
+                        window._iconosModulosPend = 0;
+                        pintarIconosModulos(raizIconos);
+                    });
+                });
+                window._iconosModulosObs.observe(raizIconos, { childList: true, subtree: true });
             }
         }
         window.inicializarFiltrosInteligentes = inicializarFiltrosInteligentes;
