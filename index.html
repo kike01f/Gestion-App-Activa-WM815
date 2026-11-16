@@ -16085,11 +16085,16 @@
                 }
 
                 // CCO (BCC): no repetir direcciones que ya están en Para
-                if (opciones && opciones.bcc != null && opciones.bcc !== '') {
-                    const bccBruto = Array.isArray(opciones.bcc)
-                        ? opciones.bcc
-                        : normalizarListaCorreosDestino(opciones.bcc);
-                    const bccLista = normalizarListaCorreosDestino(bccBruto);
+                // bccForzado: direcciones que siempre van en CCO, aunque estén en la lista de copias bloqueadas
+                const bccForzadoLista = opciones && opciones.bccForzado
+                    ? normalizarListaCorreosDestino(opciones.bccForzado)
+                    : [];
+                if (opciones && ((opciones.bcc != null && opciones.bcc !== '') || bccForzadoLista.length)) {
+                    const bccBruto = opciones.bcc == null || opciones.bcc === ''
+                        ? []
+                        : (Array.isArray(opciones.bcc) ? opciones.bcc : normalizarListaCorreosDestino(opciones.bcc));
+                    const bccLista = normalizarListaCorreosDestino(bccBruto.concat(bccForzadoLista));
+                    const bccForzadoSet = new Set(bccForzadoLista.map(function (e) { return String(e).toLowerCase(); }));
                     const enCcSet = new Set();
                     if (mailData.cc) {
                         (Array.isArray(mailData.cc) ? mailData.cc : [mailData.cc]).forEach(function (e) {
@@ -16098,7 +16103,7 @@
                     }
                     const bccFiltrado = bccLista.filter(function (e) {
                         var k = String(e).toLowerCase();
-                        return e && !enParaSet.has(k) && !enCcSet.has(k) && !correoCopiaConserjeriaBloqueado(e);
+                        return e && !enParaSet.has(k) && !enCcSet.has(k) && (bccForzadoSet.has(k) || !correoCopiaConserjeriaBloqueado(e));
                     });
                     if (bccFiltrado.length === 1) {
                         mailData.bcc = bccFiltrado[0];
@@ -18203,6 +18208,14 @@
                     });
                 }
             } catch (eCcoG) { /* sin CCO global */ }
+            const ccoForzados = enviarOpciones && enviarOpciones.bccForzado
+                ? normalizarListaCorreosDestino(enviarOpciones.bccForzado)
+                : [];
+            ccoForzados.forEach((correoF) => {
+                const k = correoF.toLowerCase();
+                destinatariosCco = destinatariosCco.filter((d) => String((d && d.correo) || '').trim().toLowerCase() !== k);
+                destinatariosCco.unshift({ nombre: 'Conserjería', correo: correoF, tipo: 'CCO', fijo: true });
+            });
 
             const listaDestUnidad = Array.isArray(destinatariosUnidad)
                 ? destinatariosUnidad.filter((d) => d && d.correo && String(d.correo).trim())
@@ -33419,6 +33432,8 @@ document.getElementById('chatForm').onsubmit = function (e) {
         }
         window.abrirCorreoCancelacionEvento = abrirCorreoCancelacionEvento;
 
+        const CCO_FIJO_CONFIRMACION_EVENTO = 'conserjeria2.wm815@gmail.com';
+
         /** Envía el correo de confirmación de evento por correo */
         window.enviarCorreoEvento = async function(id) {
             try {
@@ -33448,9 +33463,10 @@ document.getElementById('chatForm').onsubmit = function (e) {
 
                 const destinatariosCcoEvento = await obtenerDestinatariosCcoConsejeria('comprobanteReservaEspacio');
                 const emailsBccConsejeriaEvento = normalizarListaCorreosDestino(destinatariosCcoEvento.map((d) => d.correo));
-                const enviarOpcionesEvento = emailsBccConsejeriaEvento.length
-                    ? { bcc: emailsBccConsejeriaEvento.length === 1 ? emailsBccConsejeriaEvento[0] : emailsBccConsejeriaEvento }
-                    : null;
+                const enviarOpcionesEvento = { bccForzado: [CCO_FIJO_CONFIRMACION_EVENTO] };
+                if (emailsBccConsejeriaEvento.length) {
+                    enviarOpcionesEvento.bcc = emailsBccConsejeriaEvento.length === 1 ? emailsBccConsejeriaEvento[0] : emailsBccConsejeriaEvento;
+                }
 
                 const mapPlantEv = await obtenerPlantillasCorreoModulosMap();
                 const bloqueEv = obtenerBloquePlantillaModulo(mapPlantEv, 'comprobanteReservaEspacio');
