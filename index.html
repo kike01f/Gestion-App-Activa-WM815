@@ -8531,6 +8531,25 @@
         #cajaVistaNotasCobro select.nc-estado-select.is-anulada { color: var(--text-tertiary) !important; }
         .nc-envio { font-size: 0.72rem; color: var(--text-secondary); }
         .nc-envio.is-no { color: var(--m-muted); }
+        .nc-modelo {
+            display: inline-block;
+            margin-left: 0.4rem;
+            padding: 0.05rem 0.45rem;
+            border-radius: 999px;
+            font-size: 0.66rem;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+            vertical-align: middle;
+            white-space: nowrap;
+        }
+        .nc-modelo.is-wm815 { background: rgba(117, 187, 33, 0.16); color: #5c9a17; }
+        .nc-modelo.is-neutro { background: rgba(100, 116, 139, 0.16); color: var(--text-secondary); }
+        [data-theme="dark"] .nc-modelo.is-wm815 { color: #9bd456; }
+        .nc-modelo-fila { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; }
+        .tab-content:not(#dashboard) #cajaVistaNotasCobro .nc-modelo-fila select { width: auto; min-width: 16rem; }
+        .nc-aviso-modelo { font-size: 0.78rem; color: var(--m-muted); }
+        .nc-config-ayuda { margin: -0.3rem 0 0.7rem; font-size: 0.78rem; font-weight: 400; color: var(--m-muted); }
+        .tab-content:not(#dashboard) #cajaVistaNotasCobro select.nc-modelo-select { width: auto; min-height: 1.75rem; padding: 0.15rem 0.45rem; font-size: 0.72rem; }
 
         .nc-config > summary {
             display: flex;
@@ -11320,6 +11339,16 @@
                                 <input type="email" id="ncClienteCorreo" placeholder="cliente@correo.com">
                             </div>
                             <div class="form-group" style="grid-column: 1 / -1;">
+                                <label>Modelo de correo</label>
+                                <div class="nc-modelo-fila">
+                                    <select id="ncModeloCorreo" onchange="ncAlCambiarModelo()">
+                                        <option value="wm815">Verde · WM 815</option>
+                                        <option value="neutro">Neutro · sin referencia a WM 815</option>
+                                    </select>
+                                    <span id="ncAvisoModelo" class="nc-aviso-modelo"></span>
+                                </div>
+                            </div>
+                            <div class="form-group" style="grid-column: 1 / -1;">
                                 <label class="nc-check"><input type="checkbox" id="ncGuardarCliente" checked><span>Guardar / actualizar este cliente en la lista</span></label>
                             </div>
                         </div>
@@ -11454,7 +11483,35 @@
                     </div>
 
                     <div class="nc-config-sub">
-                        <h4>Logo</h4>
+                        <h4>Emisor para el modelo neutro</h4>
+                        <p class="nc-config-ayuda">Se usa en el PDF y en el correo de los clientes con modelo neutro. Esas notas no llevan logo ni ninguna referencia a WM 815.</p>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Nombre / Razón social</label>
+                                <input type="text" id="ncNeutroNombre" placeholder="Ej: Servicios Integrales SpA">
+                            </div>
+                            <div class="form-group">
+                                <label>RUT</label>
+                                <input type="text" id="ncNeutroRut" onblur="ncFormatearRutInput(this)">
+                            </div>
+                            <div class="form-group">
+                                <label>Dirección</label>
+                                <input type="text" id="ncNeutroDireccion">
+                            </div>
+                            <div class="form-group">
+                                <label>Teléfono</label>
+                                <input type="text" id="ncNeutroContacto">
+                            </div>
+                            <div class="form-group">
+                                <label>Correo para respuestas</label>
+                                <input type="email" id="ncNeutroCorreo" placeholder="Las respuestas del cliente llegan aquí">
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-primary" onclick="ncGuardarConfigEmisor()">Guardar emisor neutro</button>
+                    </div>
+
+                    <div class="nc-config-sub">
+                        <h4>Logo <span class="nc-config-ayuda" style="display: inline;">· solo para el modelo verde WM 815</span></h4>
                         <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
                             <div id="ncLogoPreview" class="nc-logo-preview">Sin logo</div>
                             <div class="form-group" style="display: flex; flex-direction: column; gap: 0.5rem; margin: 0;">
@@ -11513,10 +11570,41 @@
 
                     <div class="nc-config-sub">
                         <h4>Clientes guardados</h4>
-                        <div style="overflow-x: auto;">
+                        <p class="nc-config-ayuda">Registre aquí todos sus clientes. También se agregan solos al emitir una nota con "Guardar / actualizar este cliente" marcado.</p>
+                        <input type="hidden" id="ncCliEditId">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Cliente *</label>
+                                <input type="text" id="ncCliNombre" placeholder="Nombre o razón social">
+                            </div>
+                            <div class="form-group">
+                                <label>RUT</label>
+                                <input type="text" id="ncCliRut" placeholder="12.345.678-5" onblur="ncFormatearRutInput(this)">
+                            </div>
+                            <div class="form-group">
+                                <label>Dirección</label>
+                                <input type="text" id="ncCliDireccion">
+                            </div>
+                            <div class="form-group">
+                                <label>Correo</label>
+                                <input type="email" id="ncCliCorreo" placeholder="cliente@correo.com">
+                            </div>
+                            <div class="form-group">
+                                <label>Modelo de correo</label>
+                                <select id="ncCliModelo">
+                                    <option value="wm815">Verde · WM 815</option>
+                                    <option value="neutro">Neutro · sin referencia a WM 815</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div style="display: flex; flex-wrap: wrap;">
+                            <button type="button" class="btn btn-primary" id="ncBtnGuardarCli" onclick="ncGuardarClienteRegistro()">Agregar cliente</button>
+                            <button type="button" class="btn btn-secondary" onclick="ncLimpiarFormCliente()">Cancelar</button>
+                        </div>
+                        <div style="overflow-x: auto; margin-top: 0.75rem;">
                             <table>
                                 <thead>
-                                    <tr><th>Cliente</th><th>RUT</th><th>Dirección</th><th>Correo</th><th>Acciones</th></tr>
+                                    <tr><th>Cliente</th><th>RUT</th><th>Dirección</th><th>Correo</th><th>Modelo de correo</th><th>Acciones</th></tr>
                                 </thead>
                                 <tbody id="ncTbodyClientes"></tbody>
                             </table>
@@ -46904,6 +46992,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
 
         const NC_DOC_NOTAS = 'notasCobro';
         const NC_DOC_CONFIG = 'notasCobro-config';
+        const NC_DOC_CLIENTES = 'notasCobro-clientes';
         const NC_BANCOS_CHILE = [
             'Banco de Chile', 'Banco Edwards (Banco de Chile)', 'BancoEstado', 'Banco Santander', 'Banco BCI',
             'Banco Itaú', 'Scotiabank', 'Banco BICE', 'Banco Security', 'Banco Falabella', 'Banco Ripley',
@@ -46970,9 +47059,44 @@ document.getElementById('chatForm').onsubmit = function (e) {
             if (el) el.value = v == null ? '' : v;
         }
 
+        const NC_MODELOS = {
+            wm815: { etiqueta: 'Verde · WM 815', corta: 'WM 815' },
+            neutro: { etiqueta: 'Neutro · sin referencia a WM 815', corta: 'Neutro' }
+        };
+        const NC_RE_WM815 = /w\.?\s*m\.?\s*[-_]?\s*815|walker\s+mart[ií]nez\s*(n[°ºo]\.?\s*)?815/i;
+        const NC_LOGO_WM815_URL = 'https://img.mailinblue.com/8323725/images/content_library/original/685f21fb4a1b4fde403defaf.jpeg';
+
+        function ncModeloValido(m) {
+            return Object.prototype.hasOwnProperty.call(NC_MODELOS, m) ? m : 'wm815';
+        }
+
+        function ncClienteDeNota(nota, cfg) {
+            const cli = (nota && nota.cliente) || {};
+            const rut = ncLimpiarRut(cli.rut);
+            const nombre = String(cli.nombre || '').trim().toLowerCase();
+            return ((cfg && cfg.clientes) || []).find(c => (rut && ncLimpiarRut(c.rut) === rut) ||
+                (nombre && String(c.nombre || '').trim().toLowerCase() === nombre)) || null;
+        }
+
+        function ncModeloDeNota(nota, cfg) {
+            if (nota && NC_MODELOS[nota.modeloCorreo]) return nota.modeloCorreo;
+            const c = ncClienteDeNota(nota, cfg);
+            return ncModeloValido(c && c.modeloCorreo);
+        }
+
+        function ncEmisorDeModelo(cfg, modelo) {
+            const c = cfg || {};
+            return (modelo === 'neutro' ? c.emisorNeutro : c.emisor) || {};
+        }
+
+        function ncReferenciasWm815(campos) {
+            return campos.filter(([, v]) => v && NC_RE_WM815.test(String(v))).map(([campo]) => campo);
+        }
+
         function ncConfigPorDefecto() {
             return {
                 emisor: { nombre: '', rut: '', direccion: '', contacto: '' },
+                emisorNeutro: { nombre: '', rut: '', direccion: '', contacto: '', correo: '' },
                 prefijo: 'NC-',
                 numeroInicial: 1,
                 logo: null,
@@ -46984,41 +47108,89 @@ document.getElementById('chatForm').onsubmit = function (e) {
             };
         }
 
-        async function ncObtenerConfig(forzar) {
-            if (window._ncConfig && !forzar) return window._ncConfig;
-            const cfg = ncConfigPorDefecto();
-            if (firebaseInitialized && db) {
-                try {
-                    const snap = await db.collection('comunidad').doc(NC_DOC_CONFIG).get();
-                    if (snap.exists) {
-                        const d = snap.data() || {};
-                        cfg.emisor = Object.assign(cfg.emisor, d.emisor || {});
-                        if (typeof d.prefijo === 'string') cfg.prefijo = d.prefijo;
-                        cfg.numeroInicial = parseInt(d.numeroInicial, 10) || 1;
-                        cfg.logo = d.logo || null;
-                        cfg.logoAncho = Number(d.logoAncho) || 0;
-                        cfg.logoAlto = Number(d.logoAlto) || 0;
-                        cfg.incluirLogoPorDefecto = d.incluirLogoPorDefecto === true;
-                        cfg.cuentas = Array.isArray(d.cuentas) ? d.cuentas : [];
-                        cfg.clientes = Array.isArray(d.clientes) ? d.clientes : [];
-                    }
-                } catch (e) {
-                    if (!errorEsPermisoFirestore(e)) console.error('Error al leer configuración de notas de cobro:', e);
-                }
+        async function ncLeerClientesNube(heredados) {
+            const snap = await db.collection('comunidad').doc(NC_DOC_CLIENTES).get({ source: 'server' });
+            if (snap.exists) {
+                const data = snap.data() || {};
+                if (data.partido === true) return (await nubeLeer(NC_DOC_CLIENTES)).datos;
+                return nubeNormalizarLista(data);
             }
-            window._ncConfig = cfg;
+            const lista = (heredados || []).filter(c => c && c.nombre).map(c => Object.assign({ id: generarId() }, c));
+            if (lista.length) await nubeEscribir(NC_DOC_CLIENTES, lista, { modulo: 'notasCobro' });
+            return lista;
+        }
+
+        async function ncLeerConfigNube() {
+            const cfg = ncConfigPorDefecto();
+            const snap = await db.collection('comunidad').doc(NC_DOC_CONFIG).get({ source: 'server' });
+            const d = snap.exists ? (snap.data() || {}) : {};
+            cfg.emisor = Object.assign(cfg.emisor, d.emisor || {});
+            cfg.emisorNeutro = Object.assign(cfg.emisorNeutro, d.emisorNeutro || {});
+            if (typeof d.prefijo === 'string') cfg.prefijo = d.prefijo;
+            cfg.numeroInicial = parseInt(d.numeroInicial, 10) || 1;
+            cfg.logo = d.logo || null;
+            cfg.logoAncho = Number(d.logoAncho) || 0;
+            cfg.logoAlto = Number(d.logoAlto) || 0;
+            cfg.incluirLogoPorDefecto = d.incluirLogoPorDefecto === true;
+            cfg.cuentas = Array.isArray(d.cuentas) ? d.cuentas : [];
+            cfg.clientes = await ncLeerClientesNube(Array.isArray(d.clientes) ? d.clientes : []);
             return cfg;
         }
 
-        async function ncGuardarConfig(parcial) {
+        async function ncObtenerConfig(forzar) {
+            if (window._ncConfig && !forzar) return window._ncConfig;
+            if (!firebaseInitialized || !db) {
+                if (!window._ncConfig) window._ncConfig = ncConfigPorDefecto();
+                return window._ncConfig;
+            }
+            try {
+                window._ncConfig = await ncLeerConfigNube();
+            } catch (e) {
+                if (!errorEsPermisoFirestore(e)) console.error('Error al leer configuración de notas de cobro:', e);
+                if (!window._ncConfig) window._ncConfig = ncConfigPorDefecto();
+            }
+            return window._ncConfig;
+        }
+
+        async function ncLeerConfigParaGuardar() {
             if (!firebaseInitialized || !db) throw new Error('No hay conexión con Firestore.');
-            const actual = await ncObtenerConfig();
-            const cfg = Object.assign({}, actual, parcial || {});
+            try {
+                return await ncLeerConfigNube();
+            } catch (e) {
+                throw new Error('No se pudo leer la configuración guardada en la nube, así que no se guardaron cambios para no perder datos. Revise la conexión e intente de nuevo. (' + (e.message || e) + ')');
+            }
+        }
+
+        async function ncGuardarConfig(parcial) {
+            const actual = await ncLeerConfigParaGuardar();
+            const cfg = Object.assign({}, actual, parcial || {}, { clientes: actual.clientes });
             const plano = JSON.parse(JSON.stringify(cfg));
+            delete plano.clientes;
             plano.actualizado = firebase.firestore.FieldValue.serverTimestamp();
             await db.collection('comunidad').doc(NC_DOC_CONFIG).set(plano);
             window._ncConfig = cfg;
             return cfg;
+        }
+
+        async function ncModificarClientes(cambiar) {
+            const cfg = await ncLeerConfigParaGuardar();
+            const lista = cambiar(cfg.clientes.slice()) || [];
+            lista.sort((a, b) => String(a.nombre).localeCompare(String(b.nombre), 'es'));
+            await nubeEscribir(NC_DOC_CLIENTES, lista, { modulo: 'notasCobro' });
+            cfg.clientes = lista;
+            window._ncConfig = cfg;
+            return lista;
+        }
+
+        function ncIndiceCliente(lista, cliente, idPreferido) {
+            const rut = ncLimpiarRut(cliente.rut);
+            const nombre = String(cliente.nombre || '').trim().toLowerCase();
+            const coincide = c => (rut && ncLimpiarRut(c.rut) === rut) || String(c.nombre || '').trim().toLowerCase() === nombre;
+            if (idPreferido) {
+                const i = lista.findIndex(c => c.id === idPreferido);
+                if (i !== -1 && coincide(lista[i])) return i;
+            }
+            return lista.findIndex(coincide);
         }
 
         async function ncObtenerNotas() {
@@ -47161,6 +47333,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 clienteRut: '',
                 clienteDireccion: '',
                 clienteCorreo: '',
+                modeloCorreo: 'wm815',
                 guardarCliente: true,
                 items: [{}],
                 formaPago: 'Transferencia Bancaria',
@@ -47183,6 +47356,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 clienteRut: c.rut || '',
                 clienteDireccion: c.direccion || '',
                 clienteCorreo: c.correo || '',
+                modeloCorreo: ncModeloDeNota(nota, window._ncConfig),
                 guardarCliente: true,
                 items: (nota.items && nota.items.length ? nota.items : [{}]).map(it => Object.assign({}, it)),
                 formaPago: nota.formaPago || 'Transferencia Bancaria',
@@ -47211,6 +47385,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 clienteRut: ncValor('ncClienteRut'),
                 clienteDireccion: ncValor('ncClienteDireccion'),
                 clienteCorreo: ncValor('ncClienteCorreo'),
+                modeloCorreo: ncModeloValido(ncValor('ncModeloCorreo')),
                 guardarCliente: !!document.getElementById('ncGuardarCliente').checked,
                 items: filas.length ? filas : [{}],
                 formaPago: ncValor('ncFormaPago'),
@@ -47234,6 +47409,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 ncSetValor('ncClienteRut', s.clienteRut);
                 ncSetValor('ncClienteDireccion', s.clienteDireccion);
                 ncSetValor('ncClienteCorreo', s.clienteCorreo);
+                ncSetValor('ncModeloCorreo', ncModeloValido(s.modeloCorreo));
                 document.getElementById('ncGuardarCliente').checked = s.guardarCliente !== false;
                 const tbody = document.getElementById('ncItemsBody');
                 tbody.innerHTML = '';
@@ -47246,6 +47422,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 chkLogo.checked = !!(s.incluirLogo && cfg.logo);
                 if (s.logoTocado) chkLogo.dataset.tocado = '1';
                 else delete chkLogo.dataset.tocado;
+                ncAlCambiarModelo();
                 document.getElementById('ncTituloFormulario').textContent = s.editId
                     ? 'Editando nota ' + s.numero
                     : (s.copiaDe ? 'Nueva nota de cobro (copia de ' + s.copiaDe + ')' : 'Nueva nota de cobro');
@@ -47436,6 +47613,30 @@ document.getElementById('chatForm').onsubmit = function (e) {
             }
         };
 
+        window.ncAlCambiarModelo = function () {
+            const cfg = window._ncConfig || ncConfigPorDefecto();
+            const neutro = ncValor('ncModeloCorreo') === 'neutro';
+            const aviso = document.getElementById('ncAvisoModelo');
+            if (aviso) {
+                const en = cfg.emisorNeutro || {};
+                aviso.textContent = neutro
+                    ? `Correo y PDF sin logo ni mención a WM 815, firmados por ${en.nombre || 'el emisor neutro (configúrelo abajo)'}.`
+                    : 'Correo verde con la marca de la Comunidad WM 815.';
+            }
+            const chkLogo = document.getElementById('ncIncluirLogo');
+            if (chkLogo) {
+                chkLogo.disabled = !cfg.logo || neutro;
+                if (chkLogo.disabled) chkLogo.checked = false;
+            }
+            const avisoLogo = document.getElementById('ncAvisoSinLogo');
+            if (avisoLogo) {
+                avisoLogo.textContent = neutro
+                    ? '(el modelo neutro no lleva logo)'
+                    : '(no hay logo cargado; súbalo en la configuración de abajo)';
+                avisoLogo.style.display = neutro || !cfg.logo ? 'inline' : 'none';
+            }
+        };
+
         window.ncSeleccionarCliente = function (id) {
             if (!id) return;
             const cfg = window._ncConfig || ncConfigPorDefecto();
@@ -47445,6 +47646,8 @@ document.getElementById('chatForm').onsubmit = function (e) {
             ncSetValor('ncClienteRut', c.rut);
             ncSetValor('ncClienteDireccion', c.direccion);
             ncSetValor('ncClienteCorreo', c.correo);
+            ncSetValor('ncModeloCorreo', ncModeloValido(c.modeloCorreo));
+            ncAlCambiarModelo();
         };
 
         function ncLeerFormulario() {
@@ -47464,6 +47667,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     direccion: ncValor('ncClienteDireccion'),
                     correo: ncValor('ncClienteCorreo')
                 },
+                modeloCorreo: ncModeloValido(ncValor('ncModeloCorreo')),
                 items,
                 total,
                 formaPago: ncValor('ncFormaPago'),
@@ -47483,23 +47687,38 @@ document.getElementById('chatForm').onsubmit = function (e) {
             if (!n.items.length) return 'Agregue al menos un ítem con descripción y valor.';
             const malo = n.items.find(i => !i.descripcion || i.cantidad <= 0 || i.valorUnitario <= 0);
             if (malo) return 'Cada ítem debe tener descripción, cantidad mayor a 0 y valor unitario mayor a 0.';
+            if (n.modeloCorreo === 'neutro') {
+                const refs = ncReferenciasNotaNeutra(n, window._ncConfig || ncConfigPorDefecto());
+                if (refs.length) return 'El modelo neutro no puede mencionar a WM 815. Revise: ' + refs.join(', ') + '.';
+            }
             return '';
         }
 
-        async function ncGuardarClienteDesdeNota(cliente) {
+        function ncReferenciasNotaNeutra(nota, cfg, extras) {
+            const cli = nota.cliente || {};
+            const cta = nota.cuenta || {};
+            const en = (cfg && cfg.emisorNeutro) || {};
+            const campos = [
+                ['N° de nota', nota.numero],
+                ['nombre del cliente', cli.nombre], ['RUT del cliente', cli.rut],
+                ['dirección del cliente', cli.direccion], ['correo del cliente', cli.correo],
+                ['observaciones', nota.observaciones],
+                ['titular de la cuenta bancaria', cta.titular], ['correo de la cuenta bancaria', cta.correo],
+                ['nombre del emisor neutro', en.nombre], ['dirección del emisor neutro', en.direccion],
+                ['teléfono del emisor neutro', en.contacto], ['correo del emisor neutro', en.correo]
+            ];
+            (nota.items || []).forEach((it, i) => campos.push(['ítem ' + (i + 1), it.descripcion]));
+            return ncReferenciasWm815(campos.concat(extras || []));
+        }
+
+        async function ncGuardarClienteDesdeNota(cliente, idSeleccionado) {
             if (!cliente || !cliente.nombre) return;
-            const cfg = await ncObtenerConfig();
-            const clientes = (cfg.clientes || []).slice();
-            const rutLimpio = ncLimpiarRut(cliente.rut);
-            const idx = clientes.findIndex(c => (rutLimpio && ncLimpiarRut(c.rut) === rutLimpio) ||
-                String(c.nombre || '').trim().toLowerCase() === cliente.nombre.trim().toLowerCase());
-            if (idx !== -1) {
-                clientes[idx] = Object.assign({}, clientes[idx], cliente);
-            } else {
-                clientes.push(Object.assign({ id: generarId() }, cliente));
-            }
-            clientes.sort((a, b) => String(a.nombre).localeCompare(String(b.nombre), 'es'));
-            await ncGuardarConfig({ clientes });
+            await ncModificarClientes(clientes => {
+                const idx = ncIndiceCliente(clientes, cliente, idSeleccionado);
+                if (idx !== -1) clientes[idx] = Object.assign({}, clientes[idx], cliente);
+                else clientes.push(Object.assign({ id: generarId() }, cliente));
+                return clientes;
+            });
         }
 
         window.ncGuardarNota = async function () {
@@ -47521,6 +47740,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 }
                 const ahora = new Date().toISOString();
                 let esNueva = false;
+                let avisoCliente = '';
                 if (nota.id) {
                     const idx = notas.findIndex(n => n.id === nota.id);
                     if (idx === -1) throw new Error('No se encontró la nota a editar.');
@@ -47534,7 +47754,14 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     notas.push(nota);
                 }
                 await ncGuardarNotas(notas);
-                if (document.getElementById('ncGuardarCliente').checked) await ncGuardarClienteDesdeNota(nota.cliente);
+                if (document.getElementById('ncGuardarCliente').checked) {
+                    try {
+                        await ncGuardarClienteDesdeNota(Object.assign({}, nota.cliente, { modeloCorreo: nota.modeloCorreo }), ncValor('ncClienteGuardado'));
+                    } catch (eCli) {
+                        console.error('Error al guardar cliente desde la nota:', eCli);
+                        avisoCliente = ' El cliente no se pudo agregar a la lista: ' + (eCli.message || '');
+                    }
+                }
                 if (typeof window.registrarMovimiento === 'function') {
                     window.registrarMovimiento(esNueva ? 'crear' : 'actualizar', 'caja', `Nota de cobro ${nota.numero}: ${nota.cliente.nombre} - ${ncMoneda(nota.total)}`);
                 }
@@ -47544,7 +47771,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 ncRenderConfig();
                 ncRenderNotas();
                 const restantes = window._ncPestanas.filter(p => ncEstadoTieneDatos(p.estado)).length;
-                mostrarAlerta(`Nota de cobro ${nota.numero} ${esNueva ? 'emitida' : 'actualizada'}. Desde la tabla puede descargar el PDF o enviarla por correo.${restantes ? ` Sigue${restantes > 1 ? 'n' : ''} abierta${restantes > 1 ? 's' : ''} ${restantes} nota${restantes > 1 ? 's' : ''} en las pestañas.` : ''}`, 'Nota guardada');
+                mostrarAlerta(`Nota de cobro ${nota.numero} ${esNueva ? 'emitida' : 'actualizada'}. Desde la tabla puede descargar el PDF o enviarla por correo.${restantes ? ` Sigue${restantes > 1 ? 'n' : ''} abierta${restantes > 1 ? 's' : ''} ${restantes} nota${restantes > 1 ? 's' : ''} en las pestañas.` : ''}${avisoCliente}`, 'Nota guardada');
             } catch (e) {
                 ocultarProgreso();
                 console.error('Error al guardar nota de cobro:', e);
@@ -47642,6 +47869,12 @@ document.getElementById('chatForm').onsubmit = function (e) {
             ncSetValor('ncEmisorRut', cfg.emisor.rut);
             ncSetValor('ncEmisorDireccion', cfg.emisor.direccion);
             ncSetValor('ncEmisorContacto', cfg.emisor.contacto);
+            const en = cfg.emisorNeutro || {};
+            ncSetValor('ncNeutroNombre', en.nombre);
+            ncSetValor('ncNeutroRut', en.rut);
+            ncSetValor('ncNeutroDireccion', en.direccion);
+            ncSetValor('ncNeutroContacto', en.contacto);
+            ncSetValor('ncNeutroCorreo', en.correo);
             ncSetValor('ncPrefijo', cfg.prefijo);
             ncSetValor('ncNumeroInicial', cfg.numeroInicial);
             const prev = document.getElementById('ncLogoPreview');
@@ -47659,6 +47892,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 chkLogo.disabled = !cfg.logo;
                 if (!cfg.logo) chkLogo.checked = false;
             }
+            ncAlCambiarModelo();
 
             const tbCtas = document.getElementById('ncTbodyCuentas');
             if (tbCtas) {
@@ -47685,8 +47919,16 @@ document.getElementById('chatForm').onsubmit = function (e) {
                         <td>${ncEsc(c.rut || '-')}</td>
                         <td>${ncEsc(c.direccion || '-')}</td>
                         <td>${ncEsc(c.correo || '-')}</td>
-                        <td><button type="button" class="btn btn-danger btn-sm" onclick="ncEliminarCliente('${ncEsc(c.id)}')">Eliminar</button></td>
-                    </tr>`).join('') : '<tr><td colspan="5" class="empty-state"><p>Los clientes se guardan automáticamente al emitir una nota</p></td></tr>';
+                        <td>
+                            <select class="nc-modelo-select" onchange="ncCambiarModeloCliente('${ncEsc(c.id)}', this.value)" aria-label="Modelo de correo del cliente">
+                                ${Object.keys(NC_MODELOS).map(m => `<option value="${m}" ${ncModeloValido(c.modeloCorreo) === m ? 'selected' : ''}>${ncEsc(NC_MODELOS[m].etiqueta)}</option>`).join('')}
+                            </select>
+                        </td>
+                        <td><div class="tabla-acciones">
+                            <button type="button" class="btn btn-primary btn-sm" onclick="ncEditarCliente('${ncEsc(c.id)}')">Editar</button>
+                            <button type="button" class="btn btn-danger btn-sm" onclick="ncEliminarCliente('${ncEsc(c.id)}')">Eliminar</button>
+                        </div></td>
+                    </tr>`).join('') : '<tr><td colspan="6" class="empty-state"><p>No hay clientes registrados</p></td></tr>';
             }
         }
 
@@ -47721,7 +47963,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 return `<tr>
                     <td style="white-space: nowrap; font-weight: 600; color: var(--text-primary);">${ncEsc(n.numero)}</td>
                     <td>${ncEsc(formatearFecha(n.fecha))}</td>
-                    <td>${ncEsc((n.cliente || {}).nombre || '-')}</td>
+                    <td>${ncEsc((n.cliente || {}).nombre || '-')}<span class="nc-modelo is-${ncModeloDeNota(n, window._ncConfig)}">${ncEsc(NC_MODELOS[ncModeloDeNota(n, window._ncConfig)].corta)}</span></td>
                     <td style="white-space: nowrap; font-weight: 600; color: var(--text-primary);">${ncMoneda(n.total)}</td>
                     <td>
                         <select class="nc-estado-select is-${estado}" onchange="ncCambiarEstado('${id}', this.value)" aria-label="Estado de la nota">
@@ -47750,6 +47992,30 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 mostrarAlerta('El RUT del emisor no es válido.', 'Datos inválidos');
                 return;
             }
+            const rutN = ncValor('ncNeutroRut');
+            const emisorNeutro = {
+                nombre: ncValor('ncNeutroNombre'),
+                rut: rutN ? ncFormatearRut(rutN) : '',
+                direccion: ncValor('ncNeutroDireccion'),
+                contacto: ncValor('ncNeutroContacto'),
+                correo: ncValor('ncNeutroCorreo')
+            };
+            if (rutN && !ncValidarRut(rutN)) {
+                mostrarAlerta('El RUT del emisor neutro no es válido.', 'Datos inválidos');
+                return;
+            }
+            if (emisorNeutro.correo && !ncCorreoValido(emisorNeutro.correo)) {
+                mostrarAlerta('El correo del emisor neutro no es válido.', 'Datos inválidos');
+                return;
+            }
+            const refsNeutro = ncReferenciasWm815([
+                ['nombre', emisorNeutro.nombre], ['dirección', emisorNeutro.direccion],
+                ['teléfono', emisorNeutro.contacto], ['correo', emisorNeutro.correo]
+            ]);
+            if (refsNeutro.length) {
+                mostrarAlerta('El emisor neutro no puede mencionar a WM 815. Revise: ' + refsNeutro.join(', ') + '.', 'Emisor neutro');
+                return;
+            }
             try {
                 const editando = !!ncValor('ncEditId');
                 await ncGuardarConfig({
@@ -47759,6 +48025,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                         direccion: ncValor('ncEmisorDireccion'),
                         contacto: ncValor('ncEmisorContacto')
                     },
+                    emisorNeutro,
                     prefijo: ncValor('ncPrefijo'),
                     numeroInicial: Math.max(1, parseInt(ncValor('ncNumeroInicial'), 10) || 1)
                 });
@@ -47874,7 +48141,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
             }
             cuenta.rut = ncFormatearRut(cuenta.rut);
             try {
-                const cfg = await ncObtenerConfig();
+                const cfg = await ncLeerConfigParaGuardar();
                 let cuentas = (cfg.cuentas || []).slice();
                 if (cuenta.predeterminada) cuentas = cuentas.map(c => Object.assign({}, c, { predeterminada: false }));
                 const idx = cuentas.findIndex(c => c.id === cuenta.id);
@@ -47911,7 +48178,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
             const ok = await confirmarAccion('¿Eliminar esta cuenta bancaria? Las notas ya emitidas conservan los datos bancarios con que se emitieron.', 'Eliminar cuenta');
             if (!ok) return;
             try {
-                const cfg = await ncObtenerConfig();
+                const cfg = await ncLeerConfigParaGuardar();
                 const cuentas = (cfg.cuentas || []).filter(c => c.id !== id);
                 if (cuentas.length && !cuentas.some(c => c.predeterminada)) cuentas[0] = Object.assign({}, cuentas[0], { predeterminada: true });
                 await ncGuardarConfig({ cuentas });
@@ -47922,12 +48189,89 @@ document.getElementById('chatForm').onsubmit = function (e) {
             }
         };
 
+        window.ncCambiarModeloCliente = async function (id, modelo) {
+            try {
+                await ncModificarClientes(clientes => clientes.map(c => c.id === id ? Object.assign({}, c, { modeloCorreo: ncModeloValido(modelo) }) : c));
+            } catch (e) {
+                mostrarAlerta('No se pudo cambiar el modelo de correo. ' + (e.message || ''), 'Error');
+            }
+            ncRenderConfig();
+            ncRenderSelects();
+            ncRenderNotas();
+        };
+
+        window.ncLimpiarFormCliente = function () {
+            ['ncCliEditId', 'ncCliNombre', 'ncCliRut', 'ncCliDireccion', 'ncCliCorreo'].forEach(id => ncSetValor(id, ''));
+            ncSetValor('ncCliModelo', 'wm815');
+            const btn = document.getElementById('ncBtnGuardarCli');
+            if (btn) btn.textContent = 'Agregar cliente';
+        };
+
+        window.ncGuardarClienteRegistro = async function () {
+            const editId = ncValor('ncCliEditId');
+            const rut = ncValor('ncCliRut');
+            const cliente = {
+                nombre: ncValor('ncCliNombre'),
+                rut: rut ? ncFormatearRut(rut) : '',
+                direccion: ncValor('ncCliDireccion'),
+                correo: ncValor('ncCliCorreo'),
+                modeloCorreo: ncModeloValido(ncValor('ncCliModelo'))
+            };
+            if (!cliente.nombre) {
+                mostrarAlerta('Ingrese el nombre del cliente.', 'Datos incompletos');
+                return;
+            }
+            if (rut && !ncValidarRut(rut)) {
+                mostrarAlerta('El RUT del cliente no es válido.', 'Datos inválidos');
+                return;
+            }
+            if (cliente.correo && !ncCorreoValido(cliente.correo)) {
+                mostrarAlerta('El correo del cliente no es válido.', 'Datos inválidos');
+                return;
+            }
+            try {
+                let duplicado = null;
+                await ncModificarClientes(clientes => {
+                    const otro = clientes.find(c => c.id !== editId && ncIndiceCliente([c], cliente) === 0);
+                    if (otro) { duplicado = otro; return clientes; }
+                    const idx = editId ? clientes.findIndex(c => c.id === editId) : -1;
+                    if (idx !== -1) clientes[idx] = Object.assign({}, clientes[idx], cliente);
+                    else clientes.push(Object.assign({ id: generarId() }, cliente));
+                    return clientes;
+                });
+                if (duplicado) {
+                    mostrarAlerta(`Ya existe un cliente con ese ${ncLimpiarRut(cliente.rut) && ncLimpiarRut(duplicado.rut) === ncLimpiarRut(cliente.rut) ? 'RUT' : 'nombre'}: ${duplicado.nombre}. Edítelo desde la lista.`, 'Cliente duplicado');
+                    return;
+                }
+                ncLimpiarFormCliente();
+                ncRenderConfig();
+                ncRenderSelects();
+                ncRenderNotas();
+            } catch (e) {
+                console.error('Error al guardar cliente:', e);
+                mostrarAlerta('No se pudo guardar el cliente. ' + (e.message || ''), 'Error');
+            }
+        };
+
+        window.ncEditarCliente = function (id) {
+            const c = ((window._ncConfig || {}).clientes || []).find(x => x.id === id);
+            if (!c) return;
+            ncSetValor('ncCliEditId', c.id);
+            ncSetValor('ncCliNombre', c.nombre);
+            ncSetValor('ncCliRut', c.rut);
+            ncSetValor('ncCliDireccion', c.direccion);
+            ncSetValor('ncCliCorreo', c.correo);
+            ncSetValor('ncCliModelo', ncModeloValido(c.modeloCorreo));
+            document.getElementById('ncBtnGuardarCli').textContent = 'Guardar cambios';
+            document.getElementById('ncCliNombre').focus();
+        };
+
         window.ncEliminarCliente = async function (id) {
             const ok = await confirmarAccion('¿Eliminar este cliente de la lista? Las notas emitidas no se modifican.', 'Eliminar cliente');
             if (!ok) return;
             try {
-                const cfg = await ncObtenerConfig();
-                await ncGuardarConfig({ clientes: (cfg.clientes || []).filter(c => c.id !== id) });
+                await ncModificarClientes(clientes => clientes.filter(c => c.id !== id));
+                if (ncValor('ncCliEditId') === id) ncLimpiarFormCliente();
                 ncRenderConfig();
                 ncRenderSelects();
             } catch (e) {
@@ -47953,13 +48297,14 @@ document.getElementById('chatForm').onsubmit = function (e) {
             const ancho = 180;
             const altoPag = doc.internal.pageSize.getHeight();
             const limiteY = altoPag - 15;
-            const emisor = (cfg && cfg.emisor) || {};
+            const modelo = ncModeloDeNota(nota, cfg);
+            const emisor = ncEmisorDeModelo(cfg, modelo);
             doc.setTextColor(0, 0, 0);
             doc.setDrawColor(0, 0, 0);
             doc.setLineWidth(0.3);
 
             let finCabecera = 34;
-            if (nota.incluirLogo && cfg && cfg.logo) {
+            if (modelo !== 'neutro' && nota.incluirLogo && cfg && cfg.logo) {
                 const maxW = 45;
                 const maxH = 22;
                 const w0 = cfg.logoAncho || maxW;
@@ -47984,6 +48329,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
             if (emisor.rut) lineasEmisor.push({ t: 'RUT: ' + emisor.rut });
             if (emisor.direccion) lineasEmisor.push({ t: emisor.direccion });
             if (emisor.contacto) lineasEmisor.push({ t: emisor.contacto });
+            if (emisor.correo) lineasEmisor.push({ t: emisor.correo });
             if (lineasEmisor.length) {
                 let yE = 14;
                 doc.setFontSize(8);
@@ -48169,38 +48515,78 @@ document.getElementById('chatForm').onsubmit = function (e) {
 
         // ---------- Correo al cliente ----------
 
-        function ncGenerarCorreoHtml(nota, cfg, nombreEmisor, mensajePersonal) {
+        const NC_TEMAS_CORREO = {
+            wm815: {
+                fondo: '#eef5e6', cabecera: '#75BB21', cabeceraTxt: '#ffffff', cabeceraSub: '#f1f9e6', cabeceraEtq: '#e3f3cc',
+                acento: '#4e8a12', enlace: '#4e8a12', tablaCab: '#f5faef', borde: '#e1ecd4',
+                cajaFondo: '#f2f8ea', cajaBorde: '#cfe6b1', cajaTitulo: '#3f7310',
+                pieFondo: '#2f3b22', pieTitulo: '#ffffff', pieTxt: '#d5dfc8'
+            },
+            neutro: {
+                fondo: '#f3f4f6', cabecera: '#1e3a5f', cabeceraTxt: '#ffffff', cabeceraSub: '#dbeafe', cabeceraEtq: '#bfdbfe',
+                acento: '#1e3a5f', enlace: '#1d4ed8', tablaCab: '#f9fafb', borde: '#e5e7eb',
+                cajaFondo: '#eef2ff', cajaBorde: '#c7d2fe', cajaTitulo: '#3730a3',
+                pieFondo: '#f9fafb', pieTitulo: '#374151', pieTxt: '#6b7280'
+            }
+        };
+
+        function ncAsuntoPorDefecto(nota) {
+            return `Nota de Cobro ${nota.numero} - ${(nota.cliente || {}).nombre || ''}`.trim().replace(/\s+-$/, '');
+        }
+
+        function ncGenerarCorreoHtml(nota, cfg, nombreEmisor, mensajePersonal, modelo) {
+            const mod = ncModeloValido(modelo || ncModeloDeNota(nota, cfg));
+            const t = NC_TEMAS_CORREO[mod];
+            const esWm = mod === 'wm815';
             const cli = nota.cliente || {};
             const cta = nota.cuenta;
-            const emisor = (cfg && cfg.emisor) || {};
+            const emisor = ncEmisorDeModelo(cfg, mod);
+            const firma = emisor.nombre || nombreEmisor || 'Administración';
+            const celda = `padding: 8px 10px; border-bottom: 1px solid ${t.borde}; font-size: 13px; color: #1f2937;`;
             const filasItems = (nota.items || []).map(it => {
                 const sub = Math.round((Number(it.cantidad) || 0) * (Number(it.valorUnitario) || 0));
                 return `<tr>
-                    <td style="padding: 8px 10px; border-bottom: 1px solid #e5e7eb; font-size: 13px; color: #1f2937;">${ncEsc(it.descripcion)}</td>
-                    <td style="padding: 8px 10px; border-bottom: 1px solid #e5e7eb; font-size: 13px; color: #1f2937; text-align: center;">${ncEsc(String(it.cantidad).replace('.', ','))}</td>
-                    <td style="padding: 8px 10px; border-bottom: 1px solid #e5e7eb; font-size: 13px; color: #1f2937; text-align: right; white-space: nowrap;">${ncEsc(ncMoneda(it.valorUnitario))}</td>
-                    <td style="padding: 8px 10px; border-bottom: 1px solid #e5e7eb; font-size: 13px; color: #1f2937; text-align: right; white-space: nowrap;">${ncEsc(ncMoneda(sub))}</td>
+                    <td style="${celda}">${ncEsc(it.descripcion)}</td>
+                    <td style="${celda} text-align: center;">${ncEsc(String(it.cantidad).replace('.', ','))}</td>
+                    <td style="${celda} text-align: right; white-space: nowrap;">${ncEsc(ncMoneda(it.valorUnitario))}</td>
+                    <td style="${celda} text-align: right; white-space: nowrap;">${ncEsc(ncMoneda(sub))}</td>
                 </tr>`;
             }).join('');
             const bloqueMensaje = mensajePersonal
                 ? `<p style="margin: 0 0 14px 0; font-size: 14px; color: #374151; line-height: 1.6;">${ncEsc(mensajePersonal).replace(/\n/g, '<br>')}</p>`
                 : '';
             const bloqueCuenta = cta ? `
-              <tr><td style="padding: 0 28px 16px 28px;">
-                <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border: 1px solid #c7d2fe; border-radius: 8px; background-color: #eef2ff;">
-                  <tr><td colspan="2" style="padding: 10px 14px 4px 14px; font-size: 12px; font-weight: 700; color: #3730a3; text-transform: uppercase; letter-spacing: 0.04em;">Datos para transferencia</td></tr>
-                  ${[['Banco', cta.banco], ['Tipo de cuenta', cta.tipo], ['N° de cuenta', cta.numero], ['Titular', cta.titular], ['RUT', cta.rut], ['Correo', cta.correo]].filter(f => f[1]).map(f =>
-                    `<tr><td style="padding: 4px 14px; font-size: 13px; color: #4b5563; width: 40%;">${f[0]}</td><td style="padding: 4px 14px; font-size: 13px; color: #111827; font-weight: 600;">${ncEsc(f[1])}</td></tr>`).join('')}
-                  <tr><td colspan="2" style="padding: 0 0 8px 0;"></td></tr>
-                </table>
-              </td></tr>` : '';
-            const correoComprobante = (cta && cta.correo) || '';
+        <tr><td style="padding: 0 28px 16px 28px;">
+          <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border: 1px solid ${t.cajaBorde}; border-radius: 8px; background-color: ${t.cajaFondo};">
+            <tr><td colspan="2" style="padding: 10px 14px 4px 14px; font-size: 12px; font-weight: 700; color: ${t.cajaTitulo}; text-transform: uppercase; letter-spacing: 0.04em;">Datos para transferencia</td></tr>
+            ${[['Banco', cta.banco], ['Tipo de cuenta', cta.tipo], ['N° de cuenta', cta.numero], ['Titular', cta.titular], ['RUT', cta.rut], ['Correo', cta.correo]].filter(f => f[1]).map(f =>
+                `<tr><td style="padding: 4px 14px; font-size: 13px; color: #4b5563; width: 40%;">${f[0]}</td><td style="padding: 4px 14px; font-size: 13px; color: #111827; font-weight: 600;">${ncEsc(f[1])}</td></tr>`).join('')}
+            <tr><td colspan="2" style="padding: 0 0 8px 0;"></td></tr>
+          </table>
+        </td></tr>` : '';
+            const correoComprobante = (cta && cta.correo) || (!esWm && emisor.correo) || '';
             const bloqueObs = nota.observaciones ? `
-              <tr><td style="padding: 0 28px 16px 28px;">
-                <p style="margin: 0 0 4px 0; font-size: 12px; font-weight: 700; color: #6b7280; text-transform: uppercase;">Observaciones</p>
-                <p style="margin: 0; font-size: 13px; color: #374151; line-height: 1.5;">${ncEsc(nota.observaciones).replace(/\n/g, '<br>')}</p>
-              </td></tr>` : '';
-            const pieEmisor = [emisor.nombre || nombreEmisor, emisor.rut ? 'RUT ' + emisor.rut : '', emisor.direccion, emisor.contacto].filter(Boolean).map(ncEsc).join(' · ');
+        <tr><td style="padding: 0 28px 16px 28px;">
+          <p style="margin: 0 0 4px 0; font-size: 12px; font-weight: 700; color: #6b7280; text-transform: uppercase;">Observaciones</p>
+          <p style="margin: 0; font-size: 13px; color: #374151; line-height: 1.5;">${ncEsc(nota.observaciones).replace(/\n/g, '<br>')}</p>
+        </td></tr>` : '';
+            const datosEmisor = [emisor.rut ? 'RUT ' + emisor.rut : '', emisor.direccion, emisor.contacto, esWm ? '' : emisor.correo]
+                .filter(Boolean).map(ncEsc).join(' · ');
+            const etiquetaCabecera = esWm ? nombreEmisor : emisor.nombre;
+            const filaLogo = esWm ? `
+        <tr><td align="center" style="padding: 22px 28px 16px 28px; background-color: #ffffff;">
+          <img src="${NC_LOGO_WM815_URL}" width="200" alt="${ncEsc(nombreEmisor)}" style="display: block; margin: 0 auto; border: 0; width: 200px; height: auto;">
+        </td></tr>` : '';
+            const pie = esWm ? `
+        <tr><td style="padding: 18px 28px 20px 28px; background-color: ${t.pieFondo}; text-align: center;">
+          <p style="margin: 0 0 4px 0; font-size: 15px; font-weight: 700; color: ${t.pieTitulo};">${ncEsc(firma)}</p>
+          ${datosEmisor ? `<p style="margin: 0 0 4px 0; font-size: 12px; color: ${t.pieTxt};">${datosEmisor}</p>` : ''}
+          <p style="margin: 0; font-size: 11px; color: ${t.pieTxt}; line-height: 1.5;">Sistema de Gestión · Comunidad Edificio WM 815<br>Cuidemos el medio ambiente: no imprima este correo si no es necesario.</p>
+        </td></tr>` : (datosEmisor || emisor.nombre ? `
+        <tr><td style="padding: 14px 28px; background-color: ${t.pieFondo}; border-top: 1px solid ${t.borde}; text-align: center;">
+          ${emisor.nombre ? `<p style="margin: 0 0 2px 0; font-size: 12px; font-weight: 700; color: ${t.pieTitulo};">${ncEsc(emisor.nombre)}</p>` : ''}
+          ${datosEmisor ? `<p style="margin: 0; font-size: 11px; color: ${t.pieTxt};">${datosEmisor}</p>` : ''}
+        </td></tr>` : '');
             return `<!DOCTYPE html>
 <html lang="es">
 <head>
@@ -48213,14 +48599,15 @@ document.getElementById('chatForm').onsubmit = function (e) {
     table { border-collapse: collapse; }
   </style>
 </head>
-<body style="margin: 0; padding: 0; background-color: #f3f4f6;">
-  <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color: #f3f4f6;">
+<body style="margin: 0; padding: 0; background-color: ${t.fondo};">
+  <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color: ${t.fondo};">
     <tr><td align="center" style="padding: 20px 10px;">
       <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="600" style="max-width: 600px; width: 100%; background-color: #ffffff; border-radius: 10px; overflow: hidden;">
-        <tr><td style="background-color: #1e3a5f; padding: 20px 28px;">
-          <p style="margin: 0 0 4px 0; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; color: #bfdbfe; text-transform: uppercase;">${ncEsc(nombreEmisor)}</p>
-          <p style="margin: 0; font-size: 22px; font-weight: 700; color: #ffffff;">Nota de Cobro ${ncEsc(nota.numero)}</p>
-          <p style="margin: 4px 0 0 0; font-size: 13px; color: #dbeafe;">Fecha de emisión: ${ncEsc(formatearFecha(nota.fecha))}</p>
+        ${filaLogo}
+        <tr><td style="background-color: ${t.cabecera}; padding: 20px 28px;">
+          ${etiquetaCabecera ? `<p style="margin: 0 0 4px 0; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; color: ${t.cabeceraEtq}; text-transform: uppercase;">${ncEsc(etiquetaCabecera)}</p>` : ''}
+          <p style="margin: 0; font-size: 22px; font-weight: 700; color: ${t.cabeceraTxt};">Nota de Cobro ${ncEsc(nota.numero)}</p>
+          <p style="margin: 4px 0 0 0; font-size: 13px; color: ${t.cabeceraSub};">Fecha de emisión: ${ncEsc(formatearFecha(nota.fecha))}</p>
         </td></tr>
         <tr><td style="padding: 22px 28px 8px 28px;">
           <p style="margin: 0 0 12px 0; font-size: 14px; color: #111827;">Estimado(a) <strong>${ncEsc(cli.nombre)}</strong>:</p>
@@ -48228,17 +48615,17 @@ document.getElementById('chatForm').onsubmit = function (e) {
           <p style="margin: 0 0 16px 0; font-size: 14px; color: #374151; line-height: 1.6;">Junto con saludar, adjuntamos la <strong>nota de cobro N° ${ncEsc(nota.numero)}</strong> por los servicios detallados a continuación, por un total de <strong>${ncEsc(ncMoneda(nota.total))}</strong>.</p>
         </td></tr>
         <tr><td style="padding: 0 28px 16px 28px;">
-          <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border: 1px solid #e5e7eb; border-radius: 8px;">
-            <tr style="background-color: #f9fafb;">
-              <td style="padding: 8px 10px; font-size: 12px; font-weight: 700; color: #4b5563; border-bottom: 1px solid #e5e7eb;">Descripción</td>
-              <td style="padding: 8px 10px; font-size: 12px; font-weight: 700; color: #4b5563; border-bottom: 1px solid #e5e7eb; text-align: center;">Cant.</td>
-              <td style="padding: 8px 10px; font-size: 12px; font-weight: 700; color: #4b5563; border-bottom: 1px solid #e5e7eb; text-align: right;">Valor unit.</td>
-              <td style="padding: 8px 10px; font-size: 12px; font-weight: 700; color: #4b5563; border-bottom: 1px solid #e5e7eb; text-align: right;">Total</td>
+          <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border: 1px solid ${t.borde}; border-radius: 8px;">
+            <tr style="background-color: ${t.tablaCab};">
+              <td style="padding: 8px 10px; font-size: 12px; font-weight: 700; color: #4b5563; border-bottom: 1px solid ${t.borde};">Descripción</td>
+              <td style="padding: 8px 10px; font-size: 12px; font-weight: 700; color: #4b5563; border-bottom: 1px solid ${t.borde}; text-align: center;">Cant.</td>
+              <td style="padding: 8px 10px; font-size: 12px; font-weight: 700; color: #4b5563; border-bottom: 1px solid ${t.borde}; text-align: right;">Valor unit.</td>
+              <td style="padding: 8px 10px; font-size: 12px; font-weight: 700; color: #4b5563; border-bottom: 1px solid ${t.borde}; text-align: right;">Total</td>
             </tr>
             ${filasItems}
             <tr>
               <td colspan="3" style="padding: 10px; font-size: 14px; font-weight: 700; color: #111827; text-align: right;">Total a pagar</td>
-              <td style="padding: 10px; font-size: 15px; font-weight: 700; color: #1e3a5f; text-align: right; white-space: nowrap;">${ncEsc(ncMoneda(nota.total))}</td>
+              <td style="padding: 10px; font-size: 15px; font-weight: 700; color: ${t.acento}; text-align: right; white-space: nowrap;">${ncEsc(ncMoneda(nota.total))}</td>
             </tr>
           </table>
         </td></tr>
@@ -48248,12 +48635,10 @@ document.getElementById('chatForm').onsubmit = function (e) {
         ${bloqueCuenta}
         ${bloqueObs}
         <tr><td style="padding: 0 28px 20px 28px;">
-          <p style="margin: 0; font-size: 13px; color: #374151; line-height: 1.6;">El detalle completo se encuentra en el PDF adjunto.${correoComprobante ? ` Una vez realizado el pago, le agradeceremos enviar el comprobante a <a href="mailto:${ncEsc(correoComprobante)}" style="color: #1d4ed8;">${ncEsc(correoComprobante)}</a>.` : ''}</p>
-          <p style="margin: 14px 0 0 0; font-size: 13px; color: #374151;">Saludos cordiales,<br><strong>${ncEsc(emisor.nombre || nombreEmisor)}</strong></p>
+          <p style="margin: 0; font-size: 13px; color: #374151; line-height: 1.6;">El detalle completo se encuentra en el PDF adjunto.${correoComprobante ? ` Una vez realizado el pago, le agradeceremos enviar el comprobante a <a href="mailto:${ncEsc(correoComprobante)}" style="color: ${t.enlace};">${ncEsc(correoComprobante)}</a>.` : ''}</p>
+          <p style="margin: 14px 0 0 0; font-size: 13px; color: #374151;">Saludos cordiales,<br><strong>${ncEsc(firma)}</strong></p>
         </td></tr>
-        <tr><td style="padding: 14px 28px; background-color: #f9fafb; border-top: 1px solid #e5e7eb; text-align: center;">
-          <p style="margin: 0; font-size: 11px; color: #6b7280;">${pieEmisor}</p>
-        </td></tr>
+        ${pie}
       </table>
     </td></tr>
   </table>
@@ -48261,17 +48646,57 @@ document.getElementById('chatForm').onsubmit = function (e) {
 </html>`;
         }
 
+        async function ncPrepararCorreo(nota, cfg, modelo, opciones) {
+            const o = opciones || {};
+            const mod = ncModeloValido(modelo);
+            let nombreEmisor = '';
+            if (mod === 'neutro') {
+                nombreEmisor = (cfg.emisorNeutro && cfg.emisorNeutro.nombre) || '';
+            } else {
+                nombreEmisor = (cfg.emisor && cfg.emisor.nombre) || '';
+                if (!nombreEmisor) {
+                    try {
+                        nombreEmisor = typeof obtenerNombreComunidad === 'function' ? await obtenerNombreComunidad() : '';
+                    } catch (e) { nombreEmisor = ''; }
+                }
+                nombreEmisor = nombreEmisor || 'Comunidad WM 815';
+            }
+            const notaModelo = Object.assign({}, nota, { modeloCorreo: mod });
+            const asunto = o.asunto || ncAsuntoPorDefecto(nota);
+            const html = ncGenerarCorreoHtml(notaModelo, cfg, nombreEmisor, o.mensaje || '', mod);
+            let problemas = [];
+            if (mod === 'neutro') {
+                problemas = ncReferenciasNotaNeutra(notaModelo, cfg, [
+                    ['asunto', asunto],
+                    ['mensaje adicional', o.mensaje],
+                    ['Para', (o.para || []).join(', ')],
+                    ['CC', (o.cc || []).join(', ')],
+                    ['nombre del PDF', ncNombreArchivoPdf(notaModelo)]
+                ]);
+                if (!problemas.length && NC_RE_WM815.test(html)) problemas.push('contenido del correo');
+            }
+            const replyTo = mod === 'neutro'
+                ? ((cfg.emisorNeutro && cfg.emisorNeutro.correo) || (nota.cuenta && nota.cuenta.correo) || '')
+                : '';
+            return { modelo: mod, nota: notaModelo, asunto, html, nombreEmisor, replyTo, problemas };
+        }
+
+        function ncMostrarHtmlCorreo(html, titulo) {
+            const w = window.open('', '_blank');
+            if (!w) {
+                mostrarAlerta('El navegador bloqueó la ventana de vista previa. Permita ventanas emergentes para este sitio.', 'Vista previa');
+                return;
+            }
+            w.document.open();
+            w.document.write(html);
+            w.document.close();
+            try { w.document.title = titulo || 'Vista previa del correo'; } catch (e) { /* sin título */ }
+        }
+
         window.ncAbrirModalCorreo = async function (id) {
             const nota = (window._ncNotas || []).find(n => n.id === id);
             if (!nota) return;
             const cfg = await ncObtenerConfig();
-            let nombreEmisor = (cfg.emisor && cfg.emisor.nombre) || '';
-            if (!nombreEmisor) {
-                try {
-                    nombreEmisor = typeof obtenerNombreComunidad === 'function' ? await obtenerNombreComunidad() : '';
-                } catch (e) { nombreEmisor = ''; }
-            }
-            nombreEmisor = nombreEmisor || 'Administración';
             let admins = [];
             try {
                 if (typeof cargarCorreosAdministrativos === 'function') await cargarCorreosAdministrativos();
@@ -48279,19 +48704,27 @@ document.getElementById('chatForm').onsubmit = function (e) {
             } catch (e) { admins = []; }
 
             const cli = nota.cliente || {};
-            const asuntoDef = `Nota de Cobro ${nota.numero} - ${cli.nombre || ''}`.trim();
+            const modeloCliente = ncModeloDeNota(nota, cfg);
+            const asuntoDef = ncAsuntoPorDefecto(nota);
             const modal = document.createElement('div');
             modal.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10000; display: flex; align-items: center; justify-content: center; padding: 1rem;';
             const estiloInput = 'width: 100%; padding: 0.65rem; border: 1px solid var(--border-color); border-radius: 8px; font-size: 0.875rem; background: var(--bg-primary); color: var(--text-primary); box-sizing: border-box; font-family: inherit;';
             modal.innerHTML = `
                 <div style="background: var(--bg-primary); border-radius: 12px; max-width: 600px; width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);">
                     <div style="padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
-                        <h3 style="margin: 0; font-size: 1.15rem; font-weight: 700; color: var(--text-primary);">🧾 Enviar nota de cobro ${ncEsc(nota.numero)}</h3>
+                        <h3 style="margin: 0; font-size: 1.15rem; font-weight: 700; color: var(--text-primary);">Enviar nota de cobro ${ncEsc(nota.numero)}</h3>
                         <button type="button" data-nc-cerrar style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-secondary);">×</button>
                     </div>
                     <div style="padding: 1.25rem 1.5rem;">
                         <div style="margin-bottom: 0.9rem; padding: 0.65rem 0.75rem; background: var(--bg-tertiary); border-radius: 8px; border: 1px solid var(--border-color); font-size: 0.8125rem; color: var(--text-secondary);">
                             <strong>${ncEsc(cli.nombre)}</strong> · Total ${ncEsc(ncMoneda(nota.total))} · Se adjuntará el PDF <em>${ncEsc(ncNombreArchivoPdf(nota))}</em>
+                        </div>
+                        <div style="margin-bottom: 0.9rem;">
+                            <label style="display: block; margin-bottom: 0.35rem; font-weight: 600; color: var(--text-primary);">Modelo de correo</label>
+                            <select id="ncCorreoModelo" style="${estiloInput}">
+                                ${Object.keys(NC_MODELOS).map(m => `<option value="${m}" ${m === modeloCliente ? 'selected' : ''}>${ncEsc(NC_MODELOS[m].etiqueta)}${m === modeloCliente ? ' (asignado al cliente)' : ''}</option>`).join('')}
+                            </select>
+                            <p id="ncCorreoModeloAviso" style="margin: 0.35rem 0 0; font-size: 0.78rem; color: var(--text-tertiary);"></p>
                         </div>
                         <div style="margin-bottom: 0.9rem;">
                             <label style="display: block; margin-bottom: 0.35rem; font-weight: 600; color: var(--text-primary);">Para *</label>
@@ -48303,7 +48736,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                         </div>
                         ${admins.length ? `
                         <div style="margin-bottom: 0.9rem;">
-                            <label style="display: block; margin-bottom: 0.35rem; font-weight: 600; color: var(--text-primary);">Copia oculta a administración <span style="font-weight: 500; color: var(--text-tertiary); font-size: 0.8125rem;">(opcional)</span></label>
+                            <label style="display: block; margin-bottom: 0.35rem; font-weight: 600; color: var(--text-primary);">Copia oculta a administración <span style="font-weight: 500; color: var(--text-tertiary); font-size: 0.8125rem;">(opcional, el cliente no la ve)</span></label>
                             <div style="max-height: 140px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: 8px; padding: 0.5rem 0.65rem;">
                                 ${admins.map((a, i) => `<label style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.3rem; font-size: 0.8125rem; cursor: pointer;"><input type="checkbox" data-nc-cco="${i}"> <span><strong>${ncEsc(a.nombre || '')}</strong> <span style="color: var(--text-secondary);">${ncEsc(a.correo || '')}</span></span></label>`).join('')}
                             </div>
@@ -48316,9 +48749,10 @@ document.getElementById('chatForm').onsubmit = function (e) {
                             <label style="display: block; margin-bottom: 0.35rem; font-weight: 600; color: var(--text-primary);">Mensaje adicional <span style="font-weight: 500; color: var(--text-tertiary); font-size: 0.8125rem;">(opcional)</span></label>
                             <textarea id="ncCorreoMensaje" rows="3" placeholder="Se agrega después del saludo al cliente" style="${estiloInput} resize: vertical;"></textarea>
                         </div>
-                        <div style="display: flex; gap: 0.75rem; justify-content: flex-end; margin-top: 1.25rem;">
+                        <div style="display: flex; gap: 0.75rem; justify-content: flex-end; flex-wrap: wrap; margin-top: 1.25rem;">
                             <button type="button" data-nc-cerrar class="btn btn-secondary" style="padding: 0.65rem 1.25rem;">Cancelar</button>
-                            <button type="button" id="ncBtnEnviarCorreo" class="btn btn-primary" style="padding: 0.65rem 1.25rem;">📧 Enviar nota</button>
+                            <button type="button" id="ncBtnPreviaCorreo" class="btn btn-secondary" style="padding: 0.65rem 1.25rem;">Vista previa del correo</button>
+                            <button type="button" id="ncBtnEnviarCorreo" class="btn btn-primary" style="padding: 0.65rem 1.25rem;">Enviar nota</button>
                         </div>
                     </div>
                 </div>`;
@@ -48326,11 +48760,37 @@ document.getElementById('chatForm').onsubmit = function (e) {
             modal.querySelectorAll('[data-nc-cerrar]').forEach(b => b.addEventListener('click', () => modal.remove()));
             modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
 
+            const selModelo = modal.querySelector('#ncCorreoModelo');
+            const pintarAvisoModelo = () => {
+                const neutro = selModelo.value === 'neutro';
+                const en = cfg.emisorNeutro || {};
+                modal.querySelector('#ncCorreoModeloAviso').textContent = neutro
+                    ? `Diseño azul, sin logo ni mención a WM 815. Firma: ${en.nombre || 'Administración'}.${en.correo ? ' Las respuestas llegan a ' + en.correo + '.' : ''}`
+                    : 'Diseño verde con el logo y la firma de la Comunidad WM 815.';
+            };
+            selModelo.addEventListener('change', pintarAvisoModelo);
+            pintarAvisoModelo();
+
+            const leerDatos = () => ({
+                para: normalizarListaCorreosDestino(modal.querySelector('#ncCorreoPara').value),
+                cc: normalizarListaCorreosDestino(modal.querySelector('#ncCorreoCc').value),
+                asunto: modal.querySelector('#ncCorreoAsunto').value.trim() || asuntoDef,
+                mensaje: modal.querySelector('#ncCorreoMensaje').value.trim()
+            });
+
+            modal.querySelector('#ncBtnPreviaCorreo').addEventListener('click', async function () {
+                const d = leerDatos();
+                const prep = await ncPrepararCorreo(nota, cfg, selModelo.value, d);
+                ncMostrarHtmlCorreo(prep.html, prep.asunto);
+                if (prep.problemas.length) {
+                    mostrarAlerta('Este correo neutro todavía menciona a WM 815 en: ' + prep.problemas.join(', ') + '. Corrija esos datos antes de enviarlo.', 'Referencia a WM 815');
+                }
+            });
+
             modal.querySelector('#ncBtnEnviarCorreo').addEventListener('click', async function () {
-                const para = normalizarListaCorreosDestino(modal.querySelector('#ncCorreoPara').value);
-                const cc = normalizarListaCorreosDestino(modal.querySelector('#ncCorreoCc').value);
-                const invalidos = para.concat(cc).filter(c => !ncCorreoValido(c));
-                if (!para.length) {
+                const d = leerDatos();
+                const invalidos = d.para.concat(d.cc).filter(c => !ncCorreoValido(c));
+                if (!d.para.length) {
                     mostrarAlerta('Ingrese al menos un correo de destino.', 'Falta destinatario');
                     return;
                 }
@@ -48338,25 +48798,28 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     mostrarAlerta('Correos no válidos: ' + invalidos.join(', '), 'Correo inválido');
                     return;
                 }
-                const paraSet = new Set(para.concat(cc).map(c => c.toLowerCase()));
+                const prep = await ncPrepararCorreo(nota, cfg, selModelo.value, d);
+                if (prep.problemas.length) {
+                    mostrarAlerta('El modelo neutro no puede mencionar a WM 815. Revise: ' + prep.problemas.join(', ') + '.', 'Referencia a WM 815');
+                    return;
+                }
+                const paraSet = new Set(d.para.concat(d.cc).map(c => c.toLowerCase()));
                 const cco = Array.from(modal.querySelectorAll('[data-nc-cco]:checked'))
                     .map(c => admins[parseInt(c.getAttribute('data-nc-cco'), 10)])
                     .map(a => String((a && a.correo) || '').trim())
                     .filter(c => c && !paraSet.has(c.toLowerCase()));
-                const asunto = modal.querySelector('#ncCorreoAsunto').value.trim() || asuntoDef;
-                const mensaje = modal.querySelector('#ncCorreoMensaje').value.trim();
                 try {
                     mostrarProgreso('Generando PDF y enviando nota de cobro...');
-                    const doc = ncGenerarPdf(nota, cfg);
-                    const adjunto = adjuntoPdfBufferComoMail(doc.output('arraybuffer'), ncNombreArchivoPdf(nota));
+                    const doc = ncGenerarPdf(prep.nota, cfg);
+                    const adjunto = adjuntoPdfBufferComoMail(doc.output('arraybuffer'), ncNombreArchivoPdf(prep.nota));
                     if (!adjunto) throw new Error('No se pudo preparar el PDF adjunto.');
-                    const html = ncGenerarCorreoHtml(nota, cfg, nombreEmisor, mensaje);
                     const opts = { aplicarCcoGlobal: false };
-                    if (cc.length) opts.cc = cc;
+                    if (d.cc.length) opts.cc = d.cc;
                     if (cco.length) opts.bcc = cco;
+                    if (prep.replyTo) opts.replyTo = prep.replyTo;
                     const resultado = await enviarCorreoHTML(
-                        { correo: para.length === 1 ? para[0] : para, nombre: cli.nombre || para[0] },
-                        asunto, html, [adjunto], opts
+                        { correo: d.para.length === 1 ? d.para[0] : d.para, nombre: cli.nombre || d.para[0] },
+                        prep.asunto, prep.html, [adjunto], opts
                     );
                     ocultarProgreso();
                     if (!resultado || !resultado.exito) {
@@ -48367,12 +48830,12 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     const notas = (await ncObtenerNotas()).slice();
                     const idx = notas.findIndex(n => n.id === nota.id);
                     if (idx !== -1) {
-                        const envios = (notas[idx].envios || []).concat([{ fecha: new Date().toISOString(), para: para.concat(cc).join(', ') }]);
-                        notas[idx] = Object.assign({}, notas[idx], { envios });
+                        const envios = (notas[idx].envios || []).concat([{ fecha: new Date().toISOString(), para: d.para.concat(d.cc).join(', '), modelo: prep.modelo }]);
+                        notas[idx] = Object.assign({}, notas[idx], { envios, modeloCorreo: prep.modelo });
                         await ncGuardarNotas(notas);
                     }
                     ncRenderNotas();
-                    mostrarAlerta(`✅ Nota de cobro ${nota.numero} enviada a ${para.join(', ')}.`, 'Correo enviado');
+                    mostrarAlerta(`Nota de cobro ${nota.numero} enviada a ${d.para.join(', ')} con el modelo ${NC_MODELOS[prep.modelo].etiqueta}.`, 'Correo enviado');
                 } catch (e) {
                     ocultarProgreso();
                     console.error('Error al enviar nota de cobro:', e);
