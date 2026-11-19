@@ -47210,6 +47210,43 @@ document.getElementById('chatForm').onsubmit = function (e) {
             return typeof _LOGO_INFORME_WM815 === 'string' && _LOGO_INFORME_WM815 ? _LOGO_INFORME_WM815 : null;
         }
 
+        function ncNotaLlevaLogo(nota) {
+            // Las notas guardadas cuando no había logo disponible quedaron con incluirLogo:false.
+            // Solo se omite si el usuario desmarca la casilla en el formulario (logoTocado).
+            if (nota && nota.logoTocado && nota.incluirLogo === false) return false;
+            return true;
+        }
+
+        function ncInsertarLogoPdf(doc, logo, x, y, maxW, maxH, alias, permitirRespaldoWm) {
+            if (!logo || !logo.data) return 0;
+            const candidatos = [logo];
+            if (permitirRespaldoWm) {
+                const orig = ncLogoOriginalWm815();
+                if (orig && logo.data !== orig) candidatos.push({ data: orig, ancho: 286, alto: 182 });
+            }
+            for (let i = 0; i < candidatos.length; i++) {
+                const L = candidatos[i];
+                const formato = /^data:image\/png/i.test(L.data) ? 'PNG' : 'JPEG';
+                try {
+                    let w0 = Number(L.ancho) || 0;
+                    let h0 = Number(L.alto) || 0;
+                    if (!w0 || !h0) {
+                        const props = doc.getImageProperties(L.data);
+                        w0 = props.width;
+                        h0 = props.height;
+                    }
+                    const esc = Math.min(maxW / w0, maxH / h0);
+                    const w = w0 * esc;
+                    const h = h0 * esc;
+                    doc.addImage(L.data, formato, x, y, w, h, alias || undefined, 'NONE');
+                    return h;
+                } catch (e) {
+                    console.warn('Logo PDF intento ' + (i + 1) + ':', e);
+                }
+            }
+            return 0;
+        }
+
         function ncEmisorDeModelo(cfg, modelo) {
             const c = cfg || {};
             return (modelo === 'neutro' ? c.emisorNeutro : c.emisor) || {};
@@ -47232,7 +47269,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 logoNeutroAncho: 0,
                 logoNeutroAlto: 0,
                 logoNeutroUrl: '',
-                incluirLogoPorDefecto: false,
+                incluirLogoPorDefecto: true,
                 cuentas: [],
                 clientes: []
             };
@@ -47261,7 +47298,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
             cfg.logo = d.logo || null;
             cfg.logoAncho = Number(d.logoAncho) || 0;
             cfg.logoAlto = Number(d.logoAlto) || 0;
-            cfg.incluirLogoPorDefecto = d.incluirLogoPorDefecto === true;
+            cfg.incluirLogoPorDefecto = d.incluirLogoPorDefecto !== false;
             cfg.cuentas = Array.isArray(d.cuentas) ? d.cuentas : [];
             cfg.clientes = await ncLeerClientesNube(Array.isArray(d.clientes) ? d.clientes : []);
             const snapLogo = await db.collection('comunidad').doc(NC_DOC_LOGO_NEUTRO).get({ source: 'server' });
@@ -47477,7 +47514,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 formaPago: 'Transferencia Bancaria',
                 cuentaId: def ? def.id : '',
                 observaciones: '',
-                incluirLogo: !!(cfg.incluirLogoPorDefecto && (cfg.logo || ncLogoOriginalWm815() || cfg.logoNeutro)),
+                incluirLogo: cfg.incluirLogoPorDefecto !== false,
                 logoTocado: false
             };
         }
@@ -47500,8 +47537,8 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 formaPago: nota.formaPago || 'Transferencia Bancaria',
                 cuentaId: nota.cuentaId || '',
                 observaciones: nota.observaciones || '',
-                incluirLogo: !!nota.incluirLogo,
-                logoTocado: true
+                incluirLogo: ncNotaLlevaLogo(nota),
+                logoTocado: !!nota.logoTocado
             };
         }
 
@@ -47557,7 +47594,8 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 ncSetValor('ncCuenta', existeCuenta ? s.cuentaId : '');
                 ncSetValor('ncObservaciones', s.observaciones);
                 const chkLogo = document.getElementById('ncIncluirLogo');
-                chkLogo.checked = !!(s.incluirLogo && ncLogoDeModelo(cfg, ncModeloValido(s.modeloCorreo)).data);
+                const quiereLogo = s.logoTocado ? !!s.incluirLogo : cfg.incluirLogoPorDefecto !== false;
+                chkLogo.checked = !!(quiereLogo && ncLogoDeModelo(cfg, ncModeloValido(s.modeloCorreo)).data);
                 if (s.logoTocado) chkLogo.dataset.tocado = '1';
                 else delete chkLogo.dataset.tocado;
                 ncAlCambiarModelo();
@@ -47773,7 +47811,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
             if (avisoLogo) {
                 avisoLogo.textContent = neutro
                     ? '(no hay logo del modelo neutro; súbalo en la configuración de abajo)'
-                    : '(no hay logo WM 815 cargado; súbalo en la configuración de abajo)';
+                    : '(no hay logo WM 815 disponible)';
                 avisoLogo.style.display = logo ? 'none' : 'inline';
             }
         };
@@ -47815,7 +47853,8 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 cuentaId: cuenta ? cuenta.id : '',
                 cuenta: cuenta ? Object.assign({}, cuenta) : null,
                 observaciones: ncValor('ncObservaciones'),
-                incluirLogo: !!document.getElementById('ncIncluirLogo').checked
+                incluirLogo: !!document.getElementById('ncIncluirLogo').checked,
+                logoTocado: !!document.getElementById('ncIncluirLogo').dataset.tocado
             };
         }
 
@@ -48486,27 +48525,18 @@ document.getElementById('chatForm').onsubmit = function (e) {
             doc.setLineWidth(0.3);
 
             let finCabecera = 34;
-            const logo = ncLogoDeModelo(cfg, modelo);
-            if (nota.incluirLogo && logo.data) {
-                const maxW = 45;
-                const maxH = 22;
-                const formato = /^data:image\/png/i.test(logo.data) ? 'PNG' : 'JPEG';
-                try {
-                    let w0 = logo.ancho;
-                    let h0 = logo.alto;
-                    if (!w0 || !h0) {
-                        const props = doc.getImageProperties(logo.data);
-                        w0 = props.width;
-                        h0 = props.height;
-                    }
-                    const esc = Math.min(maxW / w0, maxH / h0);
-                    const w = w0 * esc;
-                    const h = h0 * esc;
-                    doc.addImage(logo.data, formato, mX, 12, w, h, 'nc-logo-' + modelo);
-                    finCabecera = Math.max(finCabecera, 12 + h);
-                } catch (e) {
-                    console.warn('No se pudo insertar el logo en el PDF:', e);
-                }
+            if (ncNotaLlevaLogo(nota)) {
+                const altoLogo = ncInsertarLogoPdf(
+                    doc,
+                    ncLogoDeModelo(cfg, modelo),
+                    mX,
+                    12,
+                    45,
+                    22,
+                    'nc-logo-' + modelo,
+                    modelo !== 'neutro'
+                );
+                if (altoLogo) finCabecera = Math.max(finCabecera, 12 + altoLogo);
             }
 
             doc.setFont('helvetica', 'bold');
@@ -48769,7 +48799,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
           <p style="margin: 0 0 2px 0; font-size: 11px; font-weight: 700; letter-spacing: 0.05em; color: ${t.cabeceraEtq}; text-transform: uppercase;">${ncEsc(nombreEmisor)}</p>
           <p style="margin: 0; font-size: 22px; font-weight: 700; color: #1a1a1a;">Nota de Cobro ${ncEsc(nota.numero)}</p>
           <p style="margin: 4px 0 0 0; font-size: 13px; color: #555555;">Fecha de emisión: ${ncEsc(formatearFecha(nota.fecha))}</p>
-        </td></tr>` : `${nota.incluirLogo && cfg && cfg.logoNeutroUrl ? `
+        </td></tr>` : `${ncNotaLlevaLogo(nota) && cfg && cfg.logoNeutroUrl ? `
         <tr><td style="padding: 18px 28px 14px 28px; background-color: #ffffff; text-align: center;">
           <img src="${ncEsc(cfg.logoNeutroUrl)}" alt="Logo" style="max-width: 120px; height: auto;">
         </td></tr>` : ''}
@@ -48782,8 +48812,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
         <tr><td style="padding: 0 28px 16px 28px;">
           <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color: ${t.adjFondo}; border-radius: 8px; border: 1px solid ${t.adjBorde};">
             <tr><td style="padding: 12px 14px;">
-              <p style="margin: 0 0 6px 0; font-size: 13px; color: ${t.adjTitulo}; font-weight: 700;">Documento adjunto</p>
-              <p style="margin: 0; font-size: 13px; color: #333333; line-height: 1.5;">La nota de cobro N° <strong>${ncEsc(nota.numero)}</strong> va adjunta a este correo en PDF: <strong>${ncEsc(ncNombreArchivoPdf(nota))}</strong></p>
+              <p style="margin: 0 0 8px 0; font-size: 13px; color: ${t.adjTitulo}; font-weight: 700;">Documento adjunto</p>
               <!-- ENLACES_ADJUNTOS_LISTA ${t.adjTitulo} -->
             </td></tr>
           </table>
