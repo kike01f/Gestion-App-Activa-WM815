@@ -11484,7 +11484,7 @@
 
                     <div class="nc-config-sub">
                         <h4>Emisor para el modelo neutro</h4>
-                        <p class="nc-config-ayuda">Se usa en el PDF y en el correo de los clientes con modelo neutro. Esas notas no llevan logo ni ninguna referencia a WM 815.</p>
+                        <p class="nc-config-ayuda">Se usa en el PDF y en el correo de los clientes con modelo neutro. Esas notas no llevan ninguna referencia a WM 815.</p>
                         <div class="form-row">
                             <div class="form-group">
                                 <label>Nombre / Razón social</label>
@@ -11511,13 +11511,25 @@
                     </div>
 
                     <div class="nc-config-sub">
-                        <h4>Logo <span class="nc-config-ayuda" style="display: inline;">· solo para el modelo verde WM 815</span></h4>
+                        <h4>Logo · modelo verde WM 815</h4>
                         <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
                             <div id="ncLogoPreview" class="nc-logo-preview">Sin logo</div>
                             <div class="form-group" style="display: flex; flex-direction: column; gap: 0.5rem; margin: 0;">
                                 <input type="file" id="ncLogoArchivo" accept="image/png,image/jpeg,image/jpg,image/webp" onchange="ncCargarLogo(this)">
                                 <label class="nc-check"><input type="checkbox" id="ncLogoPorDefecto" onchange="ncGuardarPreferenciaLogo()"><span>Marcar "Incluir logo" por defecto en nuevas notas</span></label>
                                 <button type="button" class="btn btn-danger" onclick="ncQuitarLogo()" style="align-self: flex-start;">Quitar logo</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="nc-config-sub">
+                        <h4>Logo · modelo neutro</h4>
+                        <p class="nc-config-ayuda">Aparece en el PDF y en el correo de los clientes con modelo neutro. Use un logo que no haga referencia a WM 815.</p>
+                        <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+                            <div id="ncLogoNeutroPreview" class="nc-logo-preview">Sin logo</div>
+                            <div class="form-group" style="display: flex; flex-direction: column; gap: 0.5rem; margin: 0;">
+                                <input type="file" id="ncLogoNeutroArchivo" accept="image/png,image/jpeg,image/jpg,image/webp" onchange="ncCargarLogo(this, 'neutro')">
+                                <button type="button" class="btn btn-danger" onclick="ncQuitarLogo('neutro')" style="align-self: flex-start;">Quitar logo</button>
                             </div>
                         </div>
                     </div>
@@ -16554,8 +16566,14 @@
                   </table>
                         `;
                         
-                        // Buscar el marcador de posición y reemplazarlo
-                        if (htmlConEnlaces.includes('<!-- ENLACES_ADJUNTOS_AQUI -->')) {
+                        const marcaLista = htmlConEnlaces.match(/<!-- ENLACES_ADJUNTOS_LISTA(?: (#[0-9a-fA-F]{3,8}))? -->/);
+                        if (marcaLista) {
+                            const colorLista = marcaLista[1] || '#1976d2';
+                            const lista = linksAdjuntos.map(link =>
+                                `<p style="margin: 8px 0 0 0; font-size: 13px;"><a href="${link.url}" target="_blank" style="color: ${colorLista}; font-weight: 700; text-decoration: underline;">Descargar ${link.nombre}</a></p>`
+                            ).join('');
+                            htmlConEnlaces = htmlConEnlaces.replace(marcaLista[0], lista);
+                        } else if (htmlConEnlaces.includes('<!-- ENLACES_ADJUNTOS_AQUI -->')) {
                             htmlConEnlaces = htmlConEnlaces.replace('<!-- ENLACES_ADJUNTOS_AQUI -->', enlacesHTML);
                         } else {
                             // Fallback: Insertar antes del cierre del body o al final del contenido
@@ -46993,6 +47011,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
         const NC_DOC_NOTAS = 'notasCobro';
         const NC_DOC_CONFIG = 'notasCobro-config';
         const NC_DOC_CLIENTES = 'notasCobro-clientes';
+        const NC_DOC_LOGO_NEUTRO = 'notasCobro-logo-neutro';
         const NC_BANCOS_CHILE = [
             'Banco de Chile', 'Banco Edwards (Banco de Chile)', 'BancoEstado', 'Banco Santander', 'Banco BCI',
             'Banco Itaú', 'Scotiabank', 'Banco BICE', 'Banco Security', 'Banco Falabella', 'Banco Ripley',
@@ -47064,7 +47083,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
             neutro: { etiqueta: 'Neutro · sin referencia a WM 815', corta: 'Neutro' }
         };
         const NC_RE_WM815 = /w\.?\s*m\.?\s*[-_]?\s*815|walker\s+mart[ií]nez\s*(n[°ºo]\.?\s*)?815/i;
-        const NC_LOGO_WM815_URL = 'https://img.mailinblue.com/8323725/images/content_library/original/685f21fb4a1b4fde403defaf.jpeg';
+        const NC_LOGO_WM815_URL = 'https://img.mailinblue.com/8323725/images/content_library/original/6844749040dd0f16c5341248.png';
 
         function ncModeloValido(m) {
             return Object.prototype.hasOwnProperty.call(NC_MODELOS, m) ? m : 'wm815';
@@ -47082,6 +47101,13 @@ document.getElementById('chatForm').onsubmit = function (e) {
             if (nota && NC_MODELOS[nota.modeloCorreo]) return nota.modeloCorreo;
             const c = ncClienteDeNota(nota, cfg);
             return ncModeloValido(c && c.modeloCorreo);
+        }
+
+        function ncLogoDeModelo(cfg, modelo) {
+            const c = cfg || {};
+            return modelo === 'neutro'
+                ? { data: c.logoNeutro || null, ancho: c.logoNeutroAncho || 0, alto: c.logoNeutroAlto || 0, url: c.logoNeutroUrl || '' }
+                : { data: c.logo || null, ancho: c.logoAncho || 0, alto: c.logoAlto || 0, url: NC_LOGO_WM815_URL };
         }
 
         function ncEmisorDeModelo(cfg, modelo) {
@@ -47102,6 +47128,10 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 logo: null,
                 logoAncho: 0,
                 logoAlto: 0,
+                logoNeutro: null,
+                logoNeutroAncho: 0,
+                logoNeutroAlto: 0,
+                logoNeutroUrl: '',
                 incluirLogoPorDefecto: false,
                 cuentas: [],
                 clientes: []
@@ -47134,6 +47164,14 @@ document.getElementById('chatForm').onsubmit = function (e) {
             cfg.incluirLogoPorDefecto = d.incluirLogoPorDefecto === true;
             cfg.cuentas = Array.isArray(d.cuentas) ? d.cuentas : [];
             cfg.clientes = await ncLeerClientesNube(Array.isArray(d.clientes) ? d.clientes : []);
+            const snapLogo = await db.collection('comunidad').doc(NC_DOC_LOGO_NEUTRO).get({ source: 'server' });
+            if (snapLogo.exists) {
+                const l = snapLogo.data() || {};
+                cfg.logoNeutro = l.logo || null;
+                cfg.logoNeutroAncho = Number(l.ancho) || 0;
+                cfg.logoNeutroAlto = Number(l.alto) || 0;
+                cfg.logoNeutroUrl = l.url || '';
+            }
             return cfg;
         }
 
@@ -47165,7 +47203,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
             const actual = await ncLeerConfigParaGuardar();
             const cfg = Object.assign({}, actual, parcial || {}, { clientes: actual.clientes });
             const plano = JSON.parse(JSON.stringify(cfg));
-            delete plano.clientes;
+            ['clientes', 'logoNeutro', 'logoNeutroAncho', 'logoNeutroAlto', 'logoNeutroUrl'].forEach(k => delete plano[k]);
             plano.actualizado = firebase.firestore.FieldValue.serverTimestamp();
             await db.collection('comunidad').doc(NC_DOC_CONFIG).set(plano);
             window._ncConfig = cfg;
@@ -47339,7 +47377,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 formaPago: 'Transferencia Bancaria',
                 cuentaId: def ? def.id : '',
                 observaciones: '',
-                incluirLogo: !!(cfg.incluirLogoPorDefecto && cfg.logo),
+                incluirLogo: !!(cfg.incluirLogoPorDefecto && (cfg.logo || cfg.logoNeutro)),
                 logoTocado: false
             };
         }
@@ -47419,7 +47457,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 ncSetValor('ncCuenta', existeCuenta ? s.cuentaId : '');
                 ncSetValor('ncObservaciones', s.observaciones);
                 const chkLogo = document.getElementById('ncIncluirLogo');
-                chkLogo.checked = !!(s.incluirLogo && cfg.logo);
+                chkLogo.checked = !!(s.incluirLogo && ncLogoDeModelo(cfg, ncModeloValido(s.modeloCorreo)).data);
                 if (s.logoTocado) chkLogo.dataset.tocado = '1';
                 else delete chkLogo.dataset.tocado;
                 ncAlCambiarModelo();
@@ -47620,20 +47658,23 @@ document.getElementById('chatForm').onsubmit = function (e) {
             if (aviso) {
                 const en = cfg.emisorNeutro || {};
                 aviso.textContent = neutro
-                    ? `Correo y PDF sin logo ni mención a WM 815, firmados por ${en.nombre || 'el emisor neutro (configúrelo abajo)'}.`
-                    : 'Correo verde con la marca de la Comunidad WM 815.';
+                    ? `Correo y PDF sin mención a WM 815, firmados por ${en.nombre || 'el emisor neutro (configúrelo abajo)'}.`
+                    : 'Correo con el logo y la firma de la Comunidad WM 815.';
             }
+            const logo = ncLogoDeModelo(cfg, neutro ? 'neutro' : 'wm815').data;
             const chkLogo = document.getElementById('ncIncluirLogo');
             if (chkLogo) {
-                chkLogo.disabled = !cfg.logo || neutro;
-                if (chkLogo.disabled) chkLogo.checked = false;
+                const estabaDeshabilitado = chkLogo.disabled;
+                chkLogo.disabled = !logo;
+                if (!logo) chkLogo.checked = false;
+                else if (estabaDeshabilitado && !chkLogo.dataset.tocado && cfg.incluirLogoPorDefecto) chkLogo.checked = true;
             }
             const avisoLogo = document.getElementById('ncAvisoSinLogo');
             if (avisoLogo) {
                 avisoLogo.textContent = neutro
-                    ? '(el modelo neutro no lleva logo)'
-                    : '(no hay logo cargado; súbalo en la configuración de abajo)';
-                avisoLogo.style.display = neutro || !cfg.logo ? 'inline' : 'none';
+                    ? '(no hay logo del modelo neutro; súbalo en la configuración de abajo)'
+                    : '(no hay logo WM 815 cargado; súbalo en la configuración de abajo)';
+                avisoLogo.style.display = logo ? 'none' : 'inline';
             }
         };
 
@@ -47883,15 +47924,14 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     ? `<img src="${cfg.logo}" alt="Logo">`
                     : 'Sin logo';
             }
+            const prevN = document.getElementById('ncLogoNeutroPreview');
+            if (prevN) {
+                prevN.innerHTML = cfg.logoNeutro
+                    ? `<img src="${cfg.logoNeutro}" alt="Logo neutro">`
+                    : 'Sin logo';
+            }
             const chkDef = document.getElementById('ncLogoPorDefecto');
             if (chkDef) chkDef.checked = !!cfg.incluirLogoPorDefecto;
-            const aviso = document.getElementById('ncAvisoSinLogo');
-            if (aviso) aviso.style.display = cfg.logo ? 'none' : 'inline';
-            const chkLogo = document.getElementById('ncIncluirLogo');
-            if (chkLogo) {
-                chkLogo.disabled = !cfg.logo;
-                if (!cfg.logo) chkLogo.checked = false;
-            }
             ncAlCambiarModelo();
 
             const tbCtas = document.getElementById('ncTbodyCuentas');
@@ -48041,7 +48081,35 @@ document.getElementById('chatForm').onsubmit = function (e) {
             }
         };
 
-        window.ncCargarLogo = function (input) {
+        async function ncSubirLogoNeutroStorage(dataUrl) {
+            if (typeof storage === 'undefined' || !storage) return '';
+            try {
+                const blob = await (await fetch(dataUrl)).blob();
+                const ext = /^data:image\/png/i.test(dataUrl) ? 'png' : 'jpg';
+                const ref = storage.ref(`notasCobro/logo-neutro-${Date.now()}.${ext}`);
+                await ref.put(blob, { contentType: blob.type || (ext === 'png' ? 'image/png' : 'image/jpeg') });
+                return await ref.getDownloadURL();
+            } catch (e) {
+                console.warn('No se pudo publicar el logo neutro para los correos:', e);
+                return '';
+            }
+        }
+
+        async function ncGuardarLogoNeutro(datos) {
+            if (!firebaseInitialized || !db) throw new Error('No hay conexión con Firestore.');
+            await db.collection('comunidad').doc(NC_DOC_LOGO_NEUTRO).set(Object.assign({}, datos, {
+                actualizado: firebase.firestore.FieldValue.serverTimestamp()
+            }));
+            const cfg = window._ncConfig || ncConfigPorDefecto();
+            cfg.logoNeutro = datos.logo || null;
+            cfg.logoNeutroAncho = datos.ancho || 0;
+            cfg.logoNeutroAlto = datos.alto || 0;
+            cfg.logoNeutroUrl = datos.url || '';
+            window._ncConfig = cfg;
+        }
+
+        window.ncCargarLogo = function (input, tipo) {
+            const esNeutro = tipo === 'neutro';
             const file = input && input.files && input.files[0];
             if (!file) return;
             if (!/^image\/(png|jpe?g|webp)$/i.test(file.type)) {
@@ -48054,6 +48122,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 const img = new Image();
                 img.onload = async function () {
                     try {
+                        mostrarProgreso('Guardando logo...');
                         const max = 600;
                         const esc = Math.min(1, max / Math.max(img.naturalWidth, img.naturalHeight));
                         const w = Math.max(1, Math.round(img.naturalWidth * esc));
@@ -48070,10 +48139,19 @@ document.getElementById('chatForm').onsubmit = function (e) {
                             ctx.fillRect(0, 0, w, h);
                             dataUrl = canvas.toDataURL('image/jpeg', 0.88);
                         }
-                        await ncGuardarConfig({ logo: dataUrl, logoAncho: w, logoAlto: h });
+                        let avisoCorreo = '';
+                        if (esNeutro) {
+                            const url = await ncSubirLogoNeutroStorage(dataUrl);
+                            await ncGuardarLogoNeutro({ logo: dataUrl, ancho: w, alto: h, url });
+                            if (!url) avisoCorreo = ' No se pudo publicar para los correos, así que por ahora solo aparecerá en el PDF.';
+                        } else {
+                            await ncGuardarConfig({ logo: dataUrl, logoAncho: w, logoAlto: h });
+                        }
+                        ocultarProgreso();
                         ncRenderConfig();
-                        mostrarAlerta('Logo guardado. Marque "Incluir logo en el PDF" en cada nota para mostrarlo.', 'Logo cargado');
+                        mostrarAlerta(`Logo del modelo ${esNeutro ? 'neutro' : 'WM 815'} guardado. Marque "Incluir logo en el PDF" en cada nota para mostrarlo.${avisoCorreo}`, 'Logo cargado');
                     } catch (e) {
+                        ocultarProgreso();
                         console.error('Error al guardar logo:', e);
                         mostrarAlerta('No se pudo guardar el logo. ' + (e.message || ''), 'Error');
                     } finally {
@@ -48089,13 +48167,15 @@ document.getElementById('chatForm').onsubmit = function (e) {
             reader.readAsDataURL(file);
         };
 
-        window.ncQuitarLogo = async function () {
+        window.ncQuitarLogo = async function (tipo) {
+            const esNeutro = tipo === 'neutro';
             const cfg = window._ncConfig || ncConfigPorDefecto();
-            if (!cfg.logo) return;
-            const ok = await confirmarAccion('¿Quitar el logo de las notas de cobro?', 'Quitar logo');
+            if (!(esNeutro ? cfg.logoNeutro : cfg.logo)) return;
+            const ok = await confirmarAccion(`¿Quitar el logo del modelo ${esNeutro ? 'neutro' : 'WM 815'}?`, 'Quitar logo');
             if (!ok) return;
             try {
-                await ncGuardarConfig({ logo: null, logoAncho: 0, logoAlto: 0 });
+                if (esNeutro) await ncGuardarLogoNeutro({ logo: null, ancho: 0, alto: 0, url: '' });
+                else await ncGuardarConfig({ logo: null, logoAncho: 0, logoAlto: 0 });
                 ncRenderConfig();
             } catch (e) {
                 mostrarAlerta('No se pudo quitar el logo. ' + (e.message || ''), 'Error');
@@ -48304,16 +48384,17 @@ document.getElementById('chatForm').onsubmit = function (e) {
             doc.setLineWidth(0.3);
 
             let finCabecera = 34;
-            if (modelo !== 'neutro' && nota.incluirLogo && cfg && cfg.logo) {
+            const logo = ncLogoDeModelo(cfg, modelo);
+            if (nota.incluirLogo && logo.data) {
                 const maxW = 45;
                 const maxH = 22;
-                const w0 = cfg.logoAncho || maxW;
-                const h0 = cfg.logoAlto || maxH;
+                const w0 = logo.ancho || maxW;
+                const h0 = logo.alto || maxH;
                 const esc = Math.min(maxW / w0, maxH / h0);
                 const w = w0 * esc;
                 const h = h0 * esc;
                 try {
-                    doc.addImage(cfg.logo, /^data:image\/png/i.test(cfg.logo) ? 'PNG' : 'JPEG', mX, 12, w, h);
+                    doc.addImage(logo.data, /^data:image\/png/i.test(logo.data) ? 'PNG' : 'JPEG', mX, 12, w, h);
                     finCabecera = Math.max(finCabecera, 12 + h);
                 } catch (e) {
                     console.warn('No se pudo insertar el logo en el PDF:', e);
@@ -48517,15 +48598,17 @@ document.getElementById('chatForm').onsubmit = function (e) {
 
         const NC_TEMAS_CORREO = {
             wm815: {
-                fondo: '#eef5e6', cabecera: '#75BB21', cabeceraTxt: '#ffffff', cabeceraSub: '#f1f9e6', cabeceraEtq: '#e3f3cc',
-                acento: '#4e8a12', enlace: '#4e8a12', tablaCab: '#f5faef', borde: '#e1ecd4',
-                cajaFondo: '#f2f8ea', cajaBorde: '#cfe6b1', cajaTitulo: '#3f7310',
-                pieFondo: '#2f3b22', pieTitulo: '#ffffff', pieTxt: '#d5dfc8'
+                fondo: '#ffffff', acentoLinea: '#75BB21', cabeceraEtq: '#4e8a12',
+                acento: '#4e8a12', enlace: '#4e8a12', tablaCab: '#f8faf8', borde: '#e8eee8',
+                cajaFondo: '#f8faf8', cajaBorde: '#e8eee8', cajaTitulo: '#4e8a12',
+                adjFondo: '#f8faf8', adjBorde: '#e8eee8', adjTitulo: '#4e8a12',
+                pieFondo: '#ffffff', pieTitulo: '#333333', pieTxt: '#888888'
             },
             neutro: {
                 fondo: '#f3f4f6', cabecera: '#1e3a5f', cabeceraTxt: '#ffffff', cabeceraSub: '#dbeafe', cabeceraEtq: '#bfdbfe',
                 acento: '#1e3a5f', enlace: '#1d4ed8', tablaCab: '#f9fafb', borde: '#e5e7eb',
                 cajaFondo: '#eef2ff', cajaBorde: '#c7d2fe', cajaTitulo: '#3730a3',
+                adjFondo: '#f0f7ff', adjBorde: '#bbdefb', adjTitulo: '#1565c0',
                 pieFondo: '#f9fafb', pieTitulo: '#374151', pieTxt: '#6b7280'
             }
         };
@@ -48572,16 +48655,36 @@ document.getElementById('chatForm').onsubmit = function (e) {
         </td></tr>` : '';
             const datosEmisor = [emisor.rut ? 'RUT ' + emisor.rut : '', emisor.direccion, emisor.contacto, esWm ? '' : emisor.correo]
                 .filter(Boolean).map(ncEsc).join(' · ');
-            const etiquetaCabecera = esWm ? nombreEmisor : emisor.nombre;
-            const filaLogo = esWm ? `
-        <tr><td align="center" style="padding: 22px 28px 16px 28px; background-color: #ffffff;">
-          <img src="${NC_LOGO_WM815_URL}" width="200" alt="${ncEsc(nombreEmisor)}" style="display: block; margin: 0 auto; border: 0; width: 200px; height: auto;">
-        </td></tr>` : '';
+            const cabecera = esWm ? `
+        <tr><td style="padding: 18px 28px 14px 28px; border-bottom: 3px solid ${t.acentoLinea}; background-color: #ffffff;">
+          <div style="text-align: center; margin-bottom: 12px;"><img src="${NC_LOGO_WM815_URL}" alt="Logo" style="max-width: 120px; height: auto;"></div>
+          <p style="margin: 0 0 2px 0; font-size: 11px; font-weight: 700; letter-spacing: 0.05em; color: ${t.cabeceraEtq}; text-transform: uppercase;">${ncEsc(nombreEmisor)}</p>
+          <p style="margin: 0; font-size: 22px; font-weight: 700; color: #1a1a1a;">Nota de Cobro ${ncEsc(nota.numero)}</p>
+          <p style="margin: 4px 0 0 0; font-size: 13px; color: #555555;">Fecha de emisión: ${ncEsc(formatearFecha(nota.fecha))}</p>
+        </td></tr>` : `${nota.incluirLogo && cfg && cfg.logoNeutroUrl ? `
+        <tr><td style="padding: 18px 28px 14px 28px; background-color: #ffffff; text-align: center;">
+          <img src="${ncEsc(cfg.logoNeutroUrl)}" alt="Logo" style="max-width: 120px; height: auto;">
+        </td></tr>` : ''}
+        <tr><td style="background-color: ${t.cabecera}; padding: 20px 28px;">
+          ${emisor.nombre ? `<p style="margin: 0 0 4px 0; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; color: ${t.cabeceraEtq}; text-transform: uppercase;">${ncEsc(emisor.nombre)}</p>` : ''}
+          <p style="margin: 0; font-size: 22px; font-weight: 700; color: ${t.cabeceraTxt};">Nota de Cobro ${ncEsc(nota.numero)}</p>
+          <p style="margin: 4px 0 0 0; font-size: 13px; color: ${t.cabeceraSub};">Fecha de emisión: ${ncEsc(formatearFecha(nota.fecha))}</p>
+        </td></tr>`;
+            const bloqueAdjunto = `
+        <tr><td style="padding: 0 28px 16px 28px;">
+          <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color: ${t.adjFondo}; border-radius: 8px; border: 1px solid ${t.adjBorde};">
+            <tr><td style="padding: 12px 14px;">
+              <p style="margin: 0 0 6px 0; font-size: 13px; color: ${t.adjTitulo}; font-weight: 700;">Documento adjunto</p>
+              <p style="margin: 0; font-size: 13px; color: #333333; line-height: 1.5;">La nota de cobro N° <strong>${ncEsc(nota.numero)}</strong> va adjunta a este correo en PDF: <strong>${ncEsc(ncNombreArchivoPdf(nota))}</strong></p>
+              <!-- ENLACES_ADJUNTOS_LISTA ${t.adjTitulo} -->
+            </td></tr>
+          </table>
+        </td></tr>`;
             const pie = esWm ? `
-        <tr><td style="padding: 18px 28px 20px 28px; background-color: ${t.pieFondo}; text-align: center;">
-          <p style="margin: 0 0 4px 0; font-size: 15px; font-weight: 700; color: ${t.pieTitulo};">${ncEsc(firma)}</p>
-          ${datosEmisor ? `<p style="margin: 0 0 4px 0; font-size: 12px; color: ${t.pieTxt};">${datosEmisor}</p>` : ''}
-          <p style="margin: 0; font-size: 11px; color: ${t.pieTxt}; line-height: 1.5;">Sistema de Gestión · Comunidad Edificio WM 815<br>Cuidemos el medio ambiente: no imprima este correo si no es necesario.</p>
+        <tr><td style="padding: 14px 28px 18px 28px; text-align: center; border-top: 1px solid #eeeeee; background-color: ${t.pieFondo};">
+          <p style="margin: 0 0 2px 0; font-size: 12px; font-weight: 700; color: ${t.pieTitulo};">${ncEsc(firma)}</p>
+          ${datosEmisor ? `<p style="margin: 0 0 4px 0; font-size: 11px; color: ${t.pieTxt};">${datosEmisor}</p>` : ''}
+          <p style="margin: 0; font-size: 12px; color: ${t.pieTxt};">Comunicación oficial de administración.</p>
         </td></tr>` : (datosEmisor || emisor.nombre ? `
         <tr><td style="padding: 14px 28px; background-color: ${t.pieFondo}; border-top: 1px solid ${t.borde}; text-align: center;">
           ${emisor.nombre ? `<p style="margin: 0 0 2px 0; font-size: 12px; font-weight: 700; color: ${t.pieTitulo};">${ncEsc(emisor.nombre)}</p>` : ''}
@@ -48602,13 +48705,8 @@ document.getElementById('chatForm').onsubmit = function (e) {
 <body style="margin: 0; padding: 0; background-color: ${t.fondo};">
   <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color: ${t.fondo};">
     <tr><td align="center" style="padding: 20px 10px;">
-      <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="600" style="max-width: 600px; width: 100%; background-color: #ffffff; border-radius: 10px; overflow: hidden;">
-        ${filaLogo}
-        <tr><td style="background-color: ${t.cabecera}; padding: 20px 28px;">
-          ${etiquetaCabecera ? `<p style="margin: 0 0 4px 0; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; color: ${t.cabeceraEtq}; text-transform: uppercase;">${ncEsc(etiquetaCabecera)}</p>` : ''}
-          <p style="margin: 0; font-size: 22px; font-weight: 700; color: ${t.cabeceraTxt};">Nota de Cobro ${ncEsc(nota.numero)}</p>
-          <p style="margin: 4px 0 0 0; font-size: 13px; color: ${t.cabeceraSub};">Fecha de emisión: ${ncEsc(formatearFecha(nota.fecha))}</p>
-        </td></tr>
+      <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="600" style="max-width: 600px; width: 100%; background-color: #ffffff; border-radius: 12px; overflow: hidden;${esWm ? '' : ' border: 1px solid ' + t.borde + ';'}">
+        ${cabecera}
         <tr><td style="padding: 22px 28px 8px 28px;">
           <p style="margin: 0 0 12px 0; font-size: 14px; color: #111827;">Estimado(a) <strong>${ncEsc(cli.nombre)}</strong>:</p>
           ${bloqueMensaje}
@@ -48634,9 +48732,10 @@ document.getElementById('chatForm').onsubmit = function (e) {
         </td></tr>
         ${bloqueCuenta}
         ${bloqueObs}
+        ${bloqueAdjunto}
         <tr><td style="padding: 0 28px 20px 28px;">
-          <p style="margin: 0; font-size: 13px; color: #374151; line-height: 1.6;">El detalle completo se encuentra en el PDF adjunto.${correoComprobante ? ` Una vez realizado el pago, le agradeceremos enviar el comprobante a <a href="mailto:${ncEsc(correoComprobante)}" style="color: ${t.enlace};">${ncEsc(correoComprobante)}</a>.` : ''}</p>
-          <p style="margin: 14px 0 0 0; font-size: 13px; color: #374151;">Saludos cordiales,<br><strong>${ncEsc(firma)}</strong></p>
+          ${correoComprobante ? `<p style="margin: 0 0 14px 0; font-size: 13px; color: #374151; line-height: 1.6;">Una vez realizado el pago, le agradeceremos enviar el comprobante a <a href="mailto:${ncEsc(correoComprobante)}" style="color: ${t.enlace};">${ncEsc(correoComprobante)}</a>.</p>` : ''}
+          <p style="margin: 0; font-size: 13px; color: #374151;">Saludos cordiales,<br><strong>${ncEsc(firma)}</strong></p>
         </td></tr>
         ${pie}
       </table>
@@ -48765,8 +48864,8 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 const neutro = selModelo.value === 'neutro';
                 const en = cfg.emisorNeutro || {};
                 modal.querySelector('#ncCorreoModeloAviso').textContent = neutro
-                    ? `Diseño azul, sin logo ni mención a WM 815. Firma: ${en.nombre || 'Administración'}.${en.correo ? ' Las respuestas llegan a ' + en.correo + '.' : ''}`
-                    : 'Diseño verde con el logo y la firma de la Comunidad WM 815.';
+                    ? `Diseño azul, ${nota.incluirLogo && cfg.logoNeutroUrl ? 'con el logo neutro' : 'sin logo'} y sin mención a WM 815. Firma: ${en.nombre || 'Administración'}.${en.correo ? ' Las respuestas llegan a ' + en.correo + '.' : ''}`
+                    : 'Diseño con el logo y la firma de la Comunidad WM 815.';
             };
             selModelo.addEventListener('change', pintarAvisoModelo);
             pintarAvisoModelo();
