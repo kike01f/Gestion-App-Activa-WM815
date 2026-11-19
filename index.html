@@ -8390,6 +8390,187 @@
             .tab-content.active { animation: none !important; }
         }
 
+        /* ===== Caja chica: selector de vistas y notas de cobro ===== */
+        .caja-subvistas {
+            display: inline-flex;
+            gap: 0.2rem;
+            padding: 0.2rem;
+            margin: 0 0 1rem;
+            background: var(--bg-primary);
+            border: 1px solid var(--m-line);
+            border-radius: var(--m-radius);
+        }
+        .caja-subvistas button {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.4rem 0.85rem;
+            border: none;
+            border-radius: var(--m-radius-sm);
+            background: transparent;
+            color: var(--text-secondary);
+            font-family: inherit;
+            font-size: 0.78rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.15s ease, color 0.15s ease;
+        }
+        .caja-subvistas button:hover { background: var(--m-hover); color: var(--text-primary); }
+        .caja-subvistas button.is-on { background: var(--m-accent-soft); color: var(--primary); font-weight: 600; }
+        .caja-subvistas svg { width: 1rem; height: 1rem; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+
+        #cajaVistaNotasCobro input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+        #cajaVistaNotasCobro select,
+        #cajaVistaNotasCobro textarea {
+            box-sizing: border-box;
+            min-height: 2.1rem;
+            padding: 0.4rem 0.65rem;
+            font-family: inherit;
+            font-size: 0.8125rem;
+            color: var(--text-primary);
+            background: var(--bg-primary);
+            border: 1px solid var(--m-line);
+            border-radius: var(--m-radius-sm);
+            box-shadow: none;
+        }
+        #cajaVistaNotasCobro input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):focus,
+        #cajaVistaNotasCobro select:focus,
+        #cajaVistaNotasCobro textarea:focus {
+            outline: none;
+            border-color: var(--primary) !important;
+            box-shadow: 0 0 0 3px var(--m-accent-ring);
+        }
+        #cajaVistaNotasCobro input[type="checkbox"] {
+            flex: none;
+            width: 1.05rem !important;
+            height: 1.05rem !important;
+            min-height: 0 !important;
+            margin: 0;
+            padding: 0;
+            accent-color: var(--primary);
+            cursor: pointer;
+        }
+        #cajaVistaNotasCobro .nc-check {
+            display: flex !important;
+            align-items: center;
+            gap: 0.5rem;
+            margin: 0 !important;
+            font-size: 0.78rem !important;
+            color: var(--text-secondary) !important;
+            cursor: pointer;
+        }
+        #cajaVistaNotasCobro .nc-items td { vertical-align: middle; }
+        #cajaVistaNotasCobro .nc-items input { width: 100%; }
+        #cajaVistaNotasCobro .nc-items .nc-total { text-align: right; white-space: nowrap; font-weight: 600; color: var(--text-primary); }
+        #cajaVistaNotasCobro .nc-total-pagar { font-size: 0.875rem; font-weight: 600; color: var(--text-primary); }
+        #cajaVistaNotasCobro .nc-total-pagar span { color: var(--primary); }
+        #cajaVistaNotasCobro .nc-filtros { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
+        #cajaVistaNotasCobro .nc-filtros input { min-width: 13rem; }
+
+        .nc-pestanas {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.35rem;
+            margin: 0 0 1rem;
+            padding: 0 0 0.75rem;
+            border-bottom: 1px solid var(--m-line);
+        }
+        .nc-pestana {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            max-width: 16rem;
+            padding: 0.3rem 0.3rem 0.3rem 0.65rem;
+            border: 1px solid var(--m-line);
+            border-radius: 999px;
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+        }
+        .nc-pestana:hover { border-color: var(--m-line-strong); color: var(--text-primary); }
+        .nc-pestana.is-on {
+            background: var(--m-accent-soft);
+            border-color: var(--m-accent-ring);
+            color: var(--primary);
+            font-weight: 600;
+        }
+        .nc-pestana-txt { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .nc-pestana-tipo { font-size: 0.62rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; opacity: 0.75; }
+        .nc-pestana-cerrar {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 1.15rem;
+            height: 1.15rem;
+            padding: 0;
+            border: none;
+            border-radius: 50%;
+            background: transparent;
+            color: inherit;
+            font-size: 0.9rem;
+            line-height: 1;
+            cursor: pointer;
+            opacity: 0.7;
+        }
+        .nc-pestana-cerrar:hover { opacity: 1; background: var(--m-hover); }
+        .nc-pestanas-info { font-size: 0.7rem; color: var(--m-muted); margin-left: 0.25rem; }
+
+        .nc-estado {
+            display: inline-block;
+            padding: 0.1rem 0.5rem;
+            border-radius: 999px;
+            font-size: 0.68rem;
+            font-weight: 600;
+        }
+        #cajaVistaNotasCobro select.nc-estado-select { min-height: 1.75rem; padding: 0.15rem 0.45rem; font-size: 0.72rem; }
+        #cajaVistaNotasCobro select.nc-estado-select.is-pendiente { color: var(--warning) !important; border-color: color-mix(in srgb, var(--warning) 45%, transparent) !important; }
+        #cajaVistaNotasCobro select.nc-estado-select.is-pagada { color: var(--success) !important; border-color: color-mix(in srgb, var(--success) 45%, transparent) !important; }
+        #cajaVistaNotasCobro select.nc-estado-select.is-anulada { color: var(--text-tertiary) !important; }
+        .nc-envio { font-size: 0.72rem; color: var(--text-secondary); }
+        .nc-envio.is-no { color: var(--m-muted); }
+
+        .nc-config > summary {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            list-style: none;
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        .nc-config > summary::-webkit-details-marker { display: none; }
+        .nc-config > summary::after {
+            content: '';
+            width: 0.45rem;
+            height: 0.45rem;
+            margin-left: auto;
+            border-right: 1.5px solid var(--m-muted);
+            border-bottom: 1.5px solid var(--m-muted);
+            transform: rotate(45deg);
+            transition: transform 0.15s ease;
+        }
+        .nc-config[open] > summary::after { transform: rotate(-135deg); }
+        .nc-config-sub { margin-top: 1.1rem; padding-top: 1rem; border-top: 1px solid var(--m-line); }
+        .nc-config-sub h4 { margin: 0 0 0.6rem; color: var(--text-primary); }
+        .nc-logo-preview {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 10rem;
+            height: 5rem;
+            overflow: hidden;
+            border: 1px dashed var(--m-line-strong);
+            border-radius: var(--m-radius-sm);
+            background: #ffffff;
+            color: #9ca3af;
+            font-size: 0.72rem;
+        }
+        .nc-logo-preview img { max-width: 100%; max-height: 100%; object-fit: contain; }
+
         /* ===== Botones de acción minimalistas con icono ===== */
         .tab-content .btn.btn-acc {
             --acc-tono: var(--primary);
@@ -10987,6 +11168,17 @@
                 </h2>
                 <p style="color: var(--gray-600); font-size: 0.875rem; margin: 0.5rem 0 0 0;">Registro de gastos de caja chica</p>
             </div>
+            <div id="cajaSubVistas" class="caja-subvistas" role="tablist" aria-label="Vistas de caja chica">
+                <button type="button" class="is-on" id="btnCajaVistaGastos" role="tab" onclick="ncCambiarVistaCaja('gastos')">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M6 12h.01M18 12h.01"/></svg>
+                    Gastos de caja chica
+                </button>
+                <button type="button" id="btnCajaVistaNotas" role="tab" onclick="ncCambiarVistaCaja('notas')">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 2v20l2.5-1.5L9 22l3-1.5 3 1.5 2.5-1.5L20 22V2l-2.5 1.5L15 2l-3 1.5L9 2 6.5 3.5Z"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>
+                    Notas de cobro
+                </button>
+            </div>
+            <div id="cajaVistaGastos">
             <div class="form-section" style="margin-bottom: 1rem;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 0.5rem;">
                     <h3 style="margin: 0; font-size: 1rem; font-weight: 700;">Caja Chica</h3>
@@ -11080,6 +11272,257 @@
                         <!-- Se llena dinámicamente -->
                     </tbody>
                 </table>
+            </div>
+            </div>
+
+            <!-- NOTAS DE COBRO -->
+            <div id="cajaVistaNotasCobro" style="display: none;">
+                <div class="form-section">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 0.5rem;">
+                        <h3 id="ncTituloFormulario" style="margin: 0 !important;">Nueva nota de cobro</h3>
+                        <div style="display: flex; flex-wrap: wrap;">
+                            <button type="button" class="btn btn-primary" onclick="ncNuevaPestana()">＋ Nueva nota en paralelo</button>
+                            <button type="button" class="btn btn-secondary" onclick="ncLimpiarFormulario()" title="Vacía solo la nota de la pestaña actual">Limpiar</button>
+                        </div>
+                    </div>
+                    <div id="ncPestanas" class="nc-pestanas"></div>
+                    <form id="formNotaCobro" onsubmit="event.preventDefault(); ncGuardarNota();">
+                        <input type="hidden" id="ncEditId">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Fecha *</label>
+                                <input type="date" id="ncFecha" required>
+                            </div>
+                            <div class="form-group">
+                                <label>N° de Nota *</label>
+                                <input type="text" id="ncNumero" required placeholder="NC-0001">
+                            </div>
+                            <div class="form-group" style="grid-column: 1 / -1;">
+                                <label>Cliente guardado</label>
+                                <select id="ncClienteGuardado" onchange="ncSeleccionarCliente(this.value)">
+                                    <option value="">— Ingresar datos manualmente —</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Cliente *</label>
+                                <input type="text" id="ncClienteNombre" required placeholder="Ej: Edificio Activa WM 815">
+                            </div>
+                            <div class="form-group">
+                                <label>RUT</label>
+                                <input type="text" id="ncClienteRut" placeholder="65.139.755-3" onblur="ncFormatearRutInput(this)">
+                            </div>
+                            <div class="form-group">
+                                <label>Dirección</label>
+                                <input type="text" id="ncClienteDireccion" placeholder="Av. Walker Martínez 815">
+                            </div>
+                            <div class="form-group">
+                                <label>Correo</label>
+                                <input type="email" id="ncClienteCorreo" placeholder="cliente@correo.com">
+                            </div>
+                            <div class="form-group" style="grid-column: 1 / -1;">
+                                <label class="nc-check"><input type="checkbox" id="ncGuardarCliente" checked><span>Guardar / actualizar este cliente en la lista</span></label>
+                            </div>
+                        </div>
+
+                        <div class="form-group" style="margin: 0.25rem 0 1rem;">
+                            <label>Detalle de servicios o productos *</label>
+                            <div style="overflow-x: auto;">
+                                <table class="nc-items" style="min-width: 620px;">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 3.5rem;">Ítem</th>
+                                            <th>Descripción del servicio o producto</th>
+                                            <th style="width: 6.5rem;">Cantidad</th>
+                                            <th style="width: 9rem;">Valor unitario</th>
+                                            <th style="width: 8rem; text-align: right;">Total</th>
+                                            <th style="width: 3rem;"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="ncItemsBody"></tbody>
+                                </table>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+                                <button type="button" class="btn btn-secondary" onclick="ncAgregarItem()">＋ Agregar ítem</button>
+                                <div class="nc-total-pagar">Total a pagar: <span id="ncTotalPagar">$0</span></div>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Forma de Pago *</label>
+                                <select id="ncFormaPago" onchange="ncAlCambiarFormaPago()">
+                                    <option value="Transferencia Bancaria">Transferencia Bancaria</option>
+                                    <option value="Depósito Bancario">Depósito Bancario</option>
+                                    <option value="Efectivo">Efectivo</option>
+                                    <option value="Cheque">Cheque</option>
+                                    <option value="Tarjeta de Débito / Crédito">Tarjeta de Débito / Crédito</option>
+                                    <option value="Otro">Otro</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Cuenta bancaria para el pago</label>
+                                <select id="ncCuenta">
+                                    <option value="">— No incluir datos bancarios —</option>
+                                </select>
+                            </div>
+                            <div class="form-group" style="grid-column: 1 / -1;">
+                                <label>Observaciones</label>
+                                <textarea id="ncObservaciones" rows="3" placeholder="Ej: Plazo de pago 5 días hábiles. Enviar comprobante al correo indicado."></textarea>
+                            </div>
+                            <div class="form-group" style="grid-column: 1 / -1;">
+                                <label class="nc-check">
+                                    <input type="checkbox" id="ncIncluirLogo"><span>Incluir logo en el PDF</span>
+                                    <span id="ncAvisoSinLogo" style="color: var(--m-muted); display: none;">(no hay logo cargado; súbalo en la configuración de abajo)</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div style="display: flex; flex-wrap: wrap;">
+                            <button type="submit" class="btn btn-primary" id="ncBtnGuardar">Guardar nota</button>
+                            <button type="button" class="btn btn-secondary" onclick="ncVistaPreviaFormulario()">Vista previa PDF</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="summary-box">
+                    <h4>Total pendiente de cobro</h4>
+                    <div class="amount" id="ncTotalPendiente">$0</div>
+                </div>
+
+                <div class="table-section">
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.85rem;">
+                        <h3 style="margin: 0 !important;">Notas de cobro emitidas</h3>
+                        <div class="nc-filtros">
+                            <input type="text" id="ncBuscar" placeholder="Buscar por N° o cliente..." oninput="ncRenderNotas()">
+                            <select id="ncFiltroEstado" onchange="ncRenderNotas()">
+                                <option value="">Todas</option>
+                                <option value="pendiente">Pendientes</option>
+                                <option value="pagada">Pagadas</option>
+                                <option value="anulada">Anuladas</option>
+                            </select>
+                        </div>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>N° Nota</th>
+                                <th>Fecha</th>
+                                <th>Cliente</th>
+                                <th>Total</th>
+                                <th>Estado</th>
+                                <th>Envío</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ncTbodyNotas">
+                            <tr><td colspan="7" class="empty-state"><p>No hay notas de cobro emitidas</p></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <details class="form-section nc-config" id="ncConfigDetalles">
+                    <summary>Configuración de notas de cobro · emisor, logo, cuentas bancarias y clientes</summary>
+
+                    <div class="nc-config-sub">
+                        <h4>Datos del emisor y numeración</h4>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Nombre / Razón social del emisor</label>
+                                <input type="text" id="ncEmisorNombre" placeholder="Opcional: aparece bajo el título del PDF">
+                            </div>
+                            <div class="form-group">
+                                <label>RUT emisor</label>
+                                <input type="text" id="ncEmisorRut" onblur="ncFormatearRutInput(this)">
+                            </div>
+                            <div class="form-group">
+                                <label>Dirección emisor</label>
+                                <input type="text" id="ncEmisorDireccion">
+                            </div>
+                            <div class="form-group">
+                                <label>Teléfono / Correo emisor</label>
+                                <input type="text" id="ncEmisorContacto">
+                            </div>
+                            <div class="form-group">
+                                <label>Prefijo del N° de nota</label>
+                                <input type="text" id="ncPrefijo" placeholder="NC-">
+                            </div>
+                            <div class="form-group">
+                                <label>Número inicial del correlativo</label>
+                                <input type="number" id="ncNumeroInicial" min="1" step="1" placeholder="1">
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-primary" onclick="ncGuardarConfigEmisor()">Guardar datos del emisor</button>
+                    </div>
+
+                    <div class="nc-config-sub">
+                        <h4>Logo</h4>
+                        <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+                            <div id="ncLogoPreview" class="nc-logo-preview">Sin logo</div>
+                            <div class="form-group" style="display: flex; flex-direction: column; gap: 0.5rem; margin: 0;">
+                                <input type="file" id="ncLogoArchivo" accept="image/png,image/jpeg,image/jpg,image/webp" onchange="ncCargarLogo(this)">
+                                <label class="nc-check"><input type="checkbox" id="ncLogoPorDefecto" onchange="ncGuardarPreferenciaLogo()"><span>Marcar "Incluir logo" por defecto en nuevas notas</span></label>
+                                <button type="button" class="btn btn-danger" onclick="ncQuitarLogo()" style="align-self: flex-start;">Quitar logo</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="nc-config-sub">
+                        <h4>Cuentas bancarias</h4>
+                        <input type="hidden" id="ncCuentaEditId">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Banco *</label>
+                                <select id="ncCuentaBanco"></select>
+                            </div>
+                            <div class="form-group">
+                                <label>Tipo de cuenta *</label>
+                                <select id="ncCuentaTipo"></select>
+                            </div>
+                            <div class="form-group">
+                                <label>N° de cuenta *</label>
+                                <input type="text" id="ncCuentaNumero" inputmode="numeric">
+                            </div>
+                            <div class="form-group">
+                                <label>Titular *</label>
+                                <input type="text" id="ncCuentaTitular">
+                            </div>
+                            <div class="form-group">
+                                <label>RUT titular *</label>
+                                <input type="text" id="ncCuentaRut" onblur="ncFormatearRutInput(this)">
+                            </div>
+                            <div class="form-group">
+                                <label>Correo para comprobante</label>
+                                <input type="email" id="ncCuentaCorreo">
+                            </div>
+                            <div class="form-group" style="grid-column: 1 / -1;">
+                                <label class="nc-check"><input type="checkbox" id="ncCuentaPredeterminada"><span>Usar como cuenta predeterminada</span></label>
+                            </div>
+                        </div>
+                        <div style="display: flex; flex-wrap: wrap;">
+                            <button type="button" class="btn btn-primary" id="ncBtnGuardarCuenta" onclick="ncGuardarCuenta()">Agregar cuenta</button>
+                            <button type="button" class="btn btn-secondary" onclick="ncLimpiarFormCuenta()">Cancelar</button>
+                        </div>
+                        <div style="overflow-x: auto; margin-top: 0.75rem;">
+                            <table>
+                                <thead>
+                                    <tr><th>Banco</th><th>Tipo</th><th>N° cuenta</th><th>Titular</th><th>RUT</th><th>Correo</th><th>Acciones</th></tr>
+                                </thead>
+                                <tbody id="ncTbodyCuentas"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="nc-config-sub">
+                        <h4>Clientes guardados</h4>
+                        <div style="overflow-x: auto;">
+                            <table>
+                                <thead>
+                                    <tr><th>Cliente</th><th>RUT</th><th>Dirección</th><th>Correo</th><th>Acciones</th></tr>
+                                </thead>
+                                <tbody id="ncTbodyClientes"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </details>
             </div>
         </div>
 
@@ -28439,7 +28882,8 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 whatsapp: '<path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 21l2.1-5.6A8.5 8.5 0 1 1 21 11.5Z"/><path d="M9 9.5c0 3 2.5 5.5 5.5 5.5l1-1.5-2-1-1 .8a3.5 3.5 0 0 1-1.8-1.8l.8-1-1-2Z"/>',
                 imprimir: '<path d="M6 9V2h12v7"/><rect x="3" y="9" width="18" height="8" rx="2"/><path d="M6 14h12v8H6z"/>',
                 descargar: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/>',
-                restaurar: '<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/>'
+                restaurar: '<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/>',
+                duplicar: '<rect x="8" y="8" width="13" height="13" rx="2"/><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"/>'
             };
             var REGLAS = [
                 { re: /^editar$/, ico: 'editar', solo: true, tono: 'azul' },
@@ -28448,6 +28892,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 { re: /^(comprobante|recibo|pdf)$/, ico: 'recibo', solo: true, tono: 'violeta' },
                 { re: /^(ver|detalle|ver detalle)$/, ico: 'ver', solo: true, tono: 'indigo' },
                 { re: /^revisar$/, ico: 'revisar', solo: true, tono: 'indigo' },
+                { re: /^duplicar$/, ico: 'duplicar', solo: true, tono: 'gris' },
                 { re: /^cancelar$/, ico: 'calendarioX', solo: true, tono: 'naranja' },
                 { re: /^guardar$/, ico: 'guardar', solo: true, tono: 'verde' },
                 { re: /cancelacion|anulacion/, ico: 'documentoX', correo: 'correoX', tono: 'rojo' },
@@ -46452,6 +46897,1513 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 await cargarCaja();
             }
         }
+
+        // ============================================
+        // CAJA CHICA: NOTAS DE COBRO
+        // ============================================
+
+        const NC_DOC_NOTAS = 'notasCobro';
+        const NC_DOC_CONFIG = 'notasCobro-config';
+        const NC_BANCOS_CHILE = [
+            'Banco de Chile', 'Banco Edwards (Banco de Chile)', 'BancoEstado', 'Banco Santander', 'Banco BCI',
+            'Banco Itaú', 'Scotiabank', 'Banco BICE', 'Banco Security', 'Banco Falabella', 'Banco Ripley',
+            'Banco Consorcio', 'Banco Internacional', 'Banco BTG Pactual', 'HSBC Bank Chile', 'Coopeuch',
+            'Tenpo', 'Mercado Pago', 'MACH (BCI)', 'Prepago Los Héroes', 'Copec Pay', 'Otro'
+        ];
+        const NC_TIPOS_CUENTA = ['Cuenta Corriente', 'Cuenta Vista', 'CuentaRUT', 'Cuenta de Ahorro', 'Chequera Electrónica'];
+        const NC_FORMAS_PAGO_BANCARIAS = ['Transferencia Bancaria', 'Depósito Bancario'];
+
+        window._ncConfig = null;
+        window._ncNotas = [];
+
+        function ncEsc(v) {
+            return String(v == null ? '' : v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+        }
+
+        function ncMoneda(n) {
+            return formatearMoneda(Math.round(Number(n) || 0));
+        }
+
+        function ncLimpiarRut(rut) {
+            return String(rut || '').replace(/[^0-9kK]/g, '').toUpperCase();
+        }
+
+        function ncValidarRut(rut) {
+            const r = ncLimpiarRut(rut);
+            if (r.length < 2) return false;
+            const cuerpo = r.slice(0, -1);
+            const dv = r.slice(-1);
+            if (!/^\d+$/.test(cuerpo)) return false;
+            let suma = 0;
+            let mul = 2;
+            for (let i = cuerpo.length - 1; i >= 0; i--) {
+                suma += parseInt(cuerpo[i], 10) * mul;
+                mul = mul === 7 ? 2 : mul + 1;
+            }
+            const res = 11 - (suma % 11);
+            const dvEsperado = res === 11 ? '0' : (res === 10 ? 'K' : String(res));
+            return dv === dvEsperado;
+        }
+
+        function ncFormatearRut(rut) {
+            const r = ncLimpiarRut(rut);
+            if (r.length < 2) return String(rut || '').trim();
+            const cuerpo = r.slice(0, -1).replace(/^0+(?=\d)/, '');
+            return cuerpo.replace(/\B(?=(\d{3})+(?!\d))/g, '.') + '-' + r.slice(-1);
+        }
+
+        window.ncFormatearRutInput = function (input) {
+            if (input && input.value.trim()) input.value = ncFormatearRut(input.value);
+        };
+
+        function ncCorreoValido(c) {
+            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(c || '').trim());
+        }
+
+        function ncValor(id) {
+            const el = document.getElementById(id);
+            return el ? String(el.value || '').trim() : '';
+        }
+
+        function ncSetValor(id, v) {
+            const el = document.getElementById(id);
+            if (el) el.value = v == null ? '' : v;
+        }
+
+        function ncConfigPorDefecto() {
+            return {
+                emisor: { nombre: '', rut: '', direccion: '', contacto: '' },
+                prefijo: 'NC-',
+                numeroInicial: 1,
+                logo: null,
+                logoAncho: 0,
+                logoAlto: 0,
+                incluirLogoPorDefecto: false,
+                cuentas: [],
+                clientes: []
+            };
+        }
+
+        async function ncObtenerConfig(forzar) {
+            if (window._ncConfig && !forzar) return window._ncConfig;
+            const cfg = ncConfigPorDefecto();
+            if (firebaseInitialized && db) {
+                try {
+                    const snap = await db.collection('comunidad').doc(NC_DOC_CONFIG).get();
+                    if (snap.exists) {
+                        const d = snap.data() || {};
+                        cfg.emisor = Object.assign(cfg.emisor, d.emisor || {});
+                        if (typeof d.prefijo === 'string') cfg.prefijo = d.prefijo;
+                        cfg.numeroInicial = parseInt(d.numeroInicial, 10) || 1;
+                        cfg.logo = d.logo || null;
+                        cfg.logoAncho = Number(d.logoAncho) || 0;
+                        cfg.logoAlto = Number(d.logoAlto) || 0;
+                        cfg.incluirLogoPorDefecto = d.incluirLogoPorDefecto === true;
+                        cfg.cuentas = Array.isArray(d.cuentas) ? d.cuentas : [];
+                        cfg.clientes = Array.isArray(d.clientes) ? d.clientes : [];
+                    }
+                } catch (e) {
+                    if (!errorEsPermisoFirestore(e)) console.error('Error al leer configuración de notas de cobro:', e);
+                }
+            }
+            window._ncConfig = cfg;
+            return cfg;
+        }
+
+        async function ncGuardarConfig(parcial) {
+            if (!firebaseInitialized || !db) throw new Error('No hay conexión con Firestore.');
+            const actual = await ncObtenerConfig();
+            const cfg = Object.assign({}, actual, parcial || {});
+            const plano = JSON.parse(JSON.stringify(cfg));
+            plano.actualizado = firebase.firestore.FieldValue.serverTimestamp();
+            await db.collection('comunidad').doc(NC_DOC_CONFIG).set(plano);
+            window._ncConfig = cfg;
+            return cfg;
+        }
+
+        async function ncObtenerNotas() {
+            const r = await nubeLeer(NC_DOC_NOTAS);
+            window._ncNotas = Array.isArray(r.datos) ? r.datos : [];
+            return window._ncNotas;
+        }
+
+        async function ncGuardarNotas(lista) {
+            await nubeEscribir(NC_DOC_NOTAS, lista, { modulo: 'notasCobro' });
+            window._ncNotas = lista;
+        }
+
+        function ncSiguienteNumero(notas, cfg) {
+            const pref = cfg.prefijo || '';
+            let max = 0;
+            (notas || []).forEach(n => {
+                const s = String(n.numero || '');
+                if (pref && s.indexOf(pref) !== 0) return;
+                const num = parseInt(s.slice(pref.length).replace(/\D/g, ''), 10);
+                if (!isNaN(num) && num > max) max = num;
+            });
+            const sig = Math.max(max + 1, parseInt(cfg.numeroInicial, 10) || 1);
+            return pref + String(sig).padStart(4, '0');
+        }
+
+        window.ncCambiarVistaCaja = async function (vista) {
+            const esNotas = vista === 'notas';
+            const vGastos = document.getElementById('cajaVistaGastos');
+            const vNotas = document.getElementById('cajaVistaNotasCobro');
+            if (vGastos) vGastos.style.display = esNotas ? 'none' : '';
+            if (vNotas) vNotas.style.display = esNotas ? '' : 'none';
+            const bG = document.getElementById('btnCajaVistaGastos');
+            const bN = document.getElementById('btnCajaVistaNotas');
+            if (bG) { bG.classList.toggle('is-on', !esNotas); bG.setAttribute('aria-selected', String(!esNotas)); }
+            if (bN) { bN.classList.toggle('is-on', esNotas); bN.setAttribute('aria-selected', String(esNotas)); }
+            if (esNotas) await ncCargarModulo();
+        };
+
+        async function ncCargarModulo() {
+            try {
+                if (window._ncPestanas.length) ncSincronizarPestanaActiva();
+                await Promise.all([ncObtenerConfig(true), ncObtenerNotas()]);
+                ncRenderConfig();
+                ncRenderSelects();
+                ncRenderNotas();
+                ncInicializarPestanas();
+            } catch (e) {
+                console.error('Error al cargar notas de cobro:', e);
+                mostrarAlerta('No se pudieron cargar las notas de cobro. ' + (e.message || ''), 'Error');
+            }
+        }
+
+        // ---------- Formulario e ítems ----------
+
+        function ncFilaItemHtml(item) {
+            const it = item || {};
+            const cant = it.cantidad != null && it.cantidad !== '' ? it.cantidad : 1;
+            const valor = it.valorUnitario != null && it.valorUnitario !== '' ? it.valorUnitario : '';
+            return `<tr>
+                <td class="nc-item-num" style="text-align: center;">1</td>
+                <td><input type="text" class="nc-desc" value="${ncEsc(it.descripcion || '')}" placeholder="Ej: Lavado de mueble hall"></td>
+                <td><input type="number" class="nc-cant" value="${ncEsc(cant)}" min="0" step="any" oninput="ncRecalcular()"></td>
+                <td><input type="number" class="nc-valor" value="${ncEsc(valor)}" min="0" step="1" placeholder="0" oninput="ncRecalcular()"></td>
+                <td class="nc-total">$0</td>
+                <td style="text-align: center;"><button type="button" class="btn btn-danger btn-sm" onclick="ncQuitarItem(this)" title="Quitar ítem">Quitar</button></td>
+            </tr>`;
+        }
+
+        window.ncAgregarItem = function (item) {
+            const tbody = document.getElementById('ncItemsBody');
+            if (!tbody) return;
+            tbody.insertAdjacentHTML('beforeend', ncFilaItemHtml(item));
+            ncRecalcular();
+        };
+
+        window.ncQuitarItem = function (btn) {
+            const tr = btn && btn.closest('tr');
+            if (tr) tr.remove();
+            const tbody = document.getElementById('ncItemsBody');
+            if (tbody && !tbody.children.length) ncAgregarItem();
+            ncRecalcular();
+        };
+
+        function ncLeerItems() {
+            const filas = Array.from(document.querySelectorAll('#ncItemsBody tr'));
+            return filas.map(tr => ({
+                descripcion: String(tr.querySelector('.nc-desc').value || '').trim(),
+                cantidad: parseFloat(tr.querySelector('.nc-cant').value) || 0,
+                valorUnitario: Math.round(parseFloat(tr.querySelector('.nc-valor').value) || 0)
+            })).filter(i => i.descripcion || i.valorUnitario);
+        }
+
+        window.ncRecalcular = function () {
+            let total = 0;
+            document.querySelectorAll('#ncItemsBody tr').forEach((tr, i) => {
+                tr.querySelector('.nc-item-num').textContent = String(i + 1);
+                const cant = parseFloat(tr.querySelector('.nc-cant').value) || 0;
+                const valor = parseFloat(tr.querySelector('.nc-valor').value) || 0;
+                const sub = Math.round(cant * valor);
+                total += sub;
+                tr.querySelector('.nc-total').textContent = ncMoneda(sub);
+            });
+            const el = document.getElementById('ncTotalPagar');
+            if (el) el.textContent = ncMoneda(total);
+            ncProgramarSync();
+        };
+
+        function ncCuentaPredeterminada(cfg) {
+            const cuentas = (cfg && cfg.cuentas) || [];
+            return cuentas.find(c => c.predeterminada) || cuentas[0] || null;
+        }
+
+        // ---------- Pestañas: varias notas abiertas a la vez ----------
+
+        const NC_LS_BORRADORES = 'notasCobro-borradores';
+        window._ncPestanas = [];
+        window._ncPestanaActiva = null;
+        window._ncAplicandoEstado = false;
+        let _ncTimerSync = null;
+
+        function ncSiguienteNumeroLibre(excluirUid) {
+            const cfg = window._ncConfig || ncConfigPorDefecto();
+            const enBorradores = (window._ncPestanas || [])
+                .filter(p => p.uid !== excluirUid && p.estado && !p.estado.editId)
+                .map(p => ({ numero: p.estado.numero }));
+            return ncSiguienteNumero((window._ncNotas || []).concat(enBorradores), cfg);
+        }
+
+        function ncEstadoNuevo(excluirUid) {
+            const cfg = window._ncConfig || ncConfigPorDefecto();
+            const def = ncCuentaPredeterminada(cfg);
+            return {
+                editId: '',
+                copiaDe: '',
+                numero: ncSiguienteNumeroLibre(excluirUid),
+                fecha: obtenerFechaHoy(),
+                clienteGuardado: '',
+                clienteNombre: '',
+                clienteRut: '',
+                clienteDireccion: '',
+                clienteCorreo: '',
+                guardarCliente: true,
+                items: [{}],
+                formaPago: 'Transferencia Bancaria',
+                cuentaId: def ? def.id : '',
+                observaciones: '',
+                incluirLogo: !!(cfg.incluirLogoPorDefecto && cfg.logo),
+                logoTocado: false
+            };
+        }
+
+        function ncEstadoDesdeNota(nota, comoCopia, excluirUid) {
+            const c = nota.cliente || {};
+            return {
+                editId: comoCopia ? '' : nota.id,
+                copiaDe: comoCopia ? nota.numero : '',
+                numero: comoCopia ? ncSiguienteNumeroLibre(excluirUid) : nota.numero,
+                fecha: comoCopia ? obtenerFechaHoy() : nota.fecha,
+                clienteGuardado: '',
+                clienteNombre: c.nombre || '',
+                clienteRut: c.rut || '',
+                clienteDireccion: c.direccion || '',
+                clienteCorreo: c.correo || '',
+                guardarCliente: true,
+                items: (nota.items && nota.items.length ? nota.items : [{}]).map(it => Object.assign({}, it)),
+                formaPago: nota.formaPago || 'Transferencia Bancaria',
+                cuentaId: nota.cuentaId || '',
+                observaciones: nota.observaciones || '',
+                incluirLogo: !!nota.incluirLogo,
+                logoTocado: true
+            };
+        }
+
+        function ncCapturarEstado() {
+            const filas = Array.from(document.querySelectorAll('#ncItemsBody tr')).map(tr => ({
+                descripcion: tr.querySelector('.nc-desc').value,
+                cantidad: tr.querySelector('.nc-cant').value,
+                valorUnitario: tr.querySelector('.nc-valor').value
+            }));
+            const activa = (window._ncPestanas || []).find(p => p.uid === window._ncPestanaActiva);
+            const chkLogo = document.getElementById('ncIncluirLogo');
+            return {
+                editId: ncValor('ncEditId'),
+                copiaDe: activa && activa.estado ? (activa.estado.copiaDe || '') : '',
+                numero: ncValor('ncNumero'),
+                fecha: ncValor('ncFecha'),
+                clienteGuardado: ncValor('ncClienteGuardado'),
+                clienteNombre: ncValor('ncClienteNombre'),
+                clienteRut: ncValor('ncClienteRut'),
+                clienteDireccion: ncValor('ncClienteDireccion'),
+                clienteCorreo: ncValor('ncClienteCorreo'),
+                guardarCliente: !!document.getElementById('ncGuardarCliente').checked,
+                items: filas.length ? filas : [{}],
+                formaPago: ncValor('ncFormaPago'),
+                cuentaId: ncValor('ncCuenta'),
+                observaciones: document.getElementById('ncObservaciones').value,
+                incluirLogo: !!chkLogo.checked,
+                logoTocado: !!chkLogo.dataset.tocado
+            };
+        }
+
+        function ncAplicarEstado(s) {
+            const cfg = window._ncConfig || ncConfigPorDefecto();
+            window._ncAplicandoEstado = true;
+            try {
+                ncSetValor('ncEditId', s.editId);
+                ncSetValor('ncNumero', s.numero);
+                ncSetValor('ncFecha', s.fecha);
+                const existeCliente = s.clienteGuardado && (cfg.clientes || []).some(c => c.id === s.clienteGuardado);
+                ncSetValor('ncClienteGuardado', existeCliente ? s.clienteGuardado : '');
+                ncSetValor('ncClienteNombre', s.clienteNombre);
+                ncSetValor('ncClienteRut', s.clienteRut);
+                ncSetValor('ncClienteDireccion', s.clienteDireccion);
+                ncSetValor('ncClienteCorreo', s.clienteCorreo);
+                document.getElementById('ncGuardarCliente').checked = s.guardarCliente !== false;
+                const tbody = document.getElementById('ncItemsBody');
+                tbody.innerHTML = '';
+                (s.items && s.items.length ? s.items : [{}]).forEach(it => ncAgregarItem(it));
+                ncSetValor('ncFormaPago', s.formaPago || 'Transferencia Bancaria');
+                const existeCuenta = s.cuentaId && (cfg.cuentas || []).some(c => c.id === s.cuentaId);
+                ncSetValor('ncCuenta', existeCuenta ? s.cuentaId : '');
+                ncSetValor('ncObservaciones', s.observaciones);
+                const chkLogo = document.getElementById('ncIncluirLogo');
+                chkLogo.checked = !!(s.incluirLogo && cfg.logo);
+                if (s.logoTocado) chkLogo.dataset.tocado = '1';
+                else delete chkLogo.dataset.tocado;
+                document.getElementById('ncTituloFormulario').textContent = s.editId
+                    ? 'Editando nota ' + s.numero
+                    : (s.copiaDe ? 'Nueva nota de cobro (copia de ' + s.copiaDe + ')' : 'Nueva nota de cobro');
+                document.getElementById('ncBtnGuardar').textContent = s.editId ? 'Guardar cambios' : 'Guardar nota';
+                ncRecalcular();
+            } finally {
+                window._ncAplicandoEstado = false;
+            }
+        }
+
+        function ncEstadoTieneDatos(s) {
+            if (!s) return false;
+            if (s.clienteNombre || s.observaciones) return true;
+            return (s.items || []).some(it => String(it.descripcion || '').trim() || Number(it.valorUnitario) > 0);
+        }
+
+        function ncGuardarBorradoresLocal() {
+            try {
+                localStorage.setItem(lsKey(NC_LS_BORRADORES), JSON.stringify({
+                    activa: window._ncPestanaActiva,
+                    pestanas: window._ncPestanas
+                }));
+            } catch (e) {
+                console.warn('No se pudieron guardar los borradores de notas de cobro:', e);
+            }
+        }
+
+        function ncLeerBorradoresLocal() {
+            try {
+                const raw = localStorage.getItem(lsKey(NC_LS_BORRADORES));
+                if (!raw) return null;
+                const d = JSON.parse(raw);
+                if (!d || !Array.isArray(d.pestanas)) return null;
+                const pestanas = d.pestanas.filter(p => p && p.uid && p.estado);
+                return pestanas.length ? { activa: d.activa, pestanas } : null;
+            } catch (e) {
+                return null;
+            }
+        }
+
+        function ncSincronizarPestanaActiva() {
+            clearTimeout(_ncTimerSync);
+            _ncTimerSync = null;
+            const activa = (window._ncPestanas || []).find(p => p.uid === window._ncPestanaActiva);
+            if (!activa) return;
+            activa.estado = ncCapturarEstado();
+            ncGuardarBorradoresLocal();
+            ncRenderPestanas();
+        }
+
+        function ncProgramarSync() {
+            if (window._ncAplicandoEstado) return;
+            clearTimeout(_ncTimerSync);
+            _ncTimerSync = setTimeout(ncSincronizarPestanaActiva, 250);
+        }
+
+        function ncRenderPestanas() {
+            const cont = document.getElementById('ncPestanas');
+            if (!cont) return;
+            const pestanas = window._ncPestanas || [];
+            cont.innerHTML = pestanas.map(p => {
+                const s = p.estado || {};
+                const activa = p.uid === window._ncPestanaActiva;
+                const cliente = String(s.clienteNombre || '').trim();
+                const tipo = s.editId ? 'Editando' : 'Borrador';
+                return `<div class="nc-pestana${activa ? ' is-on' : ''}" role="tab" aria-selected="${activa}" onclick="ncActivarPestana('${ncEsc(p.uid)}')" title="${ncEsc(tipo + ' ' + (s.numero || '') + (cliente ? ' · ' + cliente : ''))}">
+                    <span class="nc-pestana-tipo">${tipo}</span>
+                    <span class="nc-pestana-txt">${ncEsc(s.numero || 'Sin N°')} · ${ncEsc(cliente || 'Sin cliente')}</span>
+                    <button type="button" class="nc-pestana-cerrar" onclick="event.stopPropagation(); ncCerrarPestana('${ncEsc(p.uid)}')" title="Cerrar esta nota" aria-label="Cerrar esta nota">×</button>
+                </div>`;
+            }).join('') + (pestanas.length > 1
+                ? `<span class="nc-pestanas-info">${pestanas.length} notas abiertas</span>`
+                : '');
+        }
+
+        function ncInicializarPestanas() {
+            if (window._ncPestanas.length) {
+                const activa = window._ncPestanas.find(p => p.uid === window._ncPestanaActiva) || window._ncPestanas[0];
+                window._ncPestanaActiva = activa.uid;
+                ncAplicarEstado(activa.estado);
+                ncRenderPestanas();
+                return;
+            }
+            const guardado = ncLeerBorradoresLocal();
+            if (guardado) {
+                window._ncPestanas = guardado.pestanas;
+                window._ncPestanaActiva = guardado.pestanas.some(p => p.uid === guardado.activa) ? guardado.activa : guardado.pestanas[0].uid;
+            } else {
+                const uid = generarId();
+                window._ncPestanas = [{ uid, estado: ncEstadoNuevo(uid) }];
+                window._ncPestanaActiva = uid;
+            }
+            const activa = window._ncPestanas.find(p => p.uid === window._ncPestanaActiva);
+            ncAplicarEstado(activa.estado);
+            ncRenderPestanas();
+            ncGuardarBorradoresLocal();
+        }
+
+        function ncAbrirEnPestana(estadoFn) {
+            ncSincronizarPestanaActiva();
+            const actual = window._ncPestanas.find(p => p.uid === window._ncPestanaActiva);
+            let destino;
+            if (actual && !actual.estado.editId && !ncEstadoTieneDatos(actual.estado)) {
+                destino = actual;
+            } else {
+                destino = { uid: generarId(), estado: null };
+                window._ncPestanas.push(destino);
+            }
+            destino.estado = estadoFn(destino.uid);
+            window._ncPestanaActiva = destino.uid;
+            ncAplicarEstado(destino.estado);
+            ncRenderPestanas();
+            ncGuardarBorradoresLocal();
+            document.getElementById('formNotaCobro').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        window.ncNuevaPestana = function () {
+            ncSincronizarPestanaActiva();
+            const p = { uid: generarId(), estado: null };
+            window._ncPestanas.push(p);
+            p.estado = ncEstadoNuevo(p.uid);
+            window._ncPestanaActiva = p.uid;
+            ncAplicarEstado(p.estado);
+            ncRenderPestanas();
+            ncGuardarBorradoresLocal();
+            const nombre = document.getElementById('ncClienteNombre');
+            if (nombre) nombre.focus();
+        };
+
+        window.ncActivarPestana = function (uid) {
+            if (uid === window._ncPestanaActiva) return;
+            const destino = window._ncPestanas.find(p => p.uid === uid);
+            if (!destino) return;
+            ncSincronizarPestanaActiva();
+            window._ncPestanaActiva = uid;
+            ncAplicarEstado(destino.estado);
+            ncRenderPestanas();
+            ncGuardarBorradoresLocal();
+        };
+
+        window.ncCerrarPestana = async function (uid, sinConfirmar) {
+            if (uid === window._ncPestanaActiva) ncSincronizarPestanaActiva();
+            const idx = window._ncPestanas.findIndex(p => p.uid === uid);
+            if (idx === -1) return;
+            const p = window._ncPestanas[idx];
+            if (!sinConfirmar && ncEstadoTieneDatos(p.estado)) {
+                const msg = p.estado.editId
+                    ? `¿Cerrar la edición de ${p.estado.numero}? Los cambios no guardados se perderán (la nota emitida no se modifica).`
+                    : `¿Descartar el borrador ${p.estado.numero || ''}? Lo que no haya guardado se perderá.`;
+                const ok = await confirmarAccion(msg, 'Cerrar nota');
+                if (!ok) return;
+            }
+            window._ncPestanas.splice(idx, 1);
+            if (!window._ncPestanas.length) {
+                const nuevo = { uid: generarId(), estado: null };
+                window._ncPestanas.push(nuevo);
+                nuevo.estado = ncEstadoNuevo(nuevo.uid);
+                window._ncPestanaActiva = nuevo.uid;
+                ncAplicarEstado(nuevo.estado);
+            } else if (uid === window._ncPestanaActiva) {
+                const sig = window._ncPestanas[Math.min(idx, window._ncPestanas.length - 1)];
+                window._ncPestanaActiva = sig.uid;
+                ncAplicarEstado(sig.estado);
+            }
+            ncRenderPestanas();
+            ncGuardarBorradoresLocal();
+        };
+
+        window.ncLimpiarFormulario = function () {
+            const uid = window._ncPestanaActiva;
+            const activa = window._ncPestanas.find(p => p.uid === uid);
+            const estado = ncEstadoNuevo(uid);
+            if (activa) activa.estado = estado;
+            ncAplicarEstado(estado);
+            ncRenderPestanas();
+            ncGuardarBorradoresLocal();
+        };
+
+        window.ncAlCambiarFormaPago = function () {
+            const cfg = window._ncConfig || ncConfigPorDefecto();
+            if (NC_FORMAS_PAGO_BANCARIAS.includes(ncValor('ncFormaPago'))) {
+                if (!ncValor('ncCuenta')) {
+                    const def = ncCuentaPredeterminada(cfg);
+                    if (def) ncSetValor('ncCuenta', def.id);
+                }
+            } else {
+                ncSetValor('ncCuenta', '');
+            }
+        };
+
+        window.ncSeleccionarCliente = function (id) {
+            if (!id) return;
+            const cfg = window._ncConfig || ncConfigPorDefecto();
+            const c = (cfg.clientes || []).find(x => x.id === id);
+            if (!c) return;
+            ncSetValor('ncClienteNombre', c.nombre);
+            ncSetValor('ncClienteRut', c.rut);
+            ncSetValor('ncClienteDireccion', c.direccion);
+            ncSetValor('ncClienteCorreo', c.correo);
+        };
+
+        function ncLeerFormulario() {
+            const cfg = window._ncConfig || ncConfigPorDefecto();
+            const items = ncLeerItems();
+            const total = items.reduce((s, i) => s + Math.round(i.cantidad * i.valorUnitario), 0);
+            const cuentaId = ncValor('ncCuenta');
+            const cuenta = cuentaId ? (cfg.cuentas || []).find(c => c.id === cuentaId) || null : null;
+            const rut = ncValor('ncClienteRut');
+            return {
+                id: ncValor('ncEditId') || null,
+                numero: ncValor('ncNumero'),
+                fecha: ncValor('ncFecha'),
+                cliente: {
+                    nombre: ncValor('ncClienteNombre'),
+                    rut: rut ? ncFormatearRut(rut) : '',
+                    direccion: ncValor('ncClienteDireccion'),
+                    correo: ncValor('ncClienteCorreo')
+                },
+                items,
+                total,
+                formaPago: ncValor('ncFormaPago'),
+                cuentaId: cuenta ? cuenta.id : '',
+                cuenta: cuenta ? Object.assign({}, cuenta) : null,
+                observaciones: ncValor('ncObservaciones'),
+                incluirLogo: !!document.getElementById('ncIncluirLogo').checked
+            };
+        }
+
+        function ncValidarNota(n) {
+            if (!n.fecha) return 'Ingrese la fecha de la nota.';
+            if (!n.numero) return 'Ingrese el N° de nota.';
+            if (!n.cliente.nombre) return 'Ingrese el nombre del cliente.';
+            if (n.cliente.rut && !ncValidarRut(n.cliente.rut)) return 'El RUT del cliente no es válido.';
+            if (n.cliente.correo && !ncCorreoValido(n.cliente.correo)) return 'El correo del cliente no es válido.';
+            if (!n.items.length) return 'Agregue al menos un ítem con descripción y valor.';
+            const malo = n.items.find(i => !i.descripcion || i.cantidad <= 0 || i.valorUnitario <= 0);
+            if (malo) return 'Cada ítem debe tener descripción, cantidad mayor a 0 y valor unitario mayor a 0.';
+            return '';
+        }
+
+        async function ncGuardarClienteDesdeNota(cliente) {
+            if (!cliente || !cliente.nombre) return;
+            const cfg = await ncObtenerConfig();
+            const clientes = (cfg.clientes || []).slice();
+            const rutLimpio = ncLimpiarRut(cliente.rut);
+            const idx = clientes.findIndex(c => (rutLimpio && ncLimpiarRut(c.rut) === rutLimpio) ||
+                String(c.nombre || '').trim().toLowerCase() === cliente.nombre.trim().toLowerCase());
+            if (idx !== -1) {
+                clientes[idx] = Object.assign({}, clientes[idx], cliente);
+            } else {
+                clientes.push(Object.assign({ id: generarId() }, cliente));
+            }
+            clientes.sort((a, b) => String(a.nombre).localeCompare(String(b.nombre), 'es'));
+            await ncGuardarConfig({ clientes });
+        }
+
+        window.ncGuardarNota = async function () {
+            const nota = ncLeerFormulario();
+            const err = ncValidarNota(nota);
+            if (err) {
+                mostrarAlerta(err, 'Datos incompletos');
+                return;
+            }
+            const uidPestana = window._ncPestanaActiva;
+            try {
+                mostrarProgreso('Guardando nota de cobro...');
+                const notas = (await ncObtenerNotas()).slice();
+                const duplicada = notas.find(n => String(n.numero || '').trim().toLowerCase() === nota.numero.toLowerCase() && n.id !== nota.id);
+                if (duplicada) {
+                    ocultarProgreso();
+                    mostrarAlerta(`Ya existe una nota con el N° ${nota.numero}. Use otro número.`, 'Número duplicado');
+                    return;
+                }
+                const ahora = new Date().toISOString();
+                let esNueva = false;
+                if (nota.id) {
+                    const idx = notas.findIndex(n => n.id === nota.id);
+                    if (idx === -1) throw new Error('No se encontró la nota a editar.');
+                    notas[idx] = Object.assign({}, notas[idx], nota, { actualizada: ahora });
+                } else {
+                    esNueva = true;
+                    nota.id = generarId();
+                    nota.estado = 'pendiente';
+                    nota.creada = ahora;
+                    nota.envios = [];
+                    notas.push(nota);
+                }
+                await ncGuardarNotas(notas);
+                if (document.getElementById('ncGuardarCliente').checked) await ncGuardarClienteDesdeNota(nota.cliente);
+                if (typeof window.registrarMovimiento === 'function') {
+                    window.registrarMovimiento(esNueva ? 'crear' : 'actualizar', 'caja', `Nota de cobro ${nota.numero}: ${nota.cliente.nombre} - ${ncMoneda(nota.total)}`);
+                }
+                ocultarProgreso();
+                await ncCerrarPestana(uidPestana, true);
+                ncRenderSelects();
+                ncRenderConfig();
+                ncRenderNotas();
+                const restantes = window._ncPestanas.filter(p => ncEstadoTieneDatos(p.estado)).length;
+                mostrarAlerta(`Nota de cobro ${nota.numero} ${esNueva ? 'emitida' : 'actualizada'}. Desde la tabla puede descargar el PDF o enviarla por correo.${restantes ? ` Sigue${restantes > 1 ? 'n' : ''} abierta${restantes > 1 ? 's' : ''} ${restantes} nota${restantes > 1 ? 's' : ''} en las pestañas.` : ''}`, 'Nota guardada');
+            } catch (e) {
+                ocultarProgreso();
+                console.error('Error al guardar nota de cobro:', e);
+                mostrarAlerta('No se pudo guardar la nota de cobro. ' + (e.message || ''), 'Error');
+            }
+        };
+
+        window.ncEditarNota = function (id) {
+            const nota = window._ncNotas.find(n => n.id === id);
+            if (!nota) return;
+            const yaAbierta = window._ncPestanas.find(p => p.estado && p.estado.editId === id);
+            if (yaAbierta) {
+                ncActivarPestana(yaAbierta.uid);
+                document.getElementById('formNotaCobro').scrollIntoView({ behavior: 'smooth', block: 'start' });
+                return;
+            }
+            ncAbrirEnPestana(uid => ncEstadoDesdeNota(nota, false, uid));
+        };
+
+        window.ncDuplicarNota = function (id) {
+            const nota = window._ncNotas.find(n => n.id === id);
+            if (nota) ncAbrirEnPestana(uid => ncEstadoDesdeNota(nota, true, uid));
+        };
+
+        window.ncEliminarNota = async function (id) {
+            const nota = window._ncNotas.find(n => n.id === id);
+            if (!nota) return;
+            const ok = await confirmarAccion(`¿Eliminar la nota de cobro ${nota.numero}? Esta acción no se puede deshacer. Si solo desea dejarla sin efecto, cambie su estado a "Anulada".`, 'Eliminar nota de cobro');
+            if (!ok) return;
+            try {
+                const notas = (await ncObtenerNotas()).filter(n => n.id !== id);
+                await ncGuardarNotas(notas);
+                if (typeof window.registrarMovimiento === 'function') {
+                    window.registrarMovimiento('eliminar', 'caja', `Nota de cobro eliminada: ${nota.numero} - ${(nota.cliente || {}).nombre || ''}`);
+                }
+                const pestanasNota = window._ncPestanas.filter(p => p.estado && p.estado.editId === id).map(p => p.uid);
+                for (const uid of pestanasNota) await ncCerrarPestana(uid, true);
+                ncRenderNotas();
+            } catch (e) {
+                console.error('Error al eliminar nota de cobro:', e);
+                mostrarAlerta('No se pudo eliminar la nota. ' + (e.message || ''), 'Error');
+            }
+        };
+
+        window.ncCambiarEstado = async function (id, estado) {
+            try {
+                const notas = (await ncObtenerNotas()).slice();
+                const idx = notas.findIndex(n => n.id === id);
+                if (idx === -1) return;
+                notas[idx] = Object.assign({}, notas[idx], {
+                    estado,
+                    fechaPago: estado === 'pagada' ? obtenerFechaHoy() : '',
+                    actualizada: new Date().toISOString()
+                });
+                await ncGuardarNotas(notas);
+                ncRenderNotas();
+            } catch (e) {
+                console.error('Error al cambiar estado de la nota:', e);
+                mostrarAlerta('No se pudo actualizar el estado. ' + (e.message || ''), 'Error');
+            }
+        };
+
+        // ---------- Render ----------
+
+        function ncRenderSelects() {
+            const cfg = window._ncConfig || ncConfigPorDefecto();
+            const selCli = document.getElementById('ncClienteGuardado');
+            if (selCli) {
+                const prev = selCli.value;
+                selCli.innerHTML = '<option value="">— Ingresar datos manualmente —</option>' +
+                    (cfg.clientes || []).map(c => `<option value="${ncEsc(c.id)}">${ncEsc(c.nombre)}${c.rut ? ' · ' + ncEsc(c.rut) : ''}</option>`).join('');
+                selCli.value = prev && (cfg.clientes || []).some(c => c.id === prev) ? prev : '';
+            }
+            const selCta = document.getElementById('ncCuenta');
+            if (selCta) {
+                const prev = selCta.value;
+                selCta.innerHTML = '<option value="">— No incluir datos bancarios —</option>' +
+                    (cfg.cuentas || []).map(c => `<option value="${ncEsc(c.id)}">${ncEsc(c.banco)} · ${ncEsc(c.tipo)} N° ${ncEsc(c.numero)}${c.predeterminada ? ' (predeterminada)' : ''}</option>`).join('');
+                selCta.value = prev && (cfg.cuentas || []).some(c => c.id === prev) ? prev : '';
+            }
+            const selBanco = document.getElementById('ncCuentaBanco');
+            if (selBanco && !selBanco.options.length) {
+                selBanco.innerHTML = '<option value="">Seleccione banco...</option>' + NC_BANCOS_CHILE.map(b => `<option value="${ncEsc(b)}">${ncEsc(b)}</option>`).join('');
+            }
+            const selTipo = document.getElementById('ncCuentaTipo');
+            if (selTipo && !selTipo.options.length) {
+                selTipo.innerHTML = '<option value="">Seleccione tipo...</option>' + NC_TIPOS_CUENTA.map(t => `<option value="${ncEsc(t)}">${ncEsc(t)}</option>`).join('');
+            }
+            ncProgramarSync();
+        }
+
+        function ncRenderConfig() {
+            const cfg = window._ncConfig || ncConfigPorDefecto();
+            ncSetValor('ncEmisorNombre', cfg.emisor.nombre);
+            ncSetValor('ncEmisorRut', cfg.emisor.rut);
+            ncSetValor('ncEmisorDireccion', cfg.emisor.direccion);
+            ncSetValor('ncEmisorContacto', cfg.emisor.contacto);
+            ncSetValor('ncPrefijo', cfg.prefijo);
+            ncSetValor('ncNumeroInicial', cfg.numeroInicial);
+            const prev = document.getElementById('ncLogoPreview');
+            if (prev) {
+                prev.innerHTML = cfg.logo
+                    ? `<img src="${cfg.logo}" alt="Logo">`
+                    : 'Sin logo';
+            }
+            const chkDef = document.getElementById('ncLogoPorDefecto');
+            if (chkDef) chkDef.checked = !!cfg.incluirLogoPorDefecto;
+            const aviso = document.getElementById('ncAvisoSinLogo');
+            if (aviso) aviso.style.display = cfg.logo ? 'none' : 'inline';
+            const chkLogo = document.getElementById('ncIncluirLogo');
+            if (chkLogo) {
+                chkLogo.disabled = !cfg.logo;
+                if (!cfg.logo) chkLogo.checked = false;
+            }
+
+            const tbCtas = document.getElementById('ncTbodyCuentas');
+            if (tbCtas) {
+                tbCtas.innerHTML = (cfg.cuentas || []).length ? cfg.cuentas.map(c => `
+                    <tr>
+                        <td>${ncEsc(c.banco)}${c.predeterminada ? ' <span class="nc-estado" style="background: var(--m-accent-soft); color: var(--primary);">Predeterminada</span>' : ''}</td>
+                        <td>${ncEsc(c.tipo)}</td>
+                        <td>${ncEsc(c.numero)}</td>
+                        <td>${ncEsc(c.titular)}</td>
+                        <td>${ncEsc(c.rut)}</td>
+                        <td>${ncEsc(c.correo || '-')}</td>
+                        <td><div class="tabla-acciones">
+                            <button type="button" class="btn btn-primary btn-sm" onclick="ncEditarCuenta('${ncEsc(c.id)}')">Editar</button>
+                            <button type="button" class="btn btn-danger btn-sm" onclick="ncEliminarCuenta('${ncEsc(c.id)}')">Eliminar</button>
+                        </div></td>
+                    </tr>`).join('') : '<tr><td colspan="7" class="empty-state"><p>No hay cuentas bancarias registradas</p></td></tr>';
+            }
+
+            const tbCli = document.getElementById('ncTbodyClientes');
+            if (tbCli) {
+                tbCli.innerHTML = (cfg.clientes || []).length ? cfg.clientes.map(c => `
+                    <tr>
+                        <td>${ncEsc(c.nombre)}</td>
+                        <td>${ncEsc(c.rut || '-')}</td>
+                        <td>${ncEsc(c.direccion || '-')}</td>
+                        <td>${ncEsc(c.correo || '-')}</td>
+                        <td><button type="button" class="btn btn-danger btn-sm" onclick="ncEliminarCliente('${ncEsc(c.id)}')">Eliminar</button></td>
+                    </tr>`).join('') : '<tr><td colspan="5" class="empty-state"><p>Los clientes se guardan automáticamente al emitir una nota</p></td></tr>';
+            }
+        }
+
+        window.ncRenderNotas = function () {
+            const tbody = document.getElementById('ncTbodyNotas');
+            if (!tbody) return;
+            const notas = window._ncNotas || [];
+            const pendiente = notas.filter(n => (n.estado || 'pendiente') === 'pendiente').reduce((s, n) => s + (Number(n.total) || 0), 0);
+            const elPend = document.getElementById('ncTotalPendiente');
+            if (elPend) elPend.textContent = ncMoneda(pendiente);
+
+            const q = ncValor('ncBuscar').toLowerCase();
+            const fEstado = ncValor('ncFiltroEstado');
+            const lista = notas.filter(n => {
+                if (fEstado && (n.estado || 'pendiente') !== fEstado) return false;
+                if (!q) return true;
+                return String(n.numero || '').toLowerCase().includes(q) || String((n.cliente || {}).nombre || '').toLowerCase().includes(q);
+            }).sort((a, b) => String(b.fecha || '').localeCompare(String(a.fecha || '')) || String(b.numero || '').localeCompare(String(a.numero || ''), 'es', { numeric: true }));
+
+            if (!lista.length) {
+                tbody.innerHTML = `<tr><td colspan="7" class="empty-state"><p>${notas.length ? 'No hay notas que coincidan con el filtro' : 'No hay notas de cobro emitidas'}</p></td></tr>`;
+                return;
+            }
+            tbody.innerHTML = lista.map(n => {
+                const estado = n.estado || 'pendiente';
+                const envios = n.envios || [];
+                const ult = envios[envios.length - 1];
+                const envioHtml = ult
+                    ? `<span class="nc-envio" title="${ncEsc(ult.para)}">Enviada ${ncEsc(formatearFecha(String(ult.fecha).slice(0, 10)))}${envios.length > 1 ? ' (' + envios.length + ')' : ''}</span>`
+                    : '<span class="nc-envio is-no">No enviada</span>';
+                const id = ncEsc(n.id);
+                return `<tr>
+                    <td style="white-space: nowrap; font-weight: 600; color: var(--text-primary);">${ncEsc(n.numero)}</td>
+                    <td>${ncEsc(formatearFecha(n.fecha))}</td>
+                    <td>${ncEsc((n.cliente || {}).nombre || '-')}</td>
+                    <td style="white-space: nowrap; font-weight: 600; color: var(--text-primary);">${ncMoneda(n.total)}</td>
+                    <td>
+                        <select class="nc-estado-select is-${estado}" onchange="ncCambiarEstado('${id}', this.value)" aria-label="Estado de la nota">
+                            <option value="pendiente" ${estado === 'pendiente' ? 'selected' : ''}>Pendiente</option>
+                            <option value="pagada" ${estado === 'pagada' ? 'selected' : ''}>Pagada</option>
+                            <option value="anulada" ${estado === 'anulada' ? 'selected' : ''}>Anulada</option>
+                        </select>
+                    </td>
+                    <td>${envioHtml}</td>
+                    <td><div class="tabla-acciones">
+                        <button type="button" class="btn btn-secondary btn-sm" onclick="ncDescargarPdf('${id}')" title="Descargar PDF">PDF</button>
+                        <button type="button" class="btn btn-secondary btn-sm" onclick="ncAbrirModalCorreo('${id}')" title="Enviar al cliente">Enviar</button>
+                        <button type="button" class="btn btn-primary btn-sm" onclick="ncEditarNota('${id}')">Editar</button>
+                        <button type="button" class="btn btn-secondary btn-sm" onclick="ncDuplicarNota('${id}')" title="Crear una nueva nota a partir de esta">Duplicar</button>
+                        <button type="button" class="btn btn-danger btn-sm" onclick="ncEliminarNota('${id}')">Eliminar</button>
+                    </div></td>
+                </tr>`;
+            }).join('');
+        };
+
+        // ---------- Configuración: emisor, logo, cuentas, clientes ----------
+
+        window.ncGuardarConfigEmisor = async function () {
+            const rut = ncValor('ncEmisorRut');
+            if (rut && !ncValidarRut(rut)) {
+                mostrarAlerta('El RUT del emisor no es válido.', 'Datos inválidos');
+                return;
+            }
+            try {
+                const editando = !!ncValor('ncEditId');
+                await ncGuardarConfig({
+                    emisor: {
+                        nombre: ncValor('ncEmisorNombre'),
+                        rut: rut ? ncFormatearRut(rut) : '',
+                        direccion: ncValor('ncEmisorDireccion'),
+                        contacto: ncValor('ncEmisorContacto')
+                    },
+                    prefijo: ncValor('ncPrefijo'),
+                    numeroInicial: Math.max(1, parseInt(ncValor('ncNumeroInicial'), 10) || 1)
+                });
+                if (!editando) {
+                    ncSetValor('ncNumero', ncSiguienteNumeroLibre(window._ncPestanaActiva));
+                    ncSincronizarPestanaActiva();
+                }
+                ncRenderConfig();
+                mostrarAlerta('Datos del emisor y numeración guardados.', 'Configuración guardada');
+            } catch (e) {
+                console.error('Error al guardar emisor:', e);
+                mostrarAlerta('No se pudo guardar la configuración. ' + (e.message || ''), 'Error');
+            }
+        };
+
+        window.ncCargarLogo = function (input) {
+            const file = input && input.files && input.files[0];
+            if (!file) return;
+            if (!/^image\/(png|jpe?g|webp)$/i.test(file.type)) {
+                mostrarAlerta('Seleccione una imagen PNG, JPG o WEBP.', 'Formato no válido');
+                input.value = '';
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = function () {
+                const img = new Image();
+                img.onload = async function () {
+                    try {
+                        const max = 600;
+                        const esc = Math.min(1, max / Math.max(img.naturalWidth, img.naturalHeight));
+                        const w = Math.max(1, Math.round(img.naturalWidth * esc));
+                        const h = Math.max(1, Math.round(img.naturalHeight * esc));
+                        const canvas = document.createElement('canvas');
+                        canvas.width = w;
+                        canvas.height = h;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, w, h);
+                        let dataUrl = canvas.toDataURL('image/png');
+                        if (dataUrl.length > 600000) {
+                            ctx.globalCompositeOperation = 'destination-over';
+                            ctx.fillStyle = '#ffffff';
+                            ctx.fillRect(0, 0, w, h);
+                            dataUrl = canvas.toDataURL('image/jpeg', 0.88);
+                        }
+                        await ncGuardarConfig({ logo: dataUrl, logoAncho: w, logoAlto: h });
+                        ncRenderConfig();
+                        mostrarAlerta('Logo guardado. Marque "Incluir logo en el PDF" en cada nota para mostrarlo.', 'Logo cargado');
+                    } catch (e) {
+                        console.error('Error al guardar logo:', e);
+                        mostrarAlerta('No se pudo guardar el logo. ' + (e.message || ''), 'Error');
+                    } finally {
+                        input.value = '';
+                    }
+                };
+                img.onerror = function () {
+                    mostrarAlerta('No se pudo leer la imagen seleccionada.', 'Error');
+                    input.value = '';
+                };
+                img.src = reader.result;
+            };
+            reader.readAsDataURL(file);
+        };
+
+        window.ncQuitarLogo = async function () {
+            const cfg = window._ncConfig || ncConfigPorDefecto();
+            if (!cfg.logo) return;
+            const ok = await confirmarAccion('¿Quitar el logo de las notas de cobro?', 'Quitar logo');
+            if (!ok) return;
+            try {
+                await ncGuardarConfig({ logo: null, logoAncho: 0, logoAlto: 0 });
+                ncRenderConfig();
+            } catch (e) {
+                mostrarAlerta('No se pudo quitar el logo. ' + (e.message || ''), 'Error');
+            }
+        };
+
+        window.ncGuardarPreferenciaLogo = async function () {
+            try {
+                await ncGuardarConfig({ incluirLogoPorDefecto: !!document.getElementById('ncLogoPorDefecto').checked });
+            } catch (e) {
+                mostrarAlerta('No se pudo guardar la preferencia. ' + (e.message || ''), 'Error');
+            }
+        };
+
+        window.ncLimpiarFormCuenta = function () {
+            ['ncCuentaEditId', 'ncCuentaBanco', 'ncCuentaTipo', 'ncCuentaNumero', 'ncCuentaTitular', 'ncCuentaRut', 'ncCuentaCorreo'].forEach(id => ncSetValor(id, ''));
+            document.getElementById('ncCuentaPredeterminada').checked = false;
+            document.getElementById('ncBtnGuardarCuenta').textContent = 'Agregar cuenta';
+        };
+
+        window.ncGuardarCuenta = async function () {
+            const cuenta = {
+                id: ncValor('ncCuentaEditId') || generarId(),
+                banco: ncValor('ncCuentaBanco'),
+                tipo: ncValor('ncCuentaTipo'),
+                numero: ncValor('ncCuentaNumero'),
+                titular: ncValor('ncCuentaTitular'),
+                rut: ncValor('ncCuentaRut'),
+                correo: ncValor('ncCuentaCorreo'),
+                predeterminada: !!document.getElementById('ncCuentaPredeterminada').checked
+            };
+            if (!cuenta.banco || !cuenta.tipo || !cuenta.numero || !cuenta.titular || !cuenta.rut) {
+                mostrarAlerta('Complete banco, tipo de cuenta, número, titular y RUT.', 'Datos incompletos');
+                return;
+            }
+            if (!ncValidarRut(cuenta.rut)) {
+                mostrarAlerta('El RUT del titular no es válido.', 'Datos inválidos');
+                return;
+            }
+            if (cuenta.correo && !ncCorreoValido(cuenta.correo)) {
+                mostrarAlerta('El correo de la cuenta no es válido.', 'Datos inválidos');
+                return;
+            }
+            cuenta.rut = ncFormatearRut(cuenta.rut);
+            try {
+                const cfg = await ncObtenerConfig();
+                let cuentas = (cfg.cuentas || []).slice();
+                if (cuenta.predeterminada) cuentas = cuentas.map(c => Object.assign({}, c, { predeterminada: false }));
+                const idx = cuentas.findIndex(c => c.id === cuenta.id);
+                if (idx !== -1) cuentas[idx] = cuenta;
+                else cuentas.push(cuenta);
+                if (!cuentas.some(c => c.predeterminada)) cuentas[0].predeterminada = true;
+                await ncGuardarConfig({ cuentas });
+                ncLimpiarFormCuenta();
+                ncRenderConfig();
+                ncRenderSelects();
+                if (!ncValor('ncEditId')) ncAlCambiarFormaPago();
+                ncSincronizarPestanaActiva();
+            } catch (e) {
+                console.error('Error al guardar cuenta bancaria:', e);
+                mostrarAlerta('No se pudo guardar la cuenta. ' + (e.message || ''), 'Error');
+            }
+        };
+
+        window.ncEditarCuenta = function (id) {
+            const c = ((window._ncConfig || {}).cuentas || []).find(x => x.id === id);
+            if (!c) return;
+            ncSetValor('ncCuentaEditId', c.id);
+            ncSetValor('ncCuentaBanco', c.banco);
+            ncSetValor('ncCuentaTipo', c.tipo);
+            ncSetValor('ncCuentaNumero', c.numero);
+            ncSetValor('ncCuentaTitular', c.titular);
+            ncSetValor('ncCuentaRut', c.rut);
+            ncSetValor('ncCuentaCorreo', c.correo);
+            document.getElementById('ncCuentaPredeterminada').checked = !!c.predeterminada;
+            document.getElementById('ncBtnGuardarCuenta').textContent = 'Guardar cambios';
+        };
+
+        window.ncEliminarCuenta = async function (id) {
+            const ok = await confirmarAccion('¿Eliminar esta cuenta bancaria? Las notas ya emitidas conservan los datos bancarios con que se emitieron.', 'Eliminar cuenta');
+            if (!ok) return;
+            try {
+                const cfg = await ncObtenerConfig();
+                const cuentas = (cfg.cuentas || []).filter(c => c.id !== id);
+                if (cuentas.length && !cuentas.some(c => c.predeterminada)) cuentas[0] = Object.assign({}, cuentas[0], { predeterminada: true });
+                await ncGuardarConfig({ cuentas });
+                ncRenderConfig();
+                ncRenderSelects();
+            } catch (e) {
+                mostrarAlerta('No se pudo eliminar la cuenta. ' + (e.message || ''), 'Error');
+            }
+        };
+
+        window.ncEliminarCliente = async function (id) {
+            const ok = await confirmarAccion('¿Eliminar este cliente de la lista? Las notas emitidas no se modifican.', 'Eliminar cliente');
+            if (!ok) return;
+            try {
+                const cfg = await ncObtenerConfig();
+                await ncGuardarConfig({ clientes: (cfg.clientes || []).filter(c => c.id !== id) });
+                ncRenderConfig();
+                ncRenderSelects();
+            } catch (e) {
+                mostrarAlerta('No se pudo eliminar el cliente. ' + (e.message || ''), 'Error');
+            }
+        };
+
+        // ---------- PDF ----------
+
+        function ncNombreArchivoPdf(nota) {
+            const cli = String((nota.cliente || {}).nombre || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-zA-Z0-9]+/g, '_').replace(/^_+|_+$/g, '').slice(0, 40);
+            const num = String(nota.numero || 'Nota').replace(/[^a-zA-Z0-9_-]/g, '_');
+            return `Nota_de_Cobro_${num}${cli ? '_' + cli : ''}.pdf`;
+        }
+
+        function ncGenerarPdf(nota, cfg) {
+            if (typeof window.jspdf === 'undefined' || !window.jspdf.jsPDF) {
+                throw new Error('No se pudo cargar el generador de PDF. Recargue la página e intente de nuevo.');
+            }
+            const doc = new window.jspdf.jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4', compress: true });
+            doc.setProperties({ title: 'Nota de Cobro ' + (nota.numero || '') });
+            const mX = 15;
+            const ancho = 180;
+            const altoPag = doc.internal.pageSize.getHeight();
+            const limiteY = altoPag - 15;
+            const emisor = (cfg && cfg.emisor) || {};
+            doc.setTextColor(0, 0, 0);
+            doc.setDrawColor(0, 0, 0);
+            doc.setLineWidth(0.3);
+
+            let finCabecera = 34;
+            if (nota.incluirLogo && cfg && cfg.logo) {
+                const maxW = 45;
+                const maxH = 22;
+                const w0 = cfg.logoAncho || maxW;
+                const h0 = cfg.logoAlto || maxH;
+                const esc = Math.min(maxW / w0, maxH / h0);
+                const w = w0 * esc;
+                const h = h0 * esc;
+                try {
+                    doc.addImage(cfg.logo, /^data:image\/png/i.test(cfg.logo) ? 'PNG' : 'JPEG', mX, 12, w, h);
+                    finCabecera = Math.max(finCabecera, 12 + h);
+                } catch (e) {
+                    console.warn('No se pudo insertar el logo en el PDF:', e);
+                }
+            }
+
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(16);
+            doc.text('NOTA DE COBRO', 105, 28, { align: 'center' });
+
+            const lineasEmisor = [];
+            if (emisor.nombre) lineasEmisor.push({ t: emisor.nombre, b: true });
+            if (emisor.rut) lineasEmisor.push({ t: 'RUT: ' + emisor.rut });
+            if (emisor.direccion) lineasEmisor.push({ t: emisor.direccion });
+            if (emisor.contacto) lineasEmisor.push({ t: emisor.contacto });
+            if (lineasEmisor.length) {
+                let yE = 14;
+                doc.setFontSize(8);
+                lineasEmisor.forEach(l => {
+                    doc.setFont('helvetica', l.b ? 'bold' : 'normal');
+                    doc.splitTextToSize(l.t, 55).forEach(s => {
+                        doc.text(s, mX + ancho, yE, { align: 'right' });
+                        yE += 3.6;
+                    });
+                });
+                finCabecera = Math.max(finCabecera, yE);
+            }
+
+            let y = Math.max(42, finCabecera + 8);
+            const cli = nota.cliente || {};
+            const filasInfo = [
+                ['Fecha:', formatearFecha(nota.fecha)],
+                ['N° de Nota:', nota.numero],
+                ['Cliente:', cli.nombre],
+                ['Rut:', cli.rut],
+                ['Dirección:', cli.direccion],
+                ['Correo:', cli.correo]
+            ].filter((f, i) => i < 3 || f[1]);
+            doc.setFontSize(10.5);
+            filasInfo.forEach(([label, valor]) => {
+                doc.setFont('helvetica', 'bold');
+                doc.text(label, mX, y);
+                doc.setFont('helvetica', 'normal');
+                const lineas = doc.splitTextToSize(String(valor || ''), ancho - 35);
+                lineas.forEach((l, i) => doc.text(l, mX + 35, y + i * 5));
+                y += 6.2 + (lineas.length - 1) * 5;
+            });
+
+            y += 6;
+            const cols = [
+                { t: 'Ítem', w: 22 },
+                { t: 'Descripción del Servicio o Producto', w: 76 },
+                { t: 'Cantidad', w: 22 },
+                { t: 'Valor Unitario', w: 30 },
+                { t: 'Total', w: 30 }
+            ];
+            const xCols = [];
+            cols.reduce((x, c) => { xCols.push(x); return x + c.w; }, mX);
+            const altoFila = 7;
+
+            const dibujarEncabezadoTabla = () => {
+                doc.setFont('helvetica', 'bold');
+                doc.setFontSize(10);
+                cols.forEach((c, i) => {
+                    doc.setFillColor(217, 217, 217);
+                    doc.rect(xCols[i], y, c.w, altoFila, 'FD');
+                    doc.text(c.t, xCols[i] + c.w / 2, y + altoFila / 2 + 1.3, { align: 'center' });
+                });
+                y += altoFila;
+            };
+            dibujarEncabezadoTabla();
+
+            const items = nota.items || [];
+            const totalFilas = Math.max(items.length, 4);
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(10);
+            for (let i = 0; i < totalFilas; i++) {
+                const it = items[i];
+                const lineasDesc = it ? doc.splitTextToSize(String(it.descripcion || ''), cols[1].w - 4) : [''];
+                const h = Math.max(altoFila, lineasDesc.length * 4.5 + 2.5);
+                if (y + h > limiteY) {
+                    doc.addPage();
+                    y = 18;
+                    dibujarEncabezadoTabla();
+                    doc.setFont('helvetica', 'normal');
+                    doc.setFontSize(10);
+                }
+                cols.forEach((c, ci) => doc.rect(xCols[ci], y, c.w, h, 'S'));
+                if (it) {
+                    const yMedio = y + h / 2 + 1.3;
+                    const sub = Math.round((Number(it.cantidad) || 0) * (Number(it.valorUnitario) || 0));
+                    doc.text(String(i + 1), xCols[0] + cols[0].w / 2, yMedio, { align: 'center' });
+                    const yIniDesc = y + (h - lineasDesc.length * 4.5) / 2 + 3.3;
+                    lineasDesc.forEach((l, li) => doc.text(l, xCols[1] + cols[1].w / 2, yIniDesc + li * 4.5, { align: 'center' }));
+                    doc.text(String(it.cantidad).replace('.', ','), xCols[2] + cols[2].w / 2, yMedio, { align: 'center' });
+                    doc.text(ncMoneda(it.valorUnitario), xCols[3] + cols[3].w / 2, yMedio, { align: 'center' });
+                    doc.text(ncMoneda(sub), xCols[4] + cols[4].w / 2, yMedio, { align: 'center' });
+                }
+                y += h;
+            }
+
+            if (y + altoFila > limiteY) { doc.addPage(); y = 18; }
+            doc.setFont('helvetica', 'bold');
+            doc.setFillColor(217, 217, 217);
+            doc.rect(xCols[3], y, cols[3].w, altoFila, 'FD');
+            doc.setFillColor(217, 217, 217);
+            doc.rect(xCols[4], y, cols[4].w, altoFila, 'FD');
+            doc.text('Total a Pagar', xCols[3] + cols[3].w / 2, y + altoFila / 2 + 1.3, { align: 'center' });
+            doc.text(ncMoneda(nota.total), xCols[4] + cols[4].w / 2, y + altoFila / 2 + 1.3, { align: 'center' });
+            y += altoFila + 8;
+
+            doc.setFontSize(10.5);
+            if (y + altoFila > limiteY) { doc.addPage(); y = 18; }
+            doc.rect(mX, y, ancho, altoFila, 'S');
+            doc.setFont('helvetica', 'bold');
+            const etqPago = 'Forma de Pago:';
+            doc.text(etqPago, mX + 1.5, y + altoFila / 2 + 1.4);
+            const anchoEtqPago = doc.getTextWidth(etqPago);
+            doc.setFont('helvetica', 'normal');
+            doc.text(String(nota.formaPago || ''), mX + 1.5 + anchoEtqPago + 1.5, y + altoFila / 2 + 1.4);
+            y += altoFila;
+
+            const cta = nota.cuenta;
+            if (cta) {
+                const filasCta = [
+                    ['Banco:', cta.banco],
+                    ['Tipo de cuenta:', cta.tipo],
+                    ['N° de cuenta:', cta.numero],
+                    ['Titular:', cta.titular],
+                    ['RUT:', cta.rut],
+                    ['Correo:', cta.correo]
+                ].filter(f => f[1]);
+                const altoBloque = altoFila + filasCta.length * 5.6 + 2.5;
+                y += 4;
+                if (y + altoBloque > limiteY) { doc.addPage(); y = 18; }
+                doc.setFillColor(242, 242, 242);
+                doc.rect(mX, y, ancho, altoFila, 'FD');
+                doc.setFont('helvetica', 'bold');
+                doc.text('Datos para transferencia', mX + 1.5, y + altoFila / 2 + 1.4);
+                doc.rect(mX, y + altoFila, ancho, altoBloque - altoFila, 'S');
+                let yC = y + altoFila + 5.2;
+                filasCta.forEach(([label, valor]) => {
+                    doc.setFont('helvetica', 'bold');
+                    doc.text(label, mX + 1.5, yC);
+                    doc.setFont('helvetica', 'normal');
+                    doc.text(String(valor), mX + 35, yC);
+                    yC += 5.6;
+                });
+                y += altoBloque;
+            }
+
+            y += 7;
+            if (y + 6 > limiteY) { doc.addPage(); y = 18; }
+            doc.setFont('helvetica', 'bold');
+            doc.text('Observaciones:', mX, y);
+            if (nota.observaciones) {
+                doc.setFont('helvetica', 'normal');
+                const lineasObs = doc.splitTextToSize(nota.observaciones, ancho);
+                y += 5.5;
+                lineasObs.forEach(l => {
+                    if (y > limiteY) { doc.addPage(); y = 18; }
+                    doc.text(l, mX, y);
+                    y += 5;
+                });
+            }
+            return doc;
+        }
+
+        window.ncDescargarPdf = async function (id) {
+            const nota = (window._ncNotas || []).find(n => n.id === id);
+            if (!nota) return;
+            try {
+                const cfg = await ncObtenerConfig();
+                ncGenerarPdf(nota, cfg).save(ncNombreArchivoPdf(nota));
+            } catch (e) {
+                console.error('Error al generar PDF de nota de cobro:', e);
+                mostrarAlerta(e.message || 'No se pudo generar el PDF.', 'Error');
+            }
+        };
+
+        window.ncVistaPreviaFormulario = async function () {
+            const nota = ncLeerFormulario();
+            if (!nota.items.length) {
+                mostrarAlerta('Agregue al menos un ítem para ver la vista previa.', 'Sin ítems');
+                return;
+            }
+            try {
+                const cfg = await ncObtenerConfig();
+                const doc = ncGenerarPdf(nota, cfg);
+                const url = doc.output('bloburl');
+                const win = window.open(url, '_blank');
+                if (!win) doc.save(ncNombreArchivoPdf(nota));
+            } catch (e) {
+                console.error('Error en vista previa de nota de cobro:', e);
+                mostrarAlerta(e.message || 'No se pudo generar la vista previa.', 'Error');
+            }
+        };
+
+        // ---------- Correo al cliente ----------
+
+        function ncGenerarCorreoHtml(nota, cfg, nombreEmisor, mensajePersonal) {
+            const cli = nota.cliente || {};
+            const cta = nota.cuenta;
+            const emisor = (cfg && cfg.emisor) || {};
+            const filasItems = (nota.items || []).map(it => {
+                const sub = Math.round((Number(it.cantidad) || 0) * (Number(it.valorUnitario) || 0));
+                return `<tr>
+                    <td style="padding: 8px 10px; border-bottom: 1px solid #e5e7eb; font-size: 13px; color: #1f2937;">${ncEsc(it.descripcion)}</td>
+                    <td style="padding: 8px 10px; border-bottom: 1px solid #e5e7eb; font-size: 13px; color: #1f2937; text-align: center;">${ncEsc(String(it.cantidad).replace('.', ','))}</td>
+                    <td style="padding: 8px 10px; border-bottom: 1px solid #e5e7eb; font-size: 13px; color: #1f2937; text-align: right; white-space: nowrap;">${ncEsc(ncMoneda(it.valorUnitario))}</td>
+                    <td style="padding: 8px 10px; border-bottom: 1px solid #e5e7eb; font-size: 13px; color: #1f2937; text-align: right; white-space: nowrap;">${ncEsc(ncMoneda(sub))}</td>
+                </tr>`;
+            }).join('');
+            const bloqueMensaje = mensajePersonal
+                ? `<p style="margin: 0 0 14px 0; font-size: 14px; color: #374151; line-height: 1.6;">${ncEsc(mensajePersonal).replace(/\n/g, '<br>')}</p>`
+                : '';
+            const bloqueCuenta = cta ? `
+              <tr><td style="padding: 0 28px 16px 28px;">
+                <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border: 1px solid #c7d2fe; border-radius: 8px; background-color: #eef2ff;">
+                  <tr><td colspan="2" style="padding: 10px 14px 4px 14px; font-size: 12px; font-weight: 700; color: #3730a3; text-transform: uppercase; letter-spacing: 0.04em;">Datos para transferencia</td></tr>
+                  ${[['Banco', cta.banco], ['Tipo de cuenta', cta.tipo], ['N° de cuenta', cta.numero], ['Titular', cta.titular], ['RUT', cta.rut], ['Correo', cta.correo]].filter(f => f[1]).map(f =>
+                    `<tr><td style="padding: 4px 14px; font-size: 13px; color: #4b5563; width: 40%;">${f[0]}</td><td style="padding: 4px 14px; font-size: 13px; color: #111827; font-weight: 600;">${ncEsc(f[1])}</td></tr>`).join('')}
+                  <tr><td colspan="2" style="padding: 0 0 8px 0;"></td></tr>
+                </table>
+              </td></tr>` : '';
+            const correoComprobante = (cta && cta.correo) || '';
+            const bloqueObs = nota.observaciones ? `
+              <tr><td style="padding: 0 28px 16px 28px;">
+                <p style="margin: 0 0 4px 0; font-size: 12px; font-weight: 700; color: #6b7280; text-transform: uppercase;">Observaciones</p>
+                <p style="margin: 0; font-size: 13px; color: #374151; line-height: 1.5;">${ncEsc(nota.observaciones).replace(/\n/g, '<br>')}</p>
+              </td></tr>` : '';
+            const pieEmisor = [emisor.nombre || nombreEmisor, emisor.rut ? 'RUT ' + emisor.rut : '', emisor.direccion, emisor.contacto].filter(Boolean).map(ncEsc).join(' · ');
+            return `<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nota de Cobro ${ncEsc(nota.numero)}</title>
+  <style type="text/css">
+    body, p, td, span, a { font-family: Arial, Helvetica, sans-serif; }
+    body { margin: 0; padding: 0; }
+    table { border-collapse: collapse; }
+  </style>
+</head>
+<body style="margin: 0; padding: 0; background-color: #f3f4f6;">
+  <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color: #f3f4f6;">
+    <tr><td align="center" style="padding: 20px 10px;">
+      <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="600" style="max-width: 600px; width: 100%; background-color: #ffffff; border-radius: 10px; overflow: hidden;">
+        <tr><td style="background-color: #1e3a5f; padding: 20px 28px;">
+          <p style="margin: 0 0 4px 0; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; color: #bfdbfe; text-transform: uppercase;">${ncEsc(nombreEmisor)}</p>
+          <p style="margin: 0; font-size: 22px; font-weight: 700; color: #ffffff;">Nota de Cobro ${ncEsc(nota.numero)}</p>
+          <p style="margin: 4px 0 0 0; font-size: 13px; color: #dbeafe;">Fecha de emisión: ${ncEsc(formatearFecha(nota.fecha))}</p>
+        </td></tr>
+        <tr><td style="padding: 22px 28px 8px 28px;">
+          <p style="margin: 0 0 12px 0; font-size: 14px; color: #111827;">Estimado(a) <strong>${ncEsc(cli.nombre)}</strong>:</p>
+          ${bloqueMensaje}
+          <p style="margin: 0 0 16px 0; font-size: 14px; color: #374151; line-height: 1.6;">Junto con saludar, adjuntamos la <strong>nota de cobro N° ${ncEsc(nota.numero)}</strong> por los servicios detallados a continuación, por un total de <strong>${ncEsc(ncMoneda(nota.total))}</strong>.</p>
+        </td></tr>
+        <tr><td style="padding: 0 28px 16px 28px;">
+          <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border: 1px solid #e5e7eb; border-radius: 8px;">
+            <tr style="background-color: #f9fafb;">
+              <td style="padding: 8px 10px; font-size: 12px; font-weight: 700; color: #4b5563; border-bottom: 1px solid #e5e7eb;">Descripción</td>
+              <td style="padding: 8px 10px; font-size: 12px; font-weight: 700; color: #4b5563; border-bottom: 1px solid #e5e7eb; text-align: center;">Cant.</td>
+              <td style="padding: 8px 10px; font-size: 12px; font-weight: 700; color: #4b5563; border-bottom: 1px solid #e5e7eb; text-align: right;">Valor unit.</td>
+              <td style="padding: 8px 10px; font-size: 12px; font-weight: 700; color: #4b5563; border-bottom: 1px solid #e5e7eb; text-align: right;">Total</td>
+            </tr>
+            ${filasItems}
+            <tr>
+              <td colspan="3" style="padding: 10px; font-size: 14px; font-weight: 700; color: #111827; text-align: right;">Total a pagar</td>
+              <td style="padding: 10px; font-size: 15px; font-weight: 700; color: #1e3a5f; text-align: right; white-space: nowrap;">${ncEsc(ncMoneda(nota.total))}</td>
+            </tr>
+          </table>
+        </td></tr>
+        <tr><td style="padding: 0 28px 16px 28px;">
+          <p style="margin: 0; font-size: 13px; color: #374151;"><strong>Forma de pago:</strong> ${ncEsc(nota.formaPago)}</p>
+        </td></tr>
+        ${bloqueCuenta}
+        ${bloqueObs}
+        <tr><td style="padding: 0 28px 20px 28px;">
+          <p style="margin: 0; font-size: 13px; color: #374151; line-height: 1.6;">El detalle completo se encuentra en el PDF adjunto.${correoComprobante ? ` Una vez realizado el pago, le agradeceremos enviar el comprobante a <a href="mailto:${ncEsc(correoComprobante)}" style="color: #1d4ed8;">${ncEsc(correoComprobante)}</a>.` : ''}</p>
+          <p style="margin: 14px 0 0 0; font-size: 13px; color: #374151;">Saludos cordiales,<br><strong>${ncEsc(emisor.nombre || nombreEmisor)}</strong></p>
+        </td></tr>
+        <tr><td style="padding: 14px 28px; background-color: #f9fafb; border-top: 1px solid #e5e7eb; text-align: center;">
+          <p style="margin: 0; font-size: 11px; color: #6b7280;">${pieEmisor}</p>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
+        }
+
+        window.ncAbrirModalCorreo = async function (id) {
+            const nota = (window._ncNotas || []).find(n => n.id === id);
+            if (!nota) return;
+            const cfg = await ncObtenerConfig();
+            let nombreEmisor = (cfg.emisor && cfg.emisor.nombre) || '';
+            if (!nombreEmisor) {
+                try {
+                    nombreEmisor = typeof obtenerNombreComunidad === 'function' ? await obtenerNombreComunidad() : '';
+                } catch (e) { nombreEmisor = ''; }
+            }
+            nombreEmisor = nombreEmisor || 'Administración';
+            let admins = [];
+            try {
+                if (typeof cargarCorreosAdministrativos === 'function') await cargarCorreosAdministrativos();
+                admins = (typeof correosAdministrativos !== 'undefined' && Array.isArray(correosAdministrativos)) ? correosAdministrativos : [];
+            } catch (e) { admins = []; }
+
+            const cli = nota.cliente || {};
+            const asuntoDef = `Nota de Cobro ${nota.numero} - ${cli.nombre || ''}`.trim();
+            const modal = document.createElement('div');
+            modal.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10000; display: flex; align-items: center; justify-content: center; padding: 1rem;';
+            const estiloInput = 'width: 100%; padding: 0.65rem; border: 1px solid var(--border-color); border-radius: 8px; font-size: 0.875rem; background: var(--bg-primary); color: var(--text-primary); box-sizing: border-box; font-family: inherit;';
+            modal.innerHTML = `
+                <div style="background: var(--bg-primary); border-radius: 12px; max-width: 600px; width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);">
+                    <div style="padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
+                        <h3 style="margin: 0; font-size: 1.15rem; font-weight: 700; color: var(--text-primary);">🧾 Enviar nota de cobro ${ncEsc(nota.numero)}</h3>
+                        <button type="button" data-nc-cerrar style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-secondary);">×</button>
+                    </div>
+                    <div style="padding: 1.25rem 1.5rem;">
+                        <div style="margin-bottom: 0.9rem; padding: 0.65rem 0.75rem; background: var(--bg-tertiary); border-radius: 8px; border: 1px solid var(--border-color); font-size: 0.8125rem; color: var(--text-secondary);">
+                            <strong>${ncEsc(cli.nombre)}</strong> · Total ${ncEsc(ncMoneda(nota.total))} · Se adjuntará el PDF <em>${ncEsc(ncNombreArchivoPdf(nota))}</em>
+                        </div>
+                        <div style="margin-bottom: 0.9rem;">
+                            <label style="display: block; margin-bottom: 0.35rem; font-weight: 600; color: var(--text-primary);">Para *</label>
+                            <input type="text" id="ncCorreoPara" value="${ncEsc(cli.correo || '')}" placeholder="correo@cliente.cl (separe varios con coma)" style="${estiloInput}">
+                        </div>
+                        <div style="margin-bottom: 0.9rem;">
+                            <label style="display: block; margin-bottom: 0.35rem; font-weight: 600; color: var(--text-primary);">CC <span style="font-weight: 500; color: var(--text-tertiary); font-size: 0.8125rem;">(opcional)</span></label>
+                            <input type="text" id="ncCorreoCc" placeholder="Separe varios con coma" style="${estiloInput}">
+                        </div>
+                        ${admins.length ? `
+                        <div style="margin-bottom: 0.9rem;">
+                            <label style="display: block; margin-bottom: 0.35rem; font-weight: 600; color: var(--text-primary);">Copia oculta a administración <span style="font-weight: 500; color: var(--text-tertiary); font-size: 0.8125rem;">(opcional)</span></label>
+                            <div style="max-height: 140px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: 8px; padding: 0.5rem 0.65rem;">
+                                ${admins.map((a, i) => `<label style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.3rem; font-size: 0.8125rem; cursor: pointer;"><input type="checkbox" data-nc-cco="${i}"> <span><strong>${ncEsc(a.nombre || '')}</strong> <span style="color: var(--text-secondary);">${ncEsc(a.correo || '')}</span></span></label>`).join('')}
+                            </div>
+                        </div>` : ''}
+                        <div style="margin-bottom: 0.9rem;">
+                            <label style="display: block; margin-bottom: 0.35rem; font-weight: 600; color: var(--text-primary);">Asunto</label>
+                            <input type="text" id="ncCorreoAsunto" value="${ncEsc(asuntoDef)}" style="${estiloInput}">
+                        </div>
+                        <div style="margin-bottom: 0.9rem;">
+                            <label style="display: block; margin-bottom: 0.35rem; font-weight: 600; color: var(--text-primary);">Mensaje adicional <span style="font-weight: 500; color: var(--text-tertiary); font-size: 0.8125rem;">(opcional)</span></label>
+                            <textarea id="ncCorreoMensaje" rows="3" placeholder="Se agrega después del saludo al cliente" style="${estiloInput} resize: vertical;"></textarea>
+                        </div>
+                        <div style="display: flex; gap: 0.75rem; justify-content: flex-end; margin-top: 1.25rem;">
+                            <button type="button" data-nc-cerrar class="btn btn-secondary" style="padding: 0.65rem 1.25rem;">Cancelar</button>
+                            <button type="button" id="ncBtnEnviarCorreo" class="btn btn-primary" style="padding: 0.65rem 1.25rem;">📧 Enviar nota</button>
+                        </div>
+                    </div>
+                </div>`;
+            document.body.appendChild(modal);
+            modal.querySelectorAll('[data-nc-cerrar]').forEach(b => b.addEventListener('click', () => modal.remove()));
+            modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+
+            modal.querySelector('#ncBtnEnviarCorreo').addEventListener('click', async function () {
+                const para = normalizarListaCorreosDestino(modal.querySelector('#ncCorreoPara').value);
+                const cc = normalizarListaCorreosDestino(modal.querySelector('#ncCorreoCc').value);
+                const invalidos = para.concat(cc).filter(c => !ncCorreoValido(c));
+                if (!para.length) {
+                    mostrarAlerta('Ingrese al menos un correo de destino.', 'Falta destinatario');
+                    return;
+                }
+                if (invalidos.length) {
+                    mostrarAlerta('Correos no válidos: ' + invalidos.join(', '), 'Correo inválido');
+                    return;
+                }
+                const paraSet = new Set(para.concat(cc).map(c => c.toLowerCase()));
+                const cco = Array.from(modal.querySelectorAll('[data-nc-cco]:checked'))
+                    .map(c => admins[parseInt(c.getAttribute('data-nc-cco'), 10)])
+                    .map(a => String((a && a.correo) || '').trim())
+                    .filter(c => c && !paraSet.has(c.toLowerCase()));
+                const asunto = modal.querySelector('#ncCorreoAsunto').value.trim() || asuntoDef;
+                const mensaje = modal.querySelector('#ncCorreoMensaje').value.trim();
+                try {
+                    mostrarProgreso('Generando PDF y enviando nota de cobro...');
+                    const doc = ncGenerarPdf(nota, cfg);
+                    const adjunto = adjuntoPdfBufferComoMail(doc.output('arraybuffer'), ncNombreArchivoPdf(nota));
+                    if (!adjunto) throw new Error('No se pudo preparar el PDF adjunto.');
+                    const html = ncGenerarCorreoHtml(nota, cfg, nombreEmisor, mensaje);
+                    const opts = { aplicarCcoGlobal: false };
+                    if (cc.length) opts.cc = cc;
+                    if (cco.length) opts.bcc = cco;
+                    const resultado = await enviarCorreoHTML(
+                        { correo: para.length === 1 ? para[0] : para, nombre: cli.nombre || para[0] },
+                        asunto, html, [adjunto], opts
+                    );
+                    ocultarProgreso();
+                    if (!resultado || !resultado.exito) {
+                        mostrarAlerta('Error al enviar la nota: ' + ((resultado && resultado.error) || 'Error desconocido'), 'Error');
+                        return;
+                    }
+                    modal.remove();
+                    const notas = (await ncObtenerNotas()).slice();
+                    const idx = notas.findIndex(n => n.id === nota.id);
+                    if (idx !== -1) {
+                        const envios = (notas[idx].envios || []).concat([{ fecha: new Date().toISOString(), para: para.concat(cc).join(', ') }]);
+                        notas[idx] = Object.assign({}, notas[idx], { envios });
+                        await ncGuardarNotas(notas);
+                    }
+                    ncRenderNotas();
+                    mostrarAlerta(`✅ Nota de cobro ${nota.numero} enviada a ${para.join(', ')}.`, 'Correo enviado');
+                } catch (e) {
+                    ocultarProgreso();
+                    console.error('Error al enviar nota de cobro:', e);
+                    mostrarAlerta('No se pudo enviar la nota de cobro. ' + (e.message || ''), 'Error');
+                }
+            });
+        };
+
+        (function ncInit() {
+            const iniciar = function () {
+                const chk = document.getElementById('ncIncluirLogo');
+                if (chk) chk.addEventListener('change', function () { chk.dataset.tocado = '1'; });
+                const form = document.getElementById('formNotaCobro');
+                if (form) {
+                    form.addEventListener('input', ncProgramarSync);
+                    form.addEventListener('change', ncProgramarSync);
+                }
+                window.addEventListener('beforeunload', function () {
+                    if (_ncTimerSync) ncSincronizarPestanaActiva();
+                });
+                const tab = document.querySelector('.tab-button[data-tab="caja"]');
+                if (tab) {
+                    tab.addEventListener('click', function () {
+                        const v = document.getElementById('cajaVistaNotasCobro');
+                        if (v && v.style.display !== 'none') ncCargarModulo();
+                    });
+                }
+            };
+            if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', iniciar);
+            else iniciar();
+        })();
 
         // ============================================
         // MÓDULO 8: MANTENCIONES
