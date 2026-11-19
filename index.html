@@ -36066,7 +36066,13 @@ document.getElementById('chatForm').onsubmit = function (e) {
             return m;
         }
         function multaCorrelativoCola(m) {
-            var cor = m && m.novedadCorrelativo != null ? Number(m.novedadCorrelativo) : NaN;
+            if (!m) return NaN;
+            var cor = m.novedadCorrelativo != null ? Number(m.novedadCorrelativo) : NaN;
+            if (isFinite(cor)) return cor;
+            // Respaldo: algunas multas antiguas solo tienen correlativo / novedadLibro.
+            cor = m.correlativo != null ? Number(m.correlativo) : NaN;
+            if (isFinite(cor)) return cor;
+            cor = m.novedadLibro != null ? Number(m.novedadLibro) : NaN;
             return isFinite(cor) ? cor : NaN;
         }
         function multaAplicarEstadoDesdeCola(exist, n) {
