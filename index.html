@@ -14608,9 +14608,101 @@
         let storage = null;
         let auth = null;
         let firebaseInitialized = false;
+
+        // Firestore limita el ancho de banda de escritura (error resource-exhausted): se omiten
+        // escrituras idénticas repetidas sobre el mismo documento y se avisa del documento que se reescribe en bucle.
+        function instalarGuardiaEscriturasFirestore() {
+            var fs = typeof firebase !== 'undefined' && firebase.firestore;
+            if (!fs || !fs.DocumentReference || window._guardiaEscriturasFs) return;
+            window._guardiaEscriturasFs = true;
+            var VENTANA_REPETIDA_MS = 20000;
+            var VENTANA_CONTEO_MS = 60000;
+            var UMBRAL_AVISO = 12;
+            var CAMPOS_VOLATILES = { actualizado: 1, updatedAt: 1, lastSeen: 1, ultimaActualizacion: 1, fechaActualizacion: 1, savedAt: 1, timestamp: 1 };
+            var ultimas = {};
+            var conteos = {};
+            var avisados = {};
+            window._escriturasFirestore = conteos;
+            function huella(datos, opciones) {
+                try {
+                    return JSON.stringify([datos, opciones || null], function (k, v) {
+                        return Object.prototype.hasOwnProperty.call(CAMPOS_VOLATILES, k) ? undefined : v;
+                    });
+                } catch (e) {
+                    return null;
+                }
+            }
+            function contar(ruta) {
+                var ahora = Date.now();
+                var arr = (conteos[ruta] || []).filter(function (t) { return ahora - t < VENTANA_CONTEO_MS; });
+                arr.push(ahora);
+                conteos[ruta] = arr;
+                if (arr.length >= UMBRAL_AVISO && (!avisados[ruta] || ahora - avisados[ruta] > VENTANA_CONTEO_MS)) {
+                    avisados[ruta] = ahora;
+                    console.warn('[escrituras] "' + ruta + '" se escribió ' + arr.length + ' veces en el último minuto. Origen:',
+                        String(new Error().stack || '').split('\n').slice(2, 7).join('\n'));
+                }
+            }
+            function esRepetida(ruta, datos, opciones) {
+                var h = huella(datos, opciones);
+                var prev = ultimas[ruta];
+                var ahora = Date.now();
+                if (h != null && prev && prev.h === h && ahora - prev.t < VENTANA_REPETIDA_MS) return true;
+                ultimas[ruta] = h == null ? null : { h: h, t: ahora };
+                contar(ruta);
+                return false;
+            }
+            function olvidarSiFalla(promesa, rutas) {
+                return promesa.catch(function (err) {
+                    rutas.forEach(function (r) { delete ultimas[r]; });
+                    throw err;
+                });
+            }
+            var DR = fs.DocumentReference.prototype;
+            var setOrig = DR.set;
+            var updateOrig = DR.update;
+            var deleteOrig = DR.delete;
+            DR.set = function (datos, opciones) {
+                if (esRepetida(this.path, datos, opciones)) return Promise.resolve();
+                return olvidarSiFalla(setOrig.apply(this, arguments), [this.path]);
+            };
+            DR.update = function (datos) {
+                if (arguments.length === 1 && datos && typeof datos === 'object') {
+                    if (esRepetida(this.path, datos, 'update')) return Promise.resolve();
+                } else {
+                    delete ultimas[this.path];
+                    contar(this.path);
+                }
+                return olvidarSiFalla(updateOrig.apply(this, arguments), [this.path]);
+            };
+            DR.delete = function () {
+                delete ultimas[this.path];
+                contar(this.path);
+                return deleteOrig.apply(this, arguments);
+            };
+            if (fs.WriteBatch && fs.WriteBatch.prototype) {
+                var WB = fs.WriteBatch.prototype;
+                var bSetOrig = WB.set;
+                var bDeleteOrig = WB.delete;
+                var bCommitOrig = WB.commit;
+                WB.set = function (ref, datos, opciones) {
+                    if (ref && ref.path && esRepetida(ref.path, datos, opciones)) return this;
+                    if (ref && ref.path) (this._guardiaRutas = this._guardiaRutas || []).push(ref.path);
+                    return bSetOrig.apply(this, arguments);
+                };
+                WB.delete = function (ref) {
+                    if (ref && ref.path) { delete ultimas[ref.path]; contar(ref.path); }
+                    return bDeleteOrig.apply(this, arguments);
+                };
+                WB.commit = function () {
+                    return olvidarSiFalla(bCommitOrig.apply(this, arguments), this._guardiaRutas || []);
+                };
+            }
+        }
         
         try {
             if (typeof firebase !== 'undefined') {
+                try { instalarGuardiaEscriturasFirestore(); } catch (eGuard) {}
                 firebase.initializeApp(firebaseConfig);
                 db = firebase.firestore();
                 try {
@@ -36495,7 +36587,8 @@ document.getElementById('chatForm').onsubmit = function (e) {
             try {
                 var sdb = typeof obtenerDbConserjeriaOperativa === 'function' ? await obtenerDbConserjeriaOperativa() : null;
                 if (!sdb || typeof sdb.collection !== 'function') return;
-                window._multasColaUnsub = sdb.collection('multas_desde_novedad').onSnapshot(function () {
+                window._multasColaUnsub = sdb.collection('multas_desde_novedad').onSnapshot(function (snap) {
+                    if (snap && snap.metadata && snap.metadata.hasPendingWrites) return;
                     if (typeof sincronizarMultasDesdeConserjeria === 'function') {
                         sincronizarMultasDesdeConserjeria().then(function () {
                             if (typeof obtenerDatosMes !== 'function') return;
@@ -36991,7 +37084,8 @@ document.getElementById('chatForm').onsubmit = function (e) {
             try {
                 var sdb = typeof obtenerDbConserjeriaOperativa === 'function' ? await obtenerDbConserjeriaOperativa() : null;
                 if (!sdb || typeof sdb.collection !== 'function') return;
-                window._reclamosColaUnsub = sdb.collection('reclamos_desde_novedad').onSnapshot(function () {
+                window._reclamosColaUnsub = sdb.collection('reclamos_desde_novedad').onSnapshot(function (snap) {
+                    if (snap && snap.metadata && snap.metadata.hasPendingWrites) return;
                     if (typeof sincronizarReclamosDesdeConserjeria === 'function') sincronizarReclamosDesdeConserjeria();
                 }, function (err) {
                     console.warn('[reclamos] listener cola:', err);
