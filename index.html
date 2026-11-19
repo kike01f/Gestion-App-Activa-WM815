@@ -47201,7 +47201,13 @@ document.getElementById('chatForm').onsubmit = function (e) {
             const c = cfg || {};
             return modelo === 'neutro'
                 ? { data: c.logoNeutro || null, ancho: c.logoNeutroAncho || 0, alto: c.logoNeutroAlto || 0, url: c.logoNeutroUrl || '' }
-                : { data: c.logo || null, ancho: c.logoAncho || 0, alto: c.logoAlto || 0, url: NC_LOGO_WM815_URL };
+                : c.logo
+                    ? { data: c.logo, ancho: c.logoAncho || 0, alto: c.logoAlto || 0, url: NC_LOGO_WM815_URL }
+                    : { data: ncLogoOriginalWm815(), ancho: 286, alto: 182, url: NC_LOGO_WM815_URL };
+        }
+
+        function ncLogoOriginalWm815() {
+            return typeof _LOGO_INFORME_WM815 === 'string' && _LOGO_INFORME_WM815 ? _LOGO_INFORME_WM815 : null;
         }
 
         function ncEmisorDeModelo(cfg, modelo) {
@@ -47471,7 +47477,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 formaPago: 'Transferencia Bancaria',
                 cuentaId: def ? def.id : '',
                 observaciones: '',
-                incluirLogo: !!(cfg.incluirLogoPorDefecto && (cfg.logo || cfg.logoNeutro)),
+                incluirLogo: !!(cfg.incluirLogoPorDefecto && (cfg.logo || ncLogoOriginalWm815() || cfg.logoNeutro)),
                 logoTocado: false
             };
         }
@@ -48014,9 +48020,11 @@ document.getElementById('chatForm').onsubmit = function (e) {
             ncSetValor('ncNumeroInicial', cfg.numeroInicial);
             const prev = document.getElementById('ncLogoPreview');
             if (prev) {
-                prev.innerHTML = cfg.logo
-                    ? `<img src="${cfg.logo}" alt="Logo">`
+                const logoWm = ncLogoDeModelo(cfg, 'wm815').data;
+                prev.innerHTML = logoWm
+                    ? `<img src="${logoWm}" alt="Logo">`
                     : 'Sin logo';
+                prev.title = cfg.logo ? 'Logo subido' : 'Logo original de WM 815 (se usa si no sube otro)';
             }
             const prevN = document.getElementById('ncLogoNeutroPreview');
             if (prevN) {
@@ -48482,13 +48490,19 @@ document.getElementById('chatForm').onsubmit = function (e) {
             if (nota.incluirLogo && logo.data) {
                 const maxW = 45;
                 const maxH = 22;
-                const w0 = logo.ancho || maxW;
-                const h0 = logo.alto || maxH;
-                const esc = Math.min(maxW / w0, maxH / h0);
-                const w = w0 * esc;
-                const h = h0 * esc;
+                const formato = /^data:image\/png/i.test(logo.data) ? 'PNG' : 'JPEG';
                 try {
-                    doc.addImage(logo.data, /^data:image\/png/i.test(logo.data) ? 'PNG' : 'JPEG', mX, 12, w, h);
+                    let w0 = logo.ancho;
+                    let h0 = logo.alto;
+                    if (!w0 || !h0) {
+                        const props = doc.getImageProperties(logo.data);
+                        w0 = props.width;
+                        h0 = props.height;
+                    }
+                    const esc = Math.min(maxW / w0, maxH / h0);
+                    const w = w0 * esc;
+                    const h = h0 * esc;
+                    doc.addImage(logo.data, formato, mX, 12, w, h, 'nc-logo-' + modelo);
                     finCabecera = Math.max(finCabecera, 12 + h);
                 } catch (e) {
                     console.warn('No se pudo insertar el logo en el PDF:', e);
