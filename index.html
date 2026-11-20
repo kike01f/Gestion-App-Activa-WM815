@@ -8465,7 +8465,19 @@
         #cajaVistaNotasCobro .nc-total-pagar { font-size: 0.875rem; font-weight: 600; color: var(--text-primary); }
         #cajaVistaNotasCobro .nc-total-pagar span { color: var(--primary); }
         #cajaVistaNotasCobro .nc-filtros { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
-        #cajaVistaNotasCobro .nc-filtros input { min-width: 13rem; }
+        #cajaVistaNotasCobro .nc-filtros input[type="text"] { min-width: 13rem; }
+        #cajaVistaNotasCobro .nc-barra-seleccion {
+            margin: 0 0 0.65rem;
+            padding: 0.45rem 0.7rem;
+            font-size: 0.78rem;
+            color: var(--text-secondary);
+            background: var(--m-accent-soft);
+            border: 1px solid var(--m-accent-ring);
+            border-radius: var(--m-radius-sm);
+        }
+        #cajaVistaNotasCobro .nc-barra-seleccion strong { color: var(--primary); }
+        #cajaVistaNotasCobro td.nc-sel-cell { text-align: center; vertical-align: middle; }
+        #cajaVistaNotasCobro #ncBtnEnviarLote:disabled { opacity: 0.55; cursor: not-allowed; }
 
         .nc-pestanas {
             display: flex;
@@ -11428,11 +11440,16 @@
                                 <option value="pagada">Pagadas</option>
                                 <option value="anulada">Anuladas</option>
                             </select>
+                            <button type="button" class="btn btn-secondary btn-sm" id="ncBtnEnviarLote" onclick="ncAbrirModalCorreoLote()" title="Enviar las notas marcadas en un solo correo" disabled>📧 Enviar seleccionadas</button>
                         </div>
                     </div>
+                    <p id="ncBarraSeleccion" class="nc-barra-seleccion" style="display: none;"></p>
                     <table>
                         <thead>
                             <tr>
+                                <th style="width: 2.5rem; text-align: center;">
+                                    <input type="checkbox" id="ncSelTodas" title="Seleccionar / deseleccionar todas las visibles" onchange="ncToggleSeleccionarTodas(this.checked)" aria-label="Seleccionar todas">
+                                </th>
                                 <th>N° Nota</th>
                                 <th>Fecha</th>
                                 <th>Cliente</th>
@@ -11443,7 +11460,7 @@
                             </tr>
                         </thead>
                         <tbody id="ncTbodyNotas">
-                            <tr><td colspan="7" class="empty-state"><p>No hay notas de cobro emitidas</p></td></tr>
+                            <tr><td colspan="8" class="empty-state"><p>No hay notas de cobro emitidas</p></td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -48119,10 +48136,70 @@ document.getElementById('chatForm').onsubmit = function (e) {
             }
         }
 
+        window._ncSeleccionIds = window._ncSeleccionIds || new Set();
+
+        function ncIdsSeleccionados() {
+            const set = window._ncSeleccionIds || new Set();
+            return Array.from(set);
+        }
+
+        function ncNotasSeleccionadas() {
+            const ids = new Set(ncIdsSeleccionados());
+            return (window._ncNotas || []).filter(n => ids.has(n.id));
+        }
+
+        window.ncActualizarBarraSeleccion = function () {
+            const ids = ncIdsSeleccionados();
+            const notas = ncNotasSeleccionadas();
+            const btn = document.getElementById('ncBtnEnviarLote');
+            const barra = document.getElementById('ncBarraSeleccion');
+            const chkTodas = document.getElementById('ncSelTodas');
+            if (btn) btn.disabled = !notas.length;
+            const visibles = Array.from(document.querySelectorAll('#ncTbodyNotas input[data-nc-sel]'));
+            if (chkTodas) {
+                const nVis = visibles.length;
+                const nMarc = visibles.filter(c => c.checked).length;
+                chkTodas.checked = nVis > 0 && nMarc === nVis;
+                chkTodas.indeterminate = nMarc > 0 && nMarc < nVis;
+            }
+            if (!barra) return;
+            if (!notas.length) {
+                barra.style.display = 'none';
+                barra.textContent = '';
+                return;
+            }
+            const total = notas.reduce((s, n) => s + (Number(n.total) || 0), 0);
+            const clientes = Array.from(new Set(notas.map(n => String((n.cliente || {}).nombre || '').trim()).filter(Boolean)));
+            barra.style.display = 'block';
+            barra.innerHTML = `<strong>${notas.length}</strong> nota${notas.length === 1 ? '' : 's'} seleccionada${notas.length === 1 ? '' : 's'} · Total ${ncEsc(ncMoneda(total))}${clientes.length === 1 ? ' · ' + ncEsc(clientes[0]) : clientes.length > 1 ? ' · ' + clientes.length + ' clientes' : ''}. Se enviarán en <strong>un solo correo</strong> con un PDF por cada nota.`;
+        };
+
+        window.ncToggleSeleccionarNota = function (id, checked) {
+            if (!window._ncSeleccionIds) window._ncSeleccionIds = new Set();
+            if (checked) window._ncSeleccionIds.add(id);
+            else window._ncSeleccionIds.delete(id);
+            ncActualizarBarraSeleccion();
+        };
+
+        window.ncToggleSeleccionarTodas = function (checked) {
+            if (!window._ncSeleccionIds) window._ncSeleccionIds = new Set();
+            document.querySelectorAll('#ncTbodyNotas input[data-nc-sel]').forEach(c => {
+                c.checked = !!checked;
+                const id = c.getAttribute('data-nc-sel');
+                if (!id) return;
+                if (checked) window._ncSeleccionIds.add(id);
+                else window._ncSeleccionIds.delete(id);
+            });
+            ncActualizarBarraSeleccion();
+        };
+
         window.ncRenderNotas = function () {
             const tbody = document.getElementById('ncTbodyNotas');
             if (!tbody) return;
+            if (!window._ncSeleccionIds) window._ncSeleccionIds = new Set();
             const notas = window._ncNotas || [];
+            const idsVivos = new Set(notas.map(n => n.id));
+            window._ncSeleccionIds.forEach(id => { if (!idsVivos.has(id)) window._ncSeleccionIds.delete(id); });
             const pendiente = notas.filter(n => (n.estado || 'pendiente') === 'pendiente').reduce((s, n) => s + (Number(n.total) || 0), 0);
             const elPend = document.getElementById('ncTotalPendiente');
             if (elPend) elPend.textContent = ncMoneda(pendiente);
@@ -48136,7 +48213,8 @@ document.getElementById('chatForm').onsubmit = function (e) {
             }).sort((a, b) => String(b.fecha || '').localeCompare(String(a.fecha || '')) || String(b.numero || '').localeCompare(String(a.numero || ''), 'es', { numeric: true }));
 
             if (!lista.length) {
-                tbody.innerHTML = `<tr><td colspan="7" class="empty-state"><p>${notas.length ? 'No hay notas que coincidan con el filtro' : 'No hay notas de cobro emitidas'}</p></td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="8" class="empty-state"><p>${notas.length ? 'No hay notas que coincidan con el filtro' : 'No hay notas de cobro emitidas'}</p></td></tr>`;
+                ncActualizarBarraSeleccion();
                 return;
             }
             tbody.innerHTML = lista.map(n => {
@@ -48147,7 +48225,9 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     ? `<span class="nc-envio" title="${ncEsc(ult.para)}">Enviada ${ncEsc(formatearFecha(String(ult.fecha).slice(0, 10)))}${envios.length > 1 ? ' (' + envios.length + ')' : ''}</span>`
                     : '<span class="nc-envio is-no">No enviada</span>';
                 const id = ncEsc(n.id);
+                const marcada = window._ncSeleccionIds.has(n.id);
                 return `<tr>
+                    <td class="nc-sel-cell"><input type="checkbox" data-nc-sel="${id}" ${marcada ? 'checked' : ''} onchange="ncToggleSeleccionarNota('${id}', this.checked)" aria-label="Seleccionar nota ${ncEsc(n.numero)}"></td>
                     <td style="white-space: nowrap; font-weight: 600; color: var(--text-primary);">${ncEsc(n.numero)}</td>
                     <td>${ncEsc(formatearFecha(n.fecha))}</td>
                     <td>${ncEsc((n.cliente || {}).nombre || '-')}<span class="nc-modelo is-${ncModeloDeNota(n, window._ncConfig)}">${ncEsc(NC_MODELOS[ncModeloDeNota(n, window._ncConfig)].corta)}</span></td>
@@ -48169,6 +48249,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     </div></td>
                 </tr>`;
             }).join('');
+            ncActualizarBarraSeleccion();
         };
 
         // ---------- Configuración: emisor, logo, cuentas, clientes ----------
@@ -49082,6 +49163,413 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     ocultarProgreso();
                     console.error('Error al enviar nota de cobro:', e);
                     mostrarAlerta('No se pudo enviar la nota de cobro. ' + (e.message || ''), 'Error');
+                }
+            });
+        };
+
+        function ncAsuntoPorDefectoLote(notas) {
+            const lista = (notas || []).slice().sort((a, b) => String(a.numero || '').localeCompare(String(b.numero || ''), 'es', { numeric: true }));
+            const nums = lista.map(n => n.numero).filter(Boolean);
+            const clientes = Array.from(new Set(lista.map(n => String((n.cliente || {}).nombre || '').trim()).filter(Boolean)));
+            let numsTxt = '';
+            if (nums.length <= 3) numsTxt = nums.join(', ');
+            else numsTxt = nums.slice(0, 2).join(', ') + ' y ' + (nums.length - 2) + ' más';
+            const cliTxt = clientes.length === 1 ? clientes[0] : (clientes.length > 1 ? clientes.length + ' clientes' : '');
+            return (`Notas de Cobro ${numsTxt}${cliTxt ? ' - ' + cliTxt : ''}`).trim().replace(/\s+-$/, '');
+        }
+
+        function ncGenerarCorreoHtmlLote(notas, cfg, nombreEmisor, mensajePersonal, modelo) {
+            const lista = (notas || []).slice().sort((a, b) => String(a.fecha || '').localeCompare(String(b.fecha || '')) || String(a.numero || '').localeCompare(String(b.numero || ''), 'es', { numeric: true }));
+            const mod = ncModeloValido(modelo || ncModeloDeNota(lista[0], cfg));
+            const t = NC_TEMAS_CORREO[mod];
+            const esWm = mod === 'wm815';
+            const emisor = ncEmisorDeModelo(cfg, mod);
+            const firma = emisor.nombre || nombreEmisor || 'Administración';
+            const clientes = Array.from(new Set(lista.map(n => String((n.cliente || {}).nombre || '').trim()).filter(Boolean)));
+            const saludoNombre = clientes.length === 1 ? clientes[0] : 'cliente';
+            const totalLote = lista.reduce((s, n) => s + (Number(n.total) || 0), 0);
+            const celda = `padding: 8px 10px; border-bottom: 1px solid ${t.borde}; font-size: 13px; color: #1f2937;`;
+            const filasResumen = lista.map(n => {
+                const cli = (n.cliente || {}).nombre || '—';
+                return `<tr>
+                    <td style="${celda} white-space: nowrap; font-weight: 600;">${ncEsc(n.numero)}</td>
+                    <td style="${celda}">${ncEsc(formatearFecha(n.fecha))}</td>
+                    <td style="${celda}">${ncEsc(cli)}</td>
+                    <td style="${celda}">${ncEsc(n.formaPago || '—')}</td>
+                    <td style="${celda} text-align: right; white-space: nowrap; font-weight: 600;">${ncEsc(ncMoneda(n.total))}</td>
+                </tr>`;
+            }).join('');
+            const bloquesDetalle = lista.map(n => {
+                const filasItems = (n.items || []).map(it => {
+                    const sub = Math.round((Number(it.cantidad) || 0) * (Number(it.valorUnitario) || 0));
+                    return `<tr>
+                        <td style="${celda}">${ncEsc(it.descripcion)}</td>
+                        <td style="${celda} text-align: center;">${ncEsc(String(it.cantidad).replace('.', ','))}</td>
+                        <td style="${celda} text-align: right; white-space: nowrap;">${ncEsc(ncMoneda(it.valorUnitario))}</td>
+                        <td style="${celda} text-align: right; white-space: nowrap;">${ncEsc(ncMoneda(sub))}</td>
+                    </tr>`;
+                }).join('');
+                return `
+        <tr><td style="padding: 0 28px 8px 28px;">
+          <p style="margin: 12px 0 6px 0; font-size: 14px; font-weight: 700; color: ${t.acento};">Nota ${ncEsc(n.numero)} · ${ncEsc(formatearFecha(n.fecha))} · ${ncEsc(ncMoneda(n.total))}</p>
+          <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border: 1px solid ${t.borde}; border-radius: 8px;">
+            <tr style="background-color: ${t.tablaCab};">
+              <td style="padding: 8px 10px; font-size: 12px; font-weight: 700; color: #4b5563; border-bottom: 1px solid ${t.borde};">Descripción</td>
+              <td style="padding: 8px 10px; font-size: 12px; font-weight: 700; color: #4b5563; border-bottom: 1px solid ${t.borde}; text-align: center;">Cant.</td>
+              <td style="padding: 8px 10px; font-size: 12px; font-weight: 700; color: #4b5563; border-bottom: 1px solid ${t.borde}; text-align: right;">Valor unit.</td>
+              <td style="padding: 8px 10px; font-size: 12px; font-weight: 700; color: #4b5563; border-bottom: 1px solid ${t.borde}; text-align: right;">Total</td>
+            </tr>
+            ${filasItems}
+          </table>
+        </td></tr>`;
+            }).join('');
+            const bloqueMensaje = mensajePersonal
+                ? `<p style="margin: 0 0 14px 0; font-size: 14px; color: #374151; line-height: 1.6;">${ncEsc(mensajePersonal).replace(/\n/g, '<br>')}</p>`
+                : '';
+            const cuentasUnicas = [];
+            const vistosCta = new Set();
+            lista.forEach(n => {
+                const cta = n.cuenta;
+                if (!cta) return;
+                const key = [cta.banco, cta.tipo, cta.numero, cta.titular, cta.rut, cta.correo].join('|');
+                if (vistosCta.has(key)) return;
+                vistosCta.add(key);
+                cuentasUnicas.push(cta);
+            });
+            const bloqueCuenta = cuentasUnicas.map(cta => `
+        <tr><td style="padding: 0 28px 16px 28px;">
+          <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border: 1px solid ${t.cajaBorde}; border-radius: 8px; background-color: ${t.cajaFondo};">
+            <tr><td colspan="2" style="padding: 10px 14px 4px 14px; font-size: 12px; font-weight: 700; color: ${t.cajaTitulo}; text-transform: uppercase; letter-spacing: 0.04em;">Datos para transferencia</td></tr>
+            ${[['Banco', cta.banco], ['Tipo de cuenta', cta.tipo], ['N° de cuenta', cta.numero], ['Titular', cta.titular], ['RUT', cta.rut], ['Correo', cta.correo]].filter(f => f[1]).map(f =>
+                `<tr><td style="padding: 4px 14px; font-size: 13px; color: #4b5563; width: 40%;">${f[0]}</td><td style="padding: 4px 14px; font-size: 13px; color: #111827; font-weight: 600;">${ncEsc(f[1])}</td></tr>`).join('')}
+            <tr><td colspan="2" style="padding: 0 0 8px 0;"></td></tr>
+          </table>
+        </td></tr>`).join('');
+            const correoComprobante = (cuentasUnicas[0] && cuentasUnicas[0].correo) || (!esWm && emisor.correo) || '';
+            const datosEmisor = [emisor.rut ? 'RUT ' + emisor.rut : '', emisor.direccion, emisor.contacto, esWm ? '' : emisor.correo]
+                .filter(Boolean).map(ncEsc).join(' · ');
+            const tituloLote = lista.length === 1
+                ? `Nota de Cobro ${ncEsc(lista[0].numero)}`
+                : `${lista.length} Notas de Cobro`;
+            const cabecera = esWm ? `
+        <tr><td style="padding: 18px 28px 14px 28px; border-bottom: 3px solid ${t.acentoLinea}; background-color: #ffffff;">
+          <div style="text-align: center; margin-bottom: 12px;"><img src="${NC_LOGO_WM815_URL}" alt="Logo" style="max-width: 120px; height: auto;"></div>
+          <p style="margin: 0 0 2px 0; font-size: 11px; font-weight: 700; letter-spacing: 0.05em; color: ${t.cabeceraEtq}; text-transform: uppercase;">${ncEsc(nombreEmisor)}</p>
+          <p style="margin: 0; font-size: 22px; font-weight: 700; color: #1a1a1a;">${tituloLote}</p>
+          <p style="margin: 4px 0 0 0; font-size: 13px; color: #555555;">Total a pagar: ${ncEsc(ncMoneda(totalLote))}</p>
+        </td></tr>` : `${lista.some(n => ncNotaLlevaLogo(n)) && cfg && cfg.logoNeutroUrl ? `
+        <tr><td style="padding: 18px 28px 14px 28px; background-color: #ffffff; text-align: center;">
+          <img src="${ncEsc(cfg.logoNeutroUrl)}" alt="Logo" style="max-width: 120px; height: auto;">
+        </td></tr>` : ''}
+        <tr><td style="background-color: ${t.cabecera}; padding: 20px 28px;">
+          ${emisor.nombre ? `<p style="margin: 0 0 4px 0; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; color: ${t.cabeceraEtq}; text-transform: uppercase;">${ncEsc(emisor.nombre)}</p>` : ''}
+          <p style="margin: 0; font-size: 22px; font-weight: 700; color: ${t.cabeceraTxt};">${tituloLote}</p>
+          <p style="margin: 4px 0 0 0; font-size: 13px; color: ${t.cabeceraSub};">Total a pagar: ${ncEsc(ncMoneda(totalLote))}</p>
+        </td></tr>`;
+            const bloqueAdjunto = `
+        <tr><td style="padding: 0 28px 16px 28px;">
+          <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color: ${t.adjFondo}; border-radius: 8px; border: 1px solid ${t.adjBorde};">
+            <tr><td style="padding: 12px 14px;">
+              <p style="margin: 0 0 8px 0; font-size: 13px; color: ${t.adjTitulo}; font-weight: 700;">Documentos adjuntos (${lista.length} PDF)</p>
+              <!-- ENLACES_ADJUNTOS_LISTA ${t.adjTitulo} -->
+            </td></tr>
+          </table>
+        </td></tr>`;
+            const pie = esWm ? `
+        <tr><td style="padding: 14px 28px 18px 28px; text-align: center; border-top: 1px solid #eeeeee; background-color: ${t.pieFondo};">
+          <p style="margin: 0 0 2px 0; font-size: 12px; font-weight: 700; color: ${t.pieTitulo};">${ncEsc(firma)}</p>
+          ${datosEmisor ? `<p style="margin: 0 0 4px 0; font-size: 11px; color: ${t.pieTxt};">${datosEmisor}</p>` : ''}
+          <p style="margin: 0; font-size: 12px; color: ${t.pieTxt};">Comunicación oficial de administración.</p>
+        </td></tr>` : (datosEmisor || emisor.nombre ? `
+        <tr><td style="padding: 14px 28px; background-color: ${t.pieFondo}; border-top: 1px solid ${t.borde}; text-align: center;">
+          ${emisor.nombre ? `<p style="margin: 0 0 2px 0; font-size: 12px; font-weight: 700; color: ${t.pieTitulo};">${ncEsc(emisor.nombre)}</p>` : ''}
+          ${datosEmisor ? `<p style="margin: 0; font-size: 11px; color: ${t.pieTxt};">${datosEmisor}</p>` : ''}
+        </td></tr>` : '');
+            return `<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${tituloLote}</title>
+  <style type="text/css">
+    body, p, td, span, a { font-family: Arial, Helvetica, sans-serif; }
+    body { margin: 0; padding: 0; }
+    table { border-collapse: collapse; }
+  </style>
+</head>
+<body style="margin: 0; padding: 0; background-color: ${t.fondo};">
+  <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color: ${t.fondo};">
+    <tr><td align="center" style="padding: 20px 10px;">
+      <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="600" style="max-width: 600px; width: 100%; background-color: #ffffff; border-radius: 12px; overflow: hidden;${esWm ? '' : ' border: 1px solid ' + t.borde + ';'}">
+        ${cabecera}
+        <tr><td style="padding: 22px 28px 8px 28px;">
+          <p style="margin: 0 0 12px 0; font-size: 14px; color: #111827;">Estimado(a) <strong>${ncEsc(saludoNombre)}</strong>:</p>
+          ${bloqueMensaje}
+          <p style="margin: 0 0 16px 0; font-size: 14px; color: #374151; line-height: 1.6;">Junto con saludar, adjuntamos <strong>${lista.length} nota${lista.length === 1 ? '' : 's'} de cobro</strong> por los servicios detallados a continuación, por un total de <strong>${ncEsc(ncMoneda(totalLote))}</strong>. Cada nota se envía como PDF adjunto en este mismo correo.</p>
+        </td></tr>
+        <tr><td style="padding: 0 28px 16px 28px;">
+          <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border: 1px solid ${t.borde}; border-radius: 8px;">
+            <tr style="background-color: ${t.tablaCab};">
+              <td style="padding: 8px 10px; font-size: 12px; font-weight: 700; color: #4b5563; border-bottom: 1px solid ${t.borde};">N°</td>
+              <td style="padding: 8px 10px; font-size: 12px; font-weight: 700; color: #4b5563; border-bottom: 1px solid ${t.borde};">Fecha</td>
+              <td style="padding: 8px 10px; font-size: 12px; font-weight: 700; color: #4b5563; border-bottom: 1px solid ${t.borde};">Cliente</td>
+              <td style="padding: 8px 10px; font-size: 12px; font-weight: 700; color: #4b5563; border-bottom: 1px solid ${t.borde};">Forma de pago</td>
+              <td style="padding: 8px 10px; font-size: 12px; font-weight: 700; color: #4b5563; border-bottom: 1px solid ${t.borde}; text-align: right;">Total</td>
+            </tr>
+            ${filasResumen}
+            <tr>
+              <td colspan="4" style="padding: 10px; font-size: 14px; font-weight: 700; color: #111827; text-align: right;">Total a pagar</td>
+              <td style="padding: 10px; font-size: 15px; font-weight: 700; color: ${t.acento}; text-align: right; white-space: nowrap;">${ncEsc(ncMoneda(totalLote))}</td>
+            </tr>
+          </table>
+        </td></tr>
+        ${bloquesDetalle}
+        ${bloqueCuenta}
+        ${bloqueAdjunto}
+        <tr><td style="padding: 0 28px 20px 28px;">
+          ${correoComprobante ? `<p style="margin: 0 0 14px 0; font-size: 13px; color: #374151; line-height: 1.6;">Una vez realizado el pago, le agradeceremos enviar el comprobante a <a href="mailto:${ncEsc(correoComprobante)}" style="color: ${t.enlace};">${ncEsc(correoComprobante)}</a>.</p>` : ''}
+          <p style="margin: 0; font-size: 13px; color: #374151;">Saludos cordiales,<br><strong>${ncEsc(firma)}</strong></p>
+        </td></tr>
+        ${pie}
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
+        }
+
+        async function ncPrepararCorreoLote(notas, cfg, modelo, opciones) {
+            const o = opciones || {};
+            const lista = (notas || []).slice();
+            const mod = ncModeloValido(modelo);
+            let nombreEmisor = '';
+            if (mod === 'neutro') {
+                nombreEmisor = (cfg.emisorNeutro && cfg.emisorNeutro.nombre) || '';
+            } else {
+                nombreEmisor = (cfg.emisor && cfg.emisor.nombre) || '';
+                if (!nombreEmisor) {
+                    try {
+                        nombreEmisor = typeof obtenerNombreComunidad === 'function' ? await obtenerNombreComunidad() : '';
+                    } catch (e) { nombreEmisor = ''; }
+                }
+                nombreEmisor = nombreEmisor || 'Comunidad WM 815';
+            }
+            const notasModelo = lista.map(n => Object.assign({}, n, { modeloCorreo: mod }));
+            const asunto = o.asunto || ncAsuntoPorDefectoLote(notasModelo);
+            const html = ncGenerarCorreoHtmlLote(notasModelo, cfg, nombreEmisor, o.mensaje || '', mod);
+            let problemas = [];
+            if (mod === 'neutro') {
+                const extras = [
+                    ['asunto', asunto],
+                    ['mensaje adicional', o.mensaje],
+                    ['Para', (o.para || []).join(', ')],
+                    ['CC', (o.cc || []).join(', ')]
+                ];
+                notasModelo.forEach(n => {
+                    problemas = problemas.concat(ncReferenciasNotaNeutra(n, cfg, extras.concat([['nombre del PDF', ncNombreArchivoPdf(n)]])));
+                });
+                problemas = Array.from(new Set(problemas));
+                if (!problemas.length && NC_RE_WM815.test(html)) problemas.push('contenido del correo');
+            }
+            const replyTo = mod === 'neutro'
+                ? ((cfg.emisorNeutro && cfg.emisorNeutro.correo) || ((lista[0] && lista[0].cuenta && lista[0].cuenta.correo) || '') || '')
+                : '';
+            return { modelo: mod, notas: notasModelo, asunto, html, nombreEmisor, replyTo, problemas };
+        }
+
+        window.ncAbrirModalCorreoLote = async function () {
+            const seleccion = ncNotasSeleccionadas().filter(n => (n.estado || 'pendiente') !== 'anulada');
+            if (!seleccion.length) {
+                const anuladas = ncNotasSeleccionadas().filter(n => (n.estado || 'pendiente') === 'anulada');
+                mostrarAlerta(anuladas.length
+                    ? 'Las notas anuladas no se pueden enviar. Seleccione al menos una nota pendiente o pagada.'
+                    : 'Marque al menos una nota de cobro para enviarla en un solo correo.', 'Sin selección');
+                return;
+            }
+            if (seleccion.length === 1) {
+                await ncAbrirModalCorreo(seleccion[0].id);
+                return;
+            }
+            const cfg = await ncObtenerConfig();
+            let admins = [];
+            try {
+                if (typeof cargarCorreosAdministrativos === 'function') await cargarCorreosAdministrativos();
+                admins = (typeof correosAdministrativos !== 'undefined' && Array.isArray(correosAdministrativos)) ? correosAdministrativos : [];
+            } catch (e) { admins = []; }
+
+            const modelos = Array.from(new Set(seleccion.map(n => ncModeloDeNota(n, cfg))));
+            const modeloDef = modelos.length === 1 ? modelos[0] : 'wm815';
+            const correosPara = Array.from(new Set(
+                seleccion.map(n => String((n.cliente || {}).correo || '').trim()).filter(c => ncCorreoValido(c))
+            ));
+            const clientes = Array.from(new Set(seleccion.map(n => String((n.cliente || {}).nombre || '').trim()).filter(Boolean)));
+            const totalLote = seleccion.reduce((s, n) => s + (Number(n.total) || 0), 0);
+            const asuntoDef = ncAsuntoPorDefectoLote(seleccion);
+            const resumenNotas = seleccion
+                .slice()
+                .sort((a, b) => String(a.numero || '').localeCompare(String(b.numero || ''), 'es', { numeric: true }))
+                .map(n => `${ncEsc(n.numero)} (${ncEsc(ncMoneda(n.total))})`)
+                .join(' · ');
+
+            const modal = document.createElement('div');
+            modal.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10000; display: flex; align-items: center; justify-content: center; padding: 1rem;';
+            const estiloInput = 'width: 100%; padding: 0.65rem; border: 1px solid var(--border-color); border-radius: 8px; font-size: 0.875rem; background: var(--bg-primary); color: var(--text-primary); box-sizing: border-box; font-family: inherit;';
+            modal.innerHTML = `
+                <div style="background: var(--bg-primary); border-radius: 12px; max-width: 640px; width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);">
+                    <div style="padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
+                        <h3 style="margin: 0; font-size: 1.15rem; font-weight: 700; color: var(--text-primary);">Enviar ${seleccion.length} notas en un solo correo</h3>
+                        <button type="button" data-nc-cerrar style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-secondary);">×</button>
+                    </div>
+                    <div style="padding: 1.25rem 1.5rem;">
+                        <div style="margin-bottom: 0.9rem; padding: 0.65rem 0.75rem; background: var(--bg-tertiary); border-radius: 8px; border: 1px solid var(--border-color); font-size: 0.8125rem; color: var(--text-secondary);">
+                            <div style="margin-bottom: 0.35rem;"><strong>Total ${ncEsc(ncMoneda(totalLote))}</strong>${clientes.length === 1 ? ' · ' + ncEsc(clientes[0]) : clientes.length > 1 ? ' · ' + clientes.length + ' clientes' : ''}</div>
+                            <div style="line-height: 1.45;">${resumenNotas}</div>
+                            <div style="margin-top: 0.4rem; font-size: 0.75rem;">Se adjuntará un PDF por cada nota en el mismo correo.</div>
+                            ${clientes.length > 1 ? '<div style="margin-top: 0.35rem; color: var(--warning);">Hay notas de distintos clientes: revise los destinatarios.</div>' : ''}
+                            ${modelos.length > 1 ? '<div style="margin-top: 0.35rem; color: var(--warning);">Las notas tienen modelos distintos; elija uno para este envío.</div>' : ''}
+                        </div>
+                        <div style="margin-bottom: 0.9rem;">
+                            <label style="display: block; margin-bottom: 0.35rem; font-weight: 600; color: var(--text-primary);">Modelo de correo</label>
+                            <select id="ncCorreoModelo" style="${estiloInput}">
+                                ${Object.keys(NC_MODELOS).map(m => `<option value="${m}" ${m === modeloDef ? 'selected' : ''}>${ncEsc(NC_MODELOS[m].etiqueta)}</option>`).join('')}
+                            </select>
+                            <p id="ncCorreoModeloAviso" style="margin: 0.35rem 0 0; font-size: 0.78rem; color: var(--text-tertiary);"></p>
+                        </div>
+                        <div style="margin-bottom: 0.9rem;">
+                            <label style="display: block; margin-bottom: 0.35rem; font-weight: 600; color: var(--text-primary);">Para *</label>
+                            <input type="text" id="ncCorreoPara" value="${ncEsc(correosPara.join(', '))}" placeholder="correo@cliente.cl (separe varios con coma)" style="${estiloInput}">
+                        </div>
+                        <div style="margin-bottom: 0.9rem;">
+                            <label style="display: block; margin-bottom: 0.35rem; font-weight: 600; color: var(--text-primary);">CC <span style="font-weight: 500; color: var(--text-tertiary); font-size: 0.8125rem;">(opcional)</span></label>
+                            <input type="text" id="ncCorreoCc" placeholder="Separe varios con coma" style="${estiloInput}">
+                        </div>
+                        ${admins.length ? `
+                        <div style="margin-bottom: 0.9rem;">
+                            <label style="display: block; margin-bottom: 0.35rem; font-weight: 600; color: var(--text-primary);">Copia oculta a administración <span style="font-weight: 500; color: var(--text-tertiary); font-size: 0.8125rem;">(opcional, el cliente no la ve)</span></label>
+                            <div style="max-height: 140px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: 8px; padding: 0.5rem 0.65rem;">
+                                ${admins.map((a, i) => `<label style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.3rem; font-size: 0.8125rem; cursor: pointer;"><input type="checkbox" data-nc-cco="${i}"> <span><strong>${ncEsc(a.nombre || '')}</strong> <span style="color: var(--text-secondary);">${ncEsc(a.correo || '')}</span></span></label>`).join('')}
+                            </div>
+                        </div>` : ''}
+                        <div style="margin-bottom: 0.9rem;">
+                            <label style="display: block; margin-bottom: 0.35rem; font-weight: 600; color: var(--text-primary);">Asunto</label>
+                            <input type="text" id="ncCorreoAsunto" value="${ncEsc(asuntoDef)}" style="${estiloInput}">
+                        </div>
+                        <div style="margin-bottom: 0.9rem;">
+                            <label style="display: block; margin-bottom: 0.35rem; font-weight: 600; color: var(--text-primary);">Mensaje adicional <span style="font-weight: 500; color: var(--text-tertiary); font-size: 0.8125rem;">(opcional)</span></label>
+                            <textarea id="ncCorreoMensaje" rows="3" placeholder="Se agrega después del saludo al cliente" style="${estiloInput} resize: vertical;"></textarea>
+                        </div>
+                        <div style="display: flex; gap: 0.75rem; justify-content: flex-end; flex-wrap: wrap; margin-top: 1.25rem;">
+                            <button type="button" data-nc-cerrar class="btn btn-secondary" style="padding: 0.65rem 1.25rem;">Cancelar</button>
+                            <button type="button" id="ncBtnPreviaCorreo" class="btn btn-secondary" style="padding: 0.65rem 1.25rem;">Vista previa del correo</button>
+                            <button type="button" id="ncBtnEnviarCorreo" class="btn btn-primary" style="padding: 0.65rem 1.25rem;">Enviar ${seleccion.length} notas</button>
+                        </div>
+                    </div>
+                </div>`;
+            document.body.appendChild(modal);
+            modal.querySelectorAll('[data-nc-cerrar]').forEach(b => b.addEventListener('click', () => modal.remove()));
+            modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+
+            const selModelo = modal.querySelector('#ncCorreoModelo');
+            const pintarAvisoModelo = () => {
+                const neutro = selModelo.value === 'neutro';
+                const en = cfg.emisorNeutro || {};
+                modal.querySelector('#ncCorreoModeloAviso').textContent = neutro
+                    ? `Diseño azul y sin mención a WM 815. Firma: ${en.nombre || 'Administración'}.${en.correo ? ' Las respuestas llegan a ' + en.correo + '.' : ''}`
+                    : 'Diseño con el logo y la firma de la Comunidad WM 815.';
+            };
+            selModelo.addEventListener('change', pintarAvisoModelo);
+            pintarAvisoModelo();
+
+            const leerDatos = () => ({
+                para: normalizarListaCorreosDestino(modal.querySelector('#ncCorreoPara').value),
+                cc: normalizarListaCorreosDestino(modal.querySelector('#ncCorreoCc').value),
+                asunto: modal.querySelector('#ncCorreoAsunto').value.trim() || asuntoDef,
+                mensaje: modal.querySelector('#ncCorreoMensaje').value.trim()
+            });
+
+            modal.querySelector('#ncBtnPreviaCorreo').addEventListener('click', async function () {
+                const d = leerDatos();
+                const prep = await ncPrepararCorreoLote(seleccion, cfg, selModelo.value, d);
+                ncMostrarHtmlCorreo(prep.html, prep.asunto);
+                if (prep.problemas.length) {
+                    mostrarAlerta('Este correo neutro todavía menciona a WM 815 en: ' + prep.problemas.join(', ') + '. Corrija esos datos antes de enviarlo.', 'Referencia a WM 815');
+                }
+            });
+
+            modal.querySelector('#ncBtnEnviarCorreo').addEventListener('click', async function () {
+                const d = leerDatos();
+                const invalidos = d.para.concat(d.cc).filter(c => !ncCorreoValido(c));
+                if (!d.para.length) {
+                    mostrarAlerta('Ingrese al menos un correo de destino.', 'Falta destinatario');
+                    return;
+                }
+                if (invalidos.length) {
+                    mostrarAlerta('Correos no válidos: ' + invalidos.join(', '), 'Correo inválido');
+                    return;
+                }
+                const prep = await ncPrepararCorreoLote(seleccion, cfg, selModelo.value, d);
+                if (prep.problemas.length) {
+                    mostrarAlerta('El modelo neutro no puede mencionar a WM 815. Revise: ' + prep.problemas.join(', ') + '.', 'Referencia a WM 815');
+                    return;
+                }
+                const paraSet = new Set(d.para.concat(d.cc).map(c => c.toLowerCase()));
+                const cco = Array.from(modal.querySelectorAll('[data-nc-cco]:checked'))
+                    .map(c => admins[parseInt(c.getAttribute('data-nc-cco'), 10)])
+                    .map(a => String((a && a.correo) || '').trim())
+                    .filter(c => c && !paraSet.has(c.toLowerCase()));
+                try {
+                    mostrarProgreso(`Generando ${prep.notas.length} PDF y enviando en un solo correo...`);
+                    const adjuntos = [];
+                    const nombresUsados = new Set();
+                    for (let i = 0; i < prep.notas.length; i++) {
+                        const notaPdf = prep.notas[i];
+                        const doc = ncGenerarPdf(notaPdf, cfg);
+                        let nombre = ncNombreArchivoPdf(notaPdf);
+                        if (nombresUsados.has(nombre)) {
+                            const base = nombre.replace(/\.pdf$/i, '');
+                            nombre = base + '_' + (i + 1) + '.pdf';
+                        }
+                        nombresUsados.add(nombre);
+                        const adj = adjuntoPdfBufferComoMail(doc.output('arraybuffer'), nombre);
+                        if (!adj) throw new Error('No se pudo preparar el PDF de la nota ' + (notaPdf.numero || ''));
+                        adjuntos.push(adj);
+                    }
+                    const opts = { aplicarCcoGlobal: false };
+                    if (d.cc.length) opts.cc = d.cc;
+                    if (cco.length) opts.bcc = cco;
+                    if (prep.replyTo) opts.replyTo = prep.replyTo;
+                    const nombreDest = clientes.length === 1 ? clientes[0] : (d.para[0] || 'Destinatario');
+                    const resultado = await enviarCorreoHTML(
+                        { correo: d.para.length === 1 ? d.para[0] : d.para, nombre: nombreDest },
+                        prep.asunto, prep.html, adjuntos, opts
+                    );
+                    ocultarProgreso();
+                    if (!resultado || !resultado.exito) {
+                        mostrarAlerta('Error al enviar las notas: ' + ((resultado && resultado.error) || 'Error desconocido'), 'Error');
+                        return;
+                    }
+                    modal.remove();
+                    const idsEnviados = new Set(prep.notas.map(n => n.id));
+                    const notas = (await ncObtenerNotas()).slice();
+                    const ahora = new Date().toISOString();
+                    const paraTxt = d.para.concat(d.cc).join(', ');
+                    let cambiadas = 0;
+                    for (let i = 0; i < notas.length; i++) {
+                        if (!idsEnviados.has(notas[i].id)) continue;
+                        const envios = (notas[i].envios || []).concat([{ fecha: ahora, para: paraTxt, modelo: prep.modelo, lote: prep.notas.length }]);
+                        notas[i] = Object.assign({}, notas[i], { envios, modeloCorreo: prep.modelo });
+                        cambiadas++;
+                    }
+                    if (cambiadas) await ncGuardarNotas(notas);
+                    if (window._ncSeleccionIds) {
+                        idsEnviados.forEach(id => window._ncSeleccionIds.delete(id));
+                    }
+                    ncRenderNotas();
+                    mostrarAlerta(`${prep.notas.length} notas de cobro enviadas en un solo correo a ${d.para.join(', ')} (${NC_MODELOS[prep.modelo].etiqueta}).`, 'Correo enviado');
+                } catch (e) {
+                    ocultarProgreso();
+                    console.error('Error al enviar notas de cobro en lote:', e);
+                    mostrarAlerta('No se pudieron enviar las notas de cobro. ' + (e.message || ''), 'Error');
                 }
             });
         };
