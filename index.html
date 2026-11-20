@@ -48872,7 +48872,6 @@ document.getElementById('chatForm').onsubmit = function (e) {
             <tr><td colspan="2" style="padding: 0 0 8px 0;"></td></tr>
           </table>
         </td></tr>` : '';
-            const correoComprobante = (cta && cta.correo) || (!esWm && emisor.correo) || '';
             const bloqueObs = nota.observaciones ? `
         <tr><td style="padding: 0 28px 16px 28px;">
           <p style="margin: 0 0 4px 0; font-size: 12px; font-weight: 700; color: #6b7280; text-transform: uppercase;">Observaciones</p>
@@ -48958,7 +48957,6 @@ document.getElementById('chatForm').onsubmit = function (e) {
         ${bloqueObs}
         ${bloqueAdjunto}
         <tr><td style="padding: 0 28px 20px 28px;">
-          ${correoComprobante ? `<p style="margin: 0 0 14px 0; font-size: 13px; color: #374151; line-height: 1.6;">Una vez realizado el pago, le agradeceremos enviar el comprobante a <a href="mailto:${ncEsc(correoComprobante)}" style="color: ${t.enlace};">${ncEsc(correoComprobante)}</a>.</p>` : ''}
           <p style="margin: 0; font-size: 13px; color: #374151;">Saludos cordiales,<br><strong>${ncEsc(firma)}</strong></p>
         </td></tr>
         ${pie}
@@ -49245,7 +49243,6 @@ document.getElementById('chatForm').onsubmit = function (e) {
             <tr><td colspan="2" style="padding: 0 0 8px 0;"></td></tr>
           </table>
         </td></tr>`).join('');
-            const correoComprobante = (cuentasUnicas[0] && cuentasUnicas[0].correo) || (!esWm && emisor.correo) || '';
             const datosEmisor = [emisor.rut ? 'RUT ' + emisor.rut : '', emisor.direccion, emisor.contacto, esWm ? '' : emisor.correo]
                 .filter(Boolean).map(ncEsc).join(' · ');
             const tituloLote = lista.length === 1
@@ -49327,7 +49324,6 @@ document.getElementById('chatForm').onsubmit = function (e) {
         ${bloqueCuenta}
         ${bloqueAdjunto}
         <tr><td style="padding: 0 28px 20px 28px;">
-          ${correoComprobante ? `<p style="margin: 0 0 14px 0; font-size: 13px; color: #374151; line-height: 1.6;">Una vez realizado el pago, le agradeceremos enviar el comprobante a <a href="mailto:${ncEsc(correoComprobante)}" style="color: ${t.enlace};">${ncEsc(correoComprobante)}</a>.</p>` : ''}
           <p style="margin: 0; font-size: 13px; color: #374151;">Saludos cordiales,<br><strong>${ncEsc(firma)}</strong></p>
         </td></tr>
         ${pie}
@@ -64650,23 +64646,26 @@ document.getElementById('chatForm').onsubmit = function (e) {
             var src = await lib.PDFDocument.load(_copiarU8(bytes), { ignoreEncryption: true });
             var indices = src.getPageIndices();
             if (!indices.length) return false;
-            var pages = await out.copyPages(src, indices);
-            var color = typeof lib.rgb === 'function' ? lib.rgb(0.2, 0.2, 0.2) : undefined;
-            pages.forEach(function (p, idx) {
-                var etiqueta = _textoPdfSeguro(titulo || '');
-                if (indices.length > 1) {
-                    etiqueta = _textoPdfSeguro((titulo || 'Comprobante') + ' · pag. ' + (idx + 1) + '/' + indices.length);
-                }
-                if (etiqueta) {
-                    try {
-                        var alto = typeof p.getHeight === 'function' ? p.getHeight() : 0;
-                        var opts = { x: 16, y: Math.min(12, Math.max(6, alto ? 8 : 8)), size: 7 };
-                        if (color) opts.color = color;
-                        p.drawText(etiqueta.slice(0, 150), opts);
-                    } catch (eTxt) { /* la página original se conserva aunque el rótulo no quepa */ }
-                }
-                out.addPage(p);
-            });
+            // Copiar de a una página: más estable con recursos compartidos en PDF multipágina.
+            // No dibujar texto sobre la página copiada: mutate el content stream suele romper
+            // boletas/facturas multipágina (páginas en blanco, contenido cortado o desplazado).
+            for (var i = 0; i < indices.length; i++) {
+                var copied = await out.copyPages(src, [indices[i]]);
+                if (!copied || !copied[0]) return false;
+                out.addPage(copied[0]);
+            }
+            return true;
+        }
+
+        async function _informeCajaAnexarPdfComoImagenes(out, pdfBytes, titulo) {
+            var urls = await _pdfBytesAPaginasJpegDataUrl(pdfBytes, 1.55);
+            if (!urls || !urls.length) return false;
+            for (var n = 0; n < urls.length; n++) {
+                var tit = urls.length > 1
+                    ? ((titulo || 'Comprobante') + ' · pag. ' + (n + 1) + '/' + urls.length)
+                    : (titulo || 'Comprobante');
+                await _pdfLibAgregarImagen(out, urls[n], tit);
+            }
             return true;
         }
 
@@ -64678,21 +64677,31 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 var seg = segmentos[i];
                 var ok = false;
                 if (seg.pdfBytes && !seg.esPlaceholder) {
+                    var numPaginasPdf = 0;
                     try {
-                        ok = await _pdfLibAnexarPdf(out, seg.pdfBytes, lib, seg.titulo);
-                    } catch (ePdf) {
-                        console.warn('No se pudo copiar el PDF del comprobante:', seg.titulo, ePdf);
+                        var srcProbe = await lib.PDFDocument.load(_copiarU8(seg.pdfBytes), { ignoreEncryption: true });
+                        numPaginasPdf = typeof srcProbe.getPageCount === 'function'
+                            ? srcProbe.getPageCount()
+                            : (srcProbe.getPageIndices() || []).length;
+                    } catch (eProbe) {
+                        numPaginasPdf = 0;
                     }
-                }
-                if (!ok && seg.pdfBytes && !seg.esPlaceholder) {
-                    try {
-                        var urls = await _pdfBytesAPaginasJpegDataUrl(seg.pdfBytes, 1.35);
-                        for (var n = 0; n < urls.length; n++) {
-                            await _pdfLibAgregarImagen(out, urls[n], n === 0 ? seg.titulo : (seg.titulo + ' · pag. ' + (n + 1) + '/' + urls.length));
+                    // Multipágina: rasterizar siempre. copyPages suele “funcionar” pero se ve mal
+                    // (rotación, fondos, recursos compartidos, escaneos).
+                    var preferirRaster = numPaginasPdf > 1;
+                    if (!preferirRaster) {
+                        try {
+                            ok = await _pdfLibAnexarPdf(out, seg.pdfBytes, lib, seg.titulo);
+                        } catch (ePdf) {
+                            console.warn('No se pudo copiar el PDF del comprobante:', seg.titulo, ePdf);
                         }
-                        ok = urls.length > 0;
-                    } catch (eRas) {
-                        console.warn('No se pudo rasterizar el PDF del comprobante:', seg.titulo, eRas);
+                    }
+                    if (!ok) {
+                        try {
+                            ok = await _informeCajaAnexarPdfComoImagenes(out, seg.pdfBytes, seg.titulo);
+                        } catch (eRas) {
+                            console.warn('No se pudo rasterizar el PDF del comprobante:', seg.titulo, eRas);
+                        }
                     }
                 }
                 if (!ok && seg.imagenBytes && !seg.esPlaceholder) {
@@ -64726,17 +64735,42 @@ document.getElementById('chatForm').onsubmit = function (e) {
         async function _pdfBytesAPaginasJpegDataUrl(bytes, escala) {
             var lib = _ensurePdfJsListo();
             var input = _copiarU8(bytes);
-            var pdf = await lib.getDocument({ data: input, disableRange: true, disableStream: true }).promise;
+            var pdf = await lib.getDocument({
+                data: input,
+                disableRange: true,
+                disableStream: true,
+                disableAutoFetch: true
+            }).promise;
             var urls = [];
-            var esc = escala || 1.25;
-            for (var n = 1; n <= pdf.numPages; n++) {
-                var page = await pdf.getPage(n);
-                var viewport = page.getViewport({ scale: esc });
-                var canvas = document.createElement('canvas');
-                canvas.width = Math.max(1, Math.floor(viewport.width));
-                canvas.height = Math.max(1, Math.floor(viewport.height));
-                await page.render({ canvasContext: canvas.getContext('2d'), viewport: viewport }).promise;
-                urls.push(canvas.toDataURL('image/jpeg', 0.86));
+            var esc = escala || 1.35;
+            try {
+                for (var n = 1; n <= pdf.numPages; n++) {
+                    var page = await pdf.getPage(n);
+                    var rot = typeof page.rotate === 'number' ? page.rotate : 0;
+                    var viewport = page.getViewport({ scale: esc, rotation: rot });
+                    // Limitar tamaño extremo (escaneos A3 a alta resolución) para no colgar el navegador.
+                    var maxLado = 2200;
+                    if (viewport.width > maxLado || viewport.height > maxLado) {
+                        var factor = maxLado / Math.max(viewport.width, viewport.height);
+                        viewport = page.getViewport({ scale: esc * factor, rotation: rot });
+                    }
+                    var canvas = document.createElement('canvas');
+                    canvas.width = Math.max(1, Math.floor(viewport.width));
+                    canvas.height = Math.max(1, Math.floor(viewport.height));
+                    var ctx = canvas.getContext('2d', { alpha: false });
+                    // Fondo blanco: sin esto, el JPEG vuelve negros los fondos transparentes del PDF.
+                    ctx.fillStyle = '#FFFFFF';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    await page.render({
+                        canvasContext: ctx,
+                        viewport: viewport,
+                        background: 'rgb(255,255,255)'
+                    }).promise;
+                    urls.push(canvas.toDataURL('image/jpeg', 0.88));
+                    try { if (typeof page.cleanup === 'function') page.cleanup(); } catch (eClean) { /* ignore */ }
+                }
+            } finally {
+                try { if (typeof pdf.destroy === 'function') await pdf.destroy(); } catch (eDes) { /* ignore */ }
             }
             return urls;
         }
