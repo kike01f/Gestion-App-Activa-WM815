@@ -16524,6 +16524,7 @@
             }
 
             try {
+                let enlacesStorageAdjuntos = 0;
                 const campoTo = listaCorreos.length === 1 ? listaCorreos[0] : listaCorreos;
                 const mailData = {
                     to: campoTo,
@@ -16711,6 +16712,7 @@
                         console.log('✅ Enlaces de adjuntos agregados al HTML del correo');
                     }
                     
+                    enlacesStorageAdjuntos = linksAdjuntos.length;
                     console.log('📎 Resumen de adjuntos procesados:', {
                         adjuntosDirectos: mailData.attachments.length,
                         subidosStorage: linksAdjuntos.length,
@@ -16865,30 +16867,30 @@
                     console.warn('⚠️ NO HAY ADJUNTOS EN mailData ANTES DE ENVIAR');
                 }
 
-                // Firebase Trigger Email lee los adjuntos en message.attachments
+                // Firebase Trigger Email lee los adjuntos solo en message.attachments; guardarlos también
+                // en la raíz duplica el peso del documento (límite de Firestore: 1 MiB).
                 if (mailData.attachments && mailData.attachments.length) {
                     mailData.message.attachments = mailData.attachments;
                 }
+                delete mailData.attachments;
 
-                try {
-                    var copiaTam = {
-                        to: mailData.to,
-                        cc: mailData.cc,
-                        bcc: mailData.bcc,
-                        message: mailData.message
-                    };
-                    var tamEst = JSON.stringify(copiaTam).length;
-                    if (tamEst > 900000) {
-                        console.warn('⚠️ Correo demasiado grande para Firestore (' + tamEst + ' bytes). Se envía con enlaces de Storage y sin adjuntos embebidos.');
-                        delete mailData.attachments;
-                        delete mailData.message.attachments;
+                const LIMITE_DOC_CORREO = 950000;
+                const bytesDocCorreo = () => new TextEncoder().encode(JSON.stringify(mailData)).length;
+                if (mailData.message.attachments && bytesDocCorreo() > LIMITE_DOC_CORREO) {
+                    if (!enlacesStorageAdjuntos) {
+                        return { exito: false, error: 'Los adjuntos superan el tamaño máximo permitido (~1 MB) y no se pudieron subir a Storage para enviarlos como enlace. El correo no se envió.' };
                     }
-                } catch (eTam) {}
+                    console.warn('⚠️ Correo demasiado grande para Firestore. Se envía con enlaces de Storage y sin adjuntos embebidos.');
+                    delete mailData.message.attachments;
+                }
+                if (bytesDocCorreo() > LIMITE_DOC_CORREO) {
+                    return { exito: false, error: 'El contenido del correo supera el tamaño máximo permitido (~1 MB). El correo no se envió.' };
+                }
                 
                 // Log del mailData (sin mostrar todo el contenido de adjuntos por tamaño)
-                const mailDataLog = { ...mailData };
-                if (mailDataLog.attachments) {
-                    mailDataLog.attachments = mailDataLog.attachments.map(adj => ({
+                const mailDataLog = { ...mailData, message: { ...mailData.message } };
+                if (mailDataLog.message.attachments) {
+                    mailDataLog.message.attachments = mailDataLog.message.attachments.map(adj => ({
                         filename: adj.filename,
                         contentType: adj.contentType,
                         encoding: adj.encoding,
@@ -16903,9 +16905,10 @@
                 // Verificar que los adjuntos se guardaron correctamente
                 const docVerificado = await docRef.get();
                 const datosGuardados = docVerificado.data();
-                if (datosGuardados.attachments && Array.isArray(datosGuardados.attachments) && datosGuardados.attachments.length > 0) {
-                    console.log('✅ Adjuntos guardados en Firestore:', datosGuardados.attachments.length);
-                    datosGuardados.attachments.forEach((adj, idx) => {
+                const adjGuardados = datosGuardados.message && datosGuardados.message.attachments;
+                if (Array.isArray(adjGuardados) && adjGuardados.length > 0) {
+                    console.log('✅ Adjuntos guardados en Firestore:', adjGuardados.length);
+                    adjGuardados.forEach((adj, idx) => {
                         console.log(`  ✅ Adjunto ${idx + 1} guardado:`, {
                             filename: adj.filename,
                             contentType: adj.contentType,
@@ -16913,14 +16916,8 @@
                             tamañoContent: adj.content ? adj.content.length : 0
                         });
                     });
-                } else {
+                } else if (mailData.message.attachments && mailData.message.attachments.length) {
                     console.error('❌ ADJUNTOS NO SE GUARDARON EN FIRESTORE');
-                    console.error('Datos guardados:', {
-                        tieneAttachments: !!datosGuardados.attachments,
-                        tipoAttachments: typeof datosGuardados.attachments,
-                        esArray: Array.isArray(datosGuardados.attachments),
-                        longitud: datosGuardados.attachments ? datosGuardados.attachments.length : 'N/A'
-                    });
                 }
                 
                 console.log('✅ Correo agregado a la cola de envío');
