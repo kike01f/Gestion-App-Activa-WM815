@@ -16525,6 +16525,7 @@
 
             try {
                 let enlacesStorageAdjuntos = 0;
+                let htmlEnlacesSoloSiSinAdjuntos = null;
                 const campoTo = listaCorreos.length === 1 ? listaCorreos[0] : listaCorreos;
                 const mailData = {
                     to: campoTo,
@@ -16708,8 +16709,12 @@
                             }
                         }
                         
-                        mailData.message.html = htmlConEnlaces;
-                        console.log('✅ Enlaces de adjuntos agregados al HTML del correo');
+                        if (html.includes('<!-- SIN_ENLACES_ADJUNTOS -->')) {
+                            htmlEnlacesSoloSiSinAdjuntos = htmlConEnlaces;
+                        } else {
+                            mailData.message.html = htmlConEnlaces;
+                            console.log('✅ Enlaces de adjuntos agregados al HTML del correo');
+                        }
                     }
                     
                     enlacesStorageAdjuntos = linksAdjuntos.length;
@@ -16882,6 +16887,7 @@
                     }
                     console.warn('⚠️ Correo demasiado grande para Firestore. Se envía con enlaces de Storage y sin adjuntos embebidos.');
                     delete mailData.message.attachments;
+                    if (htmlEnlacesSoloSiSinAdjuntos) mailData.message.html = htmlEnlacesSoloSiSinAdjuntos;
                 }
                 if (bytesDocCorreo() > LIMITE_DOC_CORREO) {
                     return { exito: false, error: 'El contenido del correo supera el tamaño máximo permitido (~1 MB). El correo no se envió.' };
@@ -57509,14 +57515,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     var ctxTpl = { nombreComunidad: nombreComunidad, nombreMes: nombreMes, fechaEmision: fechaEmisionCorreoHoy() };
                     var asuntoEnv = resolverAsuntoPlantillaCorreo(bloqueTpl, asunto, ctxTpl);
                     var cuerpoIni = resolverCuerpoInicioPlantillaCorreo(bloqueTpl, ctxTpl);
-                    var adjuntosComite = [];
-                    var nombreHtmlComite = 'Reporte_Comite_' + String(nombreComunidad || 'Comunidad').replace(/[^a-zA-Z0-9_-]/g, '_') + '.html';
-                    if (typeof generarReporteHTMLComoAdjunto === 'function') {
-                        var adjHtmlComite = await generarReporteHTMLComoAdjunto(html, nombreHtmlComite, { documentoHtmlCompleto: true });
-                        if (adjHtmlComite) adjuntosComite.push(adjHtmlComite);
-                    }
-                    if (xlsxRes.adjunto) adjuntosComite.push(xlsxRes.adjunto);
-                    await mostrarModalSeleccionDestinatarios(asuntoEnv, html, adjuntosComite, { mensajeInicialPrefill: cuerpoIni, ccoModulo: 'reporteComite' });
+                    await mostrarModalSeleccionDestinatarios(asuntoEnv, html, [xlsxRes.adjunto], { mensajeInicialPrefill: cuerpoIni, ccoModulo: 'reporteComite' });
                 } catch (error) {
                     console.error('Error al enviar correo de comité:', error);
                     mostrarAlerta('Ocurrió un error al preparar el correo. Intente nuevamente.', 'Error');
@@ -57524,59 +57523,6 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     if (typeof ocultarProgreso === 'function') ocultarProgreso();
                 }
             };
-
-            async function comiteBlobComoAdjunto(blob, nombre, tipo) {
-                var buf = await blob.arrayBuffer();
-                if (!buf || buf.byteLength > 6 * 1024 * 1024) return null;
-                var bytes = new Uint8Array(buf);
-                var cls = typeof clasificarBytesAdjuntoCorreo === 'function'
-                    ? clasificarBytesAdjuntoCorreo(bytes, nombre, tipo || (blob && blob.type))
-                    : null;
-                if (!cls) return null;
-                var binary = '';
-                var chunk = 0x8000;
-                for (var i = 0; i < bytes.length; i += chunk) {
-                    binary += String.fromCharCode.apply(null, bytes.subarray(i, Math.min(i + chunk, bytes.length)));
-                }
-                return {
-                    filename: typeof nombreArchivoCorreoSeguro === 'function'
-                        ? nombreArchivoCorreoSeguro(nombre || 'respaldo', cls.ext)
-                        : (nombre || 'respaldo'),
-                    content: btoa(binary),
-                    contentType: cls.type,
-                    encoding: 'base64'
-                };
-            }
-
-            async function comiteAdjuntosDeMejoras(lista) {
-                var adj = [];
-                var usados = {};
-                var docs = [];
-                (lista || []).forEach(function (p) {
-                    (p.documentos || []).forEach(function (d) { if (d) docs.push(d); });
-                    if (p.cierre && Array.isArray(p.cierre.documentos)) {
-                        p.cierre.documentos.forEach(function (d) { if (d) docs.push(d); });
-                    }
-                    (p.cotizaciones || []).forEach(function (c) {
-                        comiteListaDocsCot(c).forEach(function (d) { if (d) docs.push(d); });
-                    });
-                });
-                for (var i = 0; i < docs.length && adj.length < 12; i++) {
-                    var d = docs[i];
-                    var url = d && d.url ? String(d.url) : '';
-                    if (!url || usados[url]) continue;
-                    usados[url] = true;
-                    try {
-                        var res = await fetch(url);
-                        if (!res.ok) continue;
-                        var blob = await res.blob();
-                        var nombre = d.nombre || ('respaldo-' + (adj.length + 1));
-                        var item = await comiteBlobComoAdjunto(blob, nombre, d.tipo || blob.type);
-                        if (item) adj.push(item);
-                    } catch (eFetch) { /* el enlace queda en el cuerpo del correo */ }
-                }
-                return adj;
-            }
 
             async function enviarSeleccionPropuestasComite(seleccionados, textoIntro) {
                 if (!seleccionados || !seleccionados.length) {
@@ -57598,14 +57544,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                     seleccionados,
                     { soloSeleccion: true, textoIntro: textoIntro || null }
                 );
-                var adjuntos = [];
-                if (typeof generarReporteHTMLComoAdjunto === 'function') {
-                    var adjHtmlSel = await generarReporteHTMLComoAdjunto(html, 'Reporte_Comite.html', { documentoHtmlCompleto: true });
-                    if (adjHtmlSel) adjuntos.push(adjHtmlSel);
-                }
-                if (xlsxRes && xlsxRes.adjunto) adjuntos.push(xlsxRes.adjunto);
-                var archivos = await comiteAdjuntosDeMejoras(seleccionados);
-                adjuntos = adjuntos.concat(archivos);
+                var adjuntos = (xlsxRes && xlsxRes.adjunto) ? [xlsxRes.adjunto] : [];
                 var tituloUna = seleccionados.length === 1 ? (seleccionados[0].titulo || 'Requerimiento') : '';
                 var asunto = tituloUna
                     ? ('Requerimiento — ' + tituloUna + ' — ' + nombreComunidad)
@@ -57790,14 +57729,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                         cerradas,
                         { soloCerradas: true }
                     );
-                    var adjuntos = [];
-                    if (typeof generarReporteHTMLComoAdjunto === 'function') {
-                        var adjHtmlCerr = await generarReporteHTMLComoAdjunto(html, 'Reporte_Mejoras_Cerradas.html', { documentoHtmlCompleto: true });
-                        if (adjHtmlCerr) adjuntos.push(adjHtmlCerr);
-                    }
-                    if (xlsxRes && xlsxRes.adjunto) adjuntos.push(xlsxRes.adjunto);
-                    var archivos = await comiteAdjuntosDeMejoras(cerradas);
-                    adjuntos = adjuntos.concat(archivos);
+                    var adjuntos = (xlsxRes && xlsxRes.adjunto) ? [xlsxRes.adjunto] : [];
                     var tituloUna = cerradas.length === 1 ? (cerradas[0].titulo || 'Mejora cerrada') : '';
                     var asunto = tituloUna
                         ? ('Mejora cerrada — ' + tituloUna + ' — ' + nombreComunidad)
@@ -58142,7 +58074,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 </p>
                 ${bloqueRealizadas || '<p style="font-size:13px;color:#6b7280;">No hay mejoras cerradas.</p>'}
                 <p style="margin: 14px 0 0 0; font-size: 13px; color: #555; line-height: 1.5;">
-                    Los archivos de respaldo van adjuntos a este correo cuando el tamaño lo permite. El Excel adjunto contiene solo estos trabajos.
+                    El Excel adjunto contiene solo estos trabajos.
                 </p>`;
                 if (mensajeAdicional) {
                     contenidoCerradas += `
@@ -58150,7 +58082,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                         <tr><td style="padding: 12px 14px;"><p style="margin: 0; font-size: 14px; color: #333333; line-height: 1.5;">${linkEsc(mensajeAdicional)}</p></td></tr>
                     </table>`;
                 }
-                return generarPlantillaCorreoNotificacion('Comité — Mejoras cerradas', nombreComunidad, nombreMes, contenidoCerradas, true, false, 960);
+                return generarPlantillaCorreoNotificacion('Comité — Mejoras cerradas', nombreComunidad, nombreMes, contenidoCerradas + '<!-- SIN_ENLACES_ADJUNTOS -->', true, true, 960);
             }
 
             if (opciones.soloSeleccion) {
@@ -58189,9 +58121,9 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 ${indiceSel}
                 ${fichasSel || '<p style="font-size:13px;color:#6b7280;">No hay propuestas en esta selección.</p>'}
                 <p style="margin: 14px 0 0 0; font-size: 13px; color: #555; line-height: 1.5;">
-                    Los respaldos van adjuntos a este correo cuando el tamaño lo permite. El Excel adjunto contiene el mismo detalle.
+                    El Excel adjunto contiene el mismo detalle.
                 </p>`;
-                return generarPlantillaCorreoNotificacion('Comité — Propuestas', nombreComunidad, nombreMes, contenidoSel, true, false, 960);
+                return generarPlantillaCorreoNotificacion('Comité — Propuestas', nombreComunidad, nombreMes, contenidoSel + '<!-- SIN_ENLACES_ADJUNTOS -->', true, true, 960);
             }
 
             let contenido = `
@@ -58239,7 +58171,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                         <tr><td style="padding: 12px 14px;"><p style="margin: 0; font-size: 14px; color: #333333; line-height: 1.5;">${linkEsc(mensajeAdicional)}</p></td></tr>
                     </table>`;
             }
-            return generarPlantillaCorreoNotificacion('Comité — Propuestas', nombreComunidad, nombreMes, contenido, true, false, 960);
+            return generarPlantillaCorreoNotificacion('Comité — Propuestas', nombreComunidad, nombreMes, contenido + '<!-- SIN_ENLACES_ADJUNTOS -->', true, true, 960);
         }
         window.generarCorreoNotificacionComite = generarCorreoNotificacionComite;
 
