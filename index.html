@@ -16648,6 +16648,12 @@
                             // Continuar con el siguiente adjunto
                         }
                     }
+
+                    if (mailData.attachments.length === 0) {
+                        const nombresAdj = adjuntos.map(a => (a && a.filename) || 'adjunto').join(', ');
+                        console.error('❌ Ningún adjunto pasó la validación; no se envía el correo:', nombresAdj);
+                        return { exito: false, error: 'No se pudo adjuntar el archivo (' + nombresAdj + '). El correo no se envió.' };
+                    }
                     
                     // Agregar enlaces de descarga al HTML del correo (si se subieron a Storage)
                     if (linksAdjuntos.length > 0 && html) {
@@ -17960,25 +17966,7 @@
                 </html>
                 `;
                 
-                // Convertir HTML a blob y luego a base64 para el adjunto
-                const BOM = '\uFEFF';
-                const blob = new Blob([BOM + html], { type: 'application/vnd.ms-excel;charset=utf-8' });
-                
-                // Convertir blob a base64
-                return new Promise((resolve, reject) => {
-                    const reader = new FileReader();
-                    reader.onloadend = function() {
-                        const base64 = reader.result.split(',')[1]; // Remover el prefijo data:application/...
-                        resolve({
-                            filename: nombreArchivo,
-                            content: base64,
-                            contentType: 'application/vnd.ms-excel',
-                            encoding: 'base64'
-                        });
-                    };
-                    reader.onerror = reject;
-                    reader.readAsDataURL(blob);
-                });
+                return await adjuntoXlsxDesdeHtmlExcel(html, nombreArchivo);
             } catch (error) {
                 console.error('Error al generar Excel de lecturas de agua:', error);
                 return null;
@@ -41888,32 +41876,134 @@ document.getElementById('chatForm').onsubmit = function (e) {
             }
         }
         
-        /** Convierte el mismo .xls basado en HTML que genera `generarReporteExcel` a adjunto base64 para correo (como nómina). */
-        async function adjuntoXlsHtmlDesdeString(excelContent, nombreArchivo) {
+        /**
+         * Convierte un reporte "Excel HTML" (.xls basado en HTML) en un .xlsx real para adjuntar por correo.
+         * `sanitizarAdjuntoParaGmail` descarta los .xls cuyo contenido es HTML, por eso no pueden enviarse tal cual.
+         * Sin ExcelJS disponible, se adjunta como .html (sí lo acepta el filtro).
+         */
+        async function adjuntoXlsxDesdeHtmlExcel(excelHtml, nombreArchivo) {
+            const html = String(excelHtml || '').replace(/^\uFEFF/, '');
+            if (!html.trim()) return null;
+            const base = String(nombreArchivo || 'reporte').replace(/\.(xls|xlsx|html?)$/i, '');
+            const ExcelJSLib = typeof ExcelJS !== 'undefined' ? ExcelJS : (typeof window !== 'undefined' ? window.ExcelJS : null);
+            if (!ExcelJSLib) {
+                try {
+                    return {
+                        filename: nombreArchivoCorreoSeguro(base + '.html', 'html'),
+                        content: btoa(unescape(encodeURIComponent(html))),
+                        contentType: 'text/html; charset=utf-8',
+                        encoding: 'base64'
+                    };
+                } catch (eHtml) {
+                    console.error('adjuntoXlsxDesdeHtmlExcel (html):', eHtml);
+                    return null;
+                }
+            }
             try {
-                if (!excelContent || typeof excelContent !== 'string') return null;
-                const blob = new Blob([excelContent], { type: 'application/vnd.ms-excel' });
-                return await new Promise((resolve) => {
-                    const reader = new FileReader();
-                    reader.onloadend = function() {
-                        const base64 = String(reader.result || '').split(',')[1];
-                        if (!base64 || !/^[A-Za-z0-9+/=]+$/.test(base64)) {
-                            resolve(null);
+                const doc = new DOMParser().parseFromString(html, 'text/html');
+                const wb = new ExcelJSLib.Workbook();
+                const ws = wb.addWorksheet('Reporte');
+                const anchos = [];
+                let fila = 1;
+                const BLOQUES = /^(DIV|P|H1|H2|H3|H4|H5|H6|SECTION|HEADER|FOOTER|UL|OL|LI|TABLE)$/;
+                const OMITIR = /^(STYLE|SCRIPT|HEAD|TITLE|META|LINK|COLGROUP|COL)$/;
+                const borde = { style: 'thin', color: { argb: 'FFD1D5DB' } };
+                const bordes = { top: borde, left: borde, bottom: borde, right: borde };
+
+                const textoDe = (el) => {
+                    const c = el.cloneNode(true);
+                    c.querySelectorAll('br').forEach((br) => br.replaceWith('\n'));
+                    return String(c.textContent || '')
+                        .replace(/\u00a0/g, ' ')
+                        .split('\n').map((l) => l.replace(/\s+/g, ' ').trim()).filter(Boolean).join('\n');
+                };
+                const valorCelda = (txt) => {
+                    if (/^-?\d+(\.\d+)?$/.test(txt)) return { v: Number(txt) };
+                    if (/^-?\$\s?\d{1,3}(\.\d{3})*$/.test(txt)) return { v: Number(txt.replace(/[$\s.]/g, '')), fmt: '"$"#,##0' };
+                    return { v: txt };
+                };
+                const registrarAncho = (col, txt) => {
+                    const largo = Math.max.apply(null, String(txt || '').split('\n').map((l) => l.length).concat([0]));
+                    anchos[col] = Math.max(anchos[col] || 0, largo);
+                };
+                const colorFondo = (el) => {
+                    const m = String(el.getAttribute('style') || '').match(/background(?:-color)?\s*:\s*#([0-9a-f]{6}|[0-9a-f]{3})\b/i);
+                    if (!m) return null;
+                    const hex = m[1].length === 3 ? m[1].split('').map((c) => c + c).join('') : m[1];
+                    return 'FF' + hex.toUpperCase();
+                };
+                const esHoja = (el) => !Array.from(el.querySelectorAll('*')).some((d) => BLOQUES.test(d.tagName));
+
+                const escribirTabla = (tabla) => {
+                    Array.from(tabla.rows).forEach((tr) => {
+                        const seccion = tr.parentElement ? tr.parentElement.tagName : '';
+                        const esTotal = seccion === 'TFOOT' || /total/i.test(tr.className || '');
+                        let col = 1;
+                        Array.from(tr.cells).forEach((td) => {
+                            const txt = textoDe(td);
+                            const span = Math.max(1, parseInt(td.getAttribute('colspan'), 10) || 1);
+                            const celda = ws.getCell(fila, col);
+                            const val = valorCelda(txt);
+                            celda.value = val.v;
+                            if (val.fmt) celda.numFmt = val.fmt;
+                            const esEncabezado = td.tagName === 'TH' || seccion === 'THEAD';
+                            celda.border = bordes;
+                            celda.alignment = { vertical: 'middle', wrapText: txt.indexOf('\n') !== -1 || txt.length > 40, horizontal: esEncabezado ? 'center' : undefined };
+                            if (esEncabezado) {
+                                celda.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+                                celda.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: colorFondo(td) || 'FF75BB21' } };
+                            } else if (esTotal) {
+                                celda.font = { bold: true };
+                                celda.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE5E7EB' } };
+                            }
+                            if (span > 1) {
+                                ws.mergeCells(fila, col, fila, col + span - 1);
+                            } else {
+                                registrarAncho(col, txt);
+                            }
+                            col += span;
+                        });
+                        fila++;
+                    });
+                    fila++;
+                };
+                const escribirTexto = (txt, el) => {
+                    if (!txt) return;
+                    const celda = ws.getCell(fila, 1);
+                    celda.value = txt;
+                    const titulo = /^H[1-3]$/.test(el.tagName) || /title/i.test(el.className || '');
+                    celda.font = titulo ? { bold: true, size: 14 } : { bold: /label/i.test(el.className || '') };
+                    fila++;
+                };
+                const recorrer = (el) => {
+                    if (OMITIR.test(el.tagName)) return;
+                    if (el.tagName === 'TABLE') { escribirTabla(el); return; }
+                    if (!el.querySelector('table')) {
+                        const hijos = Array.from(el.children).filter((h) => !OMITIR.test(h.tagName));
+                        if (esHoja(el) || hijos.length === 0) { escribirTexto(textoDe(el), el); return; }
+                        if (hijos.length >= 2 && hijos.every((h) => h.tagName === 'DIV' && esHoja(h))) {
+                            hijos.forEach((h, i) => {
+                                const txt = textoDe(h);
+                                const celda = ws.getCell(fila, i + 1);
+                                celda.value = txt;
+                                if (/label|title/i.test(h.className || '')) celda.font = { bold: true };
+                                registrarAncho(i + 1, txt);
+                            });
+                            fila++;
                             return;
                         }
-                        const fn = nombreArchivo && String(nombreArchivo).endsWith('.xls') ? nombreArchivo : `${nombreArchivo || 'reporte'}.xls`;
-                        resolve({
-                            filename: fn,
-                            content: base64,
-                            contentType: 'application/vnd.ms-excel',
-                            encoding: 'base64'
-                        });
-                    };
-                    reader.onerror = function() { resolve(null); };
-                    reader.readAsDataURL(blob);
+                    }
+                    Array.from(el.children).forEach(recorrer);
+                };
+                if (doc.body) Array.from(doc.body.children).forEach(recorrer);
+
+                anchos.forEach((largo, i) => {
+                    if (i > 0) ws.getColumn(i).width = Math.min(60, Math.max(8, (largo || 0) + 2));
                 });
+                const buffer = await wb.xlsx.writeBuffer();
+                return adjuntoXlsxBufferComoMail(buffer, base + '.xlsx');
             } catch (e) {
-                console.error('adjuntoXlsHtmlDesdeString:', e);
+                console.error('adjuntoXlsxDesdeHtmlExcel:', e);
                 return null;
             }
         }
@@ -43424,18 +43514,12 @@ document.getElementById('chatForm').onsubmit = function (e) {
             try {
                 mostrarProgreso('Obteniendo datos de Nómina...');
                 
-                // Obtener trabajadores del mes actual o consultado
-                let trabajadoresNomina = [];
-                if (window.mesNominaConsulta && window.mesNominaConsulta !== 'actual') {
-                    trabajadoresNomina = await obtenerDatosArchivados('nomina', window.mesNominaConsulta);
-                } else {
-                    trabajadoresNomina = await obtenerDatosMes('nomina');
-                }
+                const datosReporte = await obtenerDatosReporteNomina();
                 
                 console.log('📧 Iniciando envío de correo con reporte de Nómina');
-                console.log('✅ Datos obtenidos:', trabajadoresNomina.length, 'trabajadores');
+                console.log('✅ Datos obtenidos:', datosReporte.trabajadores.length, 'trabajadores');
                 
-                if (!trabajadoresNomina || trabajadoresNomina.length === 0) {
+                if (datosReporte.trabajadores.length === 0) {
                     mostrarAlerta('No hay datos de nómina para generar el reporte.', 'Sin Datos');
                     ocultarProgreso();
                     return;
@@ -43453,7 +43537,7 @@ document.getElementById('chatForm').onsubmit = function (e) {
                 mostrarProgreso('Generando reporte Excel de Nómina...');
                 
                 // Generar el Excel exactamente como el módulo
-                const adjunto = await generarExcelNominaComoAdjunto();
+                const adjunto = await generarExcelNominaComoAdjunto(datosReporte);
                 if (!adjunto) {
                     mostrarAlerta('Error al generar el adjunto del reporte. Por favor, intente nuevamente.', 'Error');
                     ocultarProgreso();
@@ -72525,50 +72609,38 @@ document.getElementById('chatForm').onsubmit = function (e) {
         window.exportarPDFNomina = exportarPDFNomina;
 
         // Adjunto de correo: mismo .xls HTML que gestion-entre-cerros
-        async function generarExcelNominaComoAdjunto() {
+        /** Trabajadores y reemplazos del período del módulo: lo mismo que muestra la tabla (mes actual o consultado). */
+        async function obtenerDatosReporteNomina() {
+            const mesConsulta = (window.mesNominaConsulta && window.mesNominaConsulta !== 'actual') ? window.mesNominaConsulta : null;
+            const leer = async (key) => {
+                if (!mesConsulta) return await obtenerDatosMes(key);
+                const activos = await obtenerDatosActivosDirectos(key, mesConsulta);
+                if (Array.isArray(activos) && activos.length > 0) return activos;
+                const archivados = await obtenerDatosArchivados(key, mesConsulta);
+                return Array.isArray(archivados) ? archivados : [];
+            };
+            let trabajadores = Array.isArray(trabajadoresNomina) && trabajadoresNomina.length > 0
+                ? trabajadoresNomina
+                : deduplicarEmpleadosNomina(await leer('nomina'));
+            const reemplazos = Array.isArray(reemplazosNomina) && reemplazosNomina.length > 0
+                ? reemplazosNomina
+                : await leer('nomina-reemplazos');
             try {
-                // Obtener trabajadores del mes actual o consultado
-                let trabajadoresNomina = [];
-                if (window.mesNominaConsulta && window.mesNominaConsulta !== 'actual') {
-                    trabajadoresNomina = await obtenerDatosArchivados('nomina', window.mesNominaConsulta);
-                } else {
-                    trabajadoresNomina = await obtenerDatosMes('nomina');
-                }
+                actualizarMapaEstadoPersonalNomina(await obtenerDatos('personalEdificio'));
+            } catch (e) {}
+            trabajadores = ordenarPorEstadoDestacadoNomina(trabajadores, t => t && t.nombre);
+            return { trabajadores, reemplazos: Array.isArray(reemplazos) ? reemplazos : [] };
+        }
 
-                if (trabajadoresNomina.length === 0) {
+        async function generarExcelNominaComoAdjunto(datosReporte) {
+            try {
+                const { trabajadores, reemplazos } = datosReporte || await obtenerDatosReporteNomina();
+                if (!trabajadores || trabajadores.length === 0) {
                     return null;
                 }
-
-                // Cargar reemplazos del mes actual o archivado
-                let reemplazosReporte = [];
-                if (window.mesNominaConsulta && window.mesNominaConsulta !== 'actual') {
-                    reemplazosReporte = await obtenerDatosArchivados('nomina-reemplazos', window.mesNominaConsulta);
-                } else {
-                    reemplazosReporte = await obtenerDatosMes('nomina-reemplazos');
-                }
-
-                // Obtener valores del encabezado automáticamente
                 const encabezado = await obtenerEncabezadoNomina();
-                try {
-                    actualizarMapaEstadoPersonalNomina(await obtenerDatos('personalEdificio'));
-                } catch (e) {}
-
-                const { blob, nombreArchivo } = generarBlobNominaExcelHtmlIgualEntreCerros(trabajadoresNomina, reemplazosReporte, encabezado);
-
-                return new Promise((resolve, reject) => {
-                    const reader = new FileReader();
-                    reader.onloadend = function() {
-                        const base64 = reader.result.split(',')[1];
-                        resolve({
-                            filename: nombreArchivo,
-                            content: base64,
-                            contentType: 'application/vnd.ms-excel',
-                            encoding: 'base64'
-                        });
-                    };
-                    reader.onerror = reject;
-                    reader.readAsDataURL(blob);
-                });
+                const { blob, nombreArchivo } = generarBlobNominaExcelHtmlIgualEntreCerros(trabajadores, reemplazos, encabezado);
+                return await adjuntoXlsxDesdeHtmlExcel(await blob.text(), nombreArchivo);
             } catch (error) {
                 console.error('Error al generar Excel de nómina:', error);
                 return null;
